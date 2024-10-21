@@ -1,0 +1,7 @@
+node_modules/
+*.local
+*.log
+config/serviceAccountKey.json
+src/config/serviceAccountKey.json
+/src/config/serviceAccountKey.json
+.env
