@@ -1,8 +1,8 @@
-const bakeryController = require("../controllers/bakeryController");
-const bakeryService = require("../services/bakeryService");
+const bakeryController = require("../../controllers/bakeryController");
+const bakeryService = require("../../services/bakeryService");
 
 // Mock the bakeryService
-jest.mock("../services/bakeryService");
+jest.mock("../../services/bakeryService");
 
 describe("Bakery Controller", () => {
   let mockRequest;

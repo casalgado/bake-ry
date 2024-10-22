@@ -1,9 +1,23 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if false;
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null 
+                    && (request.resource.data.role == 'system_admin'
+                        || (request.resource.data.bakeryId != null
+                            && !emailExistsInBakery(request.resource.data.email, request.resource.data.bakeryId)));
+      allow update: if request.auth != null 
+                    && request.auth.uid == userId;
+      allow delete: if request.auth != null 
+                    && (request.auth.token.role == 'system_admin' 
+                        || request.auth.uid == userId);
+      
+      function emailExistsInBakery(email, bakeryId) {
+        return exists(/databases/$(database)/documents/users where email == email && bakeryId == bakeryId);
+      }
     }
+    
+    
   }
 }

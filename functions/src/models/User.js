@@ -1,54 +1,62 @@
-import { admin } from "../config/firebase";
-
 class User {
-  constructor(id, data) {
+  constructor({
+    id,
+    email,
+    password,
+    role, // can be customer, staff, admin, or system_admin
+    bakeryId,
+    name,
+    createdAt,
+    updatedAt,
+    address,
+    birthday,
+    category,
+    comment,
+    phone,
+    national_id,
+  }) {
     this.id = id;
-    this.email = data.email;
-    this.role = data.role;
-    this.bakeryId = data.bakeryId;
-    this.name = data.name;
+    this.email = email;
+    this.password = password;
+    this.role = role;
+    this.bakeryId = bakeryId;
+    this.name = name;
+    this.createdAt = createdAt || new Date();
+    this.updatedAt = updatedAt || new Date();
+    this.address = address || "";
+    this.birthday = birthday || "";
+    this.category = category || "";
+    this.comment = comment || "";
+    this.phone = phone || "";
+    this.national_id = national_id || "";
   }
 
-  static async create(userData) {
-    const { email, password, role, bakeryId, name } = userData;
-
-    try {
-      const userRecord = await admin.auth().createUser({
-        email,
-        password,
-      });
-
-      await admin
-        .auth()
-        .setCustomUserClaims(userRecord.uid, { role, bakeryId });
-
-      const userRef = admin.firestore().collection("users").doc(userRecord.uid);
-      await userRef.set({
-        email,
-        role,
-        bakeryId,
-        name,
-      });
-
-      return new User(userRecord.uid, { email, role, bakeryId, name });
-    } catch (error) {
-      console.error("Error creating user:", error);
-      throw error;
-    }
+  toFirestore() {
+    return {
+      email: this.email,
+      role: this.role,
+      bakeryId: this.bakeryId,
+      name: this.name,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      address: this.address,
+      birthday: this.birthday,
+      category: this.category,
+      comment: this.comment,
+      phone: this.phone,
+      national_id: this.national_id,
+    };
   }
 
-  static async findById(id) {
-    try {
-      const doc = await admin.firestore().collection("users").doc(id).get();
-      if (!doc.exists) {
-        return null;
-      }
-      return new User(doc.id, doc.data());
-    } catch (error) {
-      console.error("Error finding user:", error);
-      throw error;
-    }
+  static fromFirestore(doc) {
+    const data = doc.data();
+    return new User({
+      id: doc.id,
+      ...data,
+      createdAt: data.createdAt.toDate(),
+      updatedAt: data.updatedAt.toDate(),
+    });
   }
 }
 
-export default User;
+module.exports = User;

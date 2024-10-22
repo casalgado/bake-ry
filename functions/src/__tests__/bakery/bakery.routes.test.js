@@ -1,16 +1,16 @@
 const request = require("supertest");
 const express = require("express");
-const bakeryRoutes = require("../routes/bakeryRoutes");
-const bakeryController = require("../controllers/bakeryController");
-const { authenticateUser } = require("../middleware/auth");
+const bakeryRoutes = require("../../routes/bakeryRoutes");
+const bakeryController = require("../../controllers/bakeryController");
+const { authenticateUser } = require("../../middleware/userAccess");
 
 // Mock the authentication middleware
-jest.mock("../middleware/auth", () => ({
+jest.mock("../../middleware/userAccess", () => ({
   authenticateUser: jest.fn((req, res, next) => next()),
 }));
 
 // Mock the bakery controller
-jest.mock("../controllers/bakeryController");
+jest.mock("../../controllers/bakeryController");
 
 // Create a mock Express app that mimics the structure in index.js
 const createApp = () => {

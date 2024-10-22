@@ -1,4 +1,4 @@
-const bakeryAccess = require("../middleware/bakeryAccess");
+const bakeryAccess = require("../../middleware/bakeryAccess");
 
 describe("Bakery Access Middleware", () => {
   let mockRequest;

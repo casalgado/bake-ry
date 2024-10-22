@@ -21,3 +21,23 @@ next steps:
 - write full tests for bakery service
 - create products and orders
 - write tests for products and orders
+
+# 2024-10-22
+
+- database relationships
+  graph TD
+  subgraph Firestore Collections
+  bakeries[/bakeries/]
+  products[/products/]
+  orders[/orders/]
+  ingredients[/ingredients/]
+  recipes[/recipes/]
+  orderItems[/orderItems/]
+  end
+
+      bakeries --> |contains| products
+      bakeries --> |contains| orders
+      bakeries --> |contains| ingredients
+      products --> |references| recipes
+      orders --> |contains| orderItems
+      recipes --> |references| ingredients

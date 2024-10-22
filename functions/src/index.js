@@ -21,10 +21,10 @@ const logger = require("firebase-functions/logger");
 // });
 const express = require("express");
 const { functions } = require("./config/firebase");
-const { authenticateUser } = require("./middleware/auth");
+const { authenticateUser } = require("./middleware/userAccess");
 const bakeryAccess = require("./middleware/bakeryAccess");
 
-const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
 const bakeryRoutes = require("./routes/bakeryRoutes");
 // const userRoutes = require("./routes/userRoutes");
 
@@ -34,7 +34,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Public routes
-app.use("/auth", authRoutes);
+app.use("/auth", userRoutes);
 
 // Protected routes
 app.use("/bakeries", authenticateUser, bakeryRoutes);

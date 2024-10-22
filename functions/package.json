@@ -9,6 +9,7 @@
     "logs": "firebase functions:log",
     "dev": "nodemon src/index.js",
     "test": "jest",
+    "test:silent": "jest --silent ",
     "test:watch": "jest --watch"
   },
   "engines": {
