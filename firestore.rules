@@ -1,23 +1,68 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{userId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null 
-                    && (request.resource.data.role == 'system_admin'
-                        || (request.resource.data.bakeryId != null
-                            && !emailExistsInBakery(request.resource.data.email, request.resource.data.bakeryId)));
-      allow update: if request.auth != null 
-                    && request.auth.uid == userId;
-      allow delete: if request.auth != null 
-                    && (request.auth.token.role == 'system_admin' 
-                        || request.auth.uid == userId);
-      
-      function emailExistsInBakery(email, bakeryId) {
-        return exists(/databases/$(database)/documents/users where email == email && bakeryId == bakeryId);
-      }
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
     }
     
+    function isSystemAdmin() {
+      return isAuthenticated() && request.auth.token.role == 'system_admin';
+    }
     
+    function isBakeryAdmin(bakeryId) {
+      return isAuthenticated() && 
+             request.auth.token.role == 'admin' && 
+             request.auth.token.bakeryId == bakeryId;
+    }
+    
+    function isBakeryStaff(bakeryId) {
+      return isAuthenticated() && 
+             request.auth.token.bakeryId == bakeryId;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isAuthenticated() && 
+        (isSystemAdmin() || request.auth.uid == userId || 
+         isBakeryStaff(resource.data.bakeryId));
+      allow create: if isSystemAdmin() || 
+        (isAuthenticated() && isBakeryAdmin(request.resource.data.bakeryId));
+      allow update: if isSystemAdmin() || 
+        (isAuthenticated() && request.auth.uid == userId);
+      allow delete: if isSystemAdmin();
+    }
+
+    // Bakeries collection
+    match /bakeries/{bakeryId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSystemAdmin();
+      
+      // Nested collections within bakeries
+      match /products/{productId} {
+        allow read: if isAuthenticated() && isBakeryStaff(bakeryId);
+        allow write: if isAuthenticated() && 
+          (isSystemAdmin() || isBakeryAdmin(bakeryId));
+      }
+      
+      match /orders/{orderId} {
+        allow read: if isAuthenticated() && isBakeryStaff(bakeryId);
+        allow create: if isAuthenticated();
+        allow update, delete: if isAuthenticated() && 
+          (isSystemAdmin() || isBakeryAdmin(bakeryId));
+      }
+      
+      match /ingredients/{ingredientId} {
+        allow read: if isAuthenticated() && isBakeryStaff(bakeryId);
+        allow write: if isAuthenticated() && 
+          (isSystemAdmin() || isBakeryAdmin(bakeryId));
+      }
+      
+      match /recipes/{recipeId} {
+        allow read: if isAuthenticated() && isBakeryStaff(bakeryId);
+        allow write: if isAuthenticated() && 
+          (isSystemAdmin() || isBakeryAdmin(bakeryId));
+      }
+    }
   }
 }

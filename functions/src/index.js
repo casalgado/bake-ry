@@ -22,9 +22,11 @@ const logger = require("firebase-functions/logger");
 const express = require("express");
 const { functions } = require("./config/firebase");
 const { authenticateUser } = require("./middleware/userAccess");
+const { bakeryAccess } = require("./middleware/bakeryAccess");
 
 const userRoutes = require("./routes/userRoutes");
 const bakeryRoutes = require("./routes/bakeryRoutes");
+const productRoutes = require("./routes/productRoutes");
 // const userRoutes = require("./routes/userRoutes");
 
 const app = express();
@@ -39,16 +41,6 @@ app.use("/auth", userRoutes);
 app.use("/bakeries", authenticateUser, bakeryRoutes);
 app.use("/products", authenticateUser, productRoutes);
 // app.use("/user", authenticateUser, userRoutes);
-
-// Example of using bakeryAccess middleware
-app.get(
-  "/bakeries/:bakeryId/details",
-  authenticateUser,
-  bakeryAccess,
-  (req, res) => {
-    // Handle fetching bakery details
-  }
-);
 
 // Export the Express app as a Firebase Function
 exports.bake = functions.https.onRequest(app);

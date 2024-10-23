@@ -5,8 +5,19 @@ const userService = {
   async createUser(userData) {
     console.log("Received bakeryId:", userData.bakeryId);
     console.log("Role:", userData.role);
+
+    let userRecord = null;
+
     try {
       const newUser = new User(userData);
+
+      // Validate role and bakeryId first
+      if (newUser.role !== "system_admin") {
+        if (!newUser.bakeryId) {
+          throw new Error("BakeryId is required for non-system_admin users");
+        }
+      }
+
       // Check if the email already exists for the given bakery
       const existingUser = await db
         .collection("users")
@@ -18,59 +29,73 @@ const userService = {
         throw new Error("A user with this email already exists in this bakery");
       }
 
-      // If no existing user, proceed with user creation
-      const userRecord = await admin.auth().createUser({
-        email: newUser.email,
-        password: newUser.password,
+      // Start a transaction for atomicity
+      const result = await db.runTransaction(async (transaction) => {
+        // 1. Create the user in Auth
+        userRecord = await admin.auth().createUser({
+          email: newUser.email,
+          password: newUser.password,
+        });
+
+        // 2. Set custom claims
+        const customClaims = { role: newUser.role };
+        if (newUser.role !== "system_admin" && newUser.bakeryId) {
+          customClaims.bakeryId = newUser.bakeryId;
+        }
+        await admin.auth().setCustomUserClaims(userRecord.uid, customClaims);
+
+        // 3. Create the user document in Firestore
+        const userRef = db.collection("users").doc(userRecord.uid);
+        transaction.set(userRef, newUser.toFirestore());
+
+        return {
+          uid: userRecord.uid,
+          email: userRecord.email,
+          role: newUser.role,
+          name: newUser.name,
+          bakeryId: newUser.bakeryId,
+        };
       });
 
-      const customClaims = { role: newUser.role };
-      if (newUser.role !== "system_admin" && newUser.bakeryId) {
-        customClaims.bakeryId = newUser.bakeryId;
-      }
-      await admin.auth().setCustomUserClaims(userRecord.uid, customClaims);
+      return result;
+    } catch (error) {
+      console.error("Error creating user:", error);
 
-      if (newUser.role !== "system_admin") {
-        if (!newUser.bakeryId) {
-          throw new Error("BakeryId is required for non-system_admin users");
+      // If we created a user in Auth but the transaction failed,
+      // we need to clean up the Auth user
+      if (userRecord) {
+        try {
+          await admin.auth().deleteUser(userRecord.uid);
+          console.log("Cleaned up Auth user after failed transaction");
+        } catch (cleanupError) {
+          console.error("Error cleaning up Auth user:", cleanupError);
+          // Log this incident for admin attention
+          // You might want to add proper error logging here
         }
       }
 
-      await db.collection("users").doc(userRecord.uid).set(newUser);
-
-      // Keep the original return format for backward compatibility
-      return {
-        uid: userRecord.uid,
-        email: userRecord.email,
-        role: newUser.role,
-        name: newUser.name,
-        bakeryId: newUser.bakeryId,
-      };
-    } catch (error) {
-      console.error("Error creating user:", error);
       throw error;
     }
   },
 
-  async loginUser(email, password) {
+  async loginUser(user) {
     try {
-      // Firebase Auth doesn't have a direct login method in the admin SDK
-      // We would typically use Firebase Client SDK for this
-      // For now, we'll just fetch the user data
-      const userRecord = await admin.auth().getUserByEmail(email);
-      const userDoc = await db.collection("users").doc(userRecord.uid).get();
-      const userData = userDoc.data();
+      console.log("User:", user);
 
-      // In a real application, you'd verify the password here
-      // and create a custom token or session
+      const customToken = await admin.auth().createCustomToken(user.uid);
+      console.log("Custom Token:", customToken);
 
-      // Keep the original return format for backward compatibility
+      // Then, exchange it for an ID token (this step simulates client-side auth)
+      const idToken = await getIdTokenFromCustomToken(customToken);
+      console.log("ID Token:", idToken);
+
       return {
-        uid: userRecord.uid,
-        email: userRecord.email,
-        role: userData.role,
-        name: userData.name,
-        bakeryId: userData.bakeryId,
+        uid: user.uid,
+        email: user.email,
+        role: user.role,
+        name: user.name,
+        bakeryId: user.bakeryId,
+        token: idToken,
       };
     } catch (error) {
       console.error("Error logging in user:", error);
@@ -141,5 +166,30 @@ const userService = {
     }
   },
 };
+
+// This function simulates exchanging a custom token for an ID token
+// In a real app, this would happen on the client side
+async function getIdTokenFromCustomToken(customToken) {
+  const firebaseApiKey = process.env.BAKERY_API_KEY;
+
+  if (!firebaseApiKey) {
+    throw new Error("Firebase API key is not set in environment variables");
+  }
+
+  const response = await fetch(
+    `https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyCustomToken?key=${firebaseApiKey}`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        token: customToken,
+        returnSecureToken: true,
+      }),
+    }
+  );
+
+  const data = await response.json();
+  console.log("Data:", data);
+  return data.idToken;
+}
 
 module.exports = userService;

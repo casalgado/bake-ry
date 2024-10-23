@@ -1,5 +1,6 @@
 const userService = require("../services/userService");
 
+// possible roles: customer, staff, admin, or system_admin
 const userController = {
   async register(req, res) {
     try {
@@ -20,8 +21,8 @@ const userController = {
 
   async login(req, res) {
     try {
-      const { email, password } = req.body;
-      const result = await userService.loginUser(email, password);
+      const { user } = req.body;
+      const result = await userService.loginUser(user);
       res.json(result);
     } catch (error) {
       console.error("Login error:", error);
