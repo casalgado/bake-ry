@@ -7,6 +7,8 @@ class OrderItem {
     notes, // Special instructions
     recipe, // Reference to recipe used
     status, // In preparation, completed, etc.
+    isComplimentary = false,
+    complimentaryReason = null,
   }) {
     this.productId = productId;
     this.productName = productName;
@@ -15,11 +17,13 @@ class OrderItem {
     this.notes = notes || "";
     this.recipe = recipe;
     this.status = status || "pending";
+    this.isComplimentary = isComplimentary;
+    this.complimentaryReason = complimentaryReason;
     this.subtotal = this.calculateSubtotal();
   }
 
   calculateSubtotal() {
-    return this.quantity * this.unitPrice;
+    return this.isComplimentary ? 0 : this.quantity * this.unitPrice;
   }
 
   updateStatus(newStatus) {
@@ -70,6 +74,11 @@ class Order {
     // Metadata
     createdAt,
     updatedAt,
+
+    // Complimentary Order Information
+    isComplimentary = false,
+    complimentaryReason = null,
+    orderMessage = null,
   }) {
     // Basic Information
     this.id = id;
@@ -80,7 +89,15 @@ class Order {
     this.userPhone = userPhone;
 
     // Order Items
-    this.items = items?.map((item) => new OrderItem(item)) || [];
+    this.items =
+      items?.map(
+        (item) =>
+          new OrderItem({
+            ...item,
+            isComplimentary: isComplimentary,
+            complimentaryReason: complimentaryReason,
+          })
+      ) || [];
 
     // Dates
     this.orderDate = orderDate || new Date();
@@ -98,12 +115,19 @@ class Order {
       },
     ];
 
+    // Complimentary Information
+    this.isComplimentary = isComplimentary;
+    this.complimentaryReason = complimentaryReason;
+    this.orderMessage = orderMessage;
+
     // Payment Information
     this.subtotal = subtotal || this.calculateSubtotal();
     this.tax = tax || this.calculateTax();
     this.deliveryFee = deliveryFee || 0;
     this.total = total || this.calculateTotal();
-    this.paymentStatus = paymentStatus || "pending";
+    this.paymentStatus = isComplimentary
+      ? "complimentary"
+      : paymentStatus || "pending";
     this.paymentMethod = paymentMethod;
     this.paymentDetails = paymentDetails;
 
@@ -148,20 +172,28 @@ class Order {
 
   // Calculations
   calculateSubtotal() {
-    return this.items.reduce((sum, item) => sum + item.subtotal, 0);
+    return this.isComplimentary
+      ? 0
+      : this.items.reduce((sum, item) => sum + item.subtotal, 0);
   }
 
   calculateTax() {
-    return this.subtotal * 0.1; // 10% tax, adjust as needed
+    return this.isComplimentary ? 0 : this.subtotal * 0.1; // 10% tax, adjust as needed
   }
 
   calculateTotal() {
-    return this.subtotal + this.tax + this.deliveryFee;
+    return this.isComplimentary
+      ? 0
+      : this.subtotal + this.tax + this.deliveryFee;
   }
 
   // Order Management
   addItem(item) {
-    const orderItem = new OrderItem(item);
+    const orderItem = new OrderItem({
+      ...item,
+      isComplimentary: this.isComplimentary,
+      complimentaryReason: this.complimentaryReason,
+    });
     this.items.push(orderItem);
     this.updateTotals();
     return orderItem;
@@ -203,6 +235,7 @@ class Order {
 
   // Validation Methods
   canBePrepared() {
+    if (this.isComplimentary) return true;
     return (
       this.paymentStatus === "paid" &&
       this.status === "confirmed" &&
@@ -224,27 +257,4 @@ class Order {
   }
 }
 
-// Example Usage:
-const order = new Order({
-  bakeryId: "bakery_123",
-  userId: "user_456",
-  userName: "John Doe",
-  userEmail: "john@example.com",
-  userPhone: "555-0123",
-
-  items: [
-    {
-      productId: "product_789",
-      productName: "Chocolate Cake",
-      quantity: 1,
-      unitPrice: 25.99,
-      notes: "Birthday message: Happy Birthday Tom!",
-      recipe: "recipe_choc_001",
-    },
-  ],
-
-  requiredDate: new Date("2024-10-25"),
-  fulfillmentType: "pickup",
-  customerNotes: "Please call upon arrival",
-  paymentMethod: "card",
-});
+module.exports = { Order, OrderItem };
