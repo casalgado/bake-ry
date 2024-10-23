@@ -79,7 +79,7 @@ describe("User Controller", () => {
       };
       userService.loginUser.mockResolvedValue(loggedInUser);
 
-      await userController.login(mockRequest, mockResponse);
+      await userController.loginUser(mockRequest, mockResponse);
 
       expect(userService.loginUser).toHaveBeenCalledWith(
         loginData.email,
@@ -96,7 +96,7 @@ describe("User Controller", () => {
 
       userService.loginUser.mockRejectedValue(new Error("Invalid credentials"));
 
-      await userController.login(mockRequest, mockResponse);
+      await userController.loginUser(mockRequest, mockResponse);
 
       expect(mockResponse.status).toHaveBeenCalledWith(401);
       expect(mockResponse.json).toHaveBeenCalledWith({

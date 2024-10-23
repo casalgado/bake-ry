@@ -19,7 +19,7 @@ const userController = {
     }
   },
 
-  async login(req, res) {
+  async loginUser(req, res) {
     try {
       const { user } = req.body;
       const result = await userService.loginUser(user);
@@ -27,6 +27,17 @@ const userController = {
     } catch (error) {
       console.error("Login error:", error);
       res.status(401).json({ error: error.message });
+    }
+  },
+
+  async logoutUser(req, res) {
+    try {
+      const { user } = req.body;
+      const result = await userService.logoutUser(user);
+      res.json(result);
+    } catch (error) {
+      console.error("Logout error:", error);
+      res.status(400).json({ error: error.message });
     }
   },
 };
