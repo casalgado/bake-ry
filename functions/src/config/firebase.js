@@ -16,8 +16,11 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
+if (process.env.FIREBASE_AUTH_EMULATOR_HOST) {
+  console.log("🔧 Using Auth Emulator");
+}
+
 // Replace 'user-id' with the UID of your test user
 // comment out when testing
-// createCustomToken("ZSi8YBnuCTa20ZCMat9ueNsvmeiI");
 
 module.exports = { admin, functions, db };

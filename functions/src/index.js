@@ -19,6 +19,7 @@ const logger = require("firebase-functions/logger");
 //   logger.info("Hello logs!", {structuredData: true});
 //   response.send("Hello from Firebase!");
 // });
+require("dotenv").config();
 const express = require("express");
 const { functions } = require("./config/firebase");
 const { authenticateUser } = require("./middleware/userAccess");
