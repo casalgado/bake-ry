@@ -1,12 +1,42 @@
 const productService = require("../services/productService");
 
 const productController = {
+  async createProduct(req, res) {
+    try {
+      const { bakeryId } = req.params;
+      const productData = req.body;
+      const newProduct = await productService.createProduct(
+        bakeryId,
+        productData
+      );
+      res.status(201).json(newProduct);
+    } catch (error) {
+      console.error("Error creating product:", error);
+      res.status(400).json({ error: error.message });
+    }
+  },
+
+  async getProduct(req, res) {
+    try {
+      const { bakeryId, id } = req.params;
+      const product = await productService.getProductById(bakeryId, id);
+      if (product) {
+        res.json(product);
+      } else {
+        res.status(404).json({ error: "Product not found" });
+      }
+    } catch (error) {
+      console.error("Error getting product:", error);
+      res.status(500).json({ error: error.message });
+    }
+  },
+
   async getProducts(req, res) {
     try {
       const { bakeryId } = req.params;
       const { category, name } = req.query;
 
-      // If search params are provided, use search function
+      // If search parameters are provided, use search function
       if (category || name) {
         const products = await productService.searchProducts(bakeryId, {
           category,
@@ -19,47 +49,7 @@ const productController = {
       const products = await productService.getProductsByBakery(bakeryId);
       res.json(products);
     } catch (error) {
-      console.error("Error in getProducts controller:", error);
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  async getProduct(req, res) {
-    try {
-      const { bakeryId, id } = req.params;
-
-      const product = await productService.getProductById(bakeryId, id);
-
-      if (!product) {
-        return res.status(404).json({ error: "Product not found" });
-      }
-
-      res.json(product);
-    } catch (error) {
-      console.error("Error in getProduct controller:", error);
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  async createProduct(req, res) {
-    try {
-      const { bakeryId } = req.params;
-      const productData = req.body;
-
-      // Create new product
-      const newProduct = await productService.createProduct(
-        bakeryId,
-        productData
-      );
-
-      res.status(201).json(newProduct);
-    } catch (error) {
-      console.error("Error in createProduct controller:", error);
-
-      if (error.message === "Required fields missing") {
-        return res.status(400).json({ error: error.message });
-      }
-
+      console.error("Error getting products:", error);
       res.status(500).json({ error: error.message });
     }
   },
@@ -67,40 +57,30 @@ const productController = {
   async updateProduct(req, res) {
     try {
       const { bakeryId, id } = req.params;
-      const updateData = req.body;
-
+      const productData = req.body;
       const updatedProduct = await productService.updateProduct(
         bakeryId,
         id,
-        updateData
+        productData
       );
-
-      res.json(updatedProduct);
-    } catch (error) {
-      console.error("Error in updateProduct controller:", error);
-
-      if (error.message === "Product not found") {
-        return res.status(404).json({ error: error.message });
+      if (updatedProduct) {
+        res.json(updatedProduct);
+      } else {
+        res.status(404).json({ error: "Product not found" });
       }
-
-      res.status(500).json({ error: error.message });
+    } catch (error) {
+      console.error("Error updating product:", error);
+      res.status(400).json({ error: error.message });
     }
   },
 
   async deleteProduct(req, res) {
     try {
       const { bakeryId, id } = req.params;
-
       await productService.deleteProduct(bakeryId, id);
-
       res.status(204).send();
     } catch (error) {
-      console.error("Error in deleteProduct controller:", error);
-
-      if (error.message === "Product not found") {
-        return res.status(404).json({ error: error.message });
-      }
-
+      console.error("Error deleting product:", error);
       res.status(500).json({ error: error.message });
     }
   },

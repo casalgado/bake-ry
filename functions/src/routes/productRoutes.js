@@ -1,7 +1,6 @@
 const express = require("express");
 const {
   authenticateUser,
-  requireSystemAdmin,
   requireStaffOrAdmin,
 } = require("../middleware/userAccess");
 const bakeryAccess = require("../middleware/bakeryAccess");

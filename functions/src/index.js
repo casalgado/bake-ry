@@ -22,7 +22,6 @@ const logger = require("firebase-functions/logger");
 const express = require("express");
 const { functions } = require("./config/firebase");
 const { authenticateUser } = require("./middleware/userAccess");
-const bakeryAccess = require("./middleware/bakeryAccess");
 
 const userRoutes = require("./routes/userRoutes");
 const bakeryRoutes = require("./routes/bakeryRoutes");
@@ -38,6 +37,7 @@ app.use("/auth", userRoutes);
 
 // Protected routes
 app.use("/bakeries", authenticateUser, bakeryRoutes);
+app.use("/products", authenticateUser, productRoutes);
 // app.use("/user", authenticateUser, userRoutes);
 
 // Example of using bakeryAccess middleware
