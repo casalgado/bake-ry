@@ -3,8 +3,9 @@ const User = require("../models/User");
 
 const userService = {
   async createUser(userData) {
-    console.log("Received bakeryId:", userData.bakeryId);
-    console.log("Role:", userData.role);
+    console.log("Received userData:", userData);
+
+    // requires: email, password, role, name
 
     let userRecord = null;
 
@@ -12,9 +13,9 @@ const userService = {
       const newUser = new User(userData);
 
       // Validate role and bakeryId first
-      if (newUser.role !== "system_admin") {
+      if (newUser.role !== "system_admin" && newUser.role !== "bakery_admin") {
         if (!newUser.bakeryId) {
-          throw new Error("BakeryId is required for non-system_admin users");
+          throw new Error("BakeryId is required for non-admin users");
         }
       }
 
@@ -39,7 +40,12 @@ const userService = {
 
         // 2. Set custom claims
         const customClaims = { role: newUser.role };
-        if (newUser.role !== "system_admin" && newUser.bakeryId) {
+        // Assign bakeryId to customClaims if applicable
+        if (
+          newUser.role !== "system_admin" &&
+          newUser.role !== "bakery_admin" &&
+          newUser.bakeryId
+        ) {
           customClaims.bakeryId = newUser.bakeryId;
         }
         await admin.auth().setCustomUserClaims(userRecord.uid, customClaims);
@@ -78,45 +84,57 @@ const userService = {
     }
   },
 
-  async loginUser(user) {
+  async loginUser(idToken, email) {
     try {
-      console.log("User:", user);
+      // 1. Verify the Firebase ID token
+      const decodedToken = await admin.auth().verifyIdToken(idToken);
 
-      const customToken = await admin.auth().createCustomToken(user.uid);
-      console.log("Custom Token:", customToken);
+      console.log("Decoded token:", decodedToken);
 
-      // Then, exchange it for an ID token (this step simulates client-side auth)
-      const idToken = await getIdTokenFromCustomToken(customToken);
-      console.log("ID Token:", idToken);
+      // 2. Get the user document from Firestore
+      const userSnapshot = await db
+        .collection("users")
+        .where("email", "==", email)
+        .limit(1)
+        .get();
 
+      if (userSnapshot.empty) {
+        throw new Error("User not found");
+      }
+
+      const userDoc = userSnapshot.docs[0];
+      const userData = userDoc.data();
+
+      // 3. Verify the user's Firebase UID matches
+      if (decodedToken.uid !== userDoc.id) {
+        throw new Error("User authentication failed");
+      }
+
+      // 4. Return user data (excluding sensitive information)
       return {
-        uid: user.uid,
-        email: user.email,
-        role: user.role,
-        name: user.name,
-        bakeryId: user.bakeryId,
-        token: idToken,
+        uid: userDoc.id,
+        email: userData.email,
+        name: userData.name,
+        role: userData.role,
+        bakeryId: userData.bakeryId,
+        // Add any other necessary user data
+        // Do NOT include password or other sensitive data
       };
     } catch (error) {
-      console.error("Error logging in user:", error);
-      throw error;
+      console.error("Error in loginUser service:", error);
+      if (error.code === "auth/id-token-expired") {
+        throw new Error("Session expired. Please login again.");
+      } else if (error.code === "auth/invalid-id-token") {
+        throw new Error("Invalid authentication token.");
+      }
+      throw new Error("Authentication failed. Please try again.");
     }
   },
 
-  async verifyToken(idToken) {
+  // Helper method to get user data by ID (useful for other parts of your app)
+  async getUserById(uid) {
     try {
-      const decodedToken = await admin.auth().verifyIdToken(idToken);
-      return decodedToken;
-    } catch (error) {
-      console.error("Error verifying token:", error);
-      throw error;
-    }
-  },
-
-  // New method to get a user by ID
-  async getUser(userId) {
-    try {
-      const userDoc = await db.collection("users").doc(userId).get();
+      const userDoc = await db.collection("users").doc(uid).get();
 
       if (!userDoc.exists) {
         throw new Error("User not found");
@@ -125,15 +143,17 @@ const userService = {
       const userData = userDoc.data();
       return {
         uid: userDoc.id,
-        ...userData,
+        email: userData.email,
+        name: userData.name,
+        role: userData.role,
+        bakeryId: userData.bakeryId,
       };
     } catch (error) {
-      console.error("Error fetching user:", error);
+      console.error("Error getting user by ID:", error);
       throw error;
     }
   },
 
-  // New method to update user data (patch)
   async updateUser(userId, updateData) {
     try {
       const userDoc = await db.collection("users").doc(userId).get();

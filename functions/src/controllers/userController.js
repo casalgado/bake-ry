@@ -1,6 +1,6 @@
 const userService = require("../services/userService");
 
-// possible roles: customer, staff, admin, or system_admin
+// possible roles: bakery_customer, bakery_staff, bakery_admin, or system_admin
 const userController = {
   async register(req, res) {
     try {
@@ -21,9 +21,21 @@ const userController = {
 
   async loginUser(req, res) {
     try {
-      const { user } = req.body;
-      const result = await userService.loginUser(user);
-      res.json(result);
+      // Get the ID token from the Authorization header
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "No token provided" });
+      }
+
+      const idToken = authHeader.split("Bearer ")[1];
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+      }
+
+      const userData = await userService.loginUser(idToken, email);
+      res.json(userData);
     } catch (error) {
       console.error("Login error:", error);
       res.status(401).json({ error: error.message });
