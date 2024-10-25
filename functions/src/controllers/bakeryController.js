@@ -3,7 +3,22 @@ const bakeryService = require("../services/bakeryService");
 const bakeryController = {
   async createBakery(req, res) {
     try {
-      const bakeryData = req.body;
+      const { uid, bakeryId } = req.user;
+
+      // Check if user already has a bakery
+      if (bakeryId) {
+        return res.status(403).json({
+          error:
+            "User already has a bakery assigned and cannot create another one",
+        });
+      }
+
+      const bakeryData = {
+        ...req.body,
+        ownerId: uid,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
       const newBakery = await bakeryService.createBakery(bakeryData);
       res.status(201).json(newBakery);
     } catch (error) {

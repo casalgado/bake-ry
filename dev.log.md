@@ -41,3 +41,15 @@ next steps:
       products --> |references| recipes
       orders --> |contains| orderItems
       recipes --> |references| ingredients
+
+# 2024-10-24
+
+- frontend working
+- bakery routes working
+
+next steps:
+
+- create mock users and bakeries from frontend
+- manually test bakery access
+- write tests for bakery access (from frontend?)
+- test product routes

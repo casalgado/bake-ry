@@ -1,6 +1,7 @@
 const { admin, db } = require("../../config/firebase");
 const userService = require("../../services/userService");
 
+// Mock Firebase Admin SDK
 jest.mock("../../config/firebase", () => ({
   admin: {
     auth: jest.fn(),
@@ -8,31 +9,50 @@ jest.mock("../../config/firebase", () => ({
   },
   db: {
     collection: jest.fn(),
+    runTransaction: jest.fn(),
   },
 }));
 
 describe("User Service", () => {
   let mockAuth;
   let mockFirestore;
+  let mockTransaction;
 
   beforeEach(() => {
+    // Reset all mocks
+    jest.clearAllMocks();
+
+    // Setup mock auth methods
     mockAuth = {
       createUser: jest.fn(),
       setCustomUserClaims: jest.fn(),
-      getUserByEmail: jest.fn(),
       verifyIdToken: jest.fn(),
+      deleteUser: jest.fn(),
     };
+
+    // Setup mock firestore methods
     mockFirestore = {
       collection: jest.fn().mockReturnThis(),
       doc: jest.fn().mockReturnThis(),
-      set: jest.fn(),
-      get: jest.fn(),
       where: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      set: jest.fn(),
+      update: jest.fn(),
+      get: jest.fn(),
     };
 
+    // Setup mock transaction
+    mockTransaction = {
+      set: jest.fn(),
+    };
+
+    // Configure mock implementations
     admin.auth.mockReturnValue(mockAuth);
     admin.firestore.mockReturnValue(mockFirestore);
     db.collection.mockReturnValue(mockFirestore);
+    db.runTransaction.mockImplementation(async (callback) => {
+      return callback(mockTransaction);
+    });
   });
 
   describe("createUser", () => {
@@ -45,8 +65,8 @@ describe("User Service", () => {
         bakeryId: "bakery123",
       };
 
-      mockFirestore.get.mockResolvedValue({ empty: true });
-      mockAuth.createUser.mockResolvedValue({
+      mockFirestore.get.mockResolvedValueOnce({ empty: true });
+      mockAuth.createUser.mockResolvedValueOnce({
         uid: "user123",
         email: userData.email,
       });
@@ -57,11 +77,14 @@ describe("User Service", () => {
         email: userData.email,
         password: userData.password,
       });
+
       expect(mockAuth.setCustomUserClaims).toHaveBeenCalledWith("user123", {
         role: userData.role,
         bakeryId: userData.bakeryId,
       });
-      expect(mockFirestore.set).toHaveBeenCalled();
+
+      expect(mockTransaction.set).toHaveBeenCalled();
+
       expect(result).toEqual({
         uid: "user123",
         email: userData.email,
@@ -71,16 +94,47 @@ describe("User Service", () => {
       });
     });
 
+    it("should throw an error if bakeryId is missing for non-admin users", async () => {
+      const userData = {
+        email: "test@example.com",
+        password: "password123",
+        role: "baker",
+        name: "Test Baker",
+      };
+
+      await expect(userService.createUser(userData)).rejects.toThrow(
+        "BakeryId is required for non-admin users"
+      );
+    });
+
+    it("should allow creation without bakeryId for system_admin", async () => {
+      const userData = {
+        email: "admin@example.com",
+        password: "password123",
+        role: "system_admin",
+        name: "System Admin",
+      };
+
+      mockFirestore.get.mockResolvedValueOnce({ empty: true });
+      mockAuth.createUser.mockResolvedValueOnce({
+        uid: "admin123",
+        email: userData.email,
+      });
+
+      const result = await userService.createUser(userData);
+      expect(result.uid).toBe("admin123");
+    });
+
     it("should throw an error if user already exists", async () => {
       const userData = {
         email: "existing@example.com",
         password: "password123",
         role: "baker",
-        name: "Existing Baker",
+        name: "Test Baker",
         bakeryId: "bakery123",
       };
 
-      mockFirestore.get.mockResolvedValue({ empty: false });
+      mockFirestore.get.mockResolvedValueOnce({ empty: false });
 
       await expect(userService.createUser(userData)).rejects.toThrow(
         "A user with this email already exists in this bakery"
@@ -89,62 +143,139 @@ describe("User Service", () => {
   });
 
   describe("loginUser", () => {
-    it("should login a user successfully", async () => {
+    it("should login user successfully", async () => {
+      const idToken = "valid-token";
       const email = "user@example.com";
-      const password = "password123";
-      const userRecord = { uid: "user123", email };
-      const userData = {
+      const userId = "user123";
+
+      const mockDecodedToken = {
+        uid: userId,
+        email: email,
+      };
+
+      const mockUserData = {
+        email: email,
+        name: "Test User",
         role: "baker",
-        name: "Test Baker",
         bakeryId: "bakery123",
       };
 
-      mockAuth.getUserByEmail.mockResolvedValue(userRecord);
-      mockFirestore.get.mockResolvedValue({ data: () => userData });
+      mockAuth.verifyIdToken.mockResolvedValueOnce(mockDecodedToken);
+      mockFirestore.get.mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          {
+            id: userId,
+            data: () => mockUserData,
+          },
+        ],
+      });
 
-      const result = await userService.loginUser(email, password);
+      const result = await userService.loginUser(idToken, email);
 
-      expect(mockAuth.getUserByEmail).toHaveBeenCalledWith(email);
+      expect(mockAuth.verifyIdToken).toHaveBeenCalledWith(idToken);
       expect(result).toEqual({
-        uid: userRecord.uid,
-        email: userRecord.email,
-        ...userData,
+        uid: userId,
+        ...mockUserData,
       });
     });
 
-    it("should throw an error if login fails", async () => {
-      const email = "nonexistent@example.com";
-      const password = "wrongpassword";
+    it("should throw error for invalid token", async () => {
+      mockAuth.verifyIdToken.mockRejectedValueOnce({
+        code: "auth/invalid-id-token",
+      });
 
-      mockAuth.getUserByEmail.mockRejectedValue(new Error("User not found"));
+      await expect(
+        userService.loginUser("invalid-token", "user@example.com")
+      ).rejects.toThrow("Invalid authentication token.");
+    });
 
-      await expect(userService.loginUser(email, password)).rejects.toThrow(
+    it("should throw error for expired token", async () => {
+      mockAuth.verifyIdToken.mockRejectedValueOnce({
+        code: "auth/id-token-expired",
+      });
+
+      await expect(
+        userService.loginUser("expired-token", "user@example.com")
+      ).rejects.toThrow("Session expired. Please login again.");
+    });
+  });
+
+  describe("getUserById", () => {
+    it("should get user successfully", async () => {
+      const userId = "user123";
+      const mockUserData = {
+        email: "user@example.com",
+        name: "Test User",
+        role: "baker",
+        bakeryId: "bakery123",
+      };
+
+      mockFirestore.get.mockResolvedValueOnce({
+        exists: true,
+        id: userId,
+        data: () => mockUserData,
+      });
+
+      const result = await userService.getUserById(userId);
+
+      expect(result).toEqual({
+        uid: userId,
+        ...mockUserData,
+      });
+    });
+
+    it("should throw error for non-existent user", async () => {
+      mockFirestore.get.mockResolvedValueOnce({
+        exists: false,
+      });
+
+      await expect(userService.getUserById("nonexistent")).rejects.toThrow(
         "User not found"
       );
     });
   });
 
-  describe("verifyToken", () => {
-    it("should verify a token successfully", async () => {
-      const idToken = "valid_token";
-      const decodedToken = { uid: "user123", email: "user@example.com" };
+  describe("updateUser", () => {
+    it("should update user successfully", async () => {
+      const userId = "user123";
+      const updateData = {
+        name: "Updated Name",
+        phone: "1234567890",
+      };
 
-      mockAuth.verifyIdToken.mockResolvedValue(decodedToken);
+      const mockUserData = {
+        email: "user@example.com",
+        name: "Updated Name",
+        role: "baker",
+        bakeryId: "bakery123",
+        phone: "1234567890",
+      };
 
-      const result = await userService.verifyToken(idToken);
+      mockFirestore.get
+        .mockResolvedValueOnce({ exists: true })
+        .mockResolvedValueOnce({
+          exists: true,
+          data: () => mockUserData,
+        });
 
-      expect(mockAuth.verifyIdToken).toHaveBeenCalledWith(idToken);
-      expect(result).toEqual(decodedToken);
+      const result = await userService.updateUser(userId, updateData);
+
+      expect(mockFirestore.update).toHaveBeenCalled();
+      expect(result).toEqual({
+        uid: userId,
+        ...mockUserData,
+      });
     });
 
-    it("should throw an error if token verification fails", async () => {
-      const idToken = "invalid_token";
+    it("should throw error for non-existent user", async () => {
+      mockFirestore.get.mockResolvedValueOnce({
+        exists: false,
+      });
 
-      mockAuth.verifyIdToken.mockRejectedValue(new Error("Invalid token"));
-
-      await expect(userService.verifyToken(idToken)).rejects.toThrow(
-        "Invalid token"
-      );
+      await expect(
+        userService.updateUser("nonexistent", { name: "New Name" })
+      ).rejects.toThrow("User not found");
     });
   });
 });

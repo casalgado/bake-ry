@@ -1,15 +1,45 @@
-const { db } = require("../config/firebase");
+const { db, admin } = require("../config/firebase");
 const Bakery = require("../models/Bakery");
 
 const bakeryService = {
   async createBakery(bakeryData) {
     try {
-      const newBakery = new Bakery(bakeryData);
-      const docRef = await db
-        .collection("bakeries")
-        .add(newBakery.toFirestore());
-      newBakery.id = docRef.id;
-      return newBakery;
+      // Get the uid from bakeryData since it's passed from the controller
+      const { ownerId: uid } = bakeryData;
+
+      // Start a transaction to ensure atomicity
+      const result = await db.runTransaction(async (transaction) => {
+        // Create new bakery with generated ID
+        const bakeryRef = db.collection("bakeries").doc();
+        const bakeryId = bakeryRef.id;
+
+        const newBakery = new Bakery(bakeryData);
+
+        // Update user document with the new bakeryId
+        const userRef = db.collection("users").doc(uid);
+        const userDoc = await transaction.get(userRef);
+
+        if (!userDoc.exists) {
+          throw new Error("User not found");
+        }
+
+        // Set both documents in the transaction
+        transaction.set(bakeryRef, newBakery.toFirestore());
+        transaction.update(userRef, {
+          bakeryId: bakeryId,
+          updatedAt: new Date(),
+        });
+
+        return { bakery: { ...newBakery, id: bakeryId }, uid };
+      });
+
+      // Update custom claims outside transaction
+      await admin.auth().setCustomUserClaims(result.uid, {
+        ...result.uid.customClaims,
+        bakeryId: result.bakery.id,
+      });
+
+      return result.bakery;
     } catch (error) {
       console.error("Error in createBakery:", error);
       throw error;

@@ -2,7 +2,7 @@ const { admin } = require("../config/firebase");
 const { ForbiddenError } = require("../utils/errors");
 
 // Middleware to verify user has access to the specified bakery
-const bakeryAccess = async (req, res, next) => {
+const hasBakeryAccess = async (req, res, next) => {
   try {
     const user = req.user;
     const bakeryId = req.params.bakeryId || req.body.bakeryId;
@@ -23,4 +23,4 @@ const bakeryAccess = async (req, res, next) => {
   }
 };
 
-module.exports = bakeryAccess;
+module.exports = hasBakeryAccess;

@@ -2,22 +2,6 @@ const userService = require("../services/userService");
 const { ForbiddenError } = require("../utils/errors");
 
 const authenticateUser = async (req, res, next) => {
-  // try {
-  //   // Instead of verifying the token, directly mock the decoded token
-  //   const decodedToken = {
-  //     uid: "mockedUserId123", // Mock user ID
-  //     email: "testuser@example.com", // Mock user email
-  //     name: "Test User", // Other user details can be mocked here
-  //   };
-
-  //   req.user = decodedToken; // Assign mock decoded token to req.user
-  //   next(); // Proceed to the next middleware
-  // } catch (error) {
-  //   console.error("Error in mock authentication:", error);
-  //   return res.status(401).json({ error: "Mock authentication failed" });
-  // }
-
-  // uncomment this to use firebase auth
   try {
     const idToken = req.headers.authorization?.split("Bearer ")[1];
     if (!idToken) {
@@ -47,18 +31,18 @@ const requireSystemAdmin = (req, res, next) => {
   next();
 };
 
-const requireStaffOrAdmin = (req, res, next) => {
-  const allowedRoles = ["staff", "admin", "system_admin"];
+const requireBakeryAdmin = (req, res, next) => {
+  const allowedRoles = ["bakery_admin", "system_admin"];
   if (!allowedRoles.includes(req.user.role)) {
-    throw new ForbiddenError("Requires staff or admin role");
+    throw new ForbiddenError("Requires admin role");
   }
   next();
 };
 
-const requireAdmin = (req, res, next) => {
-  const allowedRoles = ["admin", "system_admin"];
+const requireBakeryStaffOrAdmin = (req, res, next) => {
+  const allowedRoles = ["bakery_staff", "bakery_admin", "system_admin"];
   if (!allowedRoles.includes(req.user.role)) {
-    throw new ForbiddenError("Requires admin role");
+    throw new ForbiddenError("Requires staff or admin role");
   }
   next();
 };
@@ -66,6 +50,6 @@ const requireAdmin = (req, res, next) => {
 module.exports = {
   authenticateUser,
   requireSystemAdmin,
-  requireStaffOrAdmin,
-  requireAdmin,
+  requireBakeryAdmin,
+  requireBakeryStaffOrAdmin,
 };

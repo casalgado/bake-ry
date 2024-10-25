@@ -22,8 +22,6 @@ const logger = require("firebase-functions/logger");
 require("dotenv").config();
 const express = require("express");
 const { functions } = require("./config/firebase");
-const { authenticateUser } = require("./middleware/userAccess");
-const { bakeryAccess } = require("./middleware/bakeryAccess");
 const cors = require("cors");
 
 const userRoutes = require("./routes/userRoutes");
@@ -56,8 +54,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/auth", userRoutes);
 
 // Protected routes
-app.use("/bakeries", authenticateUser, bakeryRoutes);
-app.use("/products", authenticateUser, productRoutes);
+app.use("/bakeries", bakeryRoutes);
+app.use("/products", productRoutes);
 // app.use("/user", authenticateUser, userRoutes);
 
 // Export the Express app as a Firebase Function

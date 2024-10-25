@@ -1,45 +1,31 @@
 const express = require("express");
-const { authenticateUser } = require("../middleware/userAccess");
-const { requireSystemAdmin } = require("../middleware/userAccess");
 const bakeryController = require("../controllers/bakeryController");
+const {
+  authenticateUser,
+  requireSystemAdmin,
+  requireBakeryAdmin,
+} = require("../middleware/userAccess");
+const hasBakeryAccess = require("../middleware/bakeryAccess");
 
 const router = express.Router();
 
-// Create bakery (only system admin)
-router.post("/", bakeryController.createBakery);
+// Apply authentication to all routes
+router.use(authenticateUser);
 
-// Get all bakeries
-router.get("/", bakeryController.getAllBakeries);
+// System admin routes
+router.get("/", requireSystemAdmin, bakeryController.getAllBakeries);
+router.delete("/:id", requireSystemAdmin, bakeryController.deleteBakery);
 
-// Get a specific bakery
-router.get("/:id", bakeryController.getBakery);
+// Bakery admin routes
+router.post("/", requireBakeryAdmin, bakeryController.createBakery);
+router.patch(
+  "/:id",
+  requireBakeryAdmin,
+  hasBakeryAccess,
+  bakeryController.updateBakery
+);
 
-// Update a bakery (only system admin)
-router.put("/:id", bakeryController.updateBakery);
-
-// Delete a bakery (only system admin)
-router.delete("/:id", bakeryController.deleteBakery);
-
-module.exports = router;
-
-/**
- * 
-WITH ROUTE GUARDS
-
-// Create bakery (only system admin)
-router.post('/', authenticateUser, requireSystemAdmin, bakeryController.createBakery);
-
-// Get all bakeries
-router.get('/', authenticateUser, bakeryController.getAllBakeries);
-
-// Get a specific bakery
-router.get('/:id', authenticateUser, bakeryController.getBakery);
-
-// Update a bakery (only system admin)
-router.put('/:id', authenticateUser, requireSystemAdmin, bakeryController.updateBakery);
-
-// Delete a bakery (only system admin)
-router.delete('/:id', authenticateUser, requireSystemAdmin, bakeryController.deleteBakery);
+// General access routes (with bakery access check)
+router.get("/:id", hasBakeryAccess, bakeryController.getBakery);
 
 module.exports = router;
- */
