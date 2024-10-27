@@ -6,6 +6,7 @@ class Bakery {
     phone,
     email,
     operatingHours,
+    holidays,
     ownerId,
     createdAt,
     updatedAt,
@@ -64,6 +65,7 @@ class Bakery {
     this.phone = phone;
     this.email = email;
     this.operatingHours = operatingHours;
+    this.holidays = holidays;
     this.ownerId = ownerId;
     this.createdAt = createdAt || new Date();
     this.updatedAt = updatedAt || new Date();

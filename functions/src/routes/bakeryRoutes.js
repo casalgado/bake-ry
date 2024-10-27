@@ -14,18 +14,18 @@ router.use(authenticateUser);
 
 // System admin routes
 router.get("/", requireSystemAdmin, bakeryController.getAllBakeries);
-router.delete("/:id", requireSystemAdmin, bakeryController.deleteBakery);
+router.delete("/:bakeryId", requireSystemAdmin, bakeryController.deleteBakery);
 
 // Bakery admin routes
 router.post("/", requireBakeryAdmin, bakeryController.createBakery);
 router.patch(
-  "/:id",
+  "/:bakeryId",
   requireBakeryAdmin,
   hasBakeryAccess,
   bakeryController.updateBakery
 );
 
 // General access routes (with bakery access check)
-router.get("/:id", hasBakeryAccess, bakeryController.getBakery);
+router.get("/:bakeryId", hasBakeryAccess, bakeryController.getBakery);
 
 module.exports = router;

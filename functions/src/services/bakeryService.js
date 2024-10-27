@@ -48,6 +48,7 @@ const bakeryService = {
 
   async getBakeryById(id) {
     try {
+      console.log("Getting bakery by ID:", id);
       const doc = await db.collection("bakeries").doc(id).get();
       if (!doc.exists) {
         return null;

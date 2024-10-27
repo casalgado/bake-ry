@@ -154,6 +154,16 @@ const userService = {
     }
   },
 
+  async verifyToken(idToken) {
+    try {
+      const decodedToken = await admin.auth().verifyIdToken(idToken);
+      return decodedToken;
+    } catch (error) {
+      console.error("Error verifying token:", error);
+      throw error;
+    }
+  },
+
   async updateUser(userId, updateData) {
     try {
       const userDoc = await db.collection("users").doc(userId).get();
@@ -186,30 +196,5 @@ const userService = {
     }
   },
 };
-
-// This function simulates exchanging a custom token for an ID token
-// In a real app, this would happen on the client side
-async function getIdTokenFromCustomToken(customToken) {
-  const firebaseApiKey = process.env.BAKERY_API_KEY;
-
-  if (!firebaseApiKey) {
-    throw new Error("Firebase API key is not set in environment variables");
-  }
-
-  const response = await fetch(
-    `https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyCustomToken?key=${firebaseApiKey}`,
-    {
-      method: "POST",
-      body: JSON.stringify({
-        token: customToken,
-        returnSecureToken: true,
-      }),
-    }
-  );
-
-  const data = await response.json();
-  console.log("Data:", data);
-  return data.idToken;
-}
 
 module.exports = userService;

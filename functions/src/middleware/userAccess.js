@@ -4,6 +4,7 @@ const { ForbiddenError } = require("../utils/errors");
 const authenticateUser = async (req, res, next) => {
   try {
     const idToken = req.headers.authorization?.split("Bearer ")[1];
+    console.log("Received token:", idToken ? "Present" : "Missing");
     if (!idToken) {
       return res.status(401).json({ error: "No token provided" });
     }

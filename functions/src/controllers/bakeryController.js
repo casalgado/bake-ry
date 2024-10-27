@@ -29,8 +29,8 @@ const bakeryController = {
 
   async getBakery(req, res) {
     try {
-      const { id } = req.params;
-      const bakery = await bakeryService.getBakeryById(id);
+      const { bakeryId } = req.params;
+      const bakery = await bakeryService.getBakeryById(bakeryId);
       if (bakery) {
         res.json(bakery);
       } else {
