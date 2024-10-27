@@ -1,79 +1,129 @@
+// tests/controllers/bakeryController.test.js
 const bakeryController = require("../../controllers/bakeryController");
 const bakeryService = require("../../services/bakeryService");
 
-// Mock the bakeryService
 jest.mock("../../services/bakeryService");
 
 describe("Bakery Controller", () => {
   let mockRequest;
   let mockResponse;
-  let mockNext;
 
   beforeEach(() => {
-    mockRequest = {};
+    // Reset all mocks before each test
+    jest.clearAllMocks();
+
+    // Mock request object
+    mockRequest = {
+      user: {
+        uid: "testUserId",
+        bakeryId: null,
+      },
+      params: {},
+      body: {},
+    };
+
+    // Mock response object
     mockResponse = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
       send: jest.fn(),
     };
-    mockNext = jest.fn();
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
   });
 
   describe("createBakery", () => {
-    it("should create a new bakery and return 201 status", async () => {
-      const bakeryData = { name: "Test Bakery", address: "123 Test St" };
+    test("should create a new bakery successfully", async () => {
+      // Arrange
+      const bakeryData = {
+        name: "Test Bakery",
+        address: "123 Test St",
+      };
       mockRequest.body = bakeryData;
-      const newBakery = { id: "new-bakery-id", ...bakeryData };
 
-      bakeryService.createBakery.mockResolvedValue(newBakery);
+      const expectedBakery = {
+        id: "testBakeryId",
+        ...bakeryData,
+        ownerId: "testUserId",
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date),
+      };
 
+      bakeryService.createBakery.mockResolvedValue(expectedBakery);
+
+      // Act
       await bakeryController.createBakery(mockRequest, mockResponse);
 
-      expect(bakeryService.createBakery).toHaveBeenCalledWith(bakeryData);
+      // Assert
+      expect(bakeryService.createBakery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ...bakeryData,
+          ownerId: "testUserId",
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+        })
+      );
       expect(mockResponse.status).toHaveBeenCalledWith(201);
-      expect(mockResponse.json).toHaveBeenCalledWith(newBakery);
+      expect(mockResponse.json).toHaveBeenCalledWith(expectedBakery);
     });
 
-    it("should return 400 status when creation fails", async () => {
-      mockRequest.body = { name: "Test Bakery" };
-      const error = new Error("Creation failed");
+    test("should prevent creation if user already has a bakery", async () => {
+      // Arrange
+      mockRequest.user.bakeryId = "existingBakeryId";
 
-      bakeryService.createBakery.mockRejectedValue(error);
-
+      // Act
       await bakeryController.createBakery(mockRequest, mockResponse);
 
+      // Assert
+      expect(bakeryService.createBakery).not.toHaveBeenCalled();
+      expect(mockResponse.status).toHaveBeenCalledWith(403);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        error:
+          "User already has a bakery assigned and cannot create another one",
+      });
+    });
+
+    test("should handle service errors", async () => {
+      // Arrange
+      const error = new Error("Database error");
+      bakeryService.createBakery.mockRejectedValue(error);
+
+      // Act
+      await bakeryController.createBakery(mockRequest, mockResponse);
+
+      // Assert
       expect(mockResponse.status).toHaveBeenCalledWith(400);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        error: "Creation failed",
+        error: error.message,
       });
     });
   });
 
   describe("getBakery", () => {
-    it("should return a bakery if it exists", async () => {
-      const bakeryId = "existing-bakery-id";
-      mockRequest.params = { id: bakeryId };
-      const bakery = { id: bakeryId, name: "Existing Bakery" };
+    test("should get bakery by id successfully", async () => {
+      // Arrange
+      const expectedBakery = {
+        id: "testBakeryId",
+        name: "Test Bakery",
+      };
+      mockRequest.params.bakeryId = "testBakeryId";
+      bakeryService.getBakeryById.mockResolvedValue(expectedBakery);
 
-      bakeryService.getBakeryById.mockResolvedValue(bakery);
-
+      // Act
       await bakeryController.getBakery(mockRequest, mockResponse);
 
-      expect(bakeryService.getBakeryById).toHaveBeenCalledWith(bakeryId);
-      expect(mockResponse.json).toHaveBeenCalledWith(bakery);
+      // Assert
+      expect(bakeryService.getBakeryById).toHaveBeenCalledWith("testBakeryId");
+      expect(mockResponse.json).toHaveBeenCalledWith(expectedBakery);
     });
 
-    it("should return 404 status if bakery does not exist", async () => {
-      mockRequest.params = { id: "non-existent-id" };
-
+    test("should return 404 when bakery not found", async () => {
+      // Arrange
+      mockRequest.params.bakeryId = "nonexistentId";
       bakeryService.getBakeryById.mockResolvedValue(null);
 
+      // Act
       await bakeryController.getBakery(mockRequest, mockResponse);
 
+      // Assert
       expect(mockResponse.status).toHaveBeenCalledWith(404);
       expect(mockResponse.json).toHaveBeenCalledWith({
         error: "Bakery not found",
@@ -82,61 +132,72 @@ describe("Bakery Controller", () => {
   });
 
   describe("getAllBakeries", () => {
-    it("should return all bakeries", async () => {
-      const bakeries = [
+    test("should get all bakeries successfully", async () => {
+      // Arrange
+      const expectedBakeries = [
         { id: "1", name: "Bakery 1" },
         { id: "2", name: "Bakery 2" },
       ];
+      bakeryService.getAllBakeries.mockResolvedValue(expectedBakeries);
 
-      bakeryService.getAllBakeries.mockResolvedValue(bakeries);
-
+      // Act
       await bakeryController.getAllBakeries(mockRequest, mockResponse);
 
+      // Assert
       expect(bakeryService.getAllBakeries).toHaveBeenCalled();
-      expect(mockResponse.json).toHaveBeenCalledWith(bakeries);
+      expect(mockResponse.json).toHaveBeenCalledWith(expectedBakeries);
     });
 
-    it("should return 500 status if fetching fails", async () => {
-      const error = new Error("Fetching failed");
-
+    test("should handle service errors", async () => {
+      // Arrange
+      const error = new Error("Database error");
       bakeryService.getAllBakeries.mockRejectedValue(error);
 
+      // Act
       await bakeryController.getAllBakeries(mockRequest, mockResponse);
 
+      // Assert
       expect(mockResponse.status).toHaveBeenCalledWith(500);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        error: "Fetching failed",
+        error: error.message,
       });
     });
   });
 
   describe("updateBakery", () => {
-    it("should update an existing bakery", async () => {
-      const bakeryId = "existing-bakery-id";
-      const updateData = { name: "Updated Bakery" };
-      mockRequest.params = { id: bakeryId };
+    test("should update bakery successfully", async () => {
+      // Arrange
+      const updateData = {
+        name: "Updated Bakery Name",
+      };
+      const expectedBakery = {
+        id: "testBakeryId",
+        ...updateData,
+      };
+      mockRequest.params.bakeryId = "testBakeryId";
       mockRequest.body = updateData;
-      const updatedBakery = { id: bakeryId, ...updateData };
+      bakeryService.updateBakery.mockResolvedValue(expectedBakery);
 
-      bakeryService.updateBakery.mockResolvedValue(updatedBakery);
-
+      // Act
       await bakeryController.updateBakery(mockRequest, mockResponse);
 
+      // Assert
       expect(bakeryService.updateBakery).toHaveBeenCalledWith(
-        bakeryId,
+        "testBakeryId",
         updateData
       );
-      expect(mockResponse.json).toHaveBeenCalledWith(updatedBakery);
+      expect(mockResponse.json).toHaveBeenCalledWith(expectedBakery);
     });
 
-    it("should return 404 status if bakery does not exist", async () => {
-      mockRequest.params = { id: "non-existent-id" };
-      mockRequest.body = { name: "Updated Bakery" };
-
+    test("should return 404 when updating non-existent bakery", async () => {
+      // Arrange
+      mockRequest.params.bakeryId = "nonexistentId";
       bakeryService.updateBakery.mockResolvedValue(null);
 
+      // Act
       await bakeryController.updateBakery(mockRequest, mockResponse);
 
+      // Assert
       expect(mockResponse.status).toHaveBeenCalledWith(404);
       expect(mockResponse.json).toHaveBeenCalledWith({
         error: "Bakery not found",
@@ -145,28 +206,33 @@ describe("Bakery Controller", () => {
   });
 
   describe("deleteBakery", () => {
-    it("should delete an existing bakery", async () => {
-      const bakeryId = "existing-bakery-id";
-      mockRequest.params = { id: bakeryId };
+    test("should delete bakery successfully", async () => {
+      // Arrange
+      mockRequest.params.bakeryId = "testBakeryId";
+      bakeryService.deleteBakery.mockResolvedValue();
 
+      // Act
       await bakeryController.deleteBakery(mockRequest, mockResponse);
 
-      expect(bakeryService.deleteBakery).toHaveBeenCalledWith(bakeryId);
+      // Assert
+      expect(bakeryService.deleteBakery).toHaveBeenCalledWith("testBakeryId");
       expect(mockResponse.status).toHaveBeenCalledWith(204);
       expect(mockResponse.send).toHaveBeenCalled();
     });
 
-    it("should return 500 status if deletion fails", async () => {
-      mockRequest.params = { id: "failing-bakery-id" };
-      const error = new Error("Deletion failed");
-
+    test("should handle service errors during deletion", async () => {
+      // Arrange
+      const error = new Error("Database error");
+      mockRequest.params.bakeryId = "testBakeryId";
       bakeryService.deleteBakery.mockRejectedValue(error);
 
+      // Act
       await bakeryController.deleteBakery(mockRequest, mockResponse);
 
+      // Assert
       expect(mockResponse.status).toHaveBeenCalledWith(500);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        error: "Deletion failed",
+        error: error.message,
       });
     });
   });

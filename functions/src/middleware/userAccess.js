@@ -27,10 +27,14 @@ const authenticateUser = async (req, res, next) => {
 };
 
 const requireSystemAdmin = (req, res, next) => {
-  if (req.user.role !== "system_admin") {
-    throw new ForbiddenError("System admin access required");
+  try {
+    if (req.user.role !== "system_admin") {
+      throw new ForbiddenError("System admin access required");
+    }
+    next();
+  } catch (error) {
+    res.status(403).json({ error: error.message });
   }
-  next();
 };
 
 const requireBakeryAdmin = (req, res, next) => {

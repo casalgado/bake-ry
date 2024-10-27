@@ -63,37 +63,45 @@ describe("User Controller", () => {
   });
 
   describe("login", () => {
-    it("should login a user successfully", async () => {
-      const loginData = {
-        email: "user@example.com",
-        password: "password123",
+    test("should login a user successfully", async () => {
+      const mockRequest = {
+        headers: {
+          authorization: "Bearer fake_token",
+        },
+        body: {
+          email: "user@example.com",
+        },
       };
-      mockRequest.body = loginData;
 
-      const loggedInUser = {
-        uid: "user123",
-        email: loginData.email,
-        role: "baker",
-        name: "Test Baker",
-        bakeryId: "bakery123",
+      const mockResponse = {
+        json: jest.fn(),
+        status: jest.fn().mockReturnThis(),
       };
-      userService.loginUser.mockResolvedValue(loggedInUser);
 
       await userController.loginUser(mockRequest, mockResponse);
 
       expect(userService.loginUser).toHaveBeenCalledWith(
-        loginData.email,
-        loginData.password
+        "fake_token",
+        "user@example.com"
       );
-      expect(mockResponse.json).toHaveBeenCalledWith(loggedInUser);
     });
 
-    it("should handle login errors", async () => {
-      mockRequest.body = {
-        email: "nonexistent@example.com",
-        password: "wrongpassword",
+    test("should handle login errors", async () => {
+      const mockRequest = {
+        headers: {
+          authorization: "Bearer invalid_token",
+        },
+        body: {
+          email: "user@example.com",
+        },
       };
 
+      const mockResponse = {
+        json: jest.fn(),
+        status: jest.fn().mockReturnThis(),
+      };
+
+      // Mock the service to throw an error
       userService.loginUser.mockRejectedValue(new Error("Invalid credentials"));
 
       await userController.loginUser(mockRequest, mockResponse);

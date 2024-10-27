@@ -43,7 +43,7 @@ describe("User Routes", () => {
         password: "password123",
       };
 
-      userController.login.mockImplementation((req, res) => {
+      userController.loginUser.mockImplementation((req, res) => {
         res.json({ token: "fake_token" });
       });
 
@@ -52,7 +52,7 @@ describe("User Routes", () => {
         .send(loginData)
         .expect(200);
 
-      expect(userController.login).toHaveBeenCalled();
+      expect(userController.loginUser).toHaveBeenCalled();
       expect(response.body).toEqual({ token: "fake_token" });
     });
   });

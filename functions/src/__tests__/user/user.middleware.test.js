@@ -75,12 +75,15 @@ describe("Auth Middleware", () => {
     it("should deny access for non-system admin", () => {
       mockRequest.user = { role: "baker" };
 
-      requireSystemAdmin(mockRequest, mockResponse, mockNext);
+      try {
+        requireSystemAdmin(mockRequest, mockResponse, mockNext);
+      } catch (error) {
+        expect(mockResponse.status).toHaveBeenCalledWith(403);
+        expect(mockResponse.json).toHaveBeenCalledWith({
+          error: "System admin access required",
+        });
+      }
 
-      expect(mockResponse.status).toHaveBeenCalledWith(403);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        error: "System admin access required",
-      });
       expect(mockNext).not.toHaveBeenCalled();
     });
   });

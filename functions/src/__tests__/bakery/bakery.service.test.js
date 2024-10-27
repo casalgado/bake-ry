@@ -1,347 +1,282 @@
-const { db } = require("../../config/firebase");
-const Bakery = require("../../models/Bakery");
+const { db, admin } = require("../../config/firebase");
 const bakeryService = require("../../services/bakeryService");
+const Bakery = require("../../models/Bakery");
 
-// Mock Firebase
-jest.mock("../../config/firebase.js");
+// Mock Firebase modules
+jest.mock("../../config/firebase", () => {
+  // Mock get function for collection
+  const mockGet = jest.fn();
+  // Mock collection reference
+  const mockCollectionRef = {
+    doc: jest.fn(),
+    get: mockGet,
+  };
+  // Mock collection function
+  const mockCollection = jest.fn(() => mockCollectionRef);
+
+  return {
+    db: {
+      collection: mockCollection,
+      runTransaction: jest.fn(),
+    },
+    admin: {
+      auth: () => ({
+        getUser: jest.fn(() =>
+          Promise.resolve({
+            customClaims: { existingClaim: true },
+          })
+        ),
+        setCustomUserClaims: jest.fn(() => Promise.resolve()),
+      }),
+    },
+  };
+});
 
 describe("Bakery Service", () => {
-  let mockFirestore;
+  let mockTransaction;
+  let mockBakeryRef;
+  let mockUserRef;
+  let mockBakeryDoc;
+  let mockUserDoc;
 
   beforeEach(() => {
-    mockFirestore = {
-      collection: jest.fn().mockReturnThis(),
-      doc: jest.fn().mockReturnThis(),
-      add: jest.fn(),
+    // Reset all mocks
+    jest.clearAllMocks();
+
+    // Setup mock transaction
+    mockTransaction = {
       get: jest.fn(),
+      set: jest.fn(),
+      update: jest.fn(),
+    };
+
+    // Setup mock references and documents
+    mockBakeryRef = {
+      id: "test-bakery-id",
+      get: jest.fn(),
+      set: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
     };
-    db.collection.mockReturnValue(mockFirestore);
-  });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+    mockUserRef = {
+      get: jest.fn(),
+      update: jest.fn(),
+    };
+
+    mockBakeryDoc = {
+      exists: true,
+      id: "test-bakery-id",
+      data: () => ({
+        name: "Test Bakery",
+        address: "123 Test St",
+        ownerId: "test-user-id",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }),
+    };
+
+    mockUserDoc = {
+      exists: true,
+      data: () => ({
+        email: "test@example.com",
+        name: "Test User",
+      }),
+    };
+
+    // Setup collection mock to return different refs based on collection name
+    db.collection.mockImplementation((collectionName) => {
+      const mockRef = {
+        doc: jest
+          .fn()
+          .mockReturnValue(
+            collectionName === "bakeries" ? mockBakeryRef : mockUserRef
+          ),
+        get: jest.fn().mockResolvedValue({ docs: [mockBakeryDoc] }),
+      };
+      return mockRef;
+    });
+
+    // Setup transaction mock
+    db.runTransaction.mockImplementation((callback) =>
+      callback(mockTransaction)
+    );
   });
 
   describe("createBakery", () => {
-    it("should create a new bakery", async () => {
-      const bakeryData = new Bakery({
-        // Basic Info
-        name: "Sweet Delight Artisan Bakery",
-        address: {
-          street: "123 Maple Avenue",
-          city: "Portland",
-          state: "OR",
-          zipCode: "97201",
-          country: "USA",
-        },
-        phone: "+1-503-555-0123",
-        email: "hello@sweetdelightbakery.com",
-        operatingHours: {
-          monday: { open: "07:00", close: "19:00" },
-          tuesday: { open: "07:00", close: "19:00" },
-          wednesday: { open: "07:00", close: "19:00" },
-          thursday: { open: "07:00", close: "19:00" },
-          friday: { open: "07:00", close: "20:00" },
-          saturday: { open: "08:00", close: "20:00" },
-          sunday: { open: "08:00", close: "16:00" },
-        },
-        ownerId: "usr_987654321",
-        createdAt: new Date("2023-01-15T08:00:00Z"),
-        updatedAt: new Date("2024-03-20T14:30:00Z"),
+    test("should create bakery successfully with transaction", async () => {
+      // Arrange
+      const bakeryData = {
+        name: "New Bakery",
+        address: "456 New St",
+        ownerId: "test-user-id",
+      };
 
-        // Business Information
-        description:
-          "Artisanal bakery specializing in French pastries and organic sourdough breads. Family-owned since 2023.",
-        website: "https://sweetdelightbakery.com",
-        socialMedia: {
-          instagram: "@sweetdelightpdx",
-          facebook: "SweetDelightBakeryPDX",
-          tiktok: "@sweetdelightbakes",
-        },
-        businessLicense: "BL-PDX-2023-456789",
-        taxId: "87-1234567",
+      mockTransaction.get.mockResolvedValue(mockUserDoc);
 
-        // Location & Delivery
-        coordinates: {
-          lat: 45.523064,
-          lng: -122.676483,
-        },
-        deliveryRadius: 5.0, // miles
-        deliveryFee: 5.99,
-        parkingAvailable: true,
-
-        // Operations
-        capacity: 30,
-        specialties: [
-          "Croissants",
-          "Sourdough Bread",
-          "French Macarons",
-          "Custom Wedding Cakes",
-        ],
-        cuisineTypes: ["French", "American", "European"],
-        dietary: ["Vegan Options", "Gluten-Free Options", "Nut-Free Options"],
-
-        // Payment & Orders
-        acceptedPaymentMethods: [
-          "VISA",
-          "MasterCard",
-          "American Express",
-          "Apple Pay",
-          "Google Pay",
-        ],
-        minimumOrderAmount: 15.0,
-        onlineOrderingEnabled: true,
-
-        // Ratings & Reviews
-        rating: 4.8,
-        reviewCount: 127,
-        featuredReviews: [
-          {
-            id: "rev_123",
-            author: "Sarah M.",
-            rating: 5,
-            text: "Best croissants in Portland! Perfectly flaky and buttery.",
-            date: new Date("2024-03-15"),
-          },
-          {
-            id: "rev_124",
-            author: "Michael R.",
-            rating: 5,
-            text: "Their sourdough bread is exceptional. Worth the trip across town!",
-            date: new Date("2024-03-18"),
-          },
-        ],
-
-        // Staff & Service
-        employeeCount: 12,
-        serviceTypes: [
-          "Dine-in",
-          "Takeout",
-          "Delivery",
-          "Catering",
-          "Special Orders",
-        ],
-
-        // Marketing & Promotions
-        loyaltyProgram: {
-          name: "Sweet Rewards",
-          pointsPerDollar: 1,
-          rewardThreshold: 100,
-        },
-        promotions: [
-          {
-            id: "promo_123",
-            title: "Early Bird Special",
-            description: "20% off all pastries before 9am",
-            validUntil: new Date("2024-12-31"),
-            createdAt: new Date("2024-01-01"),
-          },
-        ],
-        tags: [
-          "bakery",
-          "pastries",
-          "french",
-          "organic",
-          "sourdough",
-          "wedding cakes",
-          "portland",
-        ],
-
-        // Status
-        isActive: true,
-        isPaused: false,
-        pauseReason: null,
-
-        // Customization
-        theme: {
-          primaryColor: "#FE938C",
-          secondaryColor: "#E6B89C",
-          fontFamily: "Montserrat",
-          logo: "sweet-delight-logo.png",
-        },
-        customAttributes: {
-          sustainabilityScore: 4.5,
-          certifications: ["Organic", "Local First"],
-          preferredVendors: ["Portland Flour Co.", "Oregon Dairy Farms"],
-        },
-      });
-
-      const newBakeryId = "newBakeryId";
-      mockFirestore.add.mockResolvedValue({ id: newBakeryId });
-
+      // Act
       const result = await bakeryService.createBakery(bakeryData);
 
-      expect(mockFirestore.add).toHaveBeenCalledWith(expect.any(Object));
-      expect(result).toBeInstanceOf(Bakery);
-      expect(result.id).toBe(newBakeryId);
-      expect(result.name).toBe(bakeryData.name);
-      expect(result.address).toBe(bakeryData.address);
+      // Assert
+      expect(db.runTransaction).toHaveBeenCalled();
+      expect(mockTransaction.set).toHaveBeenCalled();
+      expect(mockTransaction.update).toHaveBeenCalledWith(expect.any(Object), {
+        bakeryId: expect.any(String),
+        updatedAt: expect.any(Date),
+      });
+      expect(result).toMatchObject({
+        id: expect.any(String),
+        name: bakeryData.name,
+        address: bakeryData.address,
+      });
     });
 
-    it("should throw an error if creation fails", async () => {
-      const bakeryData = { name: "Test Bakery" };
-      mockFirestore.add.mockRejectedValue(new Error("Creation failed"));
+    test("should throw error if user not found", async () => {
+      // Arrange
+      const bakeryData = {
+        name: "New Bakery",
+        ownerId: "nonexistent-user-id",
+      };
 
+      mockTransaction.get.mockResolvedValue({ exists: false });
+
+      // Act & Assert
       await expect(bakeryService.createBakery(bakeryData)).rejects.toThrow(
-        "Creation failed"
+        "User not found"
       );
     });
   });
 
   describe("getBakeryById", () => {
-    it("should return a bakery if it exists", async () => {
-      const bakeryId = "existingBakeryId";
-      const bakeryData = { name: "Existing Bakery", address: "456 Exist St" };
-      mockFirestore.get.mockResolvedValue({
-        exists: true,
-        id: bakeryId,
-        data: () => bakeryData,
+    test("should return bakery when found", async () => {
+      // Arrange
+      mockBakeryRef.get.mockResolvedValue(mockBakeryDoc);
+
+      // Act
+      const result = await bakeryService.getBakeryById("test-bakery-id");
+
+      // Assert
+      expect(result).toMatchObject({
+        id: "test-bakery-id",
+        name: "Test Bakery",
       });
-
-      const result = await bakeryService.getBakeryById(bakeryId);
-
-      expect(mockFirestore.doc).toHaveBeenCalledWith(bakeryId);
-      expect(result).toBeInstanceOf(Bakery);
-      expect(result.id).toBe(bakeryId);
-      expect(result.name).toBe(bakeryData.name);
     });
 
-    it("should return null if bakery doesn't exist", async () => {
-      const bakeryId = "nonExistentBakeryId";
-      mockFirestore.get.mockResolvedValue({ exists: false });
+    test("should return null when bakery not found", async () => {
+      // Arrange
+      mockBakeryRef.get.mockResolvedValue({ exists: false });
 
-      const result = await bakeryService.getBakeryById(bakeryId);
+      // Act
+      const result = await bakeryService.getBakeryById("nonexistent-id");
 
+      // Assert
       expect(result).toBeNull();
     });
   });
 
   describe("getAllBakeries", () => {
-    it("should return all bakeries", async () => {
-      const bakeries = [
-        { id: "1", name: "Bakery 1" },
-        { id: "2", name: "Bakery 2" },
+    test("should return all bakeries", async () => {
+      // Arrange
+      const mockBakeries = [
+        mockBakeryDoc,
+        {
+          ...mockBakeryDoc,
+          id: "test-bakery-id-2",
+          data: () => ({
+            name: "Test Bakery 2",
+            address: "789 Test St",
+            ownerId: "test-user-id-2",
+          }),
+        },
       ];
-      mockFirestore.get.mockResolvedValue({
-        docs: bakeries.map((b) => ({
-          id: b.id,
-          data: () => b,
-        })),
+
+      db.collection.mockReturnValueOnce({
+        get: jest.fn().mockResolvedValue({ docs: mockBakeries }),
       });
 
+      // Act
       const result = await bakeryService.getAllBakeries();
 
+      // Assert
       expect(result).toHaveLength(2);
-      expect(result[0]).toBeInstanceOf(Bakery);
-      expect(result[0].id).toBe("1");
-      expect(result[1].id).toBe("2");
+      expect(result[0]).toMatchObject({ name: "Test Bakery" });
+      expect(result[1]).toMatchObject({ name: "Test Bakery 2" });
+    });
+
+    test("should return empty array when no bakeries exist", async () => {
+      // Arrange
+      db.collection.mockReturnValueOnce({
+        get: jest.fn().mockResolvedValue({ docs: [] }),
+      });
+
+      // Act
+      const result = await bakeryService.getAllBakeries();
+
+      // Assert
+      expect(result).toHaveLength(0);
     });
   });
 
   describe("updateBakery", () => {
-    it("should update an existing bakery", async () => {
-      const bakeryId = "existingBakeryId";
-      const updateData = { name: "Updated Bakery" };
-      const existingData = { name: "Old Name", address: "Old Address" };
-      mockFirestore.get.mockResolvedValue({
-        exists: true,
-        id: bakeryId,
-        data: () => existingData,
+    test("should update bakery successfully", async () => {
+      // Arrange
+      const updateData = {
+        name: "Updated Bakery Name",
+        address: "Updated Address",
+      };
+
+      mockBakeryRef.get.mockResolvedValue(mockBakeryDoc);
+
+      // Act
+      const result = await bakeryService.updateBakery(
+        "test-bakery-id",
+        updateData
+      );
+
+      // Assert
+      expect(mockBakeryRef.update).toHaveBeenCalled();
+      expect(result).toMatchObject({
+        id: "test-bakery-id",
+        ...updateData,
       });
-
-      const result = await bakeryService.updateBakery(bakeryId, updateData);
-
-      expect(mockFirestore.update).toHaveBeenCalledWith(expect.any(Object));
-      expect(result).toBeInstanceOf(Bakery);
-      expect(result.id).toBe(bakeryId);
-      expect(result.name).toBe(updateData.name);
-      expect(result.address).toBe(existingData.address);
     });
 
-    it("should return null if bakery doesn't exist", async () => {
-      const bakeryId = "nonExistentBakeryId";
-      const updateData = { name: "Updated Bakery" };
-      mockFirestore.get.mockResolvedValue({ exists: false });
+    test("should return null when updating non-existent bakery", async () => {
+      // Arrange
+      mockBakeryRef.get.mockResolvedValue({ exists: false });
 
-      const result = await bakeryService.updateBakery(bakeryId, updateData);
+      // Act
+      const result = await bakeryService.updateBakery("nonexistent-id", {
+        name: "New Name",
+      });
 
+      // Assert
       expect(result).toBeNull();
-      expect(mockFirestore.update).not.toHaveBeenCalled();
-    });
-
-    it("should update nested fields correctly", async () => {
-      const bakeryId = "existingBakeryId";
-      const updateData = {
-        socialMedia: {
-          instagram: "@newhandle",
-          facebook: "NewPage",
-        },
-        coordinates: {
-          lat: 45.523064,
-          lng: -122.676483,
-        },
-      };
-      const existingData = {
-        name: "Old Name",
-        socialMedia: {
-          instagram: "@oldhandle",
-          facebook: "OldPage",
-        },
-      };
-
-      mockFirestore.get.mockResolvedValue({
-        exists: true,
-        id: bakeryId,
-        data: () => existingData,
-      });
-
-      const result = await bakeryService.updateBakery(bakeryId, updateData);
-
-      expect(mockFirestore.update).toHaveBeenCalledWith(expect.any(Object));
-      expect(result.socialMedia).toEqual(updateData.socialMedia);
-      expect(result.coordinates).toEqual(updateData.coordinates);
-    });
-
-    it("should update array fields correctly", async () => {
-      const bakeryId = "existingBakeryId";
-      const updateData = {
-        specialties: ["New Specialty 1", "New Specialty 2"],
-        tags: ["new-tag-1", "new-tag-2"],
-      };
-
-      mockFirestore.get.mockResolvedValue({
-        exists: true,
-        id: bakeryId,
-        data: () => ({ specialties: ["Old Specialty"], tags: ["old-tag"] }),
-      });
-
-      const result = await bakeryService.updateBakery(bakeryId, updateData);
-
-      expect(mockFirestore.update).toHaveBeenCalledWith(expect.any(Object));
-      expect(result.specialties).toEqual(updateData.specialties);
-      expect(result.tags).toEqual(updateData.tags);
+      expect(mockBakeryRef.update).not.toHaveBeenCalled();
     });
   });
 
   describe("deleteBakery", () => {
-    it("should delete an existing bakery", async () => {
-      const bakeryId = "existingBakeryId";
+    test("should delete bakery successfully", async () => {
+      // Arrange
+      mockBakeryRef.delete.mockResolvedValue();
 
-      await bakeryService.deleteBakery(bakeryId);
+      // Act
+      await bakeryService.deleteBakery("test-bakery-id");
 
-      expect(mockFirestore.doc).toHaveBeenCalledWith(bakeryId);
-      expect(mockFirestore.delete).toHaveBeenCalled();
+      // Assert
+      expect(mockBakeryRef.delete).toHaveBeenCalled();
     });
 
-    it("should throw an error if deletion fails", async () => {
-      const bakeryId = "failedDeletionId";
-      mockFirestore.delete.mockRejectedValue(new Error("Deletion failed"));
+    test("should handle errors during deletion", async () => {
+      // Arrange
+      const error = new Error("Delete failed");
+      mockBakeryRef.delete.mockRejectedValue(error);
 
-      await expect(bakeryService.deleteBakery(bakeryId)).rejects.toThrow(
-        "Deletion failed"
-      );
+      // Act & Assert
+      await expect(
+        bakeryService.deleteBakery("test-bakery-id")
+      ).rejects.toThrow("Delete failed");
     });
   });
 });

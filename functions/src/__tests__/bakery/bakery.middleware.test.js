@@ -1,97 +1,126 @@
-const bakeryAccess = require("../../middleware/bakeryAccess");
+// tests/middleware/bakeryAccess.test.js
+const { admin } = require("../../config/firebase");
+const hasBakeryAccess = require("../../middleware/bakeryAccess");
+const { ForbiddenError } = require("../../utils/errors");
 
-describe("Bakery Access Middleware", () => {
+describe("hasBakeryAccess Middleware", () => {
   let mockRequest;
   let mockResponse;
-  let mockNext;
+  let nextFunction;
 
   beforeEach(() => {
+    // Reset all mocks before each test
     mockRequest = {
       user: {},
       params: {},
       body: {},
     };
+
     mockResponse = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
     };
-    mockNext = jest.fn();
+
+    nextFunction = jest.fn();
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+  test("should allow system admin access to any bakery", async () => {
+    // Arrange
+    mockRequest.user = {
+      role: "system_admin",
+      bakeryId: "bakery1",
+    };
+    mockRequest.params.bakeryId = "bakery2";
 
-  it("should allow access for system admin regardless of bakery ID", () => {
-    mockRequest.user = { role: "system_admin" };
-    mockRequest.params.bakeryId = "some-bakery-id";
+    // Act
+    await hasBakeryAccess(mockRequest, mockResponse, nextFunction);
 
-    bakeryAccess(mockRequest, mockResponse, mockNext);
-
-    expect(mockNext).toHaveBeenCalled();
+    // Assert
+    expect(nextFunction).toHaveBeenCalled();
     expect(mockResponse.status).not.toHaveBeenCalled();
-    expect(mockResponse.json).not.toHaveBeenCalled();
   });
 
-  it("should allow access when user bakeryId matches requested bakeryId in params", () => {
-    const bakeryId = "matching-bakery-id";
-    mockRequest.user = { role: "bakery_owner", bakeryId: bakeryId };
-    mockRequest.params.bakeryId = bakeryId;
+  test("should allow user access to their own bakery", async () => {
+    // Arrange
+    mockRequest.user = {
+      role: "baker",
+      bakeryId: "bakery1",
+    };
+    mockRequest.params.bakeryId = "bakery1";
 
-    bakeryAccess(mockRequest, mockResponse, mockNext);
+    // Act
+    await hasBakeryAccess(mockRequest, mockResponse, nextFunction);
 
-    expect(mockNext).toHaveBeenCalled();
+    // Assert
+    expect(nextFunction).toHaveBeenCalled();
     expect(mockResponse.status).not.toHaveBeenCalled();
-    expect(mockResponse.json).not.toHaveBeenCalled();
   });
 
-  it("should allow access when user bakeryId matches requested bakeryId in body", () => {
-    const bakeryId = "matching-bakery-id";
-    mockRequest.user = { role: "bakery_owner", bakeryId: bakeryId };
-    mockRequest.body.bakeryId = bakeryId;
+  test("should deny access to user trying to access different bakery", async () => {
+    // Arrange
+    mockRequest.user = {
+      role: "baker",
+      bakeryId: "bakery1",
+    };
+    mockRequest.params.bakeryId = "bakery2";
 
-    bakeryAccess(mockRequest, mockResponse, mockNext);
+    // Act
+    await hasBakeryAccess(mockRequest, mockResponse, nextFunction);
 
-    expect(mockNext).toHaveBeenCalled();
-    expect(mockResponse.status).not.toHaveBeenCalled();
-    expect(mockResponse.json).not.toHaveBeenCalled();
-  });
-
-  it("should deny access when user bakeryId does not match requested bakeryId", () => {
-    mockRequest.user = { role: "bakery_owner", bakeryId: "user-bakery-id" };
-    mockRequest.params.bakeryId = "different-bakery-id";
-
-    bakeryAccess(mockRequest, mockResponse, mockNext);
-
-    expect(mockNext).not.toHaveBeenCalled();
+    // Assert
+    expect(nextFunction).not.toHaveBeenCalled();
     expect(mockResponse.status).toHaveBeenCalledWith(403);
     expect(mockResponse.json).toHaveBeenCalledWith({
-      error: "Access denied to this bakery",
+      error: "User does not have access to this bakery",
     });
   });
 
-  it("should deny access when bakeryId is not provided", () => {
-    mockRequest.user = { role: "bakery_owner", bakeryId: "user-bakery-id" };
+  test("should get bakeryId from request body if not in params", async () => {
+    // Arrange
+    mockRequest.user = {
+      role: "baker",
+      bakeryId: "bakery1",
+    };
+    mockRequest.body.bakeryId = "bakery1";
 
-    bakeryAccess(mockRequest, mockResponse, mockNext);
+    // Act
+    await hasBakeryAccess(mockRequest, mockResponse, nextFunction);
 
-    expect(mockNext).not.toHaveBeenCalled();
+    // Assert
+    expect(nextFunction).toHaveBeenCalled();
+    expect(mockResponse.status).not.toHaveBeenCalled();
+  });
+
+  test("should handle missing bakeryId", async () => {
+    // Arrange
+    mockRequest.user = {
+      role: "baker",
+      bakeryId: "bakery1",
+    };
+    // No bakeryId in params or body
+
+    // Act
+    await hasBakeryAccess(mockRequest, mockResponse, nextFunction);
+
+    // Assert
+    expect(nextFunction).not.toHaveBeenCalled();
     expect(mockResponse.status).toHaveBeenCalledWith(403);
     expect(mockResponse.json).toHaveBeenCalledWith({
-      error: "Access denied to this bakery",
+      error: "User does not have access to this bakery",
     });
   });
 
-  it("should deny access for non-system admin users without matching bakeryId", () => {
-    mockRequest.user = { role: "customer", bakeryId: "customer-bakery-id" };
-    mockRequest.params.bakeryId = "different-bakery-id";
+  test("should handle undefined user", async () => {
+    // Arrange
+    mockRequest.user = undefined;
+    mockRequest.params.bakeryId = "bakery1";
 
-    bakeryAccess(mockRequest, mockResponse, mockNext);
+    // Act
+    await hasBakeryAccess(mockRequest, mockResponse, nextFunction);
 
-    expect(mockNext).not.toHaveBeenCalled();
+    // Assert
+    expect(nextFunction).not.toHaveBeenCalled();
     expect(mockResponse.status).toHaveBeenCalledWith(403);
-    expect(mockResponse.json).toHaveBeenCalledWith({
-      error: "Access denied to this bakery",
-    });
+    expect(mockResponse.json).toHaveBeenCalled();
   });
 });

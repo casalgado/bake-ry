@@ -3,7 +3,7 @@ class User {
     id,
     email,
     password,
-    role, // can be customer, staff, admin, or system_admin
+    role, // can be bakery_customer, bakery_staff, bakery_admin, or system_admin
     bakeryId,
     name,
     createdAt,
