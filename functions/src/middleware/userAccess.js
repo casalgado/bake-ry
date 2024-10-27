@@ -10,6 +10,7 @@ const authenticateUser = async (req, res, next) => {
     }
 
     const decodedToken = await userService.verifyToken(idToken);
+    console.log("Decoded token:", decodedToken);
     req.user = decodedToken;
     next();
   } catch (error) {
@@ -33,6 +34,7 @@ const requireSystemAdmin = (req, res, next) => {
 };
 
 const requireBakeryAdmin = (req, res, next) => {
+  console.log("Checking bakery admin access", req.user.role);
   const allowedRoles = ["bakery_admin", "system_admin"];
   if (!allowedRoles.includes(req.user.role)) {
     throw new ForbiddenError("Requires admin role");

@@ -48,6 +48,7 @@ const userService = {
         ) {
           customClaims.bakeryId = newUser.bakeryId;
         }
+        console.log("Setting custom claims:", customClaims);
         await admin.auth().setCustomUserClaims(userRecord.uid, customClaims);
 
         // 3. Create the user document in Firestore

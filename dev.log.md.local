@@ -53,3 +53,9 @@ next steps:
 - manually test bakery access
 - write tests for bakery access (from frontend?)
 - test product routes
+
+# 2024-10-27
+
+- lot's of error with undefined 'id' when it should have been 'bakeryId' in bakery routes, both in front and back.
+- make sure params match variables in code when implementing other resources.
+- I think in others we can just use 'id' instead of 'productId' etc.

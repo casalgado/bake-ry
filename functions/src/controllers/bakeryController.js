@@ -54,9 +54,12 @@ const bakeryController = {
 
   async updateBakery(req, res) {
     try {
-      const { id } = req.params;
+      const { bakeryId } = req.params;
       const bakeryData = req.body;
-      const updatedBakery = await bakeryService.updateBakery(id, bakeryData);
+      const updatedBakery = await bakeryService.updateBakery(
+        bakeryId,
+        bakeryData
+      );
       if (updatedBakery) {
         res.json(updatedBakery);
       } else {
@@ -70,8 +73,8 @@ const bakeryController = {
 
   async deleteBakery(req, res) {
     try {
-      const { id } = req.params;
-      await bakeryService.deleteBakery(id);
+      const { bakeryId } = req.params;
+      await bakeryService.deleteBakery(bakeryId);
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting bakery:", error);

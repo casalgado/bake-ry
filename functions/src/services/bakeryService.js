@@ -33,9 +33,12 @@ const bakeryService = {
         return { bakery: { ...newBakery, id: bakeryId }, uid };
       });
 
+      const userRecord = await admin.auth().getUser(result.uid);
+      const currentClaims = userRecord.customClaims || {};
+
       // Update custom claims outside transaction
       await admin.auth().setCustomUserClaims(result.uid, {
-        ...result.uid.customClaims,
+        ...currentClaims,
         bakeryId: result.bakery.id,
       });
 
@@ -72,6 +75,7 @@ const bakeryService = {
 
   async updateBakery(id, bakeryData) {
     try {
+      console.log("Updating bakery IN BACKEND SERVICE:", id, bakeryData);
       const bakeryRef = db.collection("bakeries").doc(id);
       const doc = await bakeryRef.get();
       if (!doc.exists) {
