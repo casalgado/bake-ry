@@ -109,9 +109,9 @@ class Ingredient {
     this.currency = currency || "USD";
 
     // Supplier Information
-    this.suppliers = suppliers || [];
-    this.preferredSupplierId = preferredSupplierId;
-    this.leadTime = leadTime || 0;
+    this.suppliers = suppliers;
+    this.preferredSupplierId;
+    this.leadTime = leadTime;
 
     // Storage Requirements
     this.storageTemp = storageTemp;
@@ -120,16 +120,16 @@ class Ingredient {
     this.storageInstructions = storageInstructions;
 
     // Quality and Safety
-    this.qualityStandards = qualityStandards || [];
-    this.allergens = allergens || [];
-    this.nutritionalInfo = nutritionalInfo || {};
-    this.organicCertified = organicCertified || false;
-    this.kosherCertified = kosherCertified || false;
-    this.halalCertified = halalCertified || false;
+    this.qualityStandards = qualityStandards;
+    this.allergens = allergens;
+    this.nutritionalInfo = nutritionalInfo;
+    this.organicCertified = organicCertified;
+    this.kosherCertified = kosherCertified;
+    this.halalCertified = halalCertified;
 
     // Usage and Recipes
-    this.usedInProducts = usedInProducts || [];
-    this.substitutes = substitutes || [];
+    this.usedInProducts = usedInProducts;
+    this.substitutes = substitutes;
     this.notes = notes;
 
     // Tracking
@@ -163,6 +163,12 @@ class Ingredient {
   toFirestore() {
     const data = { ...this };
     delete data.id; // Remove id as it's stored as document ID
+    // Remove undefined values
+    Object.keys(data).forEach((key) => {
+      if (data[key] === undefined) {
+        delete data[key];
+      }
+    });
     return data;
   }
 

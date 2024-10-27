@@ -27,6 +27,7 @@ const cors = require("cors");
 const userRoutes = require("./routes/userRoutes");
 const bakeryRoutes = require("./routes/bakeryRoutes");
 const productRoutes = require("./routes/productRoutes");
+const ingredientRoutes = require("./routes/ingredientRoutes");
 // const userRoutes = require("./routes/userRoutes");
 
 const app = express();
@@ -56,6 +57,7 @@ app.use("/auth", userRoutes);
 // Protected routes
 app.use("/bakeries", bakeryRoutes);
 app.use("/products", productRoutes);
+app.use("/bakeries", ingredientRoutes);
 // app.use("/user", authenticateUser, userRoutes);
 
 // Export the Express app as a Firebase Function

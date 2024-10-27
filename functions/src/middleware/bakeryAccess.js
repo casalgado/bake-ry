@@ -5,6 +5,11 @@ const { ForbiddenError } = require("../utils/errors");
 const hasBakeryAccess = async (req, res, next) => {
   try {
     console.log("Checking bakery access");
+    console.log("Full URL:", req.originalUrl);
+    console.log("Route Parameters:", req.params);
+    console.log("Base URL:", req.baseUrl);
+    console.log("Path:", req.path);
+
     const user = req.user;
     const bakeryId = req.params.bakeryId || req.body.bakeryId;
 
