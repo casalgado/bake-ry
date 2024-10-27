@@ -33,7 +33,7 @@ class Recipe {
     // Basic Information
     id,
     bakeryId,
-    productId,
+    productIds, // Array of product IDs
     name,
     description,
     category, // e.g., "Bread", "Cake", "Pastry"
@@ -66,7 +66,7 @@ class Recipe {
     // Basic Information
     this.id = id;
     this.bakeryId = bakeryId;
-    this.productId = productId;
+    this.productIds = productIds || [];
     this.name = name;
     this.description = description;
     this.category = category;
@@ -106,6 +106,13 @@ class Recipe {
   toFirestore() {
     const data = { ...this };
     delete data.id;
+
+    // Remove undefined values
+    Object.keys(data).forEach((key) => {
+      if (data[key] === undefined) {
+        delete data[key];
+      }
+    });
     return data;
   }
 
@@ -161,6 +168,8 @@ class Recipe {
     return Array.from(allergens);
   }
 }
+
+module.exports = { Recipe, RecipeIngredient };
 
 // Example Usage:
 const chocolateCakeRecipe = new Recipe({

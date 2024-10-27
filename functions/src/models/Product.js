@@ -137,6 +137,12 @@ class Product {
   toFirestore() {
     const data = { ...this };
     delete data.id; // Remove id as it's stored as document ID
+    // Remove undefined values
+    Object.keys(data).forEach((key) => {
+      if (data[key] === undefined) {
+        delete data[key];
+      }
+    });
     return data;
   }
 

@@ -149,6 +149,12 @@ class Order {
   toFirestore() {
     const data = { ...this };
     delete data.id;
+    // Remove undefined values
+    Object.keys(data).forEach((key) => {
+      if (data[key] === undefined) {
+        delete data[key];
+      }
+    });
     return data;
   }
 

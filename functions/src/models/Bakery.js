@@ -119,16 +119,14 @@ class Bakery {
   }
 
   toFirestore() {
-    const data = {};
-    // Only include non-undefined properties
-    Object.entries(this).forEach(([key, value]) => {
-      if (value !== undefined) {
-        data[key] = value;
+    const data = { ...this };
+    delete data.id;
+    // Remove undefined values
+    Object.keys(data).forEach((key) => {
+      if (data[key] === undefined) {
+        delete data[key];
       }
     });
-
-    // Remove id as it's stored separately in Firestore
-    delete data.id;
     return data;
   }
 
