@@ -28,6 +28,7 @@ const userRoutes = require("./routes/userRoutes");
 const bakeryRoutes = require("./routes/bakeryRoutes");
 const productRoutes = require("./routes/productRoutes");
 const ingredientRoutes = require("./routes/ingredientRoutes");
+const requestLogger = require("./middleware/requestLogger");
 // const userRoutes = require("./routes/userRoutes");
 
 const app = express();
@@ -50,6 +51,7 @@ app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(requestLogger);
 
 // Public routes
 app.use("/auth", userRoutes);

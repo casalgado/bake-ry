@@ -5,11 +5,9 @@ async function createCustomToken(uid) {
   try {
     // First, create a custom token
     const customToken = await admin.auth().createCustomToken(uid);
-    console.log("Custom Token:", customToken);
 
     // Then, exchange it for an ID token (this step simulates client-side auth)
     const idToken = await getIdTokenFromCustomToken(customToken);
-    console.log("ID Token:", idToken);
 
     return idToken;
   } catch (error) {
@@ -38,7 +36,6 @@ async function getIdTokenFromCustomToken(customToken) {
   );
 
   const data = await response.json();
-  console.log("Data:", data);
   return data.idToken;
 }
 

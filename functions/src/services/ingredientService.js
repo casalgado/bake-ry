@@ -62,7 +62,6 @@ const ingredientService = {
         query = query.where("currentStock", "<=", "reorderPoint");
       }
 
-      console.log("FILTERS:", filters);
       const snapshot = await query.get();
       return snapshot.docs.map((doc) => Ingredient.fromFirestore(doc));
     } catch (error) {

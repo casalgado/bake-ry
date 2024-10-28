@@ -35,7 +35,7 @@ class Ingredient {
     leadTime, // Time in days from order to delivery
 
     // Storage Requirements
-    storageTemp, // Storage temperature
+    storageTemp, // Storage category
     shelfLife, // In days
     expiryDate, // For current batch
     storageInstructions,
@@ -49,7 +49,7 @@ class Ingredient {
     halalCertified,
 
     // Usage and Recipes
-    usedInProducts, // Array of product IDs
+    usedInRecipes, // Array of recipe IDs
     substitutes, // Array of substitute ingredient IDs
     notes, // Special handling notes
 
@@ -128,7 +128,7 @@ class Ingredient {
     this.halalCertified = halalCertified;
 
     // Usage and Recipes
-    this.usedInProducts = usedInProducts;
+    this.usedInRecipes = usedInRecipes;
     this.substitutes = substitutes;
     this.notes = notes;
 

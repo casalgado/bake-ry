@@ -56,7 +56,12 @@ const ingredientController = {
   async updateIngredient(req, res) {
     try {
       const { bakeryId, ingredientId } = req.params;
-      const updateData = req.body;
+
+      const {
+        createdAt,
+        id, // Also removing id as it shouldn't be updated
+        ...updateData
+      } = req.body;
 
       const updatedIngredient = await ingredientService.updateIngredient(
         bakeryId,

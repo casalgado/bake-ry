@@ -21,116 +21,297 @@ process.env.FIREBASE_AUTH_EMULATOR_HOST = "localhost:9099";
 const testData = {
   bakery: {
     email: "test@bakery.com",
-    password: "password123",
+    password: "aoeuao",
     name: "Test Bakery",
     role: "bakery_admin",
   },
   ingredients: [
+    // Harinas y Almidones
     {
-      id: "flour-001",
-      name: "Bread Flour",
-      unit: "g",
-      costPerUnit: 0.002,
+      id: "harina-trigo-001",
+      name: "Harina de Trigo",
+      unit: "kg",
+      costPerUnit: 2.5,
       allergens: ["gluten"],
-      category: "Dry Goods",
-      minimumStock: 1000,
-      currentStock: 5000,
+      category: "Harinas y Almidones",
+      minimumStock: 10,
+      currentStock: 50,
+      suppliers: [],
+      storageTemp: "Ambiente",
     },
     {
-      id: "water-001",
-      name: "Water",
+      id: "almidon-maiz-001",
+      name: "Almidón de Maíz",
+      unit: "kg",
+      costPerUnit: 3.0,
+      allergens: [],
+      category: "Harinas y Almidones",
+      minimumStock: 5,
+      currentStock: 25,
+      suppliers: [],
+      storageTemp: "Ambiente",
+    },
+
+    // Líquidos Base
+    {
+      id: "agua-001",
+      name: "Agua Purificada",
+      unit: "L",
+      costPerUnit: 1.0,
+      allergens: [],
+      category: "Líquidos Base",
+      minimumStock: 20,
+      currentStock: 100,
+      suppliers: [],
+      storageTemp: "Ambiente",
+    },
+    {
+      id: "leche-001",
+      name: "Leche Entera",
+      unit: "L",
+      costPerUnit: 2.5,
+      allergens: ["lactosa"],
+      category: "Líquidos Base",
+      minimumStock: 10,
+      currentStock: 40,
+      suppliers: [],
+      storageTemp: "Refrigeracion",
+    },
+
+    // Sazonadores Básicos
+    {
+      id: "sal-001",
+      name: "Sal Refinada",
+      unit: "kg",
+      costPerUnit: 1.5,
+      allergens: [],
+      category: "Sazonadores Básicos",
+      minimumStock: 5,
+      currentStock: 25,
+      suppliers: [],
+      storageTemp: "Ambiente",
+    },
+    {
+      id: "azucar-001",
+      name: "Azúcar Blanca",
+      unit: "kg",
+      costPerUnit: 2.0,
+      allergens: [],
+      category: "Sazonadores Básicos",
+      minimumStock: 10,
+      currentStock: 50,
+      suppliers: [],
+      storageTemp: "Ambiente",
+    },
+
+    // Fermentos
+    {
+      id: "levadura-001",
+      name: "Levadura Fresca",
+      unit: "kg",
+      costPerUnit: 8.0,
+      allergens: [],
+      category: "Fermentos",
+      minimumStock: 2,
+      currentStock: 10,
+      suppliers: [],
+      storageTemp: "Refrigeracion",
+    },
+    {
+      id: "levadura-seca-001",
+      name: "Levadura Seca",
+      unit: "kg",
+      costPerUnit: 12.0,
+      allergens: [],
+      category: "Fermentos",
+      minimumStock: 1,
+      currentStock: 5,
+      suppliers: [],
+      storageTemp: "Ambiente",
+    },
+
+    // Lácteos y Proteínas
+    {
+      id: "huevos-001",
+      name: "Huevos",
+      unit: "docena",
+      costPerUnit: 4.0,
+      allergens: ["huevo"],
+      category: "Lácteos y Proteínas",
+      minimumStock: 10,
+      currentStock: 30,
+      suppliers: [],
+      storageTemp: "Refrigeracion",
+    },
+    {
+      id: "mantequilla-001",
+      name: "Mantequilla",
+      unit: "kg",
+      costPerUnit: 8.0,
+      allergens: ["lactosa"],
+      category: "Lácteos y Proteínas",
+      minimumStock: 5,
+      currentStock: 20,
+      suppliers: [],
+      storageTemp: "Refrigeracion",
+    },
+
+    // Semillas y Granos
+    {
+      id: "semillas-sesamo-001",
+      name: "Semillas de Sésamo",
+      unit: "kg",
+      costPerUnit: 10.0,
+      allergens: ["sésamo"],
+      category: "Semillas y Granos",
+      minimumStock: 2,
+      currentStock: 10,
+      suppliers: [],
+      storageTemp: "Ambiente",
+    },
+    {
+      id: "nueces-001",
+      name: "Nueces",
+      unit: "kg",
+      costPerUnit: 15.0,
+      allergens: ["frutos secos"],
+      category: "Semillas y Granos",
+      minimumStock: 3,
+      currentStock: 15,
+      suppliers: [],
+      storageTemp: "Ambiente",
+    },
+
+    // Frutas y Vegetales
+    {
+      id: "manzanas-001",
+      name: "Manzanas",
+      unit: "kg",
+      costPerUnit: 3.0,
+      allergens: [],
+      category: "Frutas y Vegetales",
+      minimumStock: 5,
+      currentStock: 20,
+      suppliers: [],
+      storageTemp: "Refrigeracion",
+    },
+    {
+      id: "fresas-001",
+      name: "Fresas",
+      unit: "kg",
+      costPerUnit: 6.0,
+      allergens: [],
+      category: "Frutas y Vegetales",
+      minimumStock: 3,
+      currentStock: 10,
+      suppliers: [],
+      storageTemp: "Refrigeracion",
+    },
+
+    // Especias y Aromáticos
+    {
+      id: "canela-001",
+      name: "Canela en Polvo",
+      unit: "kg",
+      costPerUnit: 20.0,
+      allergens: [],
+      category: "Especias y Aromáticos",
+      minimumStock: 1,
+      currentStock: 5,
+      suppliers: [],
+      storageTemp: "Ambiente",
+    },
+    {
+      id: "vainilla-001",
+      name: "Extracto de Vainilla",
+      unit: "L",
+      costPerUnit: 25.0,
+      allergens: [],
+      category: "Especias y Aromáticos",
+      minimumStock: 1,
+      currentStock: 3,
+      suppliers: [],
+      storageTemp: "Ambiente",
+    },
+
+    // Chocolates y Cocoa
+    {
+      id: "chocolate-negro-001",
+      name: "Chocolate Negro 70%",
+      unit: "kg",
+      costPerUnit: 18.0,
+      allergens: ["soya"],
+      category: "Chocolates y Cocoa",
+      minimumStock: 5,
+      currentStock: 20,
+      suppliers: [],
+      storageTemp: "Ambiente",
+    },
+    {
+      id: "cocoa-001",
+      name: "Cocoa en Polvo",
+      unit: "kg",
+      costPerUnit: 12.0,
+      allergens: [],
+      category: "Chocolates y Cocoa",
+      minimumStock: 3,
+      currentStock: 15,
+      suppliers: [],
+      storageTemp: "Ambiente",
+    },
+
+    // Additional ingredients with different units
+    {
+      id: "colorante-001",
+      name: "Colorante Alimentario",
       unit: "ml",
-      costPerUnit: 0.001,
-      category: "Liquids",
-      minimumStock: 1000,
-      currentStock: 5000,
+      costPerUnit: 0.5,
+      allergens: [],
+      category: "Especias y Aromáticos",
+      minimumStock: 500,
+      currentStock: 2000,
+      suppliers: [],
+      storageTemp: "Ambiente",
     },
     {
-      id: "salt-001",
-      name: "Salt",
-      unit: "g",
-      costPerUnit: 0.001,
-      category: "Dry Goods",
-      minimumStock: 100,
-      currentStock: 1000,
+      id: "decoraciones-001",
+      name: "Decoraciones Surtidas",
+      unit: "paquete",
+      costPerUnit: 5.0,
+      allergens: [],
+      category: "Especias y Aromáticos",
+      minimumStock: 10,
+      currentStock: 30,
+      suppliers: [],
+      storageTemp: "Ambiente",
+    },
+
+    // More ingredients with Congelacion storage
+    {
+      id: "pulpa-fruta-001",
+      name: "Pulpa de Frutas Congelada",
+      unit: "kg",
+      costPerUnit: 7.0,
+      allergens: [],
+      category: "Frutas y Vegetales",
+      minimumStock: 5,
+      currentStock: 20,
+      suppliers: [],
+      storageTemp: "Congelacion",
     },
     {
-      id: "yeast-001",
-      name: "Active Dry Yeast",
-      unit: "g",
-      costPerUnit: 0.05,
-      category: "Dry Goods",
-      minimumStock: 100,
-      currentStock: 500,
+      id: "masa-hojaldre-001",
+      name: "Masa de Hojaldre",
+      unit: "kg",
+      costPerUnit: 9.0,
+      allergens: ["gluten"],
+      category: "Harinas y Almidones",
+      minimumStock: 5,
+      currentStock: 15,
+      suppliers: [],
+      storageTemp: "Congelacion",
     },
   ],
-  products: [
-    {
-      id: "baguette-001",
-      name: "Classic Baguette",
-      description: "Traditional French baguette",
-      category: "Bread",
-      isActive: true,
-    },
-    {
-      id: "baguette-mini-001",
-      name: "Mini Baguette",
-      description: "Small version of our classic baguette",
-      category: "Bread",
-      isActive: true,
-    },
-  ],
-  recipe: {
-    name: "Classic French Baguette",
-    description:
-      "Traditional French baguette with crispy crust and chewy interior",
-    category: "Bread",
-    ingredients: [
-      {
-        ingredientId: "flour-001",
-        quantity: 1000,
-        notes: "High protein bread flour",
-      },
-      {
-        ingredientId: "water-001",
-        quantity: 650,
-        notes: "Room temperature",
-      },
-      {
-        ingredientId: "salt-001",
-        quantity: 20,
-      },
-      {
-        ingredientId: "yeast-001",
-        quantity: 7,
-        notes: "Active dry yeast",
-      },
-    ],
-    steps: [
-      {
-        stepNumber: 1,
-        description: "Mix flour and water for autolyse. Rest 30 minutes.",
-      },
-      {
-        stepNumber: 2,
-        description: "Add salt and yeast. Mix until developed.",
-      },
-    ],
-    yield: {
-      quantity: 3,
-      unit: "baguettes",
-      servings: 12,
-    },
-    preparationTime: 180,
-    bakingTime: 30,
-    bakingTemp: {
-      value: 240,
-      unit: "C",
-    },
-    laborCost: 12.0,
-    overheadCost: 5.0,
-    productIds: ["baguette-001", "baguette-mini-001"],
-  },
 };
 
 async function setupTestEnvironment() {
@@ -198,28 +379,15 @@ async function setupTestEnvironment() {
         createdAt: new Date(),
         updatedAt: new Date(),
         isActive: true,
+        type: "Raw Material",
+        customAttributes: {},
+        purchaseHistory: [],
+        averageMonthlyUsage: 0,
+        consumptionRate: 0,
+        currency: "USD",
       });
     });
     await ingredientBatch.commit();
-
-    // 4. Create products
-    console.log("Creating products...");
-    const productBatch = db.batch();
-    testData.products.forEach((product) => {
-      const ref = db
-        .collection(`bakeries/${bakeryId}/products`)
-        .doc(product.id);
-      productBatch.set(ref, {
-        ...product,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-    });
-    await productBatch.commit();
-
-    // 5. Create recipe
-    console.log("Creating recipe...");
-    await testRecipeEndpoints(bakeryId);
 
     console.log("Test environment setup complete!");
     console.log("Bakery ID:", bakeryId);
@@ -237,58 +405,19 @@ async function setupTestEnvironment() {
   }
 }
 
-async function testRecipeEndpoints(bakeryId) {
-  try {
-    console.log("Testing recipe endpoints...");
-
-    // 1. Create Recipe
-    console.log("Testing create recipe...");
-    const recipeRef = db.collection(`bakeries/${bakeryId}/recipes`).doc();
-    await recipeRef.set({
-      ...testData.recipe,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      isActive: true,
-    });
-
-    // 2. Get Recipe
-    console.log("Testing get recipe...");
-    const recipeDoc = await recipeRef.get();
-    console.log("Recipe created:", recipeDoc.exists);
-
-    // 3. Update Recipe
-    console.log("Testing update recipe...");
-    await recipeRef.update({
-      description: "Updated description",
-      updatedAt: new Date(),
-    });
-
-    // 4. Scale Recipe (this would normally be done through the API)
-    console.log("Note: Scale recipe can be tested through the API endpoint");
-
-    return recipeRef.id;
-  } catch (error) {
-    console.error("Error testing recipe endpoints:", error);
-    throw error;
-  }
-}
-
 async function cleanupTestEnvironment(userId, bakeryId) {
   try {
     console.log("Cleaning up test environment...");
 
-    // Delete all subcollections
-    const collections = ["ingredients", "products", "recipes"];
-    for (const collection of collections) {
-      const snapshot = await db
-        .collection(`bakeries/${bakeryId}/${collection}`)
-        .get();
-      const batch = db.batch();
-      snapshot.docs.forEach((doc) => {
-        batch.delete(doc.ref);
-      });
-      await batch.commit();
-    }
+    // Delete all ingredients
+    const snapshot = await db
+      .collection(`bakeries/${bakeryId}/ingredients`)
+      .get();
+    const batch = db.batch();
+    snapshot.docs.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+    await batch.commit();
 
     // Delete bakery
     await db.collection("bakeries").doc(bakeryId).delete();

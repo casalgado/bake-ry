@@ -75,7 +75,6 @@ const bakeryService = {
 
   async updateBakery(id, bakeryData) {
     try {
-      console.log("Updating bakery IN BACKEND SERVICE:", id, bakeryData);
       const bakeryRef = db.collection("bakeries").doc(id);
       const doc = await bakeryRef.get();
       if (!doc.exists) {

@@ -3,8 +3,6 @@ const User = require("../models/User");
 
 const userService = {
   async createUser(userData) {
-    console.log("Received userData:", userData);
-
     // requires: email, password, role, name
 
     let userRecord = null;
@@ -48,7 +46,6 @@ const userService = {
         ) {
           customClaims.bakeryId = newUser.bakeryId;
         }
-        console.log("Setting custom claims:", customClaims);
         await admin.auth().setCustomUserClaims(userRecord.uid, customClaims);
 
         // 3. Create the user document in Firestore
@@ -73,7 +70,6 @@ const userService = {
       if (userRecord) {
         try {
           await admin.auth().deleteUser(userRecord.uid);
-          console.log("Cleaned up Auth user after failed transaction");
         } catch (cleanupError) {
           console.error("Error cleaning up Auth user:", cleanupError);
           // Log this incident for admin attention
@@ -89,8 +85,6 @@ const userService = {
     try {
       // 1. Verify the Firebase ID token
       const decodedToken = await admin.auth().verifyIdToken(idToken);
-
-      console.log("Decoded token:", decodedToken);
 
       // 2. Get the user document from Firestore
       const userSnapshot = await db
