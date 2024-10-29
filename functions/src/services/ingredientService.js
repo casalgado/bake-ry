@@ -1,5 +1,60 @@
 const { db } = require("../config/firebase");
 const Ingredient = require("../models/Ingredient");
+const recipeService = require("./recipeService");
+
+/**
+ * Checks if costPerUnit has changed between current and update data
+ * @param {Object} currentIngredient - Current ingredient data
+ * @param {Object} updateData - New ingredient data
+ * @returns {boolean} True if cost changed
+ */
+const hasCostChanged = (currentIngredient, updateData) => {
+  return (
+    updateData.costPerUnit !== undefined &&
+    updateData.costPerUnit !== currentIngredient.costPerUnit
+  );
+};
+
+/**
+ * Updates recipes when ingredient cost changes
+ * @param {FirebaseFirestore.Transaction} transaction - Firestore transaction
+ * @param {string} bakeryId - Bakery ID
+ * @param {string} ingredientId - Ingredient ID
+ * @param {number} newCostPerUnit - New cost per unit
+ * @param {string[]} usedInRecipes - Array of recipe IDs using this ingredient
+ */
+const updateRecipesWithNewCost = async (
+  transaction,
+  bakeryId,
+  ingredientId,
+  newCostPerUnit,
+  usedInRecipes
+) => {
+  const updatePromises = usedInRecipes.map(async (recipeId) => {
+    const recipe = await recipeService.getRecipeById(bakeryId, recipeId);
+    if (!recipe) return;
+
+    // Update the ingredient cost in the recipe
+    const updatedIngredients = recipe.ingredients.map((ing) =>
+      ing.ingredientId === ingredientId
+        ? { ...ing, costPerUnit: newCostPerUnit }
+        : ing
+    );
+
+    // Let recipeService handle the update and versioning
+    console.log("updating recipe", recipeId);
+    await recipeService.updateRecipe(
+      bakeryId,
+      recipeId,
+      {
+        ingredients: updatedIngredients,
+      },
+      transaction
+    );
+  });
+
+  await Promise.all(updatePromises);
+};
 
 const ingredientService = {
   async createIngredient(bakeryId, ingredientData) {
@@ -78,22 +133,38 @@ const ingredientService = {
         .collection("ingredients")
         .doc(ingredientId);
 
-      const doc = await ingredientRef.get();
-      if (!doc.exists) {
-        return null;
-      }
+      // Start a transaction
+      return await db.runTransaction(async (transaction) => {
+        const doc = await ingredientRef.get();
+        if (!doc.exists) {
+          return null;
+        }
 
-      const currentIngredient = Ingredient.fromFirestore(doc);
-      const updatedIngredient = new Ingredient({
-        ...currentIngredient,
-        ...updateData,
-        updatedAt: new Date(),
+        const currentIngredient = Ingredient.fromFirestore(doc);
+
+        // Check if cost changed
+        if (hasCostChanged(currentIngredient, updateData)) {
+          console.log("Ingredient cost changed, updating recipes  ");
+          await updateRecipesWithNewCost(
+            transaction,
+            bakeryId,
+            ingredientId,
+            updateData.costPerUnit,
+            currentIngredient.usedInRecipes || []
+          );
+        }
+
+        const updatedIngredient = new Ingredient({
+          ...currentIngredient,
+          ...updateData,
+          updatedAt: new Date(),
+        });
+
+        // checks if costPerUnit has changed, if so, calls updateRecipe on all recipes that use this ingredient
+
+        await ingredientRef.update(updatedIngredient.toFirestore());
+        return updatedIngredient;
       });
-
-      // checks if costPerUnit has changed, if so, calls updateRecipe on all recipes that use this ingredient
-
-      await ingredientRef.update(updatedIngredient.toFirestore());
-      return updatedIngredient;
     } catch (error) {
       console.error("Error in updateIngredient:", error);
       throw error;
