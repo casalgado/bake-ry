@@ -85,6 +85,10 @@ const recipeController = {
 
       // Handle different types of updates
       if (updateData.action === "updateIngredients") {
+        console.log(
+          "In controller updateRecipe, updateData.action",
+          updateData.action
+        );
         // Validate ingredients
         if (!Array.isArray(updateData.ingredients)) {
           throw new BadRequestError("ingredients must be an array");
@@ -96,11 +100,6 @@ const recipeController = {
               "Each ingredient must have ingredientId and quantity"
             );
           }
-        }
-      } else if (updateData.action === "updateProducts") {
-        // Validate products
-        if (!Array.isArray(updateData.productIds)) {
-          throw new BadRequestError("productIds must be an array");
         }
       }
 

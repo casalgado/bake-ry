@@ -382,6 +382,7 @@ async function setupTestEnvironment() {
         type: "Raw Material",
         customAttributes: {},
         purchaseHistory: [],
+        usedInRecipes: [],
         averageMonthlyUsage: 0,
         consumptionRate: 0,
         currency: "USD",

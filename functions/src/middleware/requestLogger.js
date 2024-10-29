@@ -6,7 +6,7 @@ const requestLogger = (req, res, next) => {
   console.log(`Time: ${new Date().toISOString()}`);
   console.log(`Method: ${req.method}`);
   console.log(`URL: ${req.originalUrl}`);
-  console.log("Headers:", JSON.stringify(req.headers, null, 2));
+  // console.log("Headers:", JSON.stringify(req.headers, null, 2));
 
   // Log request body if present
   if (Object.keys(req.body).length) {

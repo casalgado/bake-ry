@@ -1,0 +1,13 @@
+Key points about recipe versioning requirements:
+
+Changes that REQUIRE versioning:
+
+Adding/removing ingredients
+Changing ingredient quantities
+Changing ingredient costs
+Changing cooking/baking instructions
+Any change that affects:
+
+Recipe cost
+Production process
+Final product

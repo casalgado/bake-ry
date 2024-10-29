@@ -1,5 +1,10 @@
 const { db } = require("../config/firebase");
-const { Recipe, RecipeIngredient } = require("../models/Recipe"); // Assuming we export both
+const { Recipe, RecipeIngredient } = require("../models/Recipe");
+const {
+  requiresNewVersion,
+  recipeVersioningService,
+  ingredientsChanged,
+} = require("./versioning/recipeVersioning");
 const { BadRequestError, NotFoundError } = require("../utils/errors");
 
 const recipeService = {
@@ -12,11 +17,11 @@ const recipeService = {
         // Fetch all referenced ingredients to validate they exist and get costs
         const ingredientsWithCosts = await Promise.all(
           recipeData.ingredients.map(async (ingredient) => {
-            const ingredientDoc = await transaction.get(
-              db
-                .collection(`bakeries/${bakeryId}/ingredients`)
-                .doc(ingredient.ingredientId)
-            );
+            const ingredientRef = db
+              .collection(`bakeries/${bakeryId}/ingredients`)
+              .doc(ingredient.ingredientId);
+
+            const ingredientDoc = await transaction.get(ingredientRef);
 
             if (!ingredientDoc.exists) {
               throw new BadRequestError(
@@ -27,7 +32,7 @@ const recipeService = {
             const ingredientData = ingredientDoc.data();
 
             // Create RecipeIngredient instance with current ingredient data
-            return new RecipeIngredient({
+            const recipeIngredient = new RecipeIngredient({
               ingredientId: ingredient.ingredientId,
               name: ingredientData.name,
               quantity: ingredient.quantity,
@@ -36,36 +41,40 @@ const recipeService = {
               notes: ingredient.notes || "",
               allergens: ingredientData.allergens || [],
             });
+
+            return {
+              ingredient: recipeIngredient,
+              ref: ingredientRef,
+              currentUsedInRecipes: ingredientData.usedInRecipes || [],
+            };
           })
         );
 
-        // If productIds provided, validate they exist
-        if (recipeData.productIds?.length > 0) {
-          await Promise.all(
-            recipeData.productIds.map(async (productId) => {
-              const productDoc = await transaction.get(
-                db.collection(`bakeries/${bakeryId}/products`).doc(productId)
-              );
-              if (!productDoc.exists) {
-                throw new BadRequestError(`Product ${productId} not found`);
-              }
-            })
-          );
-        }
+        // Create new recipe
+        const recipeRef = db.collection(`bakeries/${bakeryId}/recipes`).doc();
+        const recipeId = recipeRef.id;
 
-        // Create new recipe with RecipeIngredient instances
         const newRecipe = new Recipe({
           ...recipeData,
-          ingredients: ingredientsWithCosts,
+          ingredients: ingredientsWithCosts.map((item) => item.ingredient),
         });
 
         // Create the recipe document
-        console.log("In service createRecipe, newRecipe", newRecipe);
-        const recipeRef = db.collection(`bakeries/${bakeryId}/recipes`).doc();
         transaction.set(recipeRef, newRecipe.toFirestore());
 
+        // Update each ingredient's usedInRecipes array
+        ingredientsWithCosts.forEach(({ ref, currentUsedInRecipes }) => {
+          // Only add the recipe if it's not already in the array
+          if (!currentUsedInRecipes.includes(recipeId)) {
+            transaction.update(ref, {
+              usedInRecipes: [...currentUsedInRecipes, recipeId],
+              updatedAt: new Date(),
+            });
+          }
+        });
+
         return {
-          id: recipeRef.id,
+          id: recipeId,
           ...newRecipe,
         };
       });
@@ -146,59 +155,82 @@ const recipeService = {
 
         let currentRecipe = Recipe.fromFirestore(recipeDoc);
 
-        // Handle different update types
-        if (updateData.action === "updateIngredients") {
-          // Fetch and validate all ingredients, get current costs
-          const ingredientsWithCosts = await Promise.all(
-            updateData.ingredients.map(async (ingredient) => {
-              const ingredientDoc = await transaction.get(
-                db
-                  .collection(`bakeries/${bakeryId}/ingredients`)
-                  .doc(ingredient.ingredientId)
-              );
-
-              if (!ingredientDoc.exists) {
-                throw new BadRequestError(
-                  `Ingredient ${ingredient.ingredientId} not found`
-                );
-              }
-
-              const ingredientData = ingredientDoc.data();
-
-              // Create new RecipeIngredient instance
-              return new RecipeIngredient({
-                ingredientId: ingredient.ingredientId,
-                name: ingredientData.name,
-                quantity: ingredient.quantity,
-                unit: ingredientData.unit,
-                costPerUnit: ingredientData.costPerUnit,
-                notes: ingredient.notes || "",
-                allergens: ingredientData.allergens || [],
-              });
-            })
-          );
-
-          updateData.ingredients = ingredientsWithCosts;
-        } else if (updateData.action === "updateProducts") {
-          // Validate all products exist
-          await Promise.all(
-            updateData.productIds.map(async (productId) => {
-              const productDoc = await transaction.get(
-                db.collection(`bakeries/${bakeryId}/products`).doc(productId)
-              );
-              if (!productDoc.exists) {
-                throw new BadRequestError(`Product ${productId} not found`);
-              }
-            })
-          );
-        }
-
-        // Create updated recipe
         const updatedRecipe = new Recipe({
           ...currentRecipe,
           ...updateData,
           updatedAt: new Date(),
         });
+
+        // Check if changes require versioning
+        if (requiresNewVersion(currentRecipe, updatedRecipe)) {
+          console.log("requires new version");
+
+          if (ingredientsChanged(currentRecipe, updatedRecipe)) {
+            console.log("ingredients changed");
+            // modify usedInRecipes arrays for each ingredient
+            const oldIngredientIds = new Set(
+              currentRecipe.ingredients.map((i) => i.ingredientId)
+            );
+            const newIngredientIds = new Set(
+              updatedRecipe.ingredients.map((i) => i.ingredientId)
+            );
+
+            console.log("oldIngredientIds", oldIngredientIds);
+            console.log("newIngredientIds", newIngredientIds);
+
+            // Collect all ingredient IDs that need updating
+            const toRemove = [...oldIngredientIds].filter(
+              (id) => !newIngredientIds.has(id)
+            );
+            const toAdd = [...newIngredientIds].filter(
+              (id) => !oldIngredientIds.has(id)
+            );
+
+            // Step 1: Perform all reads first
+            const ingredientDocs = await Promise.all([
+              ...toRemove.map((id) =>
+                transaction.get(
+                  db.collection(`bakeries/${bakeryId}/ingredients`).doc(id)
+                )
+              ),
+              ...toAdd.map((id) =>
+                transaction.get(
+                  db.collection(`bakeries/${bakeryId}/ingredients`).doc(id)
+                )
+              ),
+            ]);
+
+            // Step 2: After all reads, perform writes
+            ingredientDocs.forEach((doc, index) => {
+              if (!doc.exists) return;
+
+              const isRemove = index < toRemove.length;
+              const usedInRecipes = doc.data().usedInRecipes || [];
+
+              if (isRemove) {
+                // Remove recipe from usedInRecipes
+                console.log("removing recipe from ingredient", doc.id);
+                transaction.update(doc.ref, {
+                  usedInRecipes: usedInRecipes.filter((id) => id !== recipeId),
+                });
+              } else {
+                // Add recipe to usedInRecipes if not already there
+                if (!usedInRecipes.includes(recipeId)) {
+                  console.log("adding recipe to ingredient", doc.id);
+                  transaction.update(doc.ref, {
+                    usedInRecipes: [...usedInRecipes, recipeId],
+                  });
+                }
+              }
+            });
+          }
+          const newVersion = await recipeVersioningService.createVersion(
+            transaction,
+            recipeRef,
+            currentRecipe
+          );
+          updatedRecipe.version = newVersion;
+        }
 
         // Save updates
         transaction.update(recipeRef, updatedRecipe.toFirestore());

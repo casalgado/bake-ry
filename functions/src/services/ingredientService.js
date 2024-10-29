@@ -90,6 +90,8 @@ const ingredientService = {
         updatedAt: new Date(),
       });
 
+      // checks if costPerUnit has changed, if so, calls updateRecipe on all recipes that use this ingredient
+
       await ingredientRef.update(updatedIngredient.toFirestore());
       return updatedIngredient;
     } catch (error) {

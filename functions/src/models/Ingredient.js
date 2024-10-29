@@ -128,7 +128,7 @@ class Ingredient {
     this.halalCertified = halalCertified;
 
     // Usage and Recipes
-    this.usedInRecipes = usedInRecipes;
+    this.usedInRecipes = usedInRecipes || [];
     this.substitutes = substitutes;
     this.notes = notes;
 
