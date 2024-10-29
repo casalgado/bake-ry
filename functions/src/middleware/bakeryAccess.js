@@ -4,11 +4,8 @@ const { ForbiddenError } = require("../utils/errors");
 // Middleware to verify user has access to the specified bakery
 const hasBakeryAccess = async (req, res, next) => {
   try {
-
     const user = req.user;
     const bakeryId = req.params.bakeryId || req.body.bakeryId;
-
-
 
     // System admins have access to all bakeries
     if (user.role === "system_admin") {
@@ -20,7 +17,7 @@ const hasBakeryAccess = async (req, res, next) => {
       console.log("User does not have access to this bakery");
       throw new ForbiddenError("User does not have access to this bakery");
     }
-
+    console.log("In Bakery Access, bakeryId", bakeryId);
     next();
   } catch (error) {
     res.status(403).json({ error: error.message });

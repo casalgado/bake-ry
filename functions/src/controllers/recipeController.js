@@ -3,6 +3,7 @@ const { BadRequestError, NotFoundError } = require("../utils/errors");
 
 const recipeController = {
   async createRecipe(req, res) {
+    console.log("In controller createRecipe, req.body", req.body);
     try {
       const { bakeryId } = req.params;
       const recipeData = {
@@ -29,7 +30,7 @@ const recipeController = {
           throw new BadRequestError("productIds must be an array");
         }
       }
-
+      console.log("In controller createRecipe, recipeData", recipeData);
       const recipe = await recipeService.createRecipe(recipeData);
       res.status(201).json(recipe);
     } catch (error) {

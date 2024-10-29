@@ -28,6 +28,7 @@ const userRoutes = require("./routes/userRoutes");
 const bakeryRoutes = require("./routes/bakeryRoutes");
 const productRoutes = require("./routes/productRoutes");
 const ingredientRoutes = require("./routes/ingredientRoutes");
+const recipeRoutes = require("./routes/recipeRoutes");
 const requestLogger = require("./middleware/requestLogger");
 // const userRoutes = require("./routes/userRoutes");
 
@@ -60,7 +61,7 @@ app.use("/auth", userRoutes);
 app.use("/bakeries", bakeryRoutes);
 app.use("/products", productRoutes);
 app.use("/bakeries", ingredientRoutes);
-// app.use("/user", authenticateUser, userRoutes);
+app.use("/bakeries", recipeRoutes);
 
 // Export the Express app as a Firebase Function
 exports.bake = functions.https.onRequest(app);

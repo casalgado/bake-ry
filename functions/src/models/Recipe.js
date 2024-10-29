@@ -1,21 +1,35 @@
 class RecipeIngredient {
   constructor({
     ingredientId,
-    name, // Keep for quick reference without fetching ingredient
+    name,
     quantity,
     unit,
-    costPerUnit, // Keep for cost calculations
-    notes, // Basic preparation notes
-    allergens, // Important for safety
+    costPerUnit,
+    notes = "",
+    allergens = [],
+    baseQuantity,
   }) {
     this.ingredientId = ingredientId;
     this.name = name;
     this.quantity = quantity;
-    this.baseQuantity = quantity; // Keep for scaling
+    this.baseQuantity = baseQuantity || quantity;
     this.unit = unit;
-    this.costPerUnit = costPerUnit || 0;
+    this.costPerUnit = costPerUnit;
     this.notes = notes;
-    this.allergens = allergens || [];
+    this.allergens = allergens;
+  }
+
+  toPlainObject() {
+    return {
+      ingredientId: this.ingredientId,
+      name: this.name,
+      quantity: this.quantity,
+      baseQuantity: this.baseQuantity,
+      unit: this.unit,
+      costPerUnit: this.costPerUnit,
+      notes: this.notes,
+      allergens: this.allergens,
+    };
   }
 
   calculateCost() {
@@ -33,27 +47,26 @@ class Recipe {
     // Basic Information
     id,
     bakeryId,
-    productIds, // Array of product IDs
+    productIds,
     name,
     description,
-    category, // e.g., "Bread", "Cake", "Pastry"
-    version, // Keep for recipe management
+    category,
+    version,
 
     // Core Recipe Details
-    ingredients, // Array of RecipeIngredient objects
-    steps, // Array of preparation steps
-    yield, // {quantity: number, unit: string}
+    ingredients = [],
+    steps = [],
 
     // Time Management
-    preparationTime, // in minutes
-    bakingTime, // in minutes
+    preparationTime,
+    bakingTime,
 
     // Cost Information
-    laborCost, // Per batch
-    overheadCost, // Per batch
+    laborCost,
+    overheadCost,
 
     // Essential Production Info
-    bakingTemp, // {value: number, unit: "C" | "F"}
+    bakingTemp,
 
     // Status and Timestamps
     isActive,
@@ -61,7 +74,7 @@ class Recipe {
     updatedAt,
 
     // Basic Quality Control
-    notes, // General notes and tips
+    notes,
   }) {
     // Basic Information
     this.id = id;
@@ -72,10 +85,14 @@ class Recipe {
     this.category = category;
     this.version = version || 1;
 
-    // Core Recipe Details
-    this.ingredients = ingredients || [];
+    // Convert ingredients to RecipeIngredient instances if they aren't already
+    this.ingredients = ingredients.map((ingredient) =>
+      ingredient instanceof RecipeIngredient
+        ? ingredient
+        : new RecipeIngredient(ingredient)
+    );
+
     this.steps = steps || [];
-    this.yield = yield;
 
     // Time Management
     this.preparationTime = preparationTime || 0;
@@ -102,7 +119,6 @@ class Recipe {
     this.updateCosts();
   }
 
-  // Firestore Data Conversion
   toFirestore() {
     const data = { ...this };
     delete data.id;
@@ -113,22 +129,40 @@ class Recipe {
         delete data[key];
       }
     });
+
+    // Convert RecipeIngredient instances to plain objects
+    data.ingredients = this.ingredients.map((ingredient) =>
+      ingredient instanceof RecipeIngredient
+        ? ingredient.toPlainObject()
+        : ingredient
+    );
+
     return data;
   }
 
   static fromFirestore(doc) {
     const data = doc.data();
+    // Convert plain ingredient objects back to RecipeIngredient instances
+    const ingredients = (data.ingredients || []).map(
+      (ing) => new RecipeIngredient(ing)
+    );
+
     return new Recipe({
       id: doc.id,
       ...data,
+      ingredients,
       createdAt: data.createdAt?.toDate(),
       updatedAt: data.updatedAt?.toDate(),
     });
   }
 
-  // Core Methods
   addIngredient(ingredient) {
-    this.ingredients.push(new RecipeIngredient(ingredient));
+    const recipeIngredient =
+      ingredient instanceof RecipeIngredient
+        ? ingredient
+        : new RecipeIngredient(ingredient);
+
+    this.ingredients.push(recipeIngredient);
     this.updateCosts();
   }
 
@@ -170,61 +204,3 @@ class Recipe {
 }
 
 module.exports = { Recipe, RecipeIngredient };
-
-// Example Usage:
-const chocolateCakeRecipe = new Recipe({
-  name: "Classic Chocolate Cake",
-  description: "Rich, moist chocolate cake",
-  category: "Cake",
-  bakeryId: "bakery_123",
-  productId: "product_choc_cake_001",
-
-  ingredients: [
-    new RecipeIngredient({
-      ingredientId: "ing_flour_001",
-      name: "All-Purpose Flour",
-      quantity: 210,
-      unit: "g",
-      costPerUnit: 0.002,
-      notes: "Sifted",
-      allergens: ["gluten"],
-    }),
-    new RecipeIngredient({
-      ingredientId: "ing_sugar_001",
-      name: "Granulated Sugar",
-      quantity: 200,
-      unit: "g",
-      costPerUnit: 0.001,
-    }),
-  ],
-
-  steps: [
-    {
-      stepNumber: 1,
-      description: "Preheat oven to 180°C. Grease cake pan.",
-    },
-    {
-      stepNumber: 2,
-      description: "Mix dry ingredients.",
-    },
-  ],
-
-  yield: {
-    quantity: 1,
-    unit: "cake",
-    servings: 12,
-  },
-
-  preparationTime: 30,
-  bakingTime: 35,
-
-  bakingTemp: {
-    value: 180,
-    unit: "C",
-  },
-
-  laborCost: 10.0,
-  overheadCost: 5.0,
-
-  notes: "Ensure all ingredients are at room temperature.",
-});

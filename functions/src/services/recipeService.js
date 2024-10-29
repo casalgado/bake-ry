@@ -60,6 +60,7 @@ const recipeService = {
         });
 
         // Create the recipe document
+        console.log("In service createRecipe, newRecipe", newRecipe);
         const recipeRef = db.collection(`bakeries/${bakeryId}/recipes`).doc();
         transaction.set(recipeRef, newRecipe.toFirestore());
 
