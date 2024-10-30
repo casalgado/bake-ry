@@ -1,3 +1,67 @@
+// ProductVariation.js
+class ProductVariation {
+  constructor({
+    id,
+    name,
+    size,
+    weight,
+    basePrice,
+    currentPrice,
+    recipeMultiplier,
+  }) {
+    this.id = id || this.generateVariationId();
+    this.name = name;
+    this.size = size;
+    this.weight = weight;
+    this.basePrice = basePrice;
+    this.currentPrice = currentPrice || basePrice; // Default to basePrice if not provided
+    this.recipeMultiplier = recipeMultiplier || 1;
+  }
+
+  generateVariationId() {
+    const timestamp = new Date().getTime().toString().slice(-4);
+    const random = Math.floor(Math.random() * 1000)
+      .toString()
+      .padStart(3, "0");
+    return `var_${timestamp}_${random}`;
+  }
+
+  toPlainObject() {
+    const data = {
+      id: this.id,
+      name: this.name,
+      size: this.size,
+      weight: this.weight,
+      basePrice: this.basePrice,
+      currentPrice: this.currentPrice,
+      recipeMultiplier: this.recipeMultiplier,
+    };
+
+    // Remove any undefined values
+    Object.keys(data).forEach((key) => {
+      if (data[key] === undefined || data[key] === null) {
+        delete data[key];
+      }
+    });
+
+    return data;
+  }
+
+  // Utility methods
+  applyDiscount(percentage) {
+    if (percentage < 0 || percentage > 100) {
+      throw new Error("Discount percentage must be between 0 and 100");
+    }
+    this.currentPrice = this.basePrice * (1 - percentage / 100);
+    return this.currentPrice;
+  }
+
+  resetPrice() {
+    this.currentPrice = this.basePrice;
+    return this.currentPrice;
+  }
+}
+
 class Product {
   constructor({
     // Basic Information
@@ -5,23 +69,17 @@ class Product {
     bakeryId,
     name,
     description,
-    category, // e.g., "Bread", "Cake", "Pastry"
-    type, // e.g., "Regular", "Special", "Seasonal"
+    category, // e.g., "Panaderia de Masa Madre", "Panaderia Tradicional", "Untables", "Tortas", ...
+    type, // e.g., "Fabricado", "Reventa"
     recipeId, // reference to recipe document
     recipeMultiplier, // multiplier for recipe
 
     // Sizing and Variations
-    size, // e.g., "Small", "Medium", "Large"
-    weight, // in grams
-    dimensions, // { length, width, height } for cakes
-    customizable, // boolean - can this product be customized?
     variations, // array of available variations
 
     // Pricing
     basePrice, // base price before customization
     currentPrice, // current selling price
-    costToMake, // calculated from recipe
-    profitMargin, // percentage
     discountable, // boolean - can this product be discounted?
 
     // Inventory & Production
@@ -73,32 +131,30 @@ class Product {
     this.recipeId = recipeId;
     this.recipeMultiplier = recipeMultiplier || 1;
 
-    // Sizing and Variations
-    this.size = size;
-    this.weight = weight;
-    this.dimensions = dimensions;
-    this.customizable = customizable ?? false;
-    this.variations = variations || [];
+    // Convert variations to ProductVariation instances if they aren't already
+    this.variations = (variations || []).map((variation) =>
+      variation instanceof ProductVariation
+        ? variation
+        : new ProductVariation(variation)
+    );
 
     // Pricing
     this.basePrice = basePrice;
-    this.currentPrice = currentPrice;
-    this.costToMake = costToMake;
-    this.profitMargin = profitMargin;
-    this.discountable = discountable ?? true;
+    this.currentPrice = currentPrice || basePrice;
+    this.discountable = discountable;
 
     // Inventory & Production
     this.sku = sku;
     this.barcode = barcode;
-    this.minimumStock = minimumStock || 0;
-    this.currentStock = currentStock || 0;
+    this.minimumStock = minimumStock;
+    this.currentStock = currentStock;
     this.restockThreshold = restockThreshold;
     this.productionTime = productionTime;
 
     // Display & Marketing
     this.image = image;
     this.thumbnailImage = thumbnailImage;
-    this.displayOrder = displayOrder || 0;
+    this.displayOrder = displayOrder;
     this.featured = featured || false;
     this.tags = tags || [];
 
@@ -108,28 +164,20 @@ class Product {
     this.dietary = dietary || [];
 
     // Availability
-    this.isActive = isActive ?? true;
-    this.isSeasonalItem = isSeasonalItem ?? false;
+    this.isActive = isActive || true;
+    this.isSeasonalItem = isSeasonalItem || false;
     this.seasonalPeriod = seasonalPeriod;
-    this.availableDays = availableDays || [
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-      "Sunday",
-    ];
-    this.leadTime = leadTime || 0;
+    this.availableDays = availableDays;
+    this.leadTime = leadTime;
 
     // Timestamps
     this.createdAt = createdAt || new Date();
     this.updatedAt = updatedAt || new Date();
 
     // Analytics & Metrics
-    this.totalSold = totalSold || 0;
-    this.averageRating = averageRating || 0;
-    this.reviewCount = reviewCount || 0;
+    this.totalSold = totalSold;
+    this.averageRating = averageRating;
+    this.reviewCount = reviewCount;
 
     // Custom Attributes
     this.customAttributes = customAttributes || {};
@@ -139,20 +187,35 @@ class Product {
   toFirestore() {
     const data = { ...this };
     delete data.id; // Remove id as it's stored as document ID
+
+    // Convert ProductVariation instances to plain objects
+    data.variations = this.variations.map((variation) =>
+      variation instanceof ProductVariation
+        ? variation.toPlainObject()
+        : variation
+    );
+
     // Remove undefined values
     Object.keys(data).forEach((key) => {
-      if (data[key] === undefined) {
+      if (data[key] === undefined || data[key] === null) {
         delete data[key];
       }
     });
+
     return data;
   }
 
   static fromFirestore(doc) {
     const data = doc.data();
+    // Convert plain variation objects back to ProductVariation instances
+    const variations = (data.variations || []).map(
+      (variation) => new ProductVariation(variation)
+    );
+
     return new Product({
       id: doc.id,
       ...data,
+      variations,
       createdAt: data.createdAt?.toDate(),
       updatedAt: data.updatedAt?.toDate(),
       seasonalPeriod: data.seasonalPeriod
@@ -164,45 +227,41 @@ class Product {
     });
   }
 
-  // Utility Methods
-  calculateProfit() {
-    return this.currentPrice - (this.costToMake || 0);
-  }
-
-  calculateProfitMargin() {
-    if (!this.currentPrice || !this.costToMake) return 0;
-    return ((this.currentPrice - this.costToMake) / this.currentPrice) * 100;
-  }
-
   needsRestock() {
     return this.currentStock <= this.restockThreshold;
   }
 
-  isAvailableOn(date) {
-    const dayOfWeek = date.toLocaleDateString("en-US", { weekday: "long" });
-    if (!this.availableDays.includes(dayOfWeek)) return false;
-
-    if (this.isSeasonalItem && this.seasonalPeriod) {
-      const checkDate = date.getTime();
-      return (
-        checkDate >= this.seasonalPeriod.start.getTime() &&
-        checkDate <= this.seasonalPeriod.end.getTime()
-      );
-    }
-
-    return true;
+  // Variation Management Methods
+  addVariation(variationData) {
+    const variation = new ProductVariation(variationData);
+    this.variations.push(variation);
+    return variation;
   }
 
-  canOrderFor(orderDate) {
-    if (!this.isActive) return false;
-    if (!this.isAvailableOn(orderDate)) return false;
+  getVariation(id) {
+    return this.variations.find((v) => v.id === id);
+  }
 
-    const now = new Date();
-    const leadTimeMs = this.leadTime * 60 * 60 * 1000; // Convert hours to milliseconds
-    const earliestPossibleOrder = new Date(now.getTime() + leadTimeMs);
+  updateVariation(id, updateData) {
+    const variation = this.getVariation(id);
+    if (variation) {
+      Object.assign(variation, updateData);
+      return true;
+    }
+    return false;
+  }
 
-    return orderDate >= earliestPossibleOrder;
+  removeVariation(id) {
+    const index = this.variations.findIndex((v) => v.id === id);
+    if (index !== -1) {
+      this.variations.splice(index, 1);
+      return true;
+    }
+    return false;
   }
 }
 
-module.exports = Product;
+module.exports = {
+  Product,
+  ProductVariation,
+};

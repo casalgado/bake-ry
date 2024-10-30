@@ -51,6 +51,7 @@ class Recipe {
     name,
     description,
     category,
+    type,
     version,
 
     // Core Recipe Details
@@ -83,6 +84,7 @@ class Recipe {
     this.name = name;
     this.description = description;
     this.category = category;
+    this.type = type;
     this.version = version || 1;
 
     // Convert ingredients to RecipeIngredient instances if they aren't already

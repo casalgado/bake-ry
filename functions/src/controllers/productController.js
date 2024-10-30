@@ -102,23 +102,80 @@ const productController = {
 // Validation helper function
 function validateProductData(productData) {
   const errors = [];
-  const requiredFields = ["name", "category", "basePrice", "recipeId"];
 
-  // Check required fields
-  requiredFields.forEach((field) => {
+  // Basic required fields that all products need
+  const basicRequiredFields = ["name", "category", "recipeId"];
+
+  // Check basic required fields
+  basicRequiredFields.forEach((field) => {
     if (!productData[field]) {
       errors.push(`${field} is required`);
     }
   });
 
-  // Validate prices are positive numbers
-  if (productData.basePrice && productData.basePrice <= 0) {
-    errors.push("basePrice must be greater than 0");
+  // Validate based on whether the product has variations
+  if (productData.variations && productData.variations.length > 0) {
+    // Products with variations should not have a base price
+    if (productData.basePrice !== undefined) {
+      errors.push(
+        "Products with variations should not have a base price. Price should be set per variation"
+      );
+    }
+
+    // Validate variations
+    productData.variations.forEach((variation, index) => {
+      // Required fields for each variation
+      if (!variation.name) {
+        errors.push(`Variation at index ${index} is missing a name`);
+      }
+
+      if (variation.basePrice === undefined || variation.basePrice === null) {
+        errors.push(
+          `Variation "${
+            variation.name || `at index ${index}`
+          }" is missing a base price`
+        );
+      } else if (variation.basePrice <= 0) {
+        errors.push(
+          `Variation "${
+            variation.name || `at index ${index}`
+          }" must have a base price greater than 0`
+        );
+      }
+
+      if (!variation.recipeMultiplier) {
+        errors.push(
+          `Variation "${
+            variation.name || `at index ${index}`
+          }" must have a recipe multiplier`
+        );
+      } else if (variation.recipeMultiplier <= 0) {
+        errors.push(
+          `Variation "${
+            variation.name || `at index ${index}`
+          }" must have a recipe multiplier greater than 0`
+        );
+      }
+    });
+  } else {
+    // For products without variations, validate base price
+    if (productData.basePrice === undefined || productData.basePrice === null) {
+      errors.push("Products without variations must have a base price");
+    } else if (productData.basePrice <= 0) {
+      errors.push("basePrice must be greater than 0");
+    }
+
+    // For products without variations, validate recipe multiplier
+    if (!productData.recipeMultiplier) {
+      errors.push(
+        "Recipe multiplier is required for products without variations"
+      );
+    } else if (productData.recipeMultiplier <= 0) {
+      errors.push("Recipe multiplier must be greater than 0");
+    }
   }
 
   return errors;
 }
-
-module.exports = productController;
 
 module.exports = productController;
