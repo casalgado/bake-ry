@@ -80,12 +80,21 @@ const bakeryService = {
       if (!doc.exists) {
         return null;
       }
+      console.log("In bakeryService updateBakery, bakeryData", bakeryData);
       const updatedBakery = new Bakery({
         ...Bakery.fromFirestore(doc),
         ...bakeryData,
         id,
         updatedAt: new Date(),
       });
+      console.log(
+        "In bakeryService updateBakery, updatedBakery",
+        updatedBakery
+      );
+      console.log(
+        "In bakeryService updateBakery, updatedBakery.toFirestore()",
+        updatedBakery.toFirestore()
+      );
       await bakeryRef.update(updatedBakery.toFirestore());
       return updatedBakery;
     } catch (error) {

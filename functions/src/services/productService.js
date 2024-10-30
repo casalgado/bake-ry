@@ -8,22 +8,10 @@ const productService = {
 
   async createProduct(bakeryId, productData) {
     try {
-      // Validate required fields
-      const requiredFields = ["name", "category", "basePrice", "currentPrice"];
-      const missingFields = requiredFields.filter(
-        (field) => !productData[field]
-      );
-
-      if (missingFields.length > 0) {
-        throw new Error("Required fields missing");
-      }
-
       // Create new product with bakeryId
       const newProduct = new Product({
         ...productData,
         bakeryId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       });
 
       // Add to Firestore

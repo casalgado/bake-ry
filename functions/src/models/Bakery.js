@@ -135,6 +135,8 @@ class Bakery {
     return new Bakery({
       id: doc.id,
       ...data,
+      createdAt: data.createdAt.toDate(),
+      updatedAt: data.updatedAt.toDate(),
     });
   }
 

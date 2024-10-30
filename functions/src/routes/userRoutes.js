@@ -3,8 +3,7 @@ const userController = require("../controllers/userController");
 
 const router = express.Router();
 
-// Public authentication routes with rate limiting
-
+// Public authentication routes
 router.post("/register", userController.register);
 router.post("/login", userController.loginUser);
 

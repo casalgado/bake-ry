@@ -43,8 +43,6 @@ describe("Bakery Controller", () => {
         id: "testBakeryId",
         ...bakeryData,
         ownerId: "testUserId",
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date),
       };
 
       bakeryService.createBakery.mockResolvedValue(expectedBakery);
@@ -57,8 +55,6 @@ describe("Bakery Controller", () => {
         expect.objectContaining({
           ...bakeryData,
           ownerId: "testUserId",
-          createdAt: expect.any(Date),
-          updatedAt: expect.any(Date),
         })
       );
       expect(mockResponse.status).toHaveBeenCalledWith(201);

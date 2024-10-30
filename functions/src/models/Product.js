@@ -7,6 +7,8 @@ class Product {
     description,
     category, // e.g., "Bread", "Cake", "Pastry"
     type, // e.g., "Regular", "Special", "Seasonal"
+    recipeId, // reference to recipe document
+    recipeMultiplier, // multiplier for recipe
 
     // Sizing and Variations
     size, // e.g., "Small", "Medium", "Large"
@@ -28,7 +30,6 @@ class Product {
     minimumStock, // minimum stock to maintain
     currentStock, // current available stock
     restockThreshold, // when to restock
-    recipeId, // reference to recipe document
     productionTime, // time needed to make in minutes
 
     // Display & Marketing
@@ -69,6 +70,8 @@ class Product {
     this.description = description;
     this.category = category;
     this.type = type;
+    this.recipeId = recipeId;
+    this.recipeMultiplier = recipeMultiplier || 1;
 
     // Sizing and Variations
     this.size = size;
@@ -90,7 +93,6 @@ class Product {
     this.minimumStock = minimumStock || 0;
     this.currentStock = currentStock || 0;
     this.restockThreshold = restockThreshold;
-    this.recipeId = recipeId;
     this.productionTime = productionTime;
 
     // Display & Marketing

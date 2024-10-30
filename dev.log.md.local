@@ -59,3 +59,13 @@ next steps:
 - lot's of error with undefined 'id' when it should have been 'bakeryId' in bakery routes, both in front and back.
 - make sure params match variables in code when implementing other resources.
 - I think in others we can just use 'id' instead of 'productId' etc.
+
+# 2024-10-29
+
+- when recipe is created ingredient ids are added to ingedient docs
+- when recipe is updated (add/remove ingredients) the ingredient docs are updated to reflect the change
+- this is done in recipeService.updateRecipe
+
+- when ingredient cost is updated, the cost is updated in the recipe docs for the ingredients that are used in the recipe
+
+- recipe versioning is working

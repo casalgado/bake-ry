@@ -3,14 +3,11 @@ const { BadRequestError, NotFoundError } = require("../utils/errors");
 
 const recipeController = {
   async createRecipe(req, res) {
-    console.log("In controller createRecipe, req.body", req.body);
     try {
       const { bakeryId } = req.params;
       const recipeData = {
         ...req.body,
         bakeryId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
 
       // Validate ingredients exist and get their current costs
@@ -82,26 +79,6 @@ const recipeController = {
         ...req.body,
         updatedAt: new Date(),
       };
-
-      // Handle different types of updates
-      if (updateData.action === "updateIngredients") {
-        console.log(
-          "In controller updateRecipe, updateData.action",
-          updateData.action
-        );
-        // Validate ingredients
-        if (!Array.isArray(updateData.ingredients)) {
-          throw new BadRequestError("ingredients must be an array");
-        }
-
-        for (const ingredient of updateData.ingredients) {
-          if (!ingredient.ingredientId || !ingredient.quantity) {
-            throw new BadRequestError(
-              "Each ingredient must have ingredientId and quantity"
-            );
-          }
-        }
-      }
 
       const updatedRecipe = await recipeService.updateRecipe(
         bakeryId,

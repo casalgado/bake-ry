@@ -16,8 +16,6 @@ const bakeryController = {
       const bakeryData = {
         ...req.body,
         ownerId: uid,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
       const newBakery = await bakeryService.createBakery(bakeryData);
       res.status(201).json(newBakery);
@@ -56,10 +54,12 @@ const bakeryController = {
     try {
       const { bakeryId } = req.params;
       const bakeryData = req.body;
+      console.log("In controller updateBakery, bakeryData", bakeryData);
       const updatedBakery = await bakeryService.updateBakery(
         bakeryId,
         bakeryData
       );
+      console.log("In controller updateBakery, updatedBakery", updatedBakery);
       if (updatedBakery) {
         res.json(updatedBakery);
       } else {

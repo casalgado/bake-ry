@@ -11,6 +11,7 @@ const userService = {
       const newUser = new User(userData);
 
       // Validate role and bakeryId first
+      // CHANGES: Bakery Id is requried for all users.
       if (newUser.role !== "system_admin" && newUser.role !== "bakery_admin") {
         if (!newUser.bakeryId) {
           throw new Error("BakeryId is required for non-admin users");
@@ -18,6 +19,7 @@ const userService = {
       }
 
       // Check if the email already exists for the given bakery
+      // CHANGES (CHECK): Make sure user email is unique for each bakery. (is email the right prop for uniqueness?)
       const existingUser = await db
         .collection("users")
         .where("email", "==", newUser.email)
@@ -39,6 +41,7 @@ const userService = {
         // 2. Set custom claims
         const customClaims = { role: newUser.role };
         // Assign bakeryId to customClaims if applicable
+        // CHANGES: bakery_admin should have bakeryId already?
         if (
           newUser.role !== "system_admin" &&
           newUser.role !== "bakery_admin" &&
@@ -49,6 +52,16 @@ const userService = {
         await admin.auth().setCustomUserClaims(userRecord.uid, customClaims);
 
         // 3. Create the user document in Firestore
+        /** 
+         * CHANGES: Make this nested for each bakery.
+         * probably something like this: 
+         *       const ingredientsRef = db
+                .collection("bakeries")
+                .doc(bakeryId)
+                .collection("ingredients");
+        * what has to change in the routes file to make this resource nested, and why does it have to change?
+        */
+
         const userRef = db.collection("users").doc(userRecord.uid);
         transaction.set(userRef, newUser.toFirestore());
 
@@ -168,6 +181,7 @@ const userService = {
       }
 
       // Remove any fields that shouldn't be updated
+      // this should happen in the controller
       const { email, role, createdAt, ...validUpdateData } = updateData;
 
       const updates = {

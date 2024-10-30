@@ -142,7 +142,7 @@ const ingredientService = {
 
         const currentIngredient = Ingredient.fromFirestore(doc);
 
-        // Check if cost changed
+        // checks if costPerUnit has changed, if so, calls updateRecipe on all recipes that use this ingredient
         if (hasCostChanged(currentIngredient, updateData)) {
           console.log("Ingredient cost changed, updating recipes  ");
           await updateRecipesWithNewCost(
@@ -159,8 +159,6 @@ const ingredientService = {
           ...updateData,
           updatedAt: new Date(),
         });
-
-        // checks if costPerUnit has changed, if so, calls updateRecipe on all recipes that use this ingredient
 
         await ingredientRef.update(updatedIngredient.toFirestore());
         return updatedIngredient;
