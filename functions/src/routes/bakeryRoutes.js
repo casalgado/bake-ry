@@ -1,31 +1,59 @@
-const express = require("express");
-const bakeryController = require("../controllers/bakeryController");
+const express = require('express');
+const BakeryController = require('../controllers/BakeryController');
+const bakeryService = require('../services/BakeryService');
 const {
   authenticateUser,
   requireSystemAdmin,
   requireBakeryAdmin,
-} = require("../middleware/userAccess");
-const hasBakeryAccess = require("../middleware/bakeryAccess");
+} = require('../middleware/userAccess');
+const hasBakeryAccess = require('../middleware/bakeryAccess');
+
+const mapBakeryIdToId = (req, res, next) => {
+  if (req.params.bakeryId) {
+    req.params.id = req.params.bakeryId;
+  }
+  next();
+};
 
 const router = express.Router();
+
+const bindController = (controller) => ({
+  create: controller.create.bind(controller),
+  getById: controller.getById.bind(controller),
+  getAll: controller.getAll.bind(controller),
+  update: controller.update.bind(controller),
+  patch: controller.patch.bind(controller),
+  delete: controller.delete.bind(controller),
+});
+
+const controller = new BakeryController(bakeryService);
+const bakeryController = bindController(controller);
 
 // Apply authentication to all routes
 router.use(authenticateUser);
 
 // System admin routes
-router.get("/", requireSystemAdmin, bakeryController.getAllBakeries);
-router.delete("/:bakeryId", requireSystemAdmin, bakeryController.deleteBakery);
+router.get('/', requireSystemAdmin, mapBakeryIdToId, bakeryController.getAll);
+router.delete('/:bakeryId', requireSystemAdmin, mapBakeryIdToId, bakeryController.delete);
 
 // Bakery admin routes
-router.post("/", requireBakeryAdmin, bakeryController.createBakery);
+router.post('/', requireBakeryAdmin, mapBakeryIdToId, bakeryController.create);
 router.patch(
-  "/:bakeryId",
+  '/:bakeryId',
   requireBakeryAdmin,
   hasBakeryAccess,
-  bakeryController.updateBakery
+  mapBakeryIdToId,
+  bakeryController.patch,
+);
+router.put(
+  '/:bakeryId',
+  requireBakeryAdmin,
+  hasBakeryAccess,
+  mapBakeryIdToId,
+  bakeryController.update,
 );
 
 // General access routes (with bakery access check)
-router.get("/:bakeryId", hasBakeryAccess, bakeryController.getBakery);
+router.get('/:bakeryId', hasBakeryAccess, mapBakeryIdToId, bakeryController.getById);
 
 module.exports = router;

@@ -1,6 +1,6 @@
-const { db } = require("../config/firebase");
-const Ingredient = require("../models/Ingredient");
-const recipeService = require("./recipeService");
+const { db } = require('../config/firebase');
+const Ingredient = require('../models/Ingredient');
+const recipeService = require('./recipeService');
 
 /**
  * Checks if costPerUnit has changed between current and update data
@@ -28,7 +28,7 @@ const updateRecipesWithNewCost = async (
   bakeryId,
   ingredientId,
   newCostPerUnit,
-  usedInRecipes
+  usedInRecipes,
 ) => {
   const updatePromises = usedInRecipes.map(async (recipeId) => {
     const recipe = await recipeService.getRecipeById(bakeryId, recipeId);
@@ -38,18 +38,18 @@ const updateRecipesWithNewCost = async (
     const updatedIngredients = recipe.ingredients.map((ing) =>
       ing.ingredientId === ingredientId
         ? { ...ing, costPerUnit: newCostPerUnit }
-        : ing
+        : ing,
     );
 
     // Let recipeService handle the update and versioning
-    console.log("updating recipe", recipeId);
+    console.log('updating recipe', recipeId);
     await recipeService.updateRecipe(
       bakeryId,
       recipeId,
       {
         ingredients: updatedIngredients,
       },
-      transaction
+      transaction,
     );
   });
 
@@ -60,9 +60,9 @@ const ingredientService = {
   async createIngredient(bakeryId, ingredientData) {
     try {
       const ingredientsRef = db
-        .collection("bakeries")
+        .collection('bakeries')
         .doc(bakeryId)
-        .collection("ingredients");
+        .collection('ingredients');
       const newIngredientRef = ingredientsRef.doc();
 
       const ingredient = new Ingredient({
@@ -74,7 +74,7 @@ const ingredientService = {
       await newIngredientRef.set(ingredient.toFirestore());
       return ingredient;
     } catch (error) {
-      console.error("Error in createIngredient:", error);
+      console.error('Error in createIngredient:', error);
       throw error;
     }
   },
@@ -82,9 +82,9 @@ const ingredientService = {
   async getIngredient(bakeryId, ingredientId) {
     try {
       const doc = await db
-        .collection("bakeries")
+        .collection('bakeries')
         .doc(bakeryId)
-        .collection("ingredients")
+        .collection('ingredients')
         .doc(ingredientId)
         .get();
 
@@ -94,7 +94,7 @@ const ingredientService = {
 
       return Ingredient.fromFirestore(doc);
     } catch (error) {
-      console.error("Error in getIngredient:", error);
+      console.error('Error in getIngredient:', error);
       throw error;
     }
   },
@@ -102,25 +102,25 @@ const ingredientService = {
   async getAllIngredients(bakeryId, filters = {}) {
     try {
       let query = db
-        .collection("bakeries")
+        .collection('bakeries')
         .doc(bakeryId)
-        .collection("ingredients");
+        .collection('ingredients');
 
       // Apply filters
       if (filters.category) {
-        query = query.where("category", "==", filters.category);
+        query = query.where('category', '==', filters.category);
       }
       if (filters.isActive !== undefined) {
-        query = query.where("isActive", "==", filters.isActive);
+        query = query.where('isActive', '==', filters.isActive);
       }
       if (filters.needsRestock === true) {
-        query = query.where("currentStock", "<=", "reorderPoint");
+        query = query.where('currentStock', '<=', 'reorderPoint');
       }
 
       const snapshot = await query.get();
       return snapshot.docs.map((doc) => Ingredient.fromFirestore(doc));
     } catch (error) {
-      console.error("Error in getAllIngredients:", error);
+      console.error('Error in getAllIngredients:', error);
       throw error;
     }
   },
@@ -128,9 +128,9 @@ const ingredientService = {
   async updateIngredient(bakeryId, ingredientId, updateData) {
     try {
       const ingredientRef = db
-        .collection("bakeries")
+        .collection('bakeries')
         .doc(bakeryId)
-        .collection("ingredients")
+        .collection('ingredients')
         .doc(ingredientId);
 
       // Start a transaction
@@ -144,13 +144,13 @@ const ingredientService = {
 
         // checks if costPerUnit has changed, if so, calls updateRecipe on all recipes that use this ingredient
         if (hasCostChanged(currentIngredient, updateData)) {
-          console.log("Ingredient cost changed, updating recipes  ");
+          console.log('Ingredient cost changed, updating recipes  ');
           await updateRecipesWithNewCost(
             transaction,
             bakeryId,
             ingredientId,
             updateData.costPerUnit,
-            currentIngredient.usedInRecipes || []
+            currentIngredient.usedInRecipes || [],
           );
         }
 
@@ -164,7 +164,7 @@ const ingredientService = {
         return updatedIngredient;
       });
     } catch (error) {
-      console.error("Error in updateIngredient:", error);
+      console.error('Error in updateIngredient:', error);
       throw error;
     }
   },
@@ -173,54 +173,54 @@ const ingredientService = {
     try {
       // First check if the ingredient is used in any recipes
       const recipesRef = db
-        .collection("bakeries")
+        .collection('bakeries')
         .doc(bakeryId)
-        .collection("recipes");
+        .collection('recipes');
       const recipeSnapshot = await recipesRef
-        .where("ingredients", "array-contains", ingredientId)
+        .where('ingredients', 'array-contains', ingredientId)
         .limit(1)
         .get();
 
       if (!recipeSnapshot.empty) {
-        throw new Error("Cannot delete ingredient that is used in recipes");
+        throw new Error('Cannot delete ingredient that is used in recipes');
       }
 
       await db
-        .collection("bakeries")
+        .collection('bakeries')
         .doc(bakeryId)
-        .collection("ingredients")
+        .collection('ingredients')
         .doc(ingredientId)
         .delete();
 
       return true;
     } catch (error) {
-      console.error("Error in deleteIngredient:", error);
+      console.error('Error in deleteIngredient:', error);
       throw error;
     }
   },
 
-  async updateStock(bakeryId, ingredientId, quantity, type = "decrease") {
+  async updateStock(bakeryId, ingredientId, quantity, type = 'decrease') {
     try {
       const ingredientRef = db
-        .collection("bakeries")
+        .collection('bakeries')
         .doc(bakeryId)
-        .collection("ingredients")
+        .collection('ingredients')
         .doc(ingredientId);
 
       return await db.runTransaction(async (transaction) => {
         const doc = await transaction.get(ingredientRef);
         if (!doc.exists) {
-          throw new Error("Ingredient not found");
+          throw new Error('Ingredient not found');
         }
 
         const ingredient = Ingredient.fromFirestore(doc);
         const newStock =
-          type === "decrease"
+          type === 'decrease'
             ? ingredient.currentStock - quantity
             : ingredient.currentStock + quantity;
 
         if (newStock < 0) {
-          throw new Error("Insufficient stock");
+          throw new Error('Insufficient stock');
         }
 
         const updates = {
@@ -229,7 +229,7 @@ const ingredientService = {
           updatedAt: new Date(),
         };
 
-        if (type === "increase") {
+        if (type === 'increase') {
           updates.lastRestockDate = new Date();
         }
 
@@ -241,7 +241,7 @@ const ingredientService = {
         };
       });
     } catch (error) {
-      console.error("Error in updateStock:", error);
+      console.error('Error in updateStock:', error);
       throw error;
     }
   },

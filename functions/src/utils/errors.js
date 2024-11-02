@@ -2,7 +2,7 @@ class AppError extends Error {
   constructor(message, statusCode) {
     super(message);
     this.statusCode = statusCode;
-    this.status = `${statusCode}`.startsWith("4") ? "fail" : "error";
+    this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
     this.isOperational = true;
 
     Error.captureStackTrace(this, this.constructor);
@@ -10,31 +10,31 @@ class AppError extends Error {
 }
 
 class NotFoundError extends AppError {
-  constructor(message = "Resource not found") {
+  constructor(message = 'Resource not found') {
     super(message, 404);
   }
 }
 
 class ForbiddenError extends AppError {
-  constructor(message = "Access forbidden") {
+  constructor(message = 'Access forbidden') {
     super(message, 403);
   }
 }
 
 class UnauthorizedError extends AppError {
-  constructor(message = "Unauthorized access") {
+  constructor(message = 'Unauthorized access') {
     super(message, 401);
   }
 }
 
 class ValidationError extends AppError {
-  constructor(message = "Validation failed") {
+  constructor(message = 'Validation failed') {
     super(message, 400);
   }
 }
 
 class BadRequestError extends AppError {
-  constructor(message = "Validation failed") {
+  constructor(message = 'Validation failed') {
     super(message, 400);
   }
 }
@@ -45,5 +45,5 @@ module.exports = {
   ForbiddenError,
   UnauthorizedError,
   ValidationError,
-  BadRequestError
+  BadRequestError,
 };

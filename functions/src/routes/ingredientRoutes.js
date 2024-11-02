@@ -1,12 +1,12 @@
-const express = require("express");
-const ingredientController = require("../controllers/ingredientController");
+const express = require('express');
+const ingredientController = require('../controllers/ingredientController');
 const {
   authenticateUser,
   requireBakeryStaffOrAdmin,
-} = require("../middleware/userAccess");
-const hasBakeryAccess = require("../middleware/bakeryAccess");
+} = require('../middleware/userAccess');
+const hasBakeryAccess = require('../middleware/bakeryAccess');
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 // Apply authentication to all routes
 router.use(authenticateUser);
@@ -19,26 +19,27 @@ bakeryRouter.use(hasBakeryAccess);
 bakeryRouter.use(requireBakeryStaffOrAdmin);
 
 // CRUD routes
-bakeryRouter.post("/ingredients", ingredientController.createIngredient);
-bakeryRouter.get("/ingredients", ingredientController.getAllIngredients);
+bakeryRouter.post('/ingredients', ingredientController.createIngredient);
+bakeryRouter.get('/ingredients', ingredientController.getAllIngredients);
 bakeryRouter.get(
-  "/ingredients/:ingredientId",
-  ingredientController.getIngredient
+  '/ingredients/:ingredientId',
+  ingredientController.getIngredient,
 );
 bakeryRouter.patch(
-  "/ingredients/:ingredientId",
-  ingredientController.updateIngredient
+  '/ingredients/:ingredientId',
+  ingredientController.updateIngredient,
 );
+bakeryRouter.put('/ingredients/:ingredientId', ingredientController.updateIngredient);
 bakeryRouter.delete(
-  "/ingredients/:ingredientId",
-  ingredientController.deleteIngredient
+  '/ingredients/:ingredientId',
+  ingredientController.deleteIngredient,
 );
 bakeryRouter.patch(
-  "/ingredients/:ingredientId/stock",
-  ingredientController.updateStock
+  '/ingredients/:ingredientId/stock',
+  ingredientController.updateStock,
 );
 
 // Mount the bakery router
-router.use("/:bakeryId", bakeryRouter);
+router.use('/:bakeryId', bakeryRouter);
 
 module.exports = router;

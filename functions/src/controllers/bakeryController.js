@@ -1,86 +1,60 @@
-const bakeryService = require("../services/bakeryService");
+const BaseController = require('./base/BaseController');
+const { ForbiddenError, BadRequestError } = require('../utils/errors');
 
-const bakeryController = {
-  async createBakery(req, res) {
+class BakeryController extends BaseController {
+  /**
+   * BakeryController constructor
+   * @param {BakeryService} bakeryService - Instance of BakeryService
+   */
+  constructor(bakeryService) {
+    if (!bakeryService) {
+      throw new Error('BakeryService is required');
+    }
+    super(bakeryService);
+  }
+
+  /**
+   * Create bakery - Override base create method to add bakery-specific logic
+   * @param {Request} req - Express request object
+   * @param {Response} res - Express response object
+   */
+  async create(req, res) {
     try {
+      // Get user info from request (added by authentication middleware)
       const { uid, bakeryId } = req.user;
 
-      // Check if user already has a bakery
+      // Validate user doesn't already have a bakery
       if (bakeryId) {
-        return res.status(403).json({
-          error:
-            "User already has a bakery assigned and cannot create another one",
-        });
+        throw new ForbiddenError(
+          'User already has a bakery assigned and cannot create another one',
+        );
       }
 
+      // Validate required fields in request body
+      const { name, address } = req.body;
+      if (!name || !address) {
+        throw new BadRequestError('Name and address are required');
+      }
+
+      // Prepare bakery data with owner ID
       const bakeryData = {
         ...req.body,
         ownerId: uid,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
-      const newBakery = await bakeryService.createBakery(bakeryData);
-      res.status(201).json(newBakery);
-    } catch (error) {
-      console.error("Error creating bakery:", error);
-      res.status(400).json({ error: error.message });
-    }
-  },
 
-  async getBakery(req, res) {
-    try {
-      const { bakeryId } = req.params;
-      const bakery = await bakeryService.getBakeryById(bakeryId);
-      if (bakery) {
-        res.json(bakery);
-      } else {
-        res.status(404).json({ error: "Bakery not found" });
-      }
-    } catch (error) {
-      console.error("Error getting bakery:", error);
-      res.status(500).json({ error: error.message });
-    }
-  },
+      // Create bakery using service
+      const result = await this.service.create(bakeryData);
 
-  async getAllBakeries(req, res) {
-    try {
-      const bakeries = await bakeryService.getAllBakeries();
-      res.json(bakeries);
+      // Use base controller's response handler
+      this.handleResponse(res, result, 201);
     } catch (error) {
-      console.error("Error getting all bakeries:", error);
-      res.status(500).json({ error: error.message });
+      // Use base controller's error handler
+      this.handleError(res, error);
     }
-  },
+  }
 
-  async updateBakery(req, res) {
-    try {
-      const { bakeryId } = req.params;
-      const bakeryData = req.body;
-      console.log("In controller updateBakery, bakeryData", bakeryData);
-      const updatedBakery = await bakeryService.updateBakery(
-        bakeryId,
-        bakeryData
-      );
-      console.log("In controller updateBakery, updatedBakery", updatedBakery);
-      if (updatedBakery) {
-        res.json(updatedBakery);
-      } else {
-        res.status(404).json({ error: "Bakery not found" });
-      }
-    } catch (error) {
-      console.error("Error updating bakery:", error);
-      res.status(400).json({ error: error.message });
-    }
-  },
+}
 
-  async deleteBakery(req, res) {
-    try {
-      const { bakeryId } = req.params;
-      await bakeryService.deleteBakery(bakeryId);
-      res.status(204).send();
-    } catch (error) {
-      console.error("Error deleting bakery:", error);
-      res.status(500).json({ error: error.message });
-    }
-  },
-};
-
-module.exports = bakeryController;
+module.exports = BakeryController;

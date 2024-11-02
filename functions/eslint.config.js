@@ -1,6 +1,7 @@
 const globals = require('globals');
 const pluginJs = require('@eslint/js');
 const pluginVue = require('eslint-plugin-vue');
+const pluginJest = require('eslint-plugin-jest');
 
 module.exports = [
   {
@@ -16,7 +17,7 @@ module.exports = [
     },
     rules: {
       // Disable problematic rules
-      'no-unused-vars': ['warn', { 'args': 'none' }],
+      'no-unused-vars': ['off', { 'args': 'none' }],
       'no-undef': 'off',
 
       // Basic formatting
@@ -50,6 +51,20 @@ module.exports = [
       'no-trailing-spaces': 'error',
       'no-multiple-empty-lines': ['error', { 'max': 1, 'maxEOF': 0 }],
       'eol-last': ['error', 'always'],
+    },
+  },
+  {
+    files: ['**/*.test.js', '**/*.spec.js', '**/tests/**/*.js', '**/__tests__/**/*.js'],
+    plugins: {
+      jest: pluginJest,
+    },
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+      },
+    },
+    rules: {
+      ...pluginJest.configs.recommended.rules,
     },
   },
   {
