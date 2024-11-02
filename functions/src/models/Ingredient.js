@@ -144,7 +144,7 @@ class Ingredient {
     this.discontinuedReason = discontinuedReason;
 
     // Timestamps
-    this.createdAt = createdAt || new Date();
+    this.createdAt = createdAt ? new Date(createdAt) : new Date();
     this.updatedAt = updatedAt || new Date();
 
     // Custom Attributes

@@ -1,30 +1,54 @@
-const admin = require("firebase-admin");
-
-// Initialize Firebase Admin with a project ID
-admin.initializeApp({
-  projectId: "bake-ry",
-});
-
-// Get Firestore and Auth instances
-const db = admin.firestore();
-const auth = admin.auth();
-
-// Connect to emulators
-db.settings({
-  host: "localhost:8080",
-  ssl: false,
-});
-
-// Set Auth emulator host through environment variable
-process.env.FIREBASE_AUTH_EMULATOR_HOST = "localhost:9099";
-
 const testData = {
   bakery: {
     email: "test@bakery.com",
     password: "aoeuao",
-    name: "Test Bakery",
+    name: "Betos Bakery",
     role: "bakery_admin",
-  },
+    openingHours: {
+      monday: {
+        isOpen: true,
+        open: "09:00",
+        close: "17:00",
+      },
+      tuesday: {
+        isOpen: true,
+        open: "09:00",
+        close: "17:00",
+      },
+      wednesday: {
+        isOpen: true,
+        open: "09:00",
+        close: "17:00",
+      },
+      thursday: {
+        isOpen: true,
+        open: "09:00",
+        close: "17:00",
+      },
+      friday: {
+        isOpen: true,
+        open: "09:00",
+        close: "17:00",
+      },
+      saturday: {
+        isOpen: true,
+        open: "09:00",
+        close: "17:00",
+      },
+      sunday: {
+        isOpen: false,
+        open: "",
+        close: "",
+      },
+    },
+  socialMedia: {
+    facebook: "https://facebook.com/a",
+    instagram: "https://instagram.com/a",
+    tiktok: "https://tiktok.com/a",
+    youtube: "https://youtube.com/a",
+    twitter: "https://twitter.com/a",
+    pinterest: "https://pinterest.com/a",
+  }},
   ingredients: [
     // Harinas y Almidones
     {
@@ -314,156 +338,4 @@ const testData = {
   ],
 };
 
-async function setupTestEnvironment() {
-  try {
-    // 1. Create bakery admin user in Firebase Auth
-    console.log("Creating bakery admin user...");
-    const userRecord = await auth.createUser({
-      email: testData.bakery.email,
-      password: testData.bakery.password,
-    });
-
-    // Initial custom claims with role only
-    await auth.setCustomUserClaims(userRecord.uid, {
-      role: testData.bakery.role,
-    });
-
-    // 2. Create bakery document
-    console.log("Creating bakery document...");
-    const bakeryRef = db.collection("bakeries").doc();
-    const bakeryId = bakeryRef.id;
-
-    // Start a transaction to ensure atomicity
-    await db.runTransaction(async (transaction) => {
-      // Set bakery document
-      transaction.set(bakeryRef, {
-        name: testData.bakery.name,
-        ownerId: userRecord.uid,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isActive: true,
-      });
-
-      // Set user document
-      const userRef = db.collection("users").doc(userRecord.uid);
-      transaction.set(userRef, {
-        email: testData.bakery.email,
-        name: testData.bakery.name,
-        role: testData.bakery.role,
-        bakeryId: bakeryId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-    });
-
-    // Update custom claims with bakeryId
-    console.log("Updating custom claims with bakeryId...");
-    await auth.setCustomUserClaims(userRecord.uid, {
-      role: testData.bakery.role,
-      bakeryId: bakeryId,
-    });
-
-    // Verify the claims were set correctly
-    const updatedUser = await auth.getUser(userRecord.uid);
-    console.log("Updated custom claims:", updatedUser.customClaims);
-
-    // 3. Create ingredients
-    console.log("Creating ingredients...");
-    const ingredientBatch = db.batch();
-    testData.ingredients.forEach((ingredient) => {
-      const ref = db
-        .collection(`bakeries/${bakeryId}/ingredients`)
-        .doc(ingredient.id);
-      ingredientBatch.set(ref, {
-        ...ingredient,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isActive: true,
-        type: "Raw Material",
-        customAttributes: {},
-        purchaseHistory: [],
-        usedInRecipes: [],
-        averageMonthlyUsage: 0,
-        consumptionRate: 0,
-        currency: "USD",
-      });
-    });
-    await ingredientBatch.commit();
-
-    console.log("Test environment setup complete!");
-    console.log("Bakery ID:", bakeryId);
-    console.log("User ID:", userRecord.uid);
-
-    return {
-      bakeryId,
-      userId: userRecord.uid,
-      email: testData.bakery.email,
-      password: testData.bakery.password,
-    };
-  } catch (error) {
-    console.error("Error setting up test environment:", error);
-    throw error;
-  }
-}
-
-async function cleanupTestEnvironment(userId, bakeryId) {
-  try {
-    console.log("Cleaning up test environment...");
-
-    // Delete all ingredients
-    const snapshot = await db
-      .collection(`bakeries/${bakeryId}/ingredients`)
-      .get();
-    const batch = db.batch();
-    snapshot.docs.forEach((doc) => {
-      batch.delete(doc.ref);
-    });
-    await batch.commit();
-
-    // Delete bakery
-    await db.collection("bakeries").doc(bakeryId).delete();
-
-    // Delete user document
-    await db.collection("users").doc(userId).delete();
-
-    // Delete Firebase Auth user
-    await auth.deleteUser(userId);
-
-    console.log("Cleanup complete!");
-  } catch (error) {
-    console.error("Error cleaning up test environment:", error);
-    throw error;
-  }
-}
-
-// Usage
-async function runTests() {
-  let testEnv = null;
-  try {
-    testEnv = await setupTestEnvironment();
-    console.log("Test environment created successfully!");
-    console.log("Use these credentials for API testing:");
-    console.log(testEnv);
-
-    // Wait for user input before cleanup
-    console.log(
-      "\nPress Ctrl+C when you're done testing to cleanup the test environment."
-    );
-
-    // Handle cleanup on process termination
-    process.on("SIGINT", async () => {
-      if (testEnv) {
-        await cleanupTestEnvironment(testEnv.userId, testEnv.bakeryId);
-      }
-      process.exit();
-    });
-  } catch (error) {
-    console.error("Test run failed:", error);
-    if (testEnv) {
-      await cleanupTestEnvironment(testEnv.userId, testEnv.bakeryId);
-    }
-  }
-}
-
-// Run the tests
-runTests();
+module.exports = testData;

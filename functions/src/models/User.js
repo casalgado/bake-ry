@@ -21,7 +21,7 @@ class User {
     this.role = role;
     this.bakeryId = bakeryId;
     this.name = name;
-    this.createdAt = createdAt || new Date();
+    this.createdAt = createdAt ? new Date(createdAt) : new Date();
     this.updatedAt = updatedAt || new Date();
     this.address = address || "";
     this.birthday = birthday || "";

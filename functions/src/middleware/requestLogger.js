@@ -44,16 +44,16 @@ const requestLogger = (req, res, next) => {
     console.log(`Status: ${res.statusCode}`);
     console.log(`Response Time: ${responseTime}ms`);
 
-    // // Try to parse and log response body if it's JSON
-    // if (chunks.length) {
-    //   const body = Buffer.concat(chunks).toString("utf8");
-    //   try {
-    //     const parsed = JSON.parse(body);
-    //     console.log("Response Body:", JSON.stringify(parsed, null, 2));
-    //   } catch (e) {
-    //     console.log("Response Body:", body);
-    //   }
-    // }
+    // Try to parse and log response body if it's JSON
+    if (chunks.length) {
+      const body = Buffer.concat(chunks).toString("utf8");
+      try {
+        const parsed = JSON.parse(body);
+        console.log("Response Body:", JSON.stringify(parsed, null, 2));
+      } catch (e) {
+        console.log("Response Body:", body);
+      }
+    }
 
     console.log("=== End ===\n");
 

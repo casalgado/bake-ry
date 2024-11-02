@@ -111,7 +111,7 @@ class Recipe {
 
     // Status and Timestamps
     this.isActive = isActive ?? true;
-    this.createdAt = createdAt || new Date();
+    this.createdAt = createdAt ? new Date(createdAt) : new Date();
     this.updatedAt = updatedAt || new Date();
 
     // Basic Quality Control

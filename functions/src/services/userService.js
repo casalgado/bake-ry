@@ -11,7 +11,6 @@ const userService = {
       const newUser = new User(userData);
 
       // Validate role and bakeryId first
-      // CHANGES: Bakery Id is requried for all users.
       if (newUser.role !== "system_admin" && newUser.role !== "bakery_admin") {
         if (!newUser.bakeryId) {
           throw new Error("BakeryId is required for non-admin users");
@@ -19,7 +18,7 @@ const userService = {
       }
 
       // Check if the email already exists for the given bakery
-      // CHANGES (CHECK): Make sure user email is unique for each bakery. (is email the right prop for uniqueness?)
+      // This check happens in different places in depending on role.
       const existingUser = await db
         .collection("users")
         .where("email", "==", newUser.email)

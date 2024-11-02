@@ -141,7 +141,7 @@ class Order {
     this.internalNotes = internalNotes || "";
 
     // Metadata
-    this.createdAt = createdAt || new Date();
+    this.createdAt = createdAt ? new Date(createdAt) : new Date();
     this.updatedAt = updatedAt || new Date();
   }
 

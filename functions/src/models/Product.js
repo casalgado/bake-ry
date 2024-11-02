@@ -171,7 +171,7 @@ class Product {
     this.leadTime = leadTime;
 
     // Timestamps
-    this.createdAt = createdAt || new Date();
+    this.createdAt = createdAt ? new Date(createdAt) : new Date();
     this.updatedAt = updatedAt || new Date();
 
     // Analytics & Metrics

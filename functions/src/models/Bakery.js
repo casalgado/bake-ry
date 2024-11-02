@@ -67,7 +67,7 @@ class Bakery {
     this.operatingHours = operatingHours;
     this.holidays = holidays;
     this.ownerId = ownerId;
-    this.createdAt = createdAt || new Date();
+    this.createdAt = createdAt ? new Date(createdAt) : new Date();
     this.updatedAt = updatedAt || new Date();
 
     // Business Information

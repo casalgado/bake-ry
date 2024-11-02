@@ -15,52 +15,6 @@ const { BadRequestError, NotFoundError } = require("../utils/errors");
  * @param {Set<string>} oldIngredientIds - Original recipe ingredients
  * @param {Set<string>} newIngredientIds - Updated recipe ingredients
  */
-const updateIngredientAssociations = async (
-  transaction,
-  bakeryId,
-  recipeId,
-  oldIngredientIds,
-  newIngredientIds
-) => {
-  console.log("oldIngredientIds", oldIngredientIds);
-  console.log("newIngredientIds", newIngredientIds);
-
-  // Find ingredients that need updating
-  const toRemove = [...oldIngredientIds].filter(
-    (id) => !newIngredientIds.has(id)
-  );
-  const toAdd = [...newIngredientIds].filter((id) => !oldIngredientIds.has(id));
-
-  // Step 1: Perform all reads first (Firestore requirement)
-  const ingredientDocs = await Promise.all([
-    ...toRemove.map((id) =>
-      transaction.get(db.collection(`bakeries/${bakeryId}/ingredients`).doc(id))
-    ),
-    ...toAdd.map((id) =>
-      transaction.get(db.collection(`bakeries/${bakeryId}/ingredients`).doc(id))
-    ),
-  ]);
-
-  // Step 2: Update usedInRecipes arrays
-  ingredientDocs.forEach((doc, index) => {
-    if (!doc.exists) return;
-
-    const isRemove = index < toRemove.length;
-    const usedInRecipes = doc.data().usedInRecipes || [];
-
-    if (isRemove) {
-      console.log("removing recipe from ingredient", doc.id);
-      transaction.update(doc.ref, {
-        usedInRecipes: usedInRecipes.filter((id) => id !== recipeId),
-      });
-    } else if (!usedInRecipes.includes(recipeId)) {
-      console.log("adding recipe to ingredient", doc.id);
-      transaction.update(doc.ref, {
-        usedInRecipes: [...usedInRecipes, recipeId],
-      });
-    }
-  });
-};
 
 const recipeService = {
   /**
@@ -163,16 +117,7 @@ const recipeService = {
         return null;
       }
 
-      const recipeData = recipeDoc.data();
-      const ingredients = recipeData.ingredients.map(
-        (ingredient) => new RecipeIngredient(ingredient)
-      );
-
-      return new Recipe({
-        id: recipeDoc.id,
-        ...recipeData,
-        ingredients,
-      });
+      return Recipe.fromFirestore(recipeDoc);
     } catch (error) {
       console.error("Error in getRecipeById service:", error);
       throw error;
@@ -190,18 +135,7 @@ const recipeService = {
         .collection(`bakeries/${bakeryId}/recipes`)
         .get();
 
-      return snapshot.docs.map((doc) => {
-        const recipeData = doc.data();
-        const ingredients = recipeData.ingredients.map(
-          (ingredient) => new RecipeIngredient(ingredient)
-        );
-
-        return new Recipe({
-          id: doc.id,
-          ...recipeData,
-          ingredients,
-        });
-      });
+      return snapshot.docs.map((doc) => Recipe.fromFirestore(doc));
     } catch (error) {
       console.error("Error in getAllRecipes service:", error);
       throw error;
@@ -228,6 +162,10 @@ const recipeService = {
 
         if (!recipeDoc.exists) {
           throw new NotFoundError("Recipe not found");
+        }
+
+        if (updateData.ingredients) {
+          validateIngredientData(updateData.ingredients);
         }
 
         let currentRecipe = Recipe.fromFirestore(recipeDoc);
@@ -385,6 +323,25 @@ const recipeService = {
       throw error;
     }
   },
+};
+
+const validateIngredientData = (ingredients) => {
+  if (!Array.isArray(ingredients)) {
+    throw new BadRequestError("Ingredients must be an array");
+  }
+
+  ingredients.forEach((ing, index) => {
+    if (
+      !ing.ingredientId ||
+      !ing.quantity ||
+      ing.costPerUnit === undefined ||
+      !ing.name
+    ) {
+      throw new BadRequestError(
+        `Invalid ingredient data at index ${index}. Required fields: ingredientId, quantity, costPerUnit, name`
+      );
+    }
+  });
 };
 
 module.exports = recipeService;

@@ -6,6 +6,7 @@ const recipeVersioningService = {
     recipe = recipe.toFirestore();
 
     transaction.set(historyRef, {
+  
       version: recipe.version || 1,
       ingredients: recipe.ingredients,
       steps: recipe.steps || null,

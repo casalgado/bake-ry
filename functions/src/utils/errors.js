@@ -33,10 +33,17 @@ class ValidationError extends AppError {
   }
 }
 
+class BadRequestError extends AppError {
+  constructor(message = "Validation failed") {
+    super(message, 400);
+  }
+}
+
 module.exports = {
   AppError,
   NotFoundError,
   ForbiddenError,
   UnauthorizedError,
   ValidationError,
+  BadRequestError
 };
