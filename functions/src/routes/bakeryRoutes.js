@@ -15,8 +15,6 @@ const mapBakeryIdToId = (req, res, next) => {
   next();
 };
 
-const router = express.Router();
-
 const bindController = (controller) => ({
   create: controller.create.bind(controller),
   getById: controller.getById.bind(controller),
@@ -28,6 +26,8 @@ const bindController = (controller) => ({
 
 const controller = new BakeryController(bakeryService);
 const bakeryController = bindController(controller);
+
+const router = express.Router();
 
 // Apply authentication to all routes
 router.use(authenticateUser);

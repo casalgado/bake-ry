@@ -57,7 +57,7 @@ const updateRecipesWithNewCost = async (
 };
 
 const ingredientService = {
-  async createIngredient(bakeryId, ingredientData) {
+  async create(ingredientData, bakeryId) {
     try {
       const ingredientsRef = db
         .collection('bakeries')
@@ -79,7 +79,7 @@ const ingredientService = {
     }
   },
 
-  async getIngredient(bakeryId, ingredientId) {
+  async getById(ingredientId, bakeryId) {
     try {
       const doc = await db
         .collection('bakeries')
@@ -99,7 +99,7 @@ const ingredientService = {
     }
   },
 
-  async getAllIngredients(bakeryId, filters = {}) {
+  async getAll(bakeryId, filters = {}) {
     try {
       let query = db
         .collection('bakeries')
@@ -125,7 +125,7 @@ const ingredientService = {
     }
   },
 
-  async updateIngredient(bakeryId, ingredientId, updateData) {
+  async update(ingredientId, updateData, bakeryId) {
     try {
       const ingredientRef = db
         .collection('bakeries')
@@ -169,7 +169,7 @@ const ingredientService = {
     }
   },
 
-  async deleteIngredient(bakeryId, ingredientId) {
+  async delete(ingredientId, bakeryId) {
     try {
       // First check if the ingredient is used in any recipes
       const recipesRef = db
@@ -199,52 +199,6 @@ const ingredientService = {
     }
   },
 
-  async updateStock(bakeryId, ingredientId, quantity, type = 'decrease') {
-    try {
-      const ingredientRef = db
-        .collection('bakeries')
-        .doc(bakeryId)
-        .collection('ingredients')
-        .doc(ingredientId);
-
-      return await db.runTransaction(async (transaction) => {
-        const doc = await transaction.get(ingredientRef);
-        if (!doc.exists) {
-          throw new Error('Ingredient not found');
-        }
-
-        const ingredient = Ingredient.fromFirestore(doc);
-        const newStock =
-          type === 'decrease'
-            ? ingredient.currentStock - quantity
-            : ingredient.currentStock + quantity;
-
-        if (newStock < 0) {
-          throw new Error('Insufficient stock');
-        }
-
-        const updates = {
-          currentStock: newStock,
-          lastStockCheck: new Date(),
-          updatedAt: new Date(),
-        };
-
-        if (type === 'increase') {
-          updates.lastRestockDate = new Date();
-        }
-
-        transaction.update(ingredientRef, updates);
-
-        return {
-          ...ingredient,
-          ...updates,
-        };
-      });
-    } catch (error) {
-      console.error('Error in updateStock:', error);
-      throw error;
-    }
-  },
 };
 
 module.exports = ingredientService;

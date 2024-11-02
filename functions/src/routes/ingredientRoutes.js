@@ -1,42 +1,48 @@
 const express = require('express');
-const ingredientController = require('../controllers/ingredientController');
+const IngredientController = require('../controllers/IngredientController');
+const ingredientService = require('../services/ingredientService');
 const {
   authenticateUser,
   requireBakeryStaffOrAdmin,
 } = require('../middleware/userAccess');
 const hasBakeryAccess = require('../middleware/bakeryAccess');
 
-const router = express.Router({ mergeParams: true });
+const bindController = (controller) => ({
+  create: controller.create.bind(controller),
+  getById: controller.getById.bind(controller),
+  getAll: controller.getAll.bind(controller),
+  update: controller.update.bind(controller),
+  patch: controller.patch.bind(controller),
+  delete: controller.delete.bind(controller),
+});
 
+const controller = new IngredientController(ingredientService);
+const ingredientController = bindController(controller);
+
+const router = express.Router({ mergeParams: true });
 // Apply authentication to all routes
 router.use(authenticateUser);
-
 // Create a sub-router for bakery-specific routes
 const bakeryRouter = express.Router({ mergeParams: true }); // Add mergeParams: true
-
 // Apply bakery access middleware to the sub-router
 bakeryRouter.use(hasBakeryAccess);
 bakeryRouter.use(requireBakeryStaffOrAdmin);
 
 // CRUD routes
-bakeryRouter.post('/ingredients', ingredientController.createIngredient);
-bakeryRouter.get('/ingredients', ingredientController.getAllIngredients);
+bakeryRouter.post('/ingredients', ingredientController.create);
+bakeryRouter.get('/ingredients', ingredientController.getAll);
 bakeryRouter.get(
-  '/ingredients/:ingredientId',
-  ingredientController.getIngredient,
+  '/ingredients/:id',
+  ingredientController.getById,
 );
 bakeryRouter.patch(
-  '/ingredients/:ingredientId',
-  ingredientController.updateIngredient,
+  '/ingredients/:id',
+  ingredientController.patch,
 );
-bakeryRouter.put('/ingredients/:ingredientId', ingredientController.updateIngredient);
+bakeryRouter.put('/ingredients/:id', ingredientController.update);
 bakeryRouter.delete(
-  '/ingredients/:ingredientId',
-  ingredientController.deleteIngredient,
-);
-bakeryRouter.patch(
-  '/ingredients/:ingredientId/stock',
-  ingredientController.updateStock,
+  '/ingredients/:id',
+  ingredientController.delete,
 );
 
 // Mount the bakery router

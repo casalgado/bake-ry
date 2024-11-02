@@ -99,7 +99,8 @@ class BaseController {
   async update(req, res) {
     try {
       const { id, bakeryId } = req.params;
-      const updateData = req.body;
+      const { createdAt, ...updateData } = req.body;
+      void createdAt;
 
       if (!id) {
         throw new BadRequestError('ID parameter is required');
