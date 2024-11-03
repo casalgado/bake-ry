@@ -1,10 +1,23 @@
 const express = require('express');
-const recipeController = require('../controllers/recipeController');
+const RecipeController = require('../controllers/recipeController');
+const recipeService = require('../services/recipeService');
 const {
   authenticateUser,
   requireBakeryStaffOrAdmin,
 } = require('../middleware/userAccess');
 const hasBakeryAccess = require('../middleware/bakeryAccess');
+
+const bindController = (controller) => ({
+  create: controller.create.bind(controller),
+  getById: controller.getById.bind(controller),
+  getAll: controller.getAll.bind(controller),
+  update: controller.update.bind(controller),
+  patch: controller.patch.bind(controller),
+  delete: controller.delete.bind(controller),
+});
+
+const controller = new RecipeController(recipeService);
+const recipeController = bindController(controller);
 
 const router = express.Router();
 
@@ -19,15 +32,12 @@ bakeryRouter.use(hasBakeryAccess);
 bakeryRouter.use(requireBakeryStaffOrAdmin);
 
 // CRUD routes
-bakeryRouter.post('/recipes', recipeController.createRecipe);
-bakeryRouter.get('/recipes', recipeController.getAllRecipes);
-bakeryRouter.get('/recipes/:recipeId', recipeController.getRecipe);
-bakeryRouter.patch('/recipes/:recipeId', recipeController.updateRecipe);
-bakeryRouter.put('/recipes/:recipeId', recipeController.updateRecipe);
-bakeryRouter.delete('/recipes/:recipeId', recipeController.deleteRecipe);
-
-// Recipe scaling (kept separate as it's a specific operation)
-bakeryRouter.patch('/recipes/:recipeId/scale', recipeController.scaleRecipe);
+bakeryRouter.post('/recipes', recipeController.create);
+bakeryRouter.get('/recipes', recipeController.getAll);
+bakeryRouter.get('/recipes/:id', recipeController.getById);
+bakeryRouter.patch('/recipes/:id', recipeController.patch);
+bakeryRouter.put('/recipes/:id', recipeController.update);
+bakeryRouter.delete('/recipes/:id', recipeController.delete);
 
 // Mount the bakery router
 router.use('/:bakeryId', bakeryRouter);

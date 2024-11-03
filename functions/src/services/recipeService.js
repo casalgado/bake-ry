@@ -1,11 +1,11 @@
-const { db } = require("../config/firebase");
-const { Recipe, RecipeIngredient } = require("../models/Recipe");
+const { db } = require('../config/firebase');
+const { Recipe, RecipeIngredient } = require('../models/Recipe');
 const {
   requiresNewVersion,
   recipeVersioningService,
   ingredientsChanged,
-} = require("./versioning/recipeVersioning");
-const { BadRequestError, NotFoundError } = require("../utils/errors");
+} = require('./versioning/recipeVersioning');
+const { BadRequestError, NotFoundError } = require('../utils/errors');
 
 /**
  * Updates ingredient associations when recipe ingredients change
@@ -24,9 +24,8 @@ const recipeService = {
    * @returns {Promise<Recipe>} Created recipe
    * @throws {BadRequestError} When ingredients are not found
    */
-  async createRecipe(recipeData) {
+  async create(recipeData, bakeryId) {
     try {
-      const { bakeryId } = recipeData;
 
       // Start a transaction to validate ingredients and get their costs
       const recipe = await db.runTransaction(async (transaction) => {
@@ -41,7 +40,7 @@ const recipeService = {
 
             if (!ingredientDoc.exists) {
               throw new BadRequestError(
-                `Ingredient ${ingredient.ingredientId} not found`
+                `Ingredient ${ingredient.ingredientId} not found`,
               );
             }
 
@@ -54,7 +53,7 @@ const recipeService = {
               quantity: ingredient.quantity,
               unit: ingredientData.unit,
               costPerUnit: ingredientData.costPerUnit,
-              notes: ingredient.notes || "",
+              notes: ingredient.notes || '',
               allergens: ingredientData.allergens || [],
             });
 
@@ -63,7 +62,7 @@ const recipeService = {
               ref: ingredientRef,
               currentUsedInRecipes: ingredientData.usedInRecipes || [],
             };
-          })
+          }),
         );
 
         // 2. Create new recipe
@@ -95,7 +94,7 @@ const recipeService = {
 
       return recipe;
     } catch (error) {
-      console.error("Error in createRecipe service:", error);
+      console.error('Error in createRecipe service:', error);
       throw error;
     }
   },
@@ -106,7 +105,7 @@ const recipeService = {
    * @param {string} recipeId - Recipe ID
    * @returns {Promise<Recipe|null>} Recipe if found, null otherwise
    */
-  async getRecipeById(bakeryId, recipeId) {
+  async getById(recipeId, bakeryId) {
     try {
       const recipeDoc = await db
         .collection(`bakeries/${bakeryId}/recipes`)
@@ -119,7 +118,7 @@ const recipeService = {
 
       return Recipe.fromFirestore(recipeDoc);
     } catch (error) {
-      console.error("Error in getRecipeById service:", error);
+      console.error('Error in getRecipeById service:', error);
       throw error;
     }
   },
@@ -129,7 +128,7 @@ const recipeService = {
    * @param {string} bakeryId - Bakery ID
    * @returns {Promise<Recipe[]>} Array of recipes
    */
-  async getAllRecipes(bakeryId) {
+  async getAll(bakeryId) {
     try {
       const snapshot = await db
         .collection(`bakeries/${bakeryId}/recipes`)
@@ -137,7 +136,7 @@ const recipeService = {
 
       return snapshot.docs.map((doc) => Recipe.fromFirestore(doc));
     } catch (error) {
-      console.error("Error in getAllRecipes service:", error);
+      console.error('Error in getAllRecipes service:', error);
       throw error;
     }
   },
@@ -151,7 +150,7 @@ const recipeService = {
    * @returns {Promise<Recipe>} Updated recipe object
    * @throws {NotFoundError} When recipe is not found
    */
-  async updateRecipe(bakeryId, recipeId, updateData, transaction = null) {
+  async update(recipeId, updateData, bakeryId, transaction = null) {
     try {
       const updateLogic = async (t) => {
         // Get current recipe
@@ -161,7 +160,7 @@ const recipeService = {
         const recipeDoc = await t.get(recipeRef);
 
         if (!recipeDoc.exists) {
-          throw new NotFoundError("Recipe not found");
+          throw new NotFoundError('Recipe not found');
         }
 
         if (updateData.ingredients) {
@@ -178,36 +177,36 @@ const recipeService = {
 
         // Check if changes require versioning
         if (requiresNewVersion(currentRecipe, updatedRecipe)) {
-          console.log("requires new version");
+          console.log('requires new version');
 
           if (ingredientsChanged(currentRecipe, updatedRecipe)) {
-            console.log("ingredients changed");
+            console.log('ingredients changed');
             // modify usedInRecipes arrays for each ingredient
             const oldIngredientIds = new Set(
-              currentRecipe.ingredients.map((i) => i.ingredientId)
+              currentRecipe.ingredients.map((i) => i.ingredientId),
             );
             const newIngredientIds = new Set(
-              updatedRecipe.ingredients.map((i) => i.ingredientId)
+              updatedRecipe.ingredients.map((i) => i.ingredientId),
             );
 
-            console.log("oldIngredientIds", oldIngredientIds);
-            console.log("newIngredientIds", newIngredientIds);
+            console.log('oldIngredientIds', oldIngredientIds);
+            console.log('newIngredientIds', newIngredientIds);
 
             // Collect all ingredient IDs that need updating
             const toRemove = [...oldIngredientIds].filter(
-              (id) => !newIngredientIds.has(id)
+              (id) => !newIngredientIds.has(id),
             );
             const toAdd = [...newIngredientIds].filter(
-              (id) => !oldIngredientIds.has(id)
+              (id) => !oldIngredientIds.has(id),
             );
 
             // Step 1: Perform all reads first
             const ingredientDocs = await Promise.all([
               ...toRemove.map((id) =>
-                t.get(db.collection(`bakeries/${bakeryId}/ingredients`).doc(id))
+                t.get(db.collection(`bakeries/${bakeryId}/ingredients`).doc(id)),
               ),
               ...toAdd.map((id) =>
-                t.get(db.collection(`bakeries/${bakeryId}/ingredients`).doc(id))
+                t.get(db.collection(`bakeries/${bakeryId}/ingredients`).doc(id)),
               ),
             ]);
 
@@ -220,14 +219,14 @@ const recipeService = {
 
               if (isRemove) {
                 // Remove recipe from usedInRecipes
-                console.log("removing recipe from ingredient", doc.id);
+                console.log('removing recipe from ingredient', doc.id);
                 t.update(doc.ref, {
                   usedInRecipes: usedInRecipes.filter((id) => id !== recipeId),
                 });
               } else {
                 // Add recipe to usedInRecipes if not already there
                 if (!usedInRecipes.includes(recipeId)) {
-                  console.log("adding recipe to ingredient", doc.id);
+                  console.log('adding recipe to ingredient', doc.id);
                   t.update(doc.ref, {
                     usedInRecipes: [...usedInRecipes, recipeId],
                   });
@@ -238,7 +237,7 @@ const recipeService = {
           const newVersion = await recipeVersioningService.createVersion(
             t,
             recipeRef,
-            currentRecipe
+            currentRecipe,
           );
           updatedRecipe.version = newVersion;
         }
@@ -254,7 +253,7 @@ const recipeService = {
         ? await updateLogic(transaction)
         : await db.runTransaction(updateLogic);
     } catch (error) {
-      console.error("Error in updateRecipe service:", error);
+      console.error('Error in updateRecipe service:', error);
       throw error;
     }
   },
@@ -266,7 +265,7 @@ const recipeService = {
    * @throws {NotFoundError} When recipe is not found
    * @throws {BadRequestError} When recipe is used by active products
    */
-  async deleteRecipe(bakeryId, recipeId) {
+  async delete(recipeId, bakeryId) {
     try {
       return await db.runTransaction(async (transaction) => {
         // 1. Validate recipe exists
@@ -276,20 +275,20 @@ const recipeService = {
         const recipeDoc = await transaction.get(recipeRef);
 
         if (!recipeDoc.exists) {
-          throw new NotFoundError("Recipe not found");
+          throw new NotFoundError('Recipe not found');
         }
 
         // 2. Check for active products using this recipe
         const productsSnapshot = await transaction.get(
           db
             .collection(`bakeries/${bakeryId}/products`)
-            .where("recipeId", "==", recipeId)
-            .where("isActive", "==", true)
+            .where('recipeId', '==', recipeId)
+            .where('isActive', '==', true),
         );
 
         if (!productsSnapshot.empty) {
           throw new BadRequestError(
-            "Cannot delete recipe that is used by active products"
+            'Cannot delete recipe that is used by active products',
           );
         }
 
@@ -297,37 +296,16 @@ const recipeService = {
         transaction.delete(recipeRef);
       });
     } catch (error) {
-      console.error("Error in deleteRecipe service:", error);
+      console.error('Error in deleteRecipe service:', error);
       throw error;
     }
   },
 
-  /**
-   * Scales a recipe's ingredients by a factor
-   * @param {string} bakeryId - Bakery ID
-   * @param {string} recipeId - Recipe ID to scale
-   * @param {number} factor - Scaling factor
-   * @returns {Promise<Recipe|null>} Scaled recipe or null if not found
-   */
-  async scaleRecipe(bakeryId, recipeId, factor) {
-    try {
-      const recipe = await this.getRecipeById(bakeryId, recipeId);
-      if (!recipe) {
-        return null;
-      }
-
-      recipe.scale(factor);
-      return recipe;
-    } catch (error) {
-      console.error("Error in scaleRecipe service:", error);
-      throw error;
-    }
-  },
 };
 
 const validateIngredientData = (ingredients) => {
   if (!Array.isArray(ingredients)) {
-    throw new BadRequestError("Ingredients must be an array");
+    throw new BadRequestError('Ingredients must be an array');
   }
 
   ingredients.forEach((ing, index) => {
@@ -338,7 +316,7 @@ const validateIngredientData = (ingredients) => {
       !ing.name
     ) {
       throw new BadRequestError(
-        `Invalid ingredient data at index ${index}. Required fields: ingredientId, quantity, costPerUnit, name`
+        `Invalid ingredient data at index ${index}. Required fields: ingredientId, quantity, costPerUnit, name`,
       );
     }
   });

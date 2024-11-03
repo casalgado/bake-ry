@@ -31,7 +31,7 @@ const updateRecipesWithNewCost = async (
   usedInRecipes,
 ) => {
   const updatePromises = usedInRecipes.map(async (recipeId) => {
-    const recipe = await recipeService.getRecipeById(bakeryId, recipeId);
+    const recipe = await recipeService.getById(recipeId, bakeryId);
     if (!recipe) return;
 
     // Update the ingredient cost in the recipe
@@ -42,13 +42,13 @@ const updateRecipesWithNewCost = async (
     );
 
     // Let recipeService handle the update and versioning
-    console.log('updating recipe', recipeId);
-    await recipeService.updateRecipe(
-      bakeryId,
+    console.log('in ingredientService updating recipe', recipeId);
+    await recipeService.update(
       recipeId,
       {
         ingredients: updatedIngredients,
       },
+      bakeryId,
       transaction,
     );
   });
