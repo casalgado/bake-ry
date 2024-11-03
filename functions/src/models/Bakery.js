@@ -1,5 +1,8 @@
-class Bakery {
+const BaseModel = require('./base/BaseModel');
+
+class Bakery extends BaseModel {
   constructor({
+    // Basic Info
     id,
     name,
     address,
@@ -15,162 +18,81 @@ class Bakery {
     description,
     website,
     socialMedia,
-    businessLicense,
-    taxId,
 
     // Location & Delivery
-    coordinates, // { lat, lng }
-    deliveryRadius,
     deliveryFee,
-    parkingAvailable,
-
-    // Operations
-    capacity, // Maximum number of customers
-    specialties, // Array of specialty items
-    cuisineTypes, // Array of cuisine types (e.g., French, Italian)
-    dietary, // Array of dietary options (vegan, gluten-free, etc.)
-
-    // Payment & Orders
-    acceptedPaymentMethods,
-    minimumOrderAmount,
-    onlineOrderingEnabled,
-
-    // Ratings & Reviews
-    rating,
-    reviewCount,
-    featuredReviews,
-
-    // Staff & Service
-    employeeCount,
-    serviceTypes, // Dine-in, Takeout, Delivery, Catering
-
-    // Marketing & Promotions
-    loyaltyProgram,
-    promotions,
-    tags, // Search tags
 
     // Status
     isActive,
     isPaused,
-    pauseReason,
 
     // Customization
-    theme, // Store theme/branding
-    customAttributes, // For future extensibility
-  }) {
+    theme,
+    customAttributes,
+  } = {}) {
+    super({ id, createdAt, updatedAt });
+
     // Basic Info
-    this.id = id;
     this.name = name;
     this.address = address;
     this.phone = phone;
     this.email = email;
-    this.operatingHours = operatingHours;
-    this.holidays = holidays;
+    this.operatingHours = operatingHours || {};
+    this.holidays = holidays || [];
     this.ownerId = ownerId;
-    this.createdAt = createdAt ? new Date(createdAt) : new Date();
-    this.updatedAt = updatedAt || new Date();
 
     // Business Information
     this.description = description;
     this.website = website;
     this.socialMedia = socialMedia || {};
-    this.businessLicense = businessLicense;
-    this.taxId = taxId;
 
     // Location & Delivery
-    this.coordinates = coordinates;
-    this.deliveryRadius = deliveryRadius;
     this.deliveryFee = deliveryFee;
-    this.parkingAvailable = parkingAvailable;
-
-    // Operations
-    this.capacity = capacity;
-    this.specialties = specialties || [];
-    this.cuisineTypes = cuisineTypes || [];
-    this.dietary = dietary || [];
-
-    // Payment & Orders
-    this.acceptedPaymentMethods = acceptedPaymentMethods || [];
-    this.minimumOrderAmount = minimumOrderAmount;
-    this.onlineOrderingEnabled = onlineOrderingEnabled ?? true;
-
-    // Ratings & Reviews
-    this.rating = rating;
-    this.reviewCount = reviewCount || 0;
-    this.featuredReviews = featuredReviews || [];
-
-    // Staff & Service
-    this.employeeCount = employeeCount;
-    this.serviceTypes = serviceTypes || [];
-
-    // Marketing & Promotions
-    this.loyaltyProgram = loyaltyProgram;
-    this.promotions = promotions || [];
-    this.tags = tags || [];
 
     // Status
     this.isActive = isActive ?? true;
     this.isPaused = isPaused ?? false;
-    this.pauseReason = pauseReason;
 
     // Customization
-    this.theme = theme || {};
+    this.theme = theme ;
     this.customAttributes = customAttributes || {};
   }
 
-  toFirestore() {
-    const data = { ...this };
-    delete data.id;
-    // Remove undefined values
-    Object.keys(data).forEach((key) => {
-      if (data[key] === undefined) {
-        delete data[key];
-      }
-    });
-    return data;
-  }
-
-  static fromFirestore(doc) {
-    const data = doc.data();
-    return new Bakery({
-      id: doc.id,
-      ...data,
-      createdAt: data.createdAt.toDate(),
-      updatedAt: data.updatedAt.toDate(),
-    });
-  }
-
-  // Utility methods
   isOpen(date = new Date()) {
-    // Implementation for checking if bakery is open
-    return true; // Placeholder
-  }
+    if (this.isPaused || !this.isActive) return false;
 
-  calculateDeliveryFee(distance) {
-    if (!this.deliveryRadius || distance > this.deliveryRadius) {
-      return null; // Out of delivery range
+    // Convert day to lowercase for matching with operatingHours object
+    const day = date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+    const hours = this.operatingHours[day];
+
+    if (!hours || !hours.isOpen) {
+      return false;
     }
-    return this.deliveryFee || 0;
+
+    try {
+      // Get current time in minutes since midnight
+      const currentMinutes = date.getHours() * 60 + date.getMinutes();
+
+      // Convert opening hours to minutes since midnight
+      const [openHour, openMinute] = hours.open.split(':').map(Number);
+      const [closeHour, closeMinute] = hours.close.split(':').map(Number);
+
+      if (isNaN(openHour) || isNaN(openMinute) || isNaN(closeHour) || isNaN(closeMinute)) {
+        return false;
+      }
+
+      const openMinutes = openHour * 60 + openMinute;
+      const closeMinutes = closeHour * 60 + closeMinute;
+
+      return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
+    } catch (error) {
+      console.error('Error checking if bakery is open:', error);
+      return false;
+    }
   }
 
-  updateRating(newRating) {
-    this.rating =
-      (this.rating * this.reviewCount + newRating) / (this.reviewCount + 1);
-    this.reviewCount += 1;
-    this.updatedAt = new Date();
-  }
-
-  addPromotion(promotion) {
-    this.promotions.push({
-      ...promotion,
-      createdAt: new Date(),
-    });
-    this.updatedAt = new Date();
-  }
-
-  toggleStatus(isPaused, reason) {
+  toggleStatus(isPaused) {
     this.isPaused = isPaused;
-    this.pauseReason = reason;
     this.updatedAt = new Date();
   }
 }
