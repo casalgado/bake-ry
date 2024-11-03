@@ -8,8 +8,8 @@ class Bakery extends BaseModel {
     address,
     phone,
     email,
-    operatingHours,
-    holidays,
+    operatingHours = {},
+    holidays = [],
     ownerId,
     createdAt,
     updatedAt,
@@ -17,18 +17,18 @@ class Bakery extends BaseModel {
     // Business Information
     description,
     website,
-    socialMedia,
+    socialMedia = {},
 
     // Location & Delivery
     deliveryFee,
 
     // Status
-    isActive,
-    isPaused,
+    isActive = true,
+    isPaused = false,
 
     // Customization
     theme,
-    customAttributes,
+    customAttributes = {},
   } = {}) {
     super({ id, createdAt, updatedAt });
 
@@ -37,25 +37,25 @@ class Bakery extends BaseModel {
     this.address = address;
     this.phone = phone;
     this.email = email;
-    this.operatingHours = operatingHours || {};
-    this.holidays = holidays || [];
+    this.operatingHours = operatingHours;
+    this.holidays = holidays;
     this.ownerId = ownerId;
 
     // Business Information
     this.description = description;
     this.website = website;
-    this.socialMedia = socialMedia || {};
+    this.socialMedia = socialMedia;
 
     // Location & Delivery
     this.deliveryFee = deliveryFee;
 
     // Status
-    this.isActive = isActive ?? true;
-    this.isPaused = isPaused ?? false;
+    this.isActive = isActive;
+    this.isPaused = isPaused;
 
     // Customization
-    this.theme = theme ;
-    this.customAttributes = customAttributes || {};
+    this.theme = theme;
+    this.customAttributes = customAttributes;
   }
 
   isOpen(date = new Date()) {

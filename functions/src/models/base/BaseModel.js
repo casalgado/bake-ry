@@ -5,11 +5,11 @@ class BaseModel {
 
     // Common fields all models have
     this.id = data.id;
-    this.createdAt = data.createdAt || new Date();
-    this.updatedAt = data.updatedAt || new Date();
 
     // Assign remaining data to instance
     Object.assign(this, data);
+    this.createdAt = data.createdAt || new Date();
+    this.updatedAt = data.updatedAt || new Date();
   }
 
   // Define which fields should be treated as dates
