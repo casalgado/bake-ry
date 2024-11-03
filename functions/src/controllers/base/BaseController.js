@@ -1,11 +1,24 @@
 const { ForbiddenError, NotFoundError, BadRequestError } = require('../../utils/errors');
 
 class BaseController {
-  constructor(service) {
+  constructor(service, validateData = null) {
     if (!service) {
       throw new Error('Service is required');
     }
     this.service = service;
+    this.validateData = validateData;
+  }
+
+  /**
+   * Validate data and throw BadRequestError if validation fails
+   */
+  validateRequestData(data) {
+    if (!this.validateData) return;
+
+    const errors = this.validateData(data);
+    if (errors && errors.length > 0) {
+      throw new BadRequestError(errors.join('. '));
+    }
   }
 
   /**
@@ -33,7 +46,6 @@ class BaseController {
       return res.status(403).json({ error: error.message });
     }
 
-    // Add more error type checks as needed
     const status = error.status || 500;
     res.status(status).json({
       error: error.message || 'Internal server error',
@@ -52,6 +64,9 @@ class BaseController {
       if (!data) {
         throw new BadRequestError('Request body is required');
       }
+
+      // Validate data if validation function exists
+      this.validateRequestData(data);
 
       const result = await this.service.create(data, bakeryId);
       this.handleResponse(res, result, 201);
@@ -110,6 +125,9 @@ class BaseController {
         throw new BadRequestError('Update data is required');
       }
 
+      // Validate update data if validation function exists
+      this.validateRequestData(updateData);
+
       const result = await this.service.update(id, updateData, bakeryId);
       this.handleResponse(res, result);
     } catch (error) {
@@ -132,6 +150,9 @@ class BaseController {
       if (!patchData || Object.keys(patchData).length === 0) {
         throw new BadRequestError('Patch data is required');
       }
+
+      // Validate patch data if validation function exists
+      this.validateRequestData(patchData);
 
       const result = await this.service.patch(id, patchData, bakeryId);
       this.handleResponse(res, result);
