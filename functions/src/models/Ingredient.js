@@ -6,7 +6,11 @@ class Ingredient {
     name,
     description,
     category, // e.g., "Dairy", "Flour", "Sugar", "Flavoring"
-    type, // e.g., "Raw Material", "Pre-made Mix", "Additive"
+
+    // Usage and Recipes
+    usedInRecipes, // Array of recipe IDs
+    isResaleProduct, // Whether ingredient is sold as-is
+    notes, // Special handling notes
 
     // Inventory Management
     sku, // Stock Keeping Unit
@@ -31,7 +35,6 @@ class Ingredient {
 
     // Supplier Information
     suppliers, // Array of supplier references
-    preferredSupplierId,
     leadTime, // Time in days from order to delivery
 
     // Storage Requirements
@@ -47,11 +50,6 @@ class Ingredient {
     organicCertified,
     kosherCertified,
     halalCertified,
-
-    // Usage and Recipes
-    usedInRecipes, // Array of recipe IDs
-    substitutes, // Array of substitute ingredient IDs
-    notes, // Special handling notes
 
     // Tracking
     batchNumber, // Current batch number
@@ -85,7 +83,11 @@ class Ingredient {
     this.name = name;
     this.description = description;
     this.category = category;
-    this.type = type;
+
+    // Usage and Recipes
+    this.usedInRecipes = usedInRecipes || [];
+    this.isResaleProduct = isResaleProduct || false;
+    this.notes = notes;
 
     // Inventory Management
     this.sku = sku;
@@ -106,7 +108,7 @@ class Ingredient {
     this.costPerUnit = costPerUnit || 0;
     this.lastPurchasePrice = lastPurchasePrice;
     this.averagePurchasePrice = averagePurchasePrice;
-    this.currency = currency || "USD";
+    this.currency = currency || 'COP';
 
     // Supplier Information
     this.suppliers = suppliers;
@@ -126,11 +128,6 @@ class Ingredient {
     this.organicCertified = organicCertified;
     this.kosherCertified = kosherCertified;
     this.halalCertified = halalCertified;
-
-    // Usage and Recipes
-    this.usedInRecipes = usedInRecipes || [];
-    this.substitutes = substitutes;
-    this.notes = notes;
 
     // Tracking
     this.batchNumber = batchNumber;
@@ -215,7 +212,7 @@ class Ingredient {
     const toUnitData = this.alternativeUnits.find((u) => u.unit === toUnit);
 
     if (!fromUnitData || !toUnitData) {
-      throw new Error("Invalid unit conversion");
+      throw new Error('Invalid unit conversion');
     }
 
     // Convert to base unit then to target unit
@@ -225,20 +222,20 @@ class Ingredient {
   }
 
   // Stock Management
-  updateStock(quantity, type = "decrease") {
+  updateStock(quantity, type = 'decrease') {
     const newStock =
-      type === "decrease"
+      type === 'decrease'
         ? this.currentStock - quantity
         : this.currentStock + quantity;
 
     if (newStock < 0) {
-      throw new Error("Insufficient stock");
+      throw new Error('Insufficient stock');
     }
 
     this.currentStock = newStock;
     this.updatedAt = new Date();
 
-    if (type === "increase") {
+    if (type === 'increase') {
       this.lastRestockDate = new Date();
     }
 
@@ -276,7 +273,7 @@ class Ingredient {
 
     const total = this.purchaseHistory.reduce(
       (sum, purchase) => sum + purchase.price,
-      0
+      0,
     );
     this.averagePurchasePrice = total / this.purchaseHistory.length;
   }

@@ -5,7 +5,7 @@ class RecipeIngredient {
     quantity,
     unit,
     costPerUnit,
-    notes = "",
+    notes = '',
     allergens = [],
     baseQuantity,
   }) {
@@ -47,11 +47,10 @@ class Recipe {
     // Basic Information
     id,
     bakeryId,
-    productIds,
+    productId,
     name,
     description,
     category,
-    type,
     version,
 
     // Core Recipe Details
@@ -80,18 +79,17 @@ class Recipe {
     // Basic Information
     this.id = id;
     this.bakeryId = bakeryId;
-    this.productIds = productIds || [];
+    this.productId = productId || null;
     this.name = name;
     this.description = description;
     this.category = category;
-    this.type = type;
     this.version = version || 1;
 
     // Convert ingredients to RecipeIngredient instances if they aren't already
     this.ingredients = ingredients.map((ingredient) =>
       ingredient instanceof RecipeIngredient
         ? ingredient
-        : new RecipeIngredient(ingredient)
+        : new RecipeIngredient(ingredient),
     );
 
     this.steps = steps || [];
@@ -136,7 +134,7 @@ class Recipe {
     data.ingredients = this.ingredients.map((ingredient) =>
       ingredient instanceof RecipeIngredient
         ? ingredient.toPlainObject()
-        : ingredient
+        : ingredient,
     );
 
     return data;
@@ -146,7 +144,7 @@ class Recipe {
     const data = doc.data();
     // Convert plain ingredient objects back to RecipeIngredient instances
     const ingredients = (data.ingredients || []).map(
-      (ing) => new RecipeIngredient(ing)
+      (ing) => new RecipeIngredient(ing),
     );
 
     return new Recipe({
@@ -170,7 +168,7 @@ class Recipe {
 
   removeIngredient(ingredientId) {
     this.ingredients = this.ingredients.filter(
-      (i) => i.ingredientId !== ingredientId
+      (i) => i.ingredientId !== ingredientId,
     );
     this.updateCosts();
   }
@@ -187,7 +185,7 @@ class Recipe {
   }
 
   scale(factor) {
-    if (factor <= 0) throw new Error("Scaling factor must be positive");
+    if (factor <= 0) throw new Error('Scaling factor must be positive');
 
     this.ingredients.forEach((ingredient) => {
       ingredient.scaleQuantity(factor);

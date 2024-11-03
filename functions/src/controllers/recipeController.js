@@ -16,10 +16,11 @@ class RecipeController extends BaseController {
 
 function validateRecipeData(recipeData) {
   const errors = [];
+  const ingredients = recipeData.ingredients;
 
   // Validate ingredients exist and get their current costs
-  if (recipeData.ingredients.length > 0) {
-    recipeData.ingredients.forEach((ingredient, index) => {
+  if (ingredients.length > 0) {
+    ingredients.forEach((ingredient, index) => {
       if (!ingredient.ingredientId || !ingredient.quantity) {
         errors.push(`Ingredient at index ${index} must have ingredientId and quantity`);
       }
@@ -28,9 +29,11 @@ function validateRecipeData(recipeData) {
     errors.push('Recipe must have at least one ingredient');
   }
 
-  // Validate products exist if provided
-  if (recipeData.productIds && !Array.isArray(recipeData.productIds)) {
-    errors.push('productIds must be an array');
+  const hasResaleItems = ingredients.some(ing => ing.isResaleItem);
+  const hasManufacturedItems = ingredients.some(ing => !ing.isResaleItem);
+
+  if (hasResaleItems && hasManufacturedItems) {
+    errors.push('Recipe cannot mix resale and manufactured ingredients');
   }
 
   return errors;

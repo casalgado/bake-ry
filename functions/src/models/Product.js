@@ -22,7 +22,7 @@ class ProductVariation {
     const timestamp = new Date().getTime().toString().slice(-4);
     const random = Math.floor(Math.random() * 1000)
       .toString()
-      .padStart(3, "0");
+      .padStart(3, '0');
     return `var_${timestamp}_${random}`;
   }
 
@@ -50,7 +50,7 @@ class ProductVariation {
   // Utility methods
   applyDiscount(percentage) {
     if (percentage < 0 || percentage > 100) {
-      throw new Error("Discount percentage must be between 0 and 100");
+      throw new Error('Discount percentage must be between 0 and 100');
     }
     this.currentPrice = this.basePrice * (1 - percentage / 100);
     return this.currentPrice;
@@ -69,8 +69,7 @@ class Product {
     bakeryId,
     name,
     description,
-    category, // e.g., "Panaderia de Masa Madre", "Panaderia Tradicional", "Untables", "Tortas", ...
-    type, // e.g., "Fabricado", "Reventa"
+    categoryId, // reference to category document
     recipeId, // reference to recipe document
     recipeMultiplier, // multiplier for recipe
 
@@ -126,8 +125,7 @@ class Product {
     this.bakeryId = bakeryId;
     this.name = name;
     this.description = description;
-    this.category = category;
-    this.type = type;
+    this.categoryId = categoryId;
     this.recipeId = recipeId;
     this.recipeMultiplier = recipeMultiplier || 1;
 
@@ -135,7 +133,7 @@ class Product {
     this.variations = (variations || []).map((variation) =>
       variation instanceof ProductVariation
         ? variation
-        : new ProductVariation(variation)
+        : new ProductVariation(variation),
     );
 
     // Pricing
@@ -192,7 +190,7 @@ class Product {
     data.variations = this.variations.map((variation) =>
       variation instanceof ProductVariation
         ? variation.toPlainObject()
-        : variation
+        : variation,
     );
 
     // Remove undefined values
@@ -209,7 +207,7 @@ class Product {
     const data = doc.data();
     // Convert plain variation objects back to ProductVariation instances
     const variations = (data.variations || []).map(
-      (variation) => new ProductVariation(variation)
+      (variation) => new ProductVariation(variation),
     );
 
     return new Product({
@@ -220,9 +218,9 @@ class Product {
       updatedAt: data.updatedAt?.toDate(),
       seasonalPeriod: data.seasonalPeriod
         ? {
-            start: data.seasonalPeriod.start?.toDate(),
-            end: data.seasonalPeriod.end?.toDate(),
-          }
+          start: data.seasonalPeriod.start?.toDate(),
+          end: data.seasonalPeriod.end?.toDate(),
+        }
         : null,
     });
   }
