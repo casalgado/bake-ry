@@ -8,12 +8,16 @@ class BaseModel {
 
     // Assign remaining data to instance
     Object.assign(this, data);
-    this.createdAt = data.createdAt || new Date();
-    this.updatedAt = data.updatedAt || new Date();
+
+    // Ensure dates are properly set
+    this._dateFields.forEach(field => {
+      if (!this[field]) {
+        this[field] = new Date();
+      }
+    });
   }
 
   // Define which fields should be treated as dates
-  // Child classes will override this to add their specific date fields
   static get dateFields() {
     return ['createdAt', 'updatedAt'];
   }
@@ -48,10 +52,15 @@ class BaseModel {
     const data = doc.data();
     const id = doc.id;
 
-    // Convert all date fields from Firestore Timestamp to JavaScript Date
+    // Standardize date conversion
     this.dateFields.forEach((field) => {
-      if (data[field]?.toDate) {
-        data[field] = data[field].toDate();
+      if (data[field]) {
+        // Handle both Timestamp objects and date strings
+        if (data[field].toDate) {
+          data[field] = data[field].toDate();
+        } else if (typeof data[field] === 'string') {
+          data[field] = new Date(data[field]);
+        }
       }
     });
 

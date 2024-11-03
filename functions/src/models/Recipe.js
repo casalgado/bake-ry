@@ -38,7 +38,6 @@ class Recipe extends BaseModel {
     productId,
     name,
     description,
-    category,
     version = 1,
     createdAt,
     updatedAt,
@@ -64,7 +63,6 @@ class Recipe extends BaseModel {
     this.productId = productId;
     this.name = name;
     this.description = description;
-    this.category = category;
     this.version = version;
 
     // Core Recipe Details
@@ -102,11 +100,14 @@ class Recipe extends BaseModel {
   }
 
   static fromFirestore(doc) {
-    const data = doc.data();
+    // First, let BaseModel handle the basic conversion including dates
+    const baseInstance = super.fromFirestore(doc);
+    if (!baseInstance) return null;
+
+    // Now add Recipe-specific conversions (like ingredients)
     return new Recipe({
-      id: doc.id,
-      ...data,
-      ingredients: data.ingredients.map(ing => new RecipeIngredient(ing)),
+      ...baseInstance,
+      ingredients: baseInstance.ingredients.map(ing => new RecipeIngredient(ing)),
     });
   }
 }

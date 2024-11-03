@@ -27,6 +27,8 @@ const requestLogger = (req, res, next) => {
   const oldEnd = res.end;
   const chunks = [];
 
+  console.log('\n=== Response ===');
+
   res.write = function (chunk) {
     if (chunk) {
       chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
@@ -38,12 +40,6 @@ const requestLogger = (req, res, next) => {
     if (chunk) {
       chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
     }
-
-    // Log response details
-    const responseTime = Date.now() - startTime;
-    console.log('\n=== Response ===');
-    console.log(`Status: ${res.statusCode}`);
-    console.log(`Response Time: ${responseTime}ms`);
 
     // Try to parse and log response body if present
     if (chunks.length) {
@@ -61,6 +57,12 @@ const requestLogger = (req, res, next) => {
         console.log('Error processing response body:', e.message);
       }
     }
+
+    // Log response details
+    const responseTime = Date.now() - startTime;
+
+    console.log(`Status: ${res.statusCode}`);
+    console.log(`Response Time: ${responseTime}ms`);
 
     console.log('=== End ===\n');
 

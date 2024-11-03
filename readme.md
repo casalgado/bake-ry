@@ -80,4 +80,3 @@ All main resources (Product, Recipe, Ingredient, Bakery) extend BaseModel and ma
 
 This ensures consistent handling of common fields while allowing each resource to manage its unique requirements.
 
-Would you like to add this section to the documentation? Or would you like me to adjust the wording further?
