@@ -59,3 +59,25 @@ Categories exist as a separate collection for each bakery:
 4. **Ingredients**
    - Clearly mark ingredients as resale or not when creating them
    - Consider the impact on recipes when changing an ingredient's resale status
+
+Here's a simpler addition to the documentation:
+
+## Model Architecture
+
+The system uses a BaseModel pattern for all main resources.
+
+### BaseModel
+Provides common fields for all resources:
+- `id`: Document identifier
+- `createdAt`: Creation timestamp
+- `updatedAt`: Last update timestamp
+
+### Resource Models
+All main resources (Product, Recipe, Ingredient, Bakery) extend BaseModel and manage:
+- Their specific fields and data structure
+- Any embedded objects (like ProductVariation in Product)
+- Firestore data conversion customization when needed
+
+This ensures consistent handling of common fields while allowing each resource to manage its unique requirements.
+
+Would you like to add this section to the documentation? Or would you like me to adjust the wording further?
