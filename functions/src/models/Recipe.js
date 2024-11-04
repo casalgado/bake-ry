@@ -35,7 +35,7 @@ class Recipe extends BaseModel {
     // Basic Information
     id,
     bakeryId,
-    productId,
+    productId = null,
     name,
     description,
     version = 1,

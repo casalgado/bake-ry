@@ -20,19 +20,7 @@ class IngredientService extends BaseService {
   }
 
   async getAll(bakeryId, filters = {}, options = {}) {
-    try {
-      // Convert specific ingredient filters to generic filter format
-      const queryFilters = {
-        ...(filters.category && { category: filters.category }),
-        ...(filters.isActive !== undefined && { isActive: filters.isActive }),
-      };
-
-      // Pass both filters and options to base service
-      return super.getAll(bakeryId, queryFilters, options);
-    } catch (error) {
-      console.error('Error in getAllIngredients:', error);
-      throw error;
-    }
+    return super.getAll(bakeryId, filters, options);
   }
 
   async update(ingredientId, updateData, bakeryId) {

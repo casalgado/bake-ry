@@ -14,6 +14,7 @@ class User {
     comment,
     phone,
     national_id,
+    isActive = true,
   }) {
     this.id = id;
     this.email = email;
@@ -23,12 +24,13 @@ class User {
     this.name = name;
     this.createdAt = createdAt ? new Date(createdAt) : new Date();
     this.updatedAt = updatedAt || new Date();
-    this.address = address || "";
-    this.birthday = birthday || "";
-    this.category = category || "";
-    this.comment = comment || "";
-    this.phone = phone || "";
-    this.national_id = national_id || "";
+    this.address = address || '';
+    this.birthday = birthday || '';
+    this.category = category || '';
+    this.comment = comment || '';
+    this.phone = phone || '';
+    this.national_id = national_id || '';
+    this.isActive = isActive;
   }
 
   toFirestore() {

@@ -93,13 +93,7 @@ class RecipeService extends BaseService {
   }
 
   async getAll(bakeryId, filters = {}, options = {}) {
-    // Convert specific recipe filters to generic filter format
-    const queryFilters = {
-      ...(filters.isActive !== undefined && { isActive: filters.isActive }),
-      ...(filters.productId && { productId: filters.productId }),
-    };
-
-    return super.getAll(bakeryId, queryFilters, options);
+    return super.getAll(bakeryId, filters, options);
   }
 
   async update(recipeId, updateData, bakeryId, transaction = null) {

@@ -1,133 +1,167 @@
-const { db } = require("../config/firebase");
-const Product = require("../models/Product");
+const { db } = require('../config/firebase');
+const { Product } = require('../models/Product');
+const BaseService = require('./base/BaseService');
+const { NotFoundError, BadRequestError } = require('../utils/errors');
 
-const productService = {
-  getProductsCollection(bakeryId) {
-    return db.collection("bakeries").doc(bakeryId).collection("products");
-  },
+class ProductService extends BaseService {
+  constructor() {
+    super('products', Product, 'bakeries/{bakeryId}');
+  }
 
-  async createProduct(bakeryId, productData) {
+  /**
+   * Create a new product and associate it with a recipe
+   */
+  async create(productData, bakeryId) {
     try {
-      // Create new product with bakeryId
-      const newProduct = new Product({
-        ...productData,
-        bakeryId,
-      });
+      return await db.runTransaction(async (transaction) => {
+        // Check recipe exists and is available
+        const recipeRef = db
+          .collection(`bakeries/${bakeryId}/recipes`)
+          .doc(productData.recipeId);
 
-      // Add to Firestore
-      const productsRef = this.getProductsCollection(bakeryId);
-      const docRef = await productsRef.add(newProduct.toFirestore());
-      newProduct.id = docRef.id;
+        const recipeDoc = await transaction.get(recipeRef);
+        if (!recipeDoc.exists) {
+          throw new NotFoundError('Recipe not found');
+        }
 
-      return newProduct;
-    } catch (error) {
-      console.error("Error in createProduct:", error);
-      throw error;
-    }
-  },
+        if (recipeDoc.data().productId) {
+          throw new BadRequestError('Recipe is already assigned to another product');
+        }
 
-  async getProductById(bakeryId, productId) {
-    try {
-      const productDoc = await this.getProductsCollection(bakeryId)
-        .doc(productId)
-        .get();
+        // Create new product
+        const productRef = this.getCollectionRef(bakeryId).doc();
+        const newProduct = new this.ModelClass({
+          id: productRef.id,
+          bakeryId,
+          ...productData,
+        });
 
-      if (!productDoc.exists) {
-        return null;
-      }
+        // Update both documents atomically
+        transaction.set(productRef, newProduct.toFirestore());
+        transaction.update(recipeRef, {
+          productId: productRef.id,
+          updatedAt: new Date(),
+        });
 
-      const product = Product.fromFirestore(productDoc);
-      product.bakeryId = bakeryId;
-
-      return product;
-    } catch (error) {
-      console.error("Error in getProductById:", error);
-      throw error;
-    }
-  },
-
-  async getProductsByBakery(bakeryId) {
-    try {
-      const snapshot = await this.getProductsCollection(bakeryId).get();
-
-      return snapshot.docs.map((doc) => {
-        const product = Product.fromFirestore(doc);
-        product.bakeryId = bakeryId;
-        return product;
+        return newProduct;
       });
     } catch (error) {
-      console.error("Error in getProductsByBakery:", error);
+      console.error('Error in createProduct:', error);
       throw error;
     }
-  },
+  }
 
-  async updateProduct(bakeryId, productId, productData) {
+  /**
+   * Get a product by ID
+   */
+  async getById(productId, bakeryId) {
+    return super.getById(productId, bakeryId);
+  }
+
+  /**
+   * Get all products with optional filters
+   */
+  async getAll(bakeryId, filters = {}, options = {}) {
+    return super.getAll(bakeryId, filters, options);
+  }
+
+  /**
+   * Update a product and handle recipe reassignment if needed
+   */
+  async update(productId, updateData, bakeryId) {
     try {
-      const productRef = this.getProductsCollection(bakeryId).doc(productId);
-      const productDoc = await productRef.get();
+      return await db.runTransaction(async (transaction) => {
+        const productRef = this.getCollectionRef(bakeryId).doc(productId);
+        const productDoc = await transaction.get(productRef);
 
-      if (!productDoc.exists) {
-        throw new Error("Product not found");
-      }
+        if (!productDoc.exists) {
+          throw new NotFoundError('Product not found');
+        }
 
-      const updatedProduct = new Product({
-        ...Product.fromFirestore(productDoc),
-        ...productData,
-        id: productId,
-        bakeryId,
-        updatedAt: new Date(),
+        const currentProduct = this.ModelClass.fromFirestore(productDoc);
+
+        // Handle recipe reassignment if recipe is being changed
+        if (updateData.recipeId && updateData.recipeId !== currentProduct.recipeId) {
+          // Check new recipe availability
+          const newRecipeRef = db
+            .collection(`bakeries/${bakeryId}/recipes`)
+            .doc(updateData.recipeId);
+          const newRecipeDoc = await transaction.get(newRecipeRef);
+
+          if (!newRecipeDoc.exists) {
+            throw new NotFoundError('New recipe not found');
+          }
+
+          if (newRecipeDoc.data().productId) {
+            throw new BadRequestError('New recipe is already assigned to another product');
+          }
+
+          // Release old recipe
+          const oldRecipeRef = db
+            .collection(`bakeries/${bakeryId}/recipes`)
+            .doc(currentProduct.recipeId);
+
+          transaction.update(oldRecipeRef, {
+            productId: null,
+            updatedAt: new Date(),
+          });
+
+          // Assign new recipe
+          transaction.update(newRecipeRef, {
+            productId: productId,
+            updatedAt: new Date(),
+          });
+        }
+
+        const updatedProduct = new this.ModelClass({
+          ...currentProduct,
+          ...updateData,
+          updatedAt: new Date(),
+        });
+
+        transaction.update(productRef, updatedProduct.toFirestore());
+        return updatedProduct;
       });
-
-      await productRef.update(updatedProduct.toFirestore());
-      return updatedProduct;
     } catch (error) {
-      console.error("Error in updateProduct:", error);
+      console.error('Error in updateProduct:', error);
       throw error;
     }
-  },
+  }
 
-  async deleteProduct(bakeryId, productId) {
+  /**
+   * Delete a product (soft delete) and release its recipe
+   */
+  async delete(productId, bakeryId) {
     try {
-      const productRef = this.getProductsCollection(bakeryId).doc(productId);
-      const productDoc = await productRef.get();
+      return await db.runTransaction(async (transaction) => {
+        const productRef = this.getCollectionRef(bakeryId).doc(productId);
+        const productDoc = await transaction.get(productRef);
 
-      if (!productDoc.exists) {
-        throw new Error("Product not found");
-      }
+        if (!productDoc.exists) {
+          throw new NotFoundError('Product not found');
+        }
 
-      await productRef.delete();
-    } catch (error) {
-      console.error("Error in deleteProduct:", error);
-      throw error;
-    }
-  },
+        // Release recipe
+        const recipeRef = db
+          .collection(`bakeries/${bakeryId}/recipes`)
+          .doc(productDoc.data().recipeId);
 
-  async searchProducts(bakeryId, searchParams) {
-    try {
-      let query = this.getProductsCollection(bakeryId);
+        // Soft delete product and release recipe
+        transaction.update(productRef, {
+          isActive: false,
+          updatedAt: new Date(),
+        });
 
-      if (searchParams.category) {
-        query = query.where("category", "==", searchParams.category);
-      }
-
-      if (searchParams.name) {
-        query = query
-          .where("name", ">=", searchParams.name)
-          .where("name", "<=", searchParams.name + "\uf8ff");
-      }
-
-      const snapshot = await query.get();
-
-      return snapshot.docs.map((doc) => {
-        const product = Product.fromFirestore(doc);
-        product.bakeryId = bakeryId;
-        return product;
+        transaction.update(recipeRef, {
+          productId: null,
+          updatedAt: new Date(),
+        });
       });
     } catch (error) {
-      console.error("Error in searchProducts:", error);
+      console.error('Error in deleteProduct:', error);
       throw error;
     }
-  },
-};
+  }
+}
 
-module.exports = productService;
+module.exports =  ProductService;
