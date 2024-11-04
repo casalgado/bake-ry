@@ -1,5 +1,4 @@
 // services/recipeService.js
-
 const { db } = require('../config/firebase');
 const { FieldValue } = require('firebase-admin/firestore');
 const { Recipe, RecipeIngredient } = require('../models/Recipe');
@@ -235,5 +234,4 @@ class RecipeService extends BaseService {
   }
 }
 
-// Export a single instance
-module.exports = new RecipeService();
+module.exports = RecipeService;

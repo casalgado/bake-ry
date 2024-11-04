@@ -1,6 +1,6 @@
 const express = require('express');
 const BakeryController = require('../controllers/BakeryController');
-const bakeryService = require('../services/BakeryService');
+const BakeryService = require('../services/BakeryService');
 const {
   authenticateUser,
   requireSystemAdmin,
@@ -24,7 +24,7 @@ const bindController = (controller) => ({
   delete: controller.delete.bind(controller),
 });
 
-const controller = new BakeryController(bakeryService);
+const controller = new BakeryController(new BakeryService());
 const bakeryController = bindController(controller);
 
 const router = express.Router();

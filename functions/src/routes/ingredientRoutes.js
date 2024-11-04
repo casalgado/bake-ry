@@ -1,6 +1,6 @@
 const express = require('express');
 const IngredientController = require('../controllers/IngredientController');
-const ingredientService = require('../services/IngredientService');
+const IngredientService = require('../services/IngredientService');
 const {
   authenticateUser,
   requireBakeryStaffOrAdmin,
@@ -16,7 +16,7 @@ const bindController = (controller) => ({
   delete: controller.delete.bind(controller),
 });
 
-const controller = new IngredientController(ingredientService);
+const controller = new IngredientController(new IngredientService());
 const ingredientController = bindController(controller);
 
 const router = express.Router({ mergeParams: true });

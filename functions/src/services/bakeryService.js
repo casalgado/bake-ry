@@ -77,4 +77,4 @@ class BakeryService extends BaseService {
 }
 
 // Export a single instance
-module.exports = new BakeryService();
+module.exports =  BakeryService;

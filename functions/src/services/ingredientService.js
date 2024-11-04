@@ -11,46 +11,6 @@ class IngredientService extends BaseService {
     super('ingredients', Ingredient, 'bakeries/{bakeryId}');
   }
 
-  // Helper Methods
-  hasCostChanged(currentIngredient, updateData) {
-    return (
-      updateData.costPerUnit !== undefined &&
-        updateData.costPerUnit !== currentIngredient.costPerUnit
-    );
-  }
-
-  async updateRecipesWithNewCost(
-    transaction,
-    bakeryId,
-    ingredientId,
-    newCostPerUnit,
-    usedInRecipes,
-  ) {
-    const updatePromises = usedInRecipes.map(async (recipeId) => {
-      const recipe = await recipeService.getById(recipeId, bakeryId);
-      if (!recipe) return;
-
-      // Update the ingredient cost in the recipe
-      const updatedIngredients = recipe.ingredients.map((ing) =>
-        ing.ingredientId === ingredientId
-          ? { ...ing, costPerUnit: newCostPerUnit }
-          : ing,
-      );
-
-      console.log('in ingredientService updating recipe', recipeId);
-      await recipeService.update(
-        recipeId,
-        {
-          ingredients: updatedIngredients,
-        },
-        bakeryId,
-        transaction,
-      );
-    });
-
-    await Promise.all(updatePromises);
-  }
-
   async create(ingredientData, bakeryId) {
     return super.create(ingredientData, bakeryId);
   }
@@ -137,7 +97,46 @@ class IngredientService extends BaseService {
     }
   }
 
+  // Helper Methods
+  hasCostChanged(currentIngredient, updateData) {
+    return (
+      updateData.costPerUnit !== undefined &&
+        updateData.costPerUnit !== currentIngredient.costPerUnit
+    );
+  }
+
+  async updateRecipesWithNewCost(
+    transaction,
+    bakeryId,
+    ingredientId,
+    newCostPerUnit,
+    usedInRecipes,
+  ) {
+    const updatePromises = usedInRecipes.map(async (recipeId) => {
+      const recipe = await recipeService.getById(recipeId, bakeryId);
+      if (!recipe) return;
+
+      // Update the ingredient cost in the recipe
+      const updatedIngredients = recipe.ingredients.map((ing) =>
+        ing.ingredientId === ingredientId
+          ? { ...ing, costPerUnit: newCostPerUnit }
+          : ing,
+      );
+
+      console.log('in ingredientService updating recipe', recipeId);
+      await recipeService.update(
+        recipeId,
+        {
+          ingredients: updatedIngredients,
+        },
+        bakeryId,
+        transaction,
+      );
+    });
+
+    await Promise.all(updatePromises);
+  }
+
 }
 
-// Export a single instance
-module.exports = new IngredientService();
+module.exports =  IngredientService;

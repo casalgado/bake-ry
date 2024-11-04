@@ -1,6 +1,6 @@
 const express = require('express');
 const RecipeController = require('../controllers/recipeController');
-const recipeService = require('../services/RecipeService');
+const RecipeService = require('../services/RecipeService');
 const {
   authenticateUser,
   requireBakeryStaffOrAdmin,
@@ -16,7 +16,7 @@ const bindController = (controller) => ({
   delete: controller.delete.bind(controller),
 });
 
-const controller = new RecipeController(recipeService);
+const controller = new RecipeController(new RecipeService);
 const recipeController = bindController(controller);
 
 const router = express.Router();
