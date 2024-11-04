@@ -93,15 +93,30 @@ class BaseController {
     }
   }
 
-  /**
-   * Get all resources
-   */
   async getAll(req, res) {
     try {
       const { bakeryId } = req.params;
-      const query = req.query || {};
+      const {
+        page = 1,
+        per_page = 10,
+        sort,
+        ...filters
+      } = req.query;
 
-      const results = await this.service.getAll(bakeryId, query);
+      // Build options object for the service
+      const options = {
+        limit: parseInt(per_page, 10),
+        offset: (parseInt(page, 10) - 1) * parseInt(per_page, 10),
+      };
+
+      // Handle sorting
+      if (sort) {
+        const direction = sort.startsWith('-') ? 'desc' : 'asc';
+        const field = sort.startsWith('-') ? sort.substring(1) : sort;
+        options.orderBy = [field, direction];
+      }
+
+      const results = await this.service.getAll(bakeryId, filters, options);
       this.handleResponse(res, results);
     } catch (error) {
       this.handleError(res, error);

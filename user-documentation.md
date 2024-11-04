@@ -5,20 +5,20 @@ The system implements a multi-tenant user management solution for bakeries with 
 
 ## User Types
 
-### 1. System Users (Admins)
+### 1. Admin Users
 - **Location**: `/users` collection
-- **Types**:
+- **Roles**:
   - `system_admin`: Global system administrator
   - `bakery_admin`: Owner/administrator of a specific bakery
 - **Characteristics**:
   - One bakery admin per bakery
   - One bakery per admin
-  - Created before bakery creation
+  - `bakery_admin` can self-register
   - Full access to their bakery's data
 
 ### 2. Bakery Users
 - **Location**: `/bakeries/{bakeryId}/users` subcollection
-- **Types**:
+- **Roles**:
   - `bakery_staff`: Employees of the bakery
   - `bakery_customer`: Customers of the bakery
 - **Characteristics**:
@@ -29,78 +29,78 @@ The system implements a multi-tenant user management solution for bakeries with 
 
 ## Database Schema
 
-### Admin User Document
-```typescript
-interface AdminUser {
-  id: string;
-  email: string;
-  role: 'system_admin' | 'bakery_admin';
-  bakeryId?: string;  // Only for bakery_admin
-  name: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-  // Additional fields
-  address?: string;
-  phone?: string;
-  national_id?: string;
-}
-```
-
-### Bakery User Document
-```typescript
-interface BakeryUser {
-  id: string;
-  email: string;
-  role: 'bakery_staff' | 'bakery_customer';
-  name: string;
-  isActive: boolean;  // Only relevant for staff
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-  createdBy?: string;  // Reference to admin who created the user
-  // Additional fields
-  address?: string;
-  phone?: string;
-  birthday?: string;
-  category?: string;
-  comment?: string;
+### User Model
+```javascript
+class User {
+  constructor({
+    id,
+    email,
+    password,
+    role,          // bakery_customer, bakery_staff, bakery_admin, or system_admin
+    bakeryId,      // Required for bakery_admin, bakery_staff, bakery_customer
+    name,
+    createdAt,
+    updatedAt,
+    category,
+    address,       // Optional
+    birthday,      // Optional
+    comment,       // Optional
+    phone,         // Optional
+    national_id,   // Optional, typically for staff
+    isActive = true
+  }) {
+    this.id = id;
+    this.email = email;
+    this.password = password;
+    this.role = role;
+    this.bakeryId = bakeryId;
+    this.name = name;
+    this.createdAt = createdAt || new Date();
+    this.updatedAt = updatedAt || new Date();
+    this.category = category || ""
+    this.address = address || "";
+    this.birthday = birthday || "";
+    this.comment = comment || "";
+    this.phone = phone || "";
+    this.national_id = national_id || "";
+    this.isActive = isActive;
+  }
 }
 ```
 
 ## Authentication Flows
 
-### 1. Admin Registration
-- Only through system administration
-- Creates both Firebase Auth account and admin user document
-- Automatically assigned admin role in Firebase custom claims
+### 1. Registration Flow
+```mermaid
+sequenceDiagram
+    User->>Server: POST /auth/register
+    Note right of Server: Request includes role<br/>and bakeryId if needed
+    Server->>Firebase Auth: Create auth account
+    Server->>Server: Determine collection based on role
+    Server->>Firestore: Create user document
+    Server->>Firebase Auth: Set role claims
+    Server-->>User: Registration success
+```
 
 ### 2. Staff Creation (by Admin)
 ```mermaid
 sequenceDiagram
-    Admin->>System: Create staff user
-    System->>Firebase Auth: Create auth account
-    System->>Firestore: Create staff document
-    System->>Firebase Auth: Set custom claims
-    System-->>Admin: Return staff credentials
-    Note right of System: Generated password for<br/>initial access
+    Admin->>Server: POST /users
+    Note right of Server: Request includes role=staff<br/>and bakeryId
+    Server->>Firebase Auth: Create auth account
+    Server->>Firestore: Create staff document
+    Server->>Firebase Auth: Set staff claims
+    Server-->>Admin: Return staff credentials
 ```
 
-### 3. Customer Creation
-Flow A: Self-Registration
+### 3. Customer Creation (Admin or Self)
 ```mermaid
 sequenceDiagram
-    Customer->>System: Register with bakeryId
-    System->>Firebase Auth: Create auth account
-    System->>Firestore: Create customer document
-    System-->>Customer: Registration success
-```
-
-Flow B: Admin Creation
-```mermaid
-sequenceDiagram
-    Admin->>System: Create customer
-    System->>Firebase Auth: Create auth account
-    System->>Firestore: Create customer document
-    System-->>Admin: Return customer credentials
+    Actor->>Server: POST /users or /auth/register
+    Note right of Server: Request includes role=customer<br/>and bakeryId
+    Server->>Firebase Auth: Create auth account
+    Server->>Firestore: Create customer document
+    Server-->>Actor: Return success
 ```
 
 ## Service Architecture
@@ -108,7 +108,7 @@ sequenceDiagram
 ### AdminUserService
 Responsibilities:
 - Manage users in `/users` collection
-- Handle bakery admin creation
+- Handle bakery admin operations
 - Manage system admin operations
 - Update admin user details
 - Handle admin authentication claims
@@ -123,44 +123,39 @@ Responsibilities:
 
 ## API Endpoints
 
-### Authentication Routes
+### Authentication Routes (authRoutes.js)
 ```
-POST /auth/register              # Public customer registration
-POST /auth/login                 # All user login
-POST /auth/logout               # All user logout
-```
-
-### Admin Routes
-```
-POST   /admin/users             # Create admin user (system admin only)
-GET    /admin/users             # List admin users (system admin only)
-GET    /admin/users/:id         # Get admin user details
-PATCH  /admin/users/:id         # Update admin user
+POST /auth/register  # Public registration (handles both customers and bakery_admin)
+POST /auth/login     # All user login
+POST /auth/logout    # All user logout
 ```
 
-### Bakery User Routes
+### User Routes (userRoutes.js)
 ```
-POST   /bakeries/:bakeryId/users           # Create staff/customer
-GET    /bakeries/:bakeryId/users           # List bakery users
-GET    /bakeries/:bakeryId/users/:id       # Get user details
-PATCH  /bakeries/:bakeryId/users/:id       # Update user
-GET    /bakeries/:bakeryId/users/staff     # List staff only
-GET    /bakeries/:bakeryId/users/customers # List customers only
+POST   /users        # Create user 
+GET    /users        # List users (supports filtering via query params)
+GET    /users/:id    # Get user details
+PUT    /users/:id    # Update user
+DELETE /users/:id    # Delete user
 ```
+
+Query Parameters for GET /users:
+- `role`: Filter by user role (bakery_customer, bakery_staff, bakery_admin, system_admin)
+- `bakeryId`: Filter by bakery
+- `isActive`: Filter by active status
 
 ## Access Control Matrix
 
-| Operation                | System Admin | Bakery Admin | Staff | Customer |
-|-------------------------|--------------|--------------|--------|----------|
-| Create Bakery Admin     | ✓            |              |        |          |
-| Create Staff            |              | ✓            |        |          |
-| Create Customer         |              | ✓            |        | ✓        |
-| View All Users          | ✓            |              |        |          |
-| View Bakery Users       |              | ✓            | ✓      |          |
-| View Own Profile        | ✓            | ✓            | ✓      | ✓        |
-| Update Own Profile      | ✓            | ✓            | ✓      | ✓        |
-| Update Bakery Users     |              | ✓            |        |          |
-| Deactivate Staff        |              | ✓            |        |          |
+| Operation     | System Admin | Bakery Admin | Staff | Customer |
+|--------------|--------------|--------------|--------|----------|
+| Register     | ✓            | ✓            | -      | ✓        |
+| Create User  | ✓            | ✓ (in bakery)| -      | -        |
+| View All     | ✓            | -            | -      | -        |
+| View Bakery  | ✓            | ✓ (own)      | ✓      | -        |
+| View Own     | ✓            | ✓            | ✓      | ✓        |
+| Update User  | ✓            | ✓ (in bakery)| -      | -        |
+| Update Own   | ✓            | ✓            | ✓      | ✓        |
+| Delete User  | ✓            | ✓ (in bakery)| -      | -        |
 
 ## Implementation Guidelines
 
@@ -168,21 +163,23 @@ GET    /bakeries/:bakeryId/users/customers # List customers only
 1. Always create Firebase Auth account first
 2. Use transactions for creating user documents
 3. Set appropriate custom claims
-4. Generate deterministic initial password
+4. Generate deterministic initial password for staff
 5. Validate email uniqueness within bakery context
 
 ### Security Rules
 ```javascript
 match /users/{userId} {
-  allow read: if isSystemAdmin();
+  allow read: if isSystemAdmin() || isOwner(userId);
   allow write: if isSystemAdmin();
+  allow create: if request.resource.data.role == 'bakery_admin';
 }
 
 match /bakeries/{bakeryId}/users/{userId} {
   allow read: if isBakeryAdmin(bakeryId) || 
               isBakeryStaff(bakeryId) ||
               (isBakeryCustomer(bakeryId) && isOwner(userId));
-  allow write: if isBakeryAdmin(bakeryId);
+  allow write: if isBakeryAdmin(bakeryId) ||
+              (isOwner(userId) && onlyAllowedFields());
 }
 ```
 

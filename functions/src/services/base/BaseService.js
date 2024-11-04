@@ -75,33 +75,29 @@ class BaseService {
     }
   }
 
-  /**
-   * Gets all documents in the collection with optional filters
-   * @param {string} parentId - Parent document ID for nested collections
-   * @param {Object} filters - Key-value pairs for filtering
-   * @param {Object} options - Additional query options (orderBy, limit, etc.)
-   */
   async getAll(parentId = null, filters = {}, options = {}) {
     try {
       let query = this.getCollectionRef(parentId);
 
       // Apply filters
       Object.entries(filters).forEach(([field, value]) => {
-        if (value !== undefined) {
+        if (value !== undefined && value !== '') {
           const [operator = '==', filterValue] = Array.isArray(value) ? value : ['==', value];
           query = query.where(field, operator, filterValue);
         }
       });
 
-      // Apply ordering if specified
+      // Apply sorting
       if (options.orderBy) {
-        const [field, direction = 'asc'] = Array.isArray(options.orderBy)
-          ? options.orderBy
-          : [options.orderBy];
+        const [field, direction] = options.orderBy;
         query = query.orderBy(field, direction);
       }
 
-      // Apply limit if specified
+      // Apply pagination
+      if (options.offset) {
+        query = query.offset(options.offset);
+      }
+
       if (options.limit) {
         query = query.limit(options.limit);
       }

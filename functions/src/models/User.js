@@ -8,9 +8,9 @@ class User {
     name,
     createdAt,
     updatedAt,
+    category,
     address,
     birthday,
-    category,
     comment,
     phone,
     national_id,
@@ -25,8 +25,8 @@ class User {
     this.createdAt = createdAt ? new Date(createdAt) : new Date();
     this.updatedAt = updatedAt || new Date();
     this.address = address || '';
-    this.birthday = birthday || '';
     this.category = category || '';
+    this.birthday = birthday || '';
     this.comment = comment || '';
     this.phone = phone || '';
     this.national_id = national_id || '';

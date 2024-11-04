@@ -27,7 +27,6 @@ class Bakery extends BaseModel {
     isPaused = false,
 
     // Customization
-    theme,
     customAttributes = {},
   } = {}) {
     super({ id, createdAt, updatedAt });
@@ -54,7 +53,6 @@ class Bakery extends BaseModel {
     this.isPaused = isPaused;
 
     // Customization
-    this.theme = theme;
     this.customAttributes = customAttributes;
   }
 
