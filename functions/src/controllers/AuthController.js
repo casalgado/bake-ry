@@ -1,20 +1,20 @@
-const userService = require("../services/userService");
+const authService = require('../services/AuthService');
 
 // possible roles: bakery_customer, bakery_staff, bakery_admin, or system_admin
-const userController = {
+const authController = {
   async register(req, res) {
     try {
       const { email, password, role, name, bakeryId } = req.body;
-      const user = await userService.createUser({
+      const user = await authService.createUser({
         email,
         password,
         role,
         name,
         bakeryId,
       });
-      res.status(201).json({ message: "User created successfully", user });
+      res.status(201).json({ message: 'User created successfully', user });
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error('Registration error:', error);
       res.status(400).json({ error: error.message });
     }
   },
@@ -23,21 +23,21 @@ const userController = {
     try {
       // Get the ID token from the Authorization header
       const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ error: "No token provided" });
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'No token provided' });
       }
 
-      const idToken = authHeader.split("Bearer ")[1];
+      const idToken = authHeader.split('Bearer ')[1];
       const { email } = req.body;
 
       if (!email) {
-        return res.status(400).json({ error: "Email is required" });
+        return res.status(400).json({ error: 'Email is required' });
       }
 
-      const userData = await userService.loginUser(idToken, email);
+      const userData = await authService.loginUser(idToken, email);
       res.json(userData);
     } catch (error) {
-      console.error("Login error:", error);
+      console.error('Login error:', error);
       res.status(401).json({ error: error.message });
     }
   },
@@ -45,13 +45,13 @@ const userController = {
   async logoutUser(req, res) {
     try {
       const { user } = req.body;
-      const result = await userService.logoutUser(user);
+      const result = await authService.logoutUser(user);
       res.json(result);
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error('Logout error:', error);
       res.status(400).json({ error: error.message });
     }
   },
 };
 
-module.exports = userController;
+module.exports = authController;

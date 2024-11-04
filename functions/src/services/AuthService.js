@@ -1,7 +1,7 @@
-const { admin, db } = require("../config/firebase");
-const User = require("../models/User");
+const { admin, db } = require('../config/firebase');
+const User = require('../models/User');
 
-const userService = {
+const authService = {
   async createUser(userData) {
     // requires: email, password, role, name
 
@@ -11,22 +11,22 @@ const userService = {
       const newUser = new User(userData);
 
       // Validate role and bakeryId first
-      if (newUser.role !== "system_admin" && newUser.role !== "bakery_admin") {
+      if (newUser.role !== 'system_admin' && newUser.role !== 'bakery_admin') {
         if (!newUser.bakeryId) {
-          throw new Error("BakeryId is required for non-admin users");
+          throw new Error('BakeryId is required for non-admin users');
         }
       }
 
       // Check if the email already exists for the given bakery
       // This check happens in different places in depending on role.
       const existingUser = await db
-        .collection("users")
-        .where("email", "==", newUser.email)
-        .where("bakeryId", "==", newUser.bakeryId)
+        .collection('users')
+        .where('email', '==', newUser.email)
+        .where('bakeryId', '==', newUser.bakeryId)
         .get();
 
       if (!existingUser.empty) {
-        throw new Error("A user with this email already exists in this bakery");
+        throw new Error('A user with this email already exists in this bakery');
       }
 
       // Start a transaction for atomicity
@@ -42,8 +42,8 @@ const userService = {
         // Assign bakeryId to customClaims if applicable
         // CHANGES: bakery_admin should have bakeryId already?
         if (
-          newUser.role !== "system_admin" &&
-          newUser.role !== "bakery_admin" &&
+          newUser.role !== 'system_admin' &&
+          newUser.role !== 'bakery_admin' &&
           newUser.bakeryId
         ) {
           customClaims.bakeryId = newUser.bakeryId;
@@ -51,9 +51,9 @@ const userService = {
         await admin.auth().setCustomUserClaims(userRecord.uid, customClaims);
 
         // 3. Create the user document in Firestore
-        /** 
+        /**
          * CHANGES: Make this nested for each bakery.
-         * probably something like this: 
+         * probably something like this:
          *       const ingredientsRef = db
                 .collection("bakeries")
                 .doc(bakeryId)
@@ -61,7 +61,7 @@ const userService = {
         * what has to change in the routes file to make this resource nested, and why does it have to change?
         */
 
-        const userRef = db.collection("users").doc(userRecord.uid);
+        const userRef = db.collection('users').doc(userRecord.uid);
         transaction.set(userRef, newUser.toFirestore());
 
         return {
@@ -75,7 +75,7 @@ const userService = {
 
       return result;
     } catch (error) {
-      console.error("Error creating user:", error);
+      console.error('Error creating user:', error);
 
       // If we created a user in Auth but the transaction failed,
       // we need to clean up the Auth user
@@ -83,7 +83,7 @@ const userService = {
         try {
           await admin.auth().deleteUser(userRecord.uid);
         } catch (cleanupError) {
-          console.error("Error cleaning up Auth user:", cleanupError);
+          console.error('Error cleaning up Auth user:', cleanupError);
           // Log this incident for admin attention
           // You might want to add proper error logging here
         }
@@ -100,13 +100,13 @@ const userService = {
 
       // 2. Get the user document from Firestore
       const userSnapshot = await db
-        .collection("users")
-        .where("email", "==", email)
+        .collection('users')
+        .where('email', '==', email)
         .limit(1)
         .get();
 
       if (userSnapshot.empty) {
-        throw new Error("User not found");
+        throw new Error('User not found');
       }
 
       const userDoc = userSnapshot.docs[0];
@@ -114,7 +114,7 @@ const userService = {
 
       // 3. Verify the user's Firebase UID matches
       if (decodedToken.uid !== userDoc.id) {
-        throw new Error("User authentication failed");
+        throw new Error('User authentication failed');
       }
 
       // 4. Return user data (excluding sensitive information)
@@ -128,23 +128,23 @@ const userService = {
         // Do NOT include password or other sensitive data
       };
     } catch (error) {
-      console.error("Error in loginUser service:", error);
-      if (error.code === "auth/id-token-expired") {
-        throw new Error("Session expired. Please login again.");
-      } else if (error.code === "auth/invalid-id-token") {
-        throw new Error("Invalid authentication token.");
+      console.error('Error in loginUser service:', error);
+      if (error.code === 'auth/id-token-expired') {
+        throw new Error('Session expired. Please login again.');
+      } else if (error.code === 'auth/invalid-id-token') {
+        throw new Error('Invalid authentication token.');
       }
-      throw new Error("Authentication failed. Please try again.");
+      throw new Error('Authentication failed. Please try again.');
     }
   },
 
   // Helper method to get user data by ID (useful for other parts of your app)
   async getUserById(uid) {
     try {
-      const userDoc = await db.collection("users").doc(uid).get();
+      const userDoc = await db.collection('users').doc(uid).get();
 
       if (!userDoc.exists) {
-        throw new Error("User not found");
+        throw new Error('User not found');
       }
 
       const userData = userDoc.data();
@@ -156,7 +156,7 @@ const userService = {
         bakeryId: userData.bakeryId,
       };
     } catch (error) {
-      console.error("Error getting user by ID:", error);
+      console.error('Error getting user by ID:', error);
       throw error;
     }
   },
@@ -166,17 +166,17 @@ const userService = {
       const decodedToken = await admin.auth().verifyIdToken(idToken);
       return decodedToken;
     } catch (error) {
-      console.error("Error verifying token:", error);
+      console.error('Error verifying token:', error);
       throw error;
     }
   },
 
   async updateUser(userId, updateData) {
     try {
-      const userDoc = await db.collection("users").doc(userId).get();
+      const userDoc = await db.collection('users').doc(userId).get();
 
       if (!userDoc.exists) {
-        throw new Error("User not found");
+        throw new Error('User not found');
       }
 
       // Remove any fields that shouldn't be updated
@@ -188,10 +188,10 @@ const userService = {
         updatedAt: new Date(),
       };
 
-      await db.collection("users").doc(userId).update(updates);
+      await db.collection('users').doc(userId).update(updates);
 
       // Return updated user data
-      const updatedDoc = await db.collection("users").doc(userId).get();
+      const updatedDoc = await db.collection('users').doc(userId).get();
       const updatedData = updatedDoc.data();
 
       return {
@@ -199,10 +199,10 @@ const userService = {
         ...updatedData,
       };
     } catch (error) {
-      console.error("Error updating user:", error);
+      console.error('Error updating user:', error);
       throw error;
     }
   },
 };
 
-module.exports = userService;
+module.exports = authService;
