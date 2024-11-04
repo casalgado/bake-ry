@@ -1,6 +1,6 @@
 const express = require('express');
 const IngredientController = require('../controllers/IngredientController');
-const ingredientService = require('../services/ingredientService');
+const ingredientService = require('../services/IngredientService');
 const {
   authenticateUser,
   requireBakeryStaffOrAdmin,

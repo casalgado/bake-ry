@@ -1,151 +1,96 @@
+// services/ingredientService.js
+
 const { db } = require('../config/firebase');
 const Ingredient = require('../models/Ingredient');
-const recipeService = require('./recipeService');
+const BaseService = require('./base/BaseService');
+const recipeService = require('./RecipeService');
+const { NotFoundError } = require('../utils/errors');
 
-/**
- * Checks if costPerUnit has changed between current and update data
- * @param {Object} currentIngredient - Current ingredient data
- * @param {Object} updateData - New ingredient data
- * @returns {boolean} True if cost changed
- */
-const hasCostChanged = (currentIngredient, updateData) => {
-  return (
-    updateData.costPerUnit !== undefined &&
-    updateData.costPerUnit !== currentIngredient.costPerUnit
-  );
-};
+class IngredientService extends BaseService {
+  constructor() {
+    super('ingredients', Ingredient, 'bakeries/{bakeryId}');
+  }
 
-/**
- * Updates recipes when ingredient cost changes
- * @param {FirebaseFirestore.Transaction} transaction - Firestore transaction
- * @param {string} bakeryId - Bakery ID
- * @param {string} ingredientId - Ingredient ID
- * @param {number} newCostPerUnit - New cost per unit
- * @param {string[]} usedInRecipes - Array of recipe IDs using this ingredient
- */
-const updateRecipesWithNewCost = async (
-  transaction,
-  bakeryId,
-  ingredientId,
-  newCostPerUnit,
-  usedInRecipes,
-) => {
-  const updatePromises = usedInRecipes.map(async (recipeId) => {
-    const recipe = await recipeService.getById(recipeId, bakeryId);
-    if (!recipe) return;
-
-    // Update the ingredient cost in the recipe
-    const updatedIngredients = recipe.ingredients.map((ing) =>
-      ing.ingredientId === ingredientId
-        ? { ...ing, costPerUnit: newCostPerUnit }
-        : ing,
+  // Helper Methods
+  hasCostChanged(currentIngredient, updateData) {
+    return (
+      updateData.costPerUnit !== undefined &&
+        updateData.costPerUnit !== currentIngredient.costPerUnit
     );
+  }
 
-    // Let recipeService handle the update and versioning
-    console.log('in ingredientService updating recipe', recipeId);
-    await recipeService.update(
-      recipeId,
-      {
-        ingredients: updatedIngredients,
-      },
-      bakeryId,
-      transaction,
-    );
-  });
+  async updateRecipesWithNewCost(
+    transaction,
+    bakeryId,
+    ingredientId,
+    newCostPerUnit,
+    usedInRecipes,
+  ) {
+    const updatePromises = usedInRecipes.map(async (recipeId) => {
+      const recipe = await recipeService.getById(recipeId, bakeryId);
+      if (!recipe) return;
 
-  await Promise.all(updatePromises);
-};
+      // Update the ingredient cost in the recipe
+      const updatedIngredients = recipe.ingredients.map((ing) =>
+        ing.ingredientId === ingredientId
+          ? { ...ing, costPerUnit: newCostPerUnit }
+          : ing,
+      );
 
-const ingredientService = {
-  async create(ingredientData, bakeryId) {
-    try {
-      const ingredientsRef = db
-        .collection('bakeries')
-        .doc(bakeryId)
-        .collection('ingredients');
-      const newIngredientRef = ingredientsRef.doc();
-
-      const ingredient = new Ingredient({
-        id: newIngredientRef.id,
+      console.log('in ingredientService updating recipe', recipeId);
+      await recipeService.update(
+        recipeId,
+        {
+          ingredients: updatedIngredients,
+        },
         bakeryId,
-        ...ingredientData,
-      });
+        transaction,
+      );
+    });
 
-      await newIngredientRef.set(ingredient.toFirestore());
-      return ingredient;
-    } catch (error) {
-      console.error('Error in createIngredient:', error);
-      throw error;
-    }
-  },
+    await Promise.all(updatePromises);
+  }
+
+  async create(ingredientData, bakeryId) {
+    return super.create(ingredientData, bakeryId);
+  }
 
   async getById(ingredientId, bakeryId) {
+    return super.getById(ingredientId, bakeryId);
+  }
+
+  async getAll(bakeryId, filters = {}, options = {}) {
     try {
-      const doc = await db
-        .collection('bakeries')
-        .doc(bakeryId)
-        .collection('ingredients')
-        .doc(ingredientId)
-        .get();
+      // Convert specific ingredient filters to generic filter format
+      const queryFilters = {
+        ...(filters.category && { category: filters.category }),
+        ...(filters.isActive !== undefined && { isActive: filters.isActive }),
+      };
 
-      if (!doc.exists) {
-        return null;
-      }
-
-      return Ingredient.fromFirestore(doc);
-    } catch (error) {
-      console.error('Error in getIngredient:', error);
-      throw error;
-    }
-  },
-
-  async getAll(bakeryId, filters = {}) {
-    try {
-      let query = db
-        .collection('bakeries')
-        .doc(bakeryId)
-        .collection('ingredients');
-
-      // Apply filters
-      if (filters.category) {
-        query = query.where('category', '==', filters.category);
-      }
-      if (filters.isActive !== undefined) {
-        query = query.where('isActive', '==', filters.isActive);
-      }
-      if (filters.needsRestock === true) {
-        query = query.where('currentStock', '<=', 'reorderPoint');
-      }
-
-      const snapshot = await query.get();
-      return snapshot.docs.map((doc) => Ingredient.fromFirestore(doc));
+      // Pass both filters and options to base service
+      return super.getAll(bakeryId, queryFilters, options);
     } catch (error) {
       console.error('Error in getAllIngredients:', error);
       throw error;
     }
-  },
+  }
 
   async update(ingredientId, updateData, bakeryId) {
     try {
-      const ingredientRef = db
-        .collection('bakeries')
-        .doc(bakeryId)
-        .collection('ingredients')
-        .doc(ingredientId);
+      const ingredientRef = this.getCollectionRef(bakeryId).doc(ingredientId);
 
       // Start a transaction
       return await db.runTransaction(async (transaction) => {
-        const doc = await ingredientRef.get();
+        const doc = await transaction.get(ingredientRef);
         if (!doc.exists) {
-          return null;
+          throw new NotFoundError('Ingredient not found');
         }
 
-        const currentIngredient = Ingredient.fromFirestore(doc);
+        const currentIngredient = this.ModelClass.fromFirestore(doc);
 
-        // checks if costPerUnit has changed, if so, calls updateRecipe on all recipes that use this ingredient
-        if (hasCostChanged(currentIngredient, updateData)) {
-          console.log('Ingredient cost changed, updating recipes  ');
-          await updateRecipesWithNewCost(
+        // Check if cost has changed
+        if (this.hasCostChanged(currentIngredient, updateData)) {
+          await this.updateRecipesWithNewCost(
             transaction,
             bakeryId,
             ingredientId,
@@ -154,20 +99,20 @@ const ingredientService = {
           );
         }
 
-        const updatedIngredient = new Ingredient({
+        const updatedIngredient = new this.ModelClass({
           ...currentIngredient,
           ...updateData,
           updatedAt: new Date(),
         });
 
-        await ingredientRef.update(updatedIngredient.toFirestore());
+        await transaction.update(ingredientRef, updatedIngredient.toFirestore());
         return updatedIngredient;
       });
     } catch (error) {
       console.error('Error in updateIngredient:', error);
       throw error;
     }
-  },
+  }
 
   async delete(ingredientId, bakeryId) {
     try {
@@ -185,20 +130,14 @@ const ingredientService = {
         throw new Error('Cannot delete ingredient that is used in recipes');
       }
 
-      await db
-        .collection('bakeries')
-        .doc(bakeryId)
-        .collection('ingredients')
-        .doc(ingredientId)
-        .delete();
-
-      return true;
+      return super.delete(ingredientId, bakeryId);
     } catch (error) {
       console.error('Error in deleteIngredient:', error);
       throw error;
     }
-  },
+  }
 
-};
+}
 
-module.exports = ingredientService;
+// Export a single instance
+module.exports = new IngredientService();

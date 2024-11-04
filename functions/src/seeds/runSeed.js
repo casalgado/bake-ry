@@ -1,6 +1,6 @@
 const admin = require('firebase-admin');
-const recipeTestData = require('./recipeTestData');
 const testData = require('./testData');
+
 // Initialize Firebase Admin with a project ID
 admin.initializeApp({
   projectId: 'bake-ry',
@@ -40,10 +40,12 @@ async function setupTestEnvironment() {
 
     // Start a transaction to ensure atomicity
     await db.runTransaction(async (transaction) => {
-      // Set bakery document
+      // Set bakery document with expanded data
       transaction.set(bakeryRef, {
         name: testData.bakery.name,
         ownerId: userRecord.uid,
+        operatingHours: testData.bakery.openingHours,
+        socialMedia: testData.bakery.socialMedia,
         createdAt: new Date(),
         updatedAt: new Date(),
         isActive: true,
@@ -74,7 +76,7 @@ async function setupTestEnvironment() {
 
     // Build a map of which ingredients are used in which recipes
     const ingredientRecipeMap = new Map();
-    recipeTestData.recipes.forEach((recipe) => {
+    testData.recipes.forEach((recipe) => {
       recipe.ingredients.forEach((ing) => {
         if (!ingredientRecipeMap.has(ing.ingredientId)) {
           ingredientRecipeMap.set(ing.ingredientId, []);
@@ -83,25 +85,17 @@ async function setupTestEnvironment() {
       });
     });
 
-    // 3. Create ingredients with recipe relationships
+    // 3. Create ingredients
     console.log('Creating ingredients...');
     const ingredientBatch = db.batch();
     testData.ingredients.forEach((ingredient) => {
       const ref = db
         .collection(`bakeries/${bakeryId}/ingredients`)
         .doc(ingredient.id);
+      // Use the ingredient data directly as it now contains all needed fields
       ingredientBatch.set(ref, {
         ...ingredient,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isActive: true,
-        type: 'Raw Material',
-        customAttributes: {},
-        purchaseHistory: [],
         usedInRecipes: ingredientRecipeMap.get(ingredient.id) || [],
-        averageMonthlyUsage: 0,
-        consumptionRate: 0,
-        currency: 'COP',
       });
     });
     await ingredientBatch.commit();
@@ -109,16 +103,13 @@ async function setupTestEnvironment() {
     // 4. Create recipes
     console.log('Creating recipes...');
     const recipeBatch = db.batch();
-    recipeTestData.recipes.forEach((recipe) => {
+    testData.recipes.forEach((recipe) => {
       const recipeRef = db
         .collection(`bakeries/${bakeryId}/recipes`)
         .doc(recipe.id);
       recipeBatch.set(recipeRef, {
         ...recipe,
         bakeryId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isActive: true,
       });
     });
     await recipeBatch.commit();
@@ -139,6 +130,7 @@ async function setupTestEnvironment() {
   }
 }
 
+// Cleanup function remains the same
 async function cleanupTestEnvironment(userId, bakeryId) {
   try {
     console.log('Cleaning up test environment...');
@@ -175,7 +167,7 @@ async function cleanupTestEnvironment(userId, bakeryId) {
   }
 }
 
-// Usage
+// Usage function remains the same
 async function runTests() {
   let testEnv = null;
   try {
@@ -184,12 +176,10 @@ async function runTests() {
     console.log('Use these credentials for API testing:');
     console.log(testEnv);
 
-    // Wait for user input before cleanup
     console.log(
       '\nPress Ctrl+C when you\'re done testing to cleanup the test environment.',
     );
 
-    // Better cleanup handling
     process.on('SIGINT', async () => {
       console.log('\nReceived SIGINT. Starting cleanup...');
       if (testEnv) {
@@ -206,7 +196,6 @@ async function runTests() {
       }
     });
 
-    // Return a promise that never resolves, keeping the process alive
     return new Promise(() => {});
   } catch (error) {
     console.error('Test run failed:', error);
@@ -217,7 +206,6 @@ async function runTests() {
   }
 }
 
-// Run the tests and handle any uncaught errors
 runTests().catch((error) => {
   console.error('Uncaught error:', error);
   process.exit(1);

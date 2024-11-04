@@ -1,12 +1,12 @@
 // src/services/versioning/recipeVersioning.js
 const recipeVersioningService = {
   async createVersion(transaction, recipeRef, recipe) {
-    const historyRef = recipeRef.collection("history").doc();
+    const historyRef = recipeRef.collection('history').doc();
 
     recipe = recipe.toFirestore();
 
     transaction.set(historyRef, {
-  
+
       version: recipe.version || 1,
       ingredients: recipe.ingredients,
       steps: recipe.steps || null,
@@ -20,9 +20,9 @@ const recipeVersioningService = {
 
   async getVersionAtDate(recipeRef, date) {
     const snapshot = await recipeRef
-      .collection("history")
-      .where("timestamp", "<=", date)
-      .orderBy("timestamp", "desc")
+      .collection('history')
+      .where('timestamp', '<=', date)
+      .orderBy('timestamp', 'desc')
       .limit(1)
       .get();
 
@@ -57,5 +57,3 @@ module.exports = {
   recipeVersioningService,
   ingredientsChanged,
 };
-
-// src/services/recipeService.js

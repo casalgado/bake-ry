@@ -1,2 +1,8 @@
 
 when product is added to order, the current recipe should be recorded.
+
+let's discuss this more fully
+
+shouldn't we implement filters on the baseService class?
+
+if I understood what you did, you moved the updateRecipeWithCosts to the Ingredient model? Does this brake separation of concerns? Why is the ingredient model changing recipes and doing firebase transactions?
