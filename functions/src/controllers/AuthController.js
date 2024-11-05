@@ -1,57 +1,81 @@
-const authService = require('../services/AuthService');
+const BaseController = require('./base/BaseController');
+const { BadRequestError } = require('../utils/errors');
 
-// possible roles: bakery_customer, bakery_staff, bakery_admin, or system_admin
-const authController = {
+class AuthController extends BaseController {
+  /**
+   * AuthController constructor
+   * @param {AuthService} authService - Instance of AuthService
+   */
+  constructor(authService) {
+    if (!authService) {
+      throw new Error('AuthService is required');
+    }
+    super(authService);
+  }
+
+  /**
+   * Register new user
+   * @param {Request} req - Express request object
+   * @param {Response} res - Express response object
+   */
   async register(req, res) {
     try {
       const { email, password, role, name, bakeryId } = req.body;
-      const user = await authService.createUser({
+
+      // Validate required fields
+      if (!email || !password || !role || !name) {
+        throw new BadRequestError('Email, password, role, and name are required');
+      }
+
+      // Validate role and bakeryId
+      if (role !== 'system_admin' && role !== 'bakery_admin' && !bakeryId) {
+        throw new BadRequestError('BakeryId is required for non-admin users');
+      }
+
+      const user = await this.service.register({
         email,
         password,
         role,
         name,
         bakeryId,
       });
-      res.status(201).json({ message: 'User created successfully', user });
-    } catch (error) {
-      console.error('Registration error:', error);
-      res.status(400).json({ error: error.message });
-    }
-  },
 
-  async loginUser(req, res) {
+      this.handleResponse(res, {
+        message: 'User created successfully',
+        user,
+      }, 201);
+    } catch (error) {
+      this.handleError(res, error);
+    }
+  }
+
+  /**
+   * Login user
+   * @param {Request} req - Express request object
+   * @param {Response} res - Express response object
+   */
+  async login(req, res) {
     try {
       // Get the ID token from the Authorization header
       const authHeader = req.headers.authorization;
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'No token provided' });
+        throw new BadRequestError('No token provided');
       }
 
       const idToken = authHeader.split('Bearer ')[1];
       const { email } = req.body;
 
       if (!email) {
-        return res.status(400).json({ error: 'Email is required' });
+        throw new BadRequestError('Email is required');
       }
 
-      const userData = await authService.loginUser(idToken, email);
-      res.json(userData);
+      const userData = await this.service.login(idToken, email);
+      this.handleResponse(res, userData);
     } catch (error) {
-      console.error('Login error:', error);
-      res.status(401).json({ error: error.message });
+      this.handleError(res, error);
     }
-  },
+  }
 
-  async logoutUser(req, res) {
-    try {
-      const { user } = req.body;
-      const result = await authService.logoutUser(user);
-      res.json(result);
-    } catch (error) {
-      console.error('Logout error:', error);
-      res.status(400).json({ error: error.message });
-    }
-  },
-};
+}
 
-module.exports = authController;
+module.exports = AuthController;

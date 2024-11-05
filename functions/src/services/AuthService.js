@@ -1,208 +1,106 @@
-const { admin, db } = require('../config/firebase');
+const { admin } = require('../config/firebase');
+const BaseService = require('./base/BaseService');
 const User = require('../models/User');
+const AdminUserService = require('./AdminUserService');
+const {  NotFoundError, AuthenticationError } = require('../utils/errors');
 
-const authService = {
-  async createUser(userData) {
-    // requires: email, password, role, name
+class AuthService extends BaseService {
+  constructor() {
+    // Pass users collection and User model to BaseService
+    super('users', User);
+    this.adminUserService = new AdminUserService();
+  }
 
+  /**
+   * Register a new user
+   * @param {Object} userData - User registration data
+   * @returns {Promise<Object>} Created user data
+   */
+  async register(userData) {
     let userRecord = null;
 
     try {
-      const newUser = new User(userData);
-
-      // Validate role and bakeryId first
-      if (newUser.role !== 'system_admin' && newUser.role !== 'bakery_admin') {
-        if (!newUser.bakeryId) {
-          throw new Error('BakeryId is required for non-admin users');
-        }
+      // If role is bakery_admin, delegate to AdminUserService
+      if (userData.role === 'bakery_admin') {
+        return await this.adminUserService.create(userData);
       }
-
-      // Check if the email already exists for the given bakery
-      // This check happens in different places in depending on role.
-      const existingUser = await db
-        .collection('users')
-        .where('email', '==', newUser.email)
-        .where('bakeryId', '==', newUser.bakeryId)
-        .get();
-
-      if (!existingUser.empty) {
-        throw new Error('A user with this email already exists in this bakery');
-      }
-
-      // Start a transaction for atomicity
-      const result = await db.runTransaction(async (transaction) => {
-        // 1. Create the user in Auth
-        userRecord = await admin.auth().createUser({
-          email: newUser.email,
-          password: newUser.password,
-        });
-
-        // 2. Set custom claims
-        const customClaims = { role: newUser.role };
-        // Assign bakeryId to customClaims if applicable
-        // CHANGES: bakery_admin should have bakeryId already?
-        if (
-          newUser.role !== 'system_admin' &&
-          newUser.role !== 'bakery_admin' &&
-          newUser.bakeryId
-        ) {
-          customClaims.bakeryId = newUser.bakeryId;
-        }
-        await admin.auth().setCustomUserClaims(userRecord.uid, customClaims);
-
-        // 3. Create the user document in Firestore
-        /**
-         * CHANGES: Make this nested for each bakery.
-         * probably something like this:
-         *       const ingredientsRef = db
-                .collection("bakeries")
-                .doc(bakeryId)
-                .collection("ingredients");
-        * what has to change in the routes file to make this resource nested, and why does it have to change?
-        */
-
-        const userRef = db.collection('users').doc(userRecord.uid);
-        transaction.set(userRef, newUser.toFirestore());
-
-        return {
-          uid: userRecord.uid,
-          email: userRecord.email,
-          role: newUser.role,
-          name: newUser.name,
-          bakeryId: newUser.bakeryId,
-        };
-      });
-
-      return result;
+      return null;
     } catch (error) {
-      console.error('Error creating user:', error);
-
-      // If we created a user in Auth but the transaction failed,
-      // we need to clean up the Auth user
+      // Cleanup if necessary
       if (userRecord) {
         try {
           await admin.auth().deleteUser(userRecord.uid);
         } catch (cleanupError) {
           console.error('Error cleaning up Auth user:', cleanupError);
-          // Log this incident for admin attention
-          // You might want to add proper error logging here
         }
       }
 
       throw error;
     }
-  },
+  }
 
-  async loginUser(idToken, email) {
+  /**
+   * Login user
+   * @param {string} idToken - Firebase ID token
+   * @param {string} email - User email
+   * @returns {Promise<Object>} User data
+   */
+  async login(idToken, email) {
     try {
-      // 1. Verify the Firebase ID token
+      // 1. Verify token
       const decodedToken = await admin.auth().verifyIdToken(idToken);
 
-      // 2. Get the user document from Firestore
-      const userSnapshot = await db
-        .collection('users')
+      // 2. Get user document
+      const userSnapshot = await this.getCollectionRef()
         .where('email', '==', email)
         .limit(1)
         .get();
 
       if (userSnapshot.empty) {
-        throw new Error('User not found');
+        throw new NotFoundError('User not found');
       }
 
       const userDoc = userSnapshot.docs[0];
       const userData = userDoc.data();
 
-      // 3. Verify the user's Firebase UID matches
+      // 3. Verify UID
       if (decodedToken.uid !== userDoc.id) {
-        throw new Error('User authentication failed');
+        throw new AuthenticationError('User authentication failed');
       }
 
-      // 4. Return user data (excluding sensitive information)
       return {
         uid: userDoc.id,
         email: userData.email,
         name: userData.name,
         role: userData.role,
         bakeryId: userData.bakeryId,
-        // Add any other necessary user data
-        // Do NOT include password or other sensitive data
       };
     } catch (error) {
-      console.error('Error in loginUser service:', error);
       if (error.code === 'auth/id-token-expired') {
-        throw new Error('Session expired. Please login again.');
+        throw new AuthenticationError('Session expired. Please login again.');
       } else if (error.code === 'auth/invalid-id-token') {
-        throw new Error('Invalid authentication token.');
+        throw new AuthenticationError('Invalid authentication token.');
       }
-      throw new Error('Authentication failed. Please try again.');
-    }
-  },
-
-  // Helper method to get user data by ID (useful for other parts of your app)
-  async getUserById(uid) {
-    try {
-      const userDoc = await db.collection('users').doc(uid).get();
-
-      if (!userDoc.exists) {
-        throw new Error('User not found');
-      }
-
-      const userData = userDoc.data();
-      return {
-        uid: userDoc.id,
-        email: userData.email,
-        name: userData.name,
-        role: userData.role,
-        bakeryId: userData.bakeryId,
-      };
-    } catch (error) {
-      console.error('Error getting user by ID:', error);
       throw error;
     }
-  },
+  }
 
+  /**
+   * Verify Firebase ID token
+   * @param {string} idToken - Firebase ID token
+   * @returns {Promise<Object>} Decoded token
+   */
   async verifyToken(idToken) {
     try {
-      const decodedToken = await admin.auth().verifyIdToken(idToken);
-      return decodedToken;
+      return await admin.auth().verifyIdToken(idToken);
     } catch (error) {
-      console.error('Error verifying token:', error);
-      throw error;
-    }
-  },
-
-  async updateUser(userId, updateData) {
-    try {
-      const userDoc = await db.collection('users').doc(userId).get();
-
-      if (!userDoc.exists) {
-        throw new Error('User not found');
+      if (error) {
+        throw new AuthenticationError('Invalid token');
       }
-
-      // Remove any fields that shouldn't be updated
-      // this should happen in the controller
-      const { email, role, createdAt, ...validUpdateData } = updateData;
-
-      const updates = {
-        ...validUpdateData,
-        updatedAt: new Date(),
-      };
-
-      await db.collection('users').doc(userId).update(updates);
-
-      // Return updated user data
-      const updatedDoc = await db.collection('users').doc(userId).get();
-      const updatedData = updatedDoc.data();
-
-      return {
-        uid: userId,
-        ...updatedData,
-      };
-    } catch (error) {
-      console.error('Error updating user:', error);
-      throw error;
     }
-  },
-};
+  }
 
-module.exports = authService;
+}
+
+// Export a single instance
+module.exports = AuthService;
