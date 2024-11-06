@@ -39,7 +39,7 @@ app.use('/auth', authRoutes);
 
 // Protected routes
 app.use('/bakeries', bakeryRoutes);
-app.use('/products', productRoutes);
+app.use('/bakeries', productRoutes);
 app.use('/bakeries', ingredientRoutes);
 app.use('/bakeries', recipeRoutes);
 

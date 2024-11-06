@@ -1,44 +1,44 @@
-const express = require("express");
+const express = require('express');
+const ProductController = require('../controllers/ProductController');
+const ProductService = require('../services/ProductService');
 const {
   authenticateUser,
-  requireSystemAdmin,
-  requireBakeryAdmin,
   requireBakeryStaffOrAdmin,
-} = require("../middleware/userAccess");
-const hasBakeryAccess = require("../middleware/bakeryAccess");
-const productController = require("../controllers/productController");
+} = require('../middleware/userAccess');
+const hasBakeryAccess = require('../middleware/bakeryAccess');
 
-const router = express.Router();
+const bindController = (controller) => ({
+  create: controller.create.bind(controller),
+  getById: controller.getById.bind(controller),
+  getAll: controller.getAll.bind(controller),
+  update: controller.update.bind(controller),
+  delete: controller.delete.bind(controller),
+});
 
-// All routes
+const controller = new ProductController(new ProductService());
+const productController = bindController(controller);
+
+const router = express.Router({ mergeParams: true });
+
+// Apply authentication to all routes
 router.use(authenticateUser);
-router.use(hasBakeryAccess);
 
-// Get all products for a bakery
-router.get("/bakeries/:bakeryId/products", productController.getProducts);
+// Create a sub-router for bakery-specific routes
+const bakeryRouter = express.Router({ mergeParams: true });
 
-// Get a specific product
-router.get("/bakeries/:bakeryId/products/:id", productController.getProduct);
+// Apply bakery access middleware to the sub-router
+bakeryRouter.use(hasBakeryAccess);
 
-// Create a new product (requires staff or admin)
-router.post(
-  "/bakeries/:bakeryId/products",
-  requireBakeryStaffOrAdmin,
-  productController.createProduct
-);
+// CRUD routes
+bakeryRouter.get('/products', productController.getAll);
+bakeryRouter.get('/products/:id', productController.getById);
 
-// Update a product (requires staff or admin)
-router.patch(
-  "/bakeries/:bakeryId/products/:id",
-  requireBakeryStaffOrAdmin,
-  productController.updateProduct
-);
+// Routes requiring staff or admin access
+bakeryRouter.post('/products', requireBakeryStaffOrAdmin, productController.create);
+bakeryRouter.put('/products/:id', requireBakeryStaffOrAdmin, productController.update);
+bakeryRouter.delete('/products/:id', requireBakeryStaffOrAdmin, productController.delete);
 
-// Delete a product (system admin only)
-router.delete(
-  "/bakeries/:bakeryId/products/:id",
-  requireBakeryStaffOrAdmin,
-  productController.deleteProduct
-);
+// Mount the bakery router
+router.use('/:bakeryId', bakeryRouter);
 
 module.exports = router;
