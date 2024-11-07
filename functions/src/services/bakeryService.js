@@ -1,7 +1,7 @@
 // services/bakeryService.js
-
 const { db, admin } = require('../config/firebase');
 const Bakery = require('../models/Bakery');
+const { BakerySettings } = require('../models/BakerySettings');
 const BaseService = require('./base/BaseService');
 
 class BakeryService extends BaseService {
@@ -24,6 +24,12 @@ class BakeryService extends BaseService {
 
         const newBakery = new this.ModelClass(bakeryData);
 
+        // Create default settings
+        const settingsRef = bakeryRef.collection('settings').doc('default');
+        const defaultSettings = new BakerySettings({
+          bakeryId: bakeryId,
+        });
+
         // Update user document with the new bakeryId
         const userRef = db.collection('users').doc(uid);
         const userDoc = await transaction.get(userRef);
@@ -32,8 +38,9 @@ class BakeryService extends BaseService {
           throw new Error('User not found');
         }
 
-        // Set both documents in the transaction
+        // Set all documents in the transaction
         transaction.set(bakeryRef, newBakery.toFirestore());
+        transaction.set(settingsRef, defaultSettings.toFirestore());
         transaction.update(userRef, {
           bakeryId: bakeryId,
           updatedAt: new Date(),
@@ -73,8 +80,6 @@ class BakeryService extends BaseService {
   async delete(id) {
     return super.delete(id);
   }
-
 }
 
-// Export a single instance
-module.exports =  BakeryService;
+module.exports = BakeryService;

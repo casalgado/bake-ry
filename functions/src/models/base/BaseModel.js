@@ -1,16 +1,13 @@
 class BaseModel {
   constructor(data = {}) {
-    // Store date fields from child class or use defaults
-    this._dateFields = this.constructor.dateFields || ['createdAt', 'updatedAt'];
-
     // Common fields all models have
     this.id = data.id;
 
     // Assign remaining data to instance
     Object.assign(this, data);
 
-    // Ensure dates are properly set
-    this._dateFields.forEach(field => {
+    // Ensure dates are properly set using the static getter directly
+    this.constructor.dateFields.forEach(field => {
       if (!this[field]) {
         this[field] = new Date();
       }
@@ -26,9 +23,6 @@ class BaseModel {
   toFirestore() {
     // Create a copy of the object without private fields
     const data = { ...this };
-
-    // Remove internal properties
-    delete data._dateFields;
 
     // Remove id as it's stored as document ID
     delete data.id;
@@ -52,7 +46,7 @@ class BaseModel {
     const data = doc.data();
     const id = doc.id;
 
-    // Standardize date conversion
+    // Standardize date conversion using the static getter
     this.dateFields.forEach((field) => {
       if (data[field]) {
         // Handle both Timestamp objects and date strings

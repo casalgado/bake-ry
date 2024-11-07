@@ -62,7 +62,7 @@ class BakeryUserController extends BaseController {
       }
 
       // Validate email if it's being updated
-      if (updateData.email) {
+      if (updateData.email !== currentUser.email) {
         throw new BadRequestError('Email cannot be updated');
       }
 

@@ -1,24 +1,42 @@
+// models/Product.js
 const BaseModel = require('./base/BaseModel');
+const { BadRequestError } = require('../utils/errors');
 
 class ProductVariation {
   constructor({
     name,
-    size,
-    weight,
+    value,          // weight in grams or quantity
+    recipeMultiplier = 1,
     basePrice,
     currentPrice,
-    recipeMultiplier = 1,
   }) {
     this.name = name;
-    this.size = size;
-    this.weight = weight;
+    this.value = value;
+    this.recipeMultiplier = recipeMultiplier;
     this.basePrice = basePrice;
     this.currentPrice = currentPrice || basePrice;
-    this.recipeMultiplier = recipeMultiplier;
+  }
+
+  validate(category) {
+    if (!category) {
+      throw new BadRequestError('Category is required for validation');
+    }
+
+    // Validate using category's validation rules
+    category.validateVariation(this);
+  }
+
+  getDisplayValue(category) {
+    if (!category) {
+      throw new BadRequestError('Category is required for display formatting');
+    }
+
+    return category.formatVariationValue(this.value);
   }
 
   toPlainObject() {
     const data = { ...this };
+    // Remove undefined values
     Object.keys(data).forEach(key => {
       if (data[key] === undefined) {
         delete data[key];
@@ -35,27 +53,22 @@ class Product extends BaseModel {
     bakeryId,
     name,
     description,
-    categoryId,
+    categoryName,    // Changed from categoryId to categoryName to match BakerySettings
     recipeId,
-    recipeMultiplier = 1,
-    createdAt,
-    updatedAt,
-
     // Variations
     variations = [],
-
-    // Pricing
+    // Basic price (for products without variations)
     basePrice,
     currentPrice,
-
     // Display & Marketing
     displayOrder,
     featured = false,
     tags = [],
-
     // Status
     isActive = true,
-
+    // Common fields
+    createdAt,
+    updatedAt,
     // Custom Attributes
     customAttributes = {},
   } = {}) {
@@ -65,18 +78,11 @@ class Product extends BaseModel {
     this.bakeryId = bakeryId;
     this.name = name;
     this.description = description;
-    this.categoryId = categoryId;
+    this.categoryName = categoryName;
     this.recipeId = recipeId;
-    this.recipeMultiplier = recipeMultiplier;
 
-    // Variations
-    this.variations = variations.map(variation =>
-      variation instanceof ProductVariation
-        ? variation
-        : new ProductVariation(variation),
-    );
-
-    // Pricing
+    // Handle variations based on category
+    this.variations = [];
     this.basePrice = basePrice;
     this.currentPrice = currentPrice || basePrice;
 
@@ -92,18 +98,59 @@ class Product extends BaseModel {
     this.customAttributes = customAttributes;
   }
 
+  // Method to set variations after category is available
+  setVariations(variations, category) {
+    if (!category) {
+      throw new BadRequestError('Category is required to set variations');
+    }
+
+    // If category doesn't support variations, ensure no variations are set
+    if (!category.hasVariations()) {
+      if (variations.length > 0) {
+        throw new BadRequestError('This product category does not support variations');
+      }
+      this.variations = [];
+      return;
+    }
+
+    // Validate and set each variation
+    this.variations = variations.map(variation => {
+      const productVariation = variation instanceof ProductVariation
+        ? variation
+        : new ProductVariation(variation);
+
+      productVariation.validate(category);
+      return productVariation;
+    });
+  }
+
+  // Helper to apply suggested variations from category
+  applyCategoryVariations(category) {
+    if (!category.hasVariations() || !category.suggestedVariations.length) {
+      return;
+    }
+
+    this.setVariations(category.suggestedVariations, category);
+  }
+
+  // Override toFirestore to handle variations
   toFirestore() {
     const data = super.toFirestore();
-    data.variations = this.variations.map(variation => variation.toPlainObject());
+    if (this.variations.length > 0) {
+      data.variations = this.variations.map(v => v.toPlainObject());
+    }
     return data;
   }
 
+  // Override fromFirestore to handle variations
   static fromFirestore(doc) {
     const data = doc.data();
     return new Product({
       id: doc.id,
       ...data,
       variations: data.variations?.map(v => new ProductVariation(v)),
+      createdAt: data.createdAt?.toDate(),
+      updatedAt: data.updatedAt?.toDate(),
     });
   }
 }
