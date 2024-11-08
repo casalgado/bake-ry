@@ -1,6 +1,7 @@
 // models/BakerySettings.js
 const BaseModel = require('./base/BaseModel');
 const { BadRequestError } = require('../utils/errors');
+const { generateId } = require('../utils/helpers');
 
 class ProductCategory {
   static DISPLAY_TYPES = {
@@ -29,12 +30,14 @@ class ProductCategory {
   };
 
   constructor({
+    id = generateId(),
     name,
     description,
     displayType = null, // 'weight' or 'quantity' or null
     suggestedVariations = [],
     isActive = true,
   }) {
+    this.id = id;
     this.name = name;
     this.description = description;
     this.displayType = displayType;

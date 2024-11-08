@@ -139,6 +139,39 @@ class BaseService {
   }
 
   /**
+ * Partially updates a document
+ */
+  async patch(id, data, parentId = null) {
+    try {
+      const docRef = this.getCollectionRef(parentId).doc(id);
+      const doc = await docRef.get();
+
+      if (!doc.exists) {
+        throw new NotFoundError(`${this.collectionName} not found`);
+      }
+
+      // Get current data
+      const currentData = this.ModelClass.fromFirestore(doc);
+
+      // Create new instance with merged data
+      const patchedInstance = new this.ModelClass({
+        ...currentData,
+        ...data,
+        id,
+        updatedAt: new Date(),
+      });
+
+      // Use update to perform partial update
+      await docRef.update(patchedInstance.toFirestore());
+
+      return patchedInstance;
+    } catch (error) {
+      console.error(`Error patching ${this.collectionName}:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Deletes a document
    */
   async delete(id, parentId = null) {

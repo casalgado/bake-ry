@@ -107,7 +107,7 @@ class ProductController extends BaseController {
     // Validate based on whether the product has variations
     if (productData.variations && productData.variations.length > 0) {
       // Products with variations should not have a base price
-      if (productData.basePrice !== undefined) {
+      if (productData.basePrice != 0) {
         errors.push(
           'Products with variations should not have a base price. Price should be set per variation',
         );
@@ -145,6 +145,20 @@ class ProductController extends BaseController {
             `Variation "${
               variation.name || `at index ${index}`
             }" must have a recipe multiplier greater than 0`,
+          );
+        }
+
+        if (!variation.value) {
+          errors.push(
+            `Variation "${
+              variation.name || `at index ${index}`
+            }" must have a value`,
+          );
+        } else if (variation.value <= 0) {
+          errors.push(
+            `Variation "${
+              variation.name || `at index ${index}`
+            }" must have a value greater than 0`,
           );
         }
       });

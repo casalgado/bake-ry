@@ -166,6 +166,16 @@ class BaseController {
         throw new BadRequestError('Patch data is required');
       }
 
+      // Prevent updates to immutable fields
+      const immutableFields = ['id', 'createdAt'];
+      const attemptedImmutableUpdate = immutableFields.find(field =>
+        Object.prototype.hasOwnProperty.call(patchData, field),
+      );
+
+      if (attemptedImmutableUpdate) {
+        throw new BadRequestError(`Cannot update immutable field: ${attemptedImmutableUpdate}`);
+      }
+
       // Validate patch data if validation function exists
       this.validateRequestData(patchData);
 
