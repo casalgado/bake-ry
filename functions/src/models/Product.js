@@ -144,7 +144,7 @@ class Product extends BaseModel {
 
   // Override fromFirestore to handle variations
   static fromFirestore(doc) {
-    const data = doc.data();
+    const data = super.fromFirestore(doc);
     return new Product({
       id: doc.id,
       ...data,
