@@ -9,8 +9,6 @@ class OrderItem {
     unitPrice,
     recipeId,
     recipeVersion,
-    notes = '',
-    status = 0,
     isComplimentary = false,
   }) {
     this.productId = productId;
@@ -20,8 +18,6 @@ class OrderItem {
     this.unitPrice = unitPrice;
     this.recipeId = recipeId;
     this.recipeVersion = recipeVersion;
-    this.notes = notes;
-    this.status = status;
     this.isComplimentary = isComplimentary;
     this.subtotal = this.calculateSubtotal();
   }
