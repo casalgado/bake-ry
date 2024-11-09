@@ -7,7 +7,8 @@ class OrderItem {
     productName,
     quantity,
     unitPrice,
-    recipe,
+    recipeId,
+    recipeVersion,
     notes = '',
     status = 0,
     isComplimentary = false,
@@ -17,7 +18,8 @@ class OrderItem {
     this.productName = productName;
     this.quantity = quantity;
     this.unitPrice = unitPrice;
-    this.recipe = recipe;
+    this.recipeId = recipeId;
+    this.recipeVersion = recipeVersion;
     this.notes = notes;
     this.status = status;
     this.isComplimentary = isComplimentary;
@@ -165,7 +167,6 @@ class Order extends BaseModel {
       id: this.id,
       bakeryId: this.bakeryId,
       dueDate: this.dueDate,
-      status: this.status,
       total: this.total,
       items: this.items.map(item => item.toHistoryObject()),
       fulfillmentType: this.fulfillmentType,
