@@ -1,6 +1,9 @@
 const admin = require('firebase-admin');
 const testData = require('./testData');
 
+const BAKERY_ID = 'bakery-betos-001';
+const ADMIN_USER_ID = 'admin-betos-001';
+
 // Initialize Firebase Admin with a project ID
 admin.initializeApp({
   projectId: 'bake-ry',
@@ -19,62 +22,50 @@ db.settings({
 // Set Auth emulator host through environment variable
 process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
 
+// Helper function to create Firestore timestamp
+const timestamp = () => admin.firestore.Timestamp.now();
+
 async function setupTestEnvironment() {
   try {
-    // 1. Create bakery admin user in Firebase Auth
+    // 1. Create bakery admin user in Firebase Auth with hardcoded UID
     console.log('Creating bakery admin user...');
-    const userRecord = await auth.createUser({
+    await auth.createUser({
+      uid: ADMIN_USER_ID,
       email: testData.bakery.email,
       password: testData.bakery.password,
     });
 
-    // Initial custom claims with role only
-    await auth.setCustomUserClaims(userRecord.uid, {
+    // Set custom claims with bakeryId
+    await auth.setCustomUserClaims(ADMIN_USER_ID, {
       role: testData.bakery.role,
+      bakeryId: BAKERY_ID,
     });
 
-    // 2. Create bakery document
+    // 2. Create bakery document with hardcoded ID
     console.log('Creating bakery document...');
-    const bakeryRef = db.collection('bakeries').doc();
-    const bakeryId = bakeryRef.id;
-
-    // Start a transaction to ensure atomicity
-    await db.runTransaction(async (transaction) => {
-      // Set bakery document with expanded data
-      transaction.set(bakeryRef, {
-        name: testData.bakery.name,
-        ownerId: userRecord.uid,
-        operatingHours: testData.bakery.openingHours,
-        socialMedia: testData.bakery.socialMedia,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isActive: true,
-      });
-
-      // Set user document
-      const userRef = db.collection('users').doc(userRecord.uid);
-      transaction.set(userRef, {
-        email: testData.bakery.email,
-        name: testData.bakery.name,
-        role: testData.bakery.role,
-        bakeryId: bakeryId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
+    const bakeryRef = db.collection('bakeries').doc(BAKERY_ID);
+    await bakeryRef.set({
+      name: testData.bakery.name,
+      ownerId: ADMIN_USER_ID,
+      operatingHours: testData.bakery.openingHours,
+      socialMedia: testData.bakery.socialMedia,
+      createdAt: timestamp(),
+      updatedAt: timestamp(),
+      isActive: true,
     });
 
-    // Update custom claims with bakeryId
-    console.log('Updating custom claims with bakeryId...');
-    await auth.setCustomUserClaims(userRecord.uid, {
+    // 3. Create admin user document
+    console.log('Creating admin user document...');
+    await db.collection('users').doc(ADMIN_USER_ID).set({
+      email: testData.bakery.email,
+      name: testData.bakery.name,
       role: testData.bakery.role,
-      bakeryId: bakeryId,
+      bakeryId: BAKERY_ID,
+      createdAt: timestamp(),
+      updatedAt: timestamp(),
     });
 
-    // Verify the claims were set correctly
-    const updatedUser = await auth.getUser(userRecord.uid);
-    console.log('Updated custom claims:', updatedUser.customClaims);
-
-    // Build a map of which ingredients are used in which recipes
+    // 4. Build ingredient-recipe relationship map
     const ingredientRecipeMap = new Map();
     testData.recipes.forEach((recipe) => {
       recipe.ingredients.forEach((ing) => {
@@ -85,65 +76,73 @@ async function setupTestEnvironment() {
       });
     });
 
-    // 3. Create ingredients
+    // 5. Create ingredients
     console.log('Creating ingredients...');
     const ingredientBatch = db.batch();
     testData.ingredients.forEach((ingredient) => {
       const ref = db
-        .collection(`bakeries/${bakeryId}/ingredients`)
+        .collection(`bakeries/${BAKERY_ID}/ingredients`)
         .doc(ingredient.id);
       ingredientBatch.set(ref, {
         ...ingredient,
+        createdAt: timestamp(),
+        updatedAt: timestamp(),
         usedInRecipes: ingredientRecipeMap.get(ingredient.id) || [],
       });
     });
     await ingredientBatch.commit();
 
-    // 4. Create recipes
+    // 6. Create recipes
     console.log('Creating recipes...');
     const recipeBatch = db.batch();
     testData.recipes.forEach((recipe) => {
       const recipeRef = db
-        .collection(`bakeries/${bakeryId}/recipes`)
+        .collection(`bakeries/${BAKERY_ID}/recipes`)
         .doc(recipe.id);
       recipeBatch.set(recipeRef, {
         ...recipe,
-        bakeryId,
+        createdAt: timestamp(),
+        updatedAt: timestamp(),
+        bakeryId: BAKERY_ID,
       });
     });
     await recipeBatch.commit();
 
-    // 5. Create settings
+    // 7. Create settings
     console.log('Creating settings...');
     await db
-      .collection(`bakeries/${bakeryId}/settings`)
+      .collection(`bakeries/${BAKERY_ID}/settings`)
       .doc('default')
       .set({
         ...testData.settings,
-        bakeryId,
+        createdAt: timestamp(),
+        updatedAt: timestamp(),
+        bakeryId: BAKERY_ID,
       });
 
-    // 6. Create users
+    // 8. Create users
     console.log('Creating users...');
     const userBatch = db.batch();
     testData.users.forEach((user) => {
       const userRef = db
-        .collection(`bakeries/${bakeryId}/users`)
-        .doc(); // Auto-generated ID
+        .collection(`bakeries/${BAKERY_ID}/users`)
+        .doc(user.id);
       userBatch.set(userRef, {
         ...user,
-        bakeryId,
+        createdAt: timestamp(),
+        updatedAt: timestamp(),
+        bakeryId: BAKERY_ID,
       });
     });
     await userBatch.commit();
 
     console.log('Test environment setup complete!');
-    console.log('Bakery ID:', bakeryId);
-    console.log('User ID:', userRecord.uid);
+    console.log('Bakery ID:', BAKERY_ID);
+    console.log('Admin User ID:', ADMIN_USER_ID);
 
     return {
-      bakeryId,
-      userId: userRecord.uid,
+      bakeryId: BAKERY_ID,
+      userId: ADMIN_USER_ID,
       email: testData.bakery.email,
       password: testData.bakery.password,
     };
@@ -153,51 +152,34 @@ async function setupTestEnvironment() {
   }
 }
 
-// Updated cleanup function to include new collections
-async function cleanupTestEnvironment(userId, bakeryId) {
+async function cleanupTestEnvironment() {
   try {
     console.log('Cleaning up test environment...');
 
-    // Delete all recipes
-    const recipesSnapshot = await db
-      .collection(`bakeries/${bakeryId}/recipes`)
-      .get();
-    const recipeBatch = db.batch();
-    recipesSnapshot.docs.forEach((doc) => {
-      recipeBatch.delete(doc.ref);
-    });
-    await recipeBatch.commit();
+    // Delete all subcollections using batches
+    const collections = ['recipes', 'ingredients', 'users', 'settings'];
 
-    // Delete all ingredients
-    const ingredientsSnapshot = await db
-      .collection(`bakeries/${bakeryId}/ingredients`)
-      .get();
-    const ingredientBatch = db.batch();
-    ingredientsSnapshot.docs.forEach((doc) => {
-      ingredientBatch.delete(doc.ref);
-    });
-    await ingredientBatch.commit();
+    for (const collection of collections) {
+      const snapshot = await db
+        .collection(`bakeries/${BAKERY_ID}/${collection}`)
+        .get();
 
-    // Delete all users
-    const usersSnapshot = await db
-      .collection(`bakeries/${bakeryId}/users`)
-      .get();
-    const userBatch = db.batch();
-    usersSnapshot.docs.forEach((doc) => {
-      userBatch.delete(doc.ref);
-    });
-    await userBatch.commit();
+      if (!snapshot.empty) {
+        const batch = db.batch();
+        snapshot.docs.forEach((doc) => {
+          batch.delete(doc.ref);
+        });
+        await batch.commit();
+        console.log(`Deleted ${collection} collection`);
+      }
+    }
 
-    // Delete settings
-    await db
-      .collection(`bakeries/${bakeryId}/settings`)
-      .doc('default')
-      .delete();
+    // Delete bakery and admin user documents
+    await db.collection('bakeries').doc(BAKERY_ID).delete();
+    await db.collection('users').doc(ADMIN_USER_ID).delete();
 
-    // Delete bakery and user
-    await db.collection('bakeries').doc(bakeryId).delete();
-    await db.collection('users').doc(userId).delete();
-    await auth.deleteUser(userId);
+    // Delete admin user from Auth
+    await auth.deleteUser(ADMIN_USER_ID);
 
     console.log('Cleanup complete!');
   } catch (error) {
@@ -220,17 +202,13 @@ async function runTests() {
 
     process.on('SIGINT', async () => {
       console.log('\nReceived SIGINT. Starting cleanup...');
-      if (testEnv) {
-        try {
-          await cleanupTestEnvironment(testEnv.userId, testEnv.bakeryId);
-          console.log('Cleanup successful, exiting...');
-          process.exit(0);
-        } catch (error) {
-          console.error('Error during cleanup:', error);
-          process.exit(1);
-        }
-      } else {
+      try {
+        await cleanupTestEnvironment();
+        console.log('Cleanup successful, exiting...');
         process.exit(0);
+      } catch (error) {
+        console.error('Error during cleanup:', error);
+        process.exit(1);
       }
     });
 
@@ -238,7 +216,7 @@ async function runTests() {
   } catch (error) {
     console.error('Test run failed:', error);
     if (testEnv) {
-      await cleanupTestEnvironment(testEnv.userId, testEnv.bakeryId);
+      await cleanupTestEnvironment();
     }
     process.exit(1);
   }

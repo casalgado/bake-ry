@@ -1,5 +1,30 @@
 const ingredients = [
   {
+    id: 'cafe-beatriz-001',
+    createdAt: new Date('2024-11-04T01:34:12.149Z'),
+    updatedAt: new Date('2024-11-04T01:51:12.733Z'),
+    name: 'Cafe Beatriz',
+    description: 'Cafe',
+    category: 'Café',
+    usedInRecipes: [], // Will be populated based on recipes
+    isResaleProduct: false,
+    costPerUnit: 14,
+    currency: 'COP',
+    currentStock: 25,
+    unit: 'unidades',
+    suppliers: [
+      {
+        name: 'Molinos del Norte',
+        contact: '3155484849',
+        address: 'Calle 123 #45-67',
+      },
+    ],
+    storageTemp: 'Ambiente',
+    isActive: true,
+    isDiscontinued: false,
+    customAttributes: {},
+  },
+  {
     id: 'harina-integral-002',
     createdAt: new Date('2024-11-04T01:34:12.149Z'),
     updatedAt: new Date('2024-11-04T01:51:12.733Z'),

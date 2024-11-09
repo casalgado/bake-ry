@@ -166,6 +166,7 @@ class BakerySettings extends BaseModel {
     'Frutas y Vegetales',
     'Especias y Aromáticos',
     'Chocolates y Cocoa',
+
   ];
 
   static ORDER_STATUSES = [
@@ -239,6 +240,7 @@ class BakerySettings extends BaseModel {
 
   static FULFILLMENT_TYPES = ['delivery', 'pickup'];
   static PAYMENT_METHODS = ['transfer', 'cash', 'card'];
+  static UNIT_OPTIONS = ['kg', 'g', 'L', 'ml', 'unidades', 'docena', 'paquete'];
 
   constructor({
     id,

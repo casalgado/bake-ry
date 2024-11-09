@@ -1,5 +1,6 @@
 const users = [
   {
+    id: 'user-sofia-001',
     email: 'sofia.ramirez@empresa.com',
     role: 'bakery_customer',
     name: 'Sofía Ramírez',
@@ -12,6 +13,7 @@ const users = [
     isActive: true,
   },
   {
+    id: 'user-carlos-001',
     email: 'carlos.restrepo@hotelpalace.com',
     role: 'bakery_customer',
     name: 'Carlos Restrepo',
@@ -24,6 +26,7 @@ const users = [
     isActive: true,
   },
   {
+    id: 'user-maria-001',
     email: 'mariafernanda.lopez@gmail.com',
     role: 'bakery_customer',
     name: 'María Fernanda López',
@@ -36,6 +39,7 @@ const users = [
     isActive: true,
   },
   {
+    id: 'user-andres-001',
     email: 'andres.gutierrez@restaurantemonte.com',
     role: 'bakery_customer',
     name: 'Andrés Gutiérrez',
@@ -48,6 +52,7 @@ const users = [
     isActive: true,
   },
   {
+    id: 'user-daniela-001',
     email: 'daniela.garcia@personal.com',
     role: 'bakery_customer',
     name: 'Daniela García',
@@ -60,6 +65,7 @@ const users = [
     isActive: true,
   },
   {
+    id: 'user-juan-001',
     email: 'juan.valencia@cafeteriajv.com',
     role: 'bakery_customer',
     name: 'Juan Valencia',
@@ -72,6 +78,7 @@ const users = [
     isActive: true,
   },
   {
+    id: 'user-isabella-001',
     email: 'isabella.martinez@gmail.com',
     role: 'bakery_customer',
     name: 'Isabella Martínez',
