@@ -6,7 +6,7 @@ const { generateId } = require('../utils/helpers');
 class ProductCategory {
   static DISPLAY_TYPES = {
     WEIGHT: {
-      id: 'weight',
+
       label: 'Weight',
       unit: 'g',
       validateValue: (value) => {
@@ -17,7 +17,7 @@ class ProductCategory {
       formatValue: (value) => `${value}${ProductCategory.DISPLAY_TYPES.WEIGHT.unit}`,
     },
     QUANTITY: {
-      id: 'quantity',
+
       label: 'Quantity',
       prefix: 'x',
       validateValue: (value) => {
@@ -173,20 +173,77 @@ class BakerySettings extends BaseModel {
     'En Produccion',
     'Preparada',
     'En Camino',
-    'Entregada',
-    'Cancelada',
+    'Completada',
   ];
+
+  static PRODUCT_CATEGORIES = [
+    {
+      'name': 'Café',
+      'description': 'Cafe de la sierra nevada',
+      'displayType': null,
+      'suggestedVariations': [],
+      'isActive': true,
+    },
+    {
+      'name': 'Masa Madre',
+      'description': 'Panes artesanales fermentados naturalmente',
+      'displayType': 'weight',
+      'suggestedVariations': [
+        {
+          'name': 'Mini',
+          'value': 100,
+          'recipeMultiplier': 0.2,
+        },
+        {
+          'name': 'Pequeño',
+          'value': 500,
+          'recipeMultiplier': 1,
+        },
+        {
+          'name': 'Mediano',
+          'value': 950,
+          'recipeMultiplier': 2,
+        },
+        {
+          'name': 'Grande',
+          'value': 1700,
+          'recipeMultiplier': 3.5,
+        },
+      ],
+      'isActive': true,
+    },
+    {
+      'name': 'Productos Congelados',
+      'description': 'Para hornear en casa cuando quieras',
+      'displayType': 'quantity',
+      'suggestedVariations': [
+        {
+          'name': 'Media Docena',
+          'value': 6,
+          'recipeMultiplier': 1,
+        },
+        {
+          'name': 'Docena',
+          'value': 12,
+          'recipeMultiplier': 2,
+        },
+        {
+          'name': 'Docena y Media',
+          'value': 18,
+          'recipeMultiplier': 3,
+        },
+      ],
+      'isActive': true,
+    },
+  ];
+
+  static FULFILLMENT_TYPES = ['delivery', 'pickup'];
+  static PAYMENT_METHODS = ['transfer', 'cash', 'card'];
+
   constructor({
     id,
     bakeryId,
-    // Categories
-    productCategories = [],
-    ingredientCategories = [],
-    // Order Statuses
-    orderStatuses = [],
-    // Theme
     theme = {},
-    // Other settings...
     createdAt,
     updatedAt,
   }) {
@@ -195,7 +252,7 @@ class BakerySettings extends BaseModel {
     this.bakeryId = bakeryId;
 
     // Initialize categories
-    this.productCategories = productCategories.map(cat =>
+    this.productCategories = BakerySettings.PRODUCT_CATEGORIES.map(cat =>
       cat instanceof ProductCategory ? cat : new ProductCategory(cat),
     );
 
@@ -204,6 +261,8 @@ class BakerySettings extends BaseModel {
     );
 
     this.orderStatuses = BakerySettings.ORDER_STATUSES;
+    this.fulfillmentTypes = BakerySettings.FULFILLMENT_TYPES;
+    this.paymentMethods = BakerySettings.PAYMENT_METHODS;
     this.theme = theme;
   }
 

@@ -68,7 +68,7 @@ class Order extends BaseModel {
     // Status and Payment
     status = 0,
     isPaid = false,
-    paymentMethod = null,
+    paymentMethod = 'transfer',
     paymentDetails = null,
 
     // Fulfillment

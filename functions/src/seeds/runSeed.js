@@ -92,7 +92,6 @@ async function setupTestEnvironment() {
       const ref = db
         .collection(`bakeries/${bakeryId}/ingredients`)
         .doc(ingredient.id);
-      // Use the ingredient data directly as it now contains all needed fields
       ingredientBatch.set(ref, {
         ...ingredient,
         usedInRecipes: ingredientRecipeMap.get(ingredient.id) || [],
@@ -114,6 +113,30 @@ async function setupTestEnvironment() {
     });
     await recipeBatch.commit();
 
+    // 5. Create settings
+    console.log('Creating settings...');
+    await db
+      .collection(`bakeries/${bakeryId}/settings`)
+      .doc('default')
+      .set({
+        ...testData.settings,
+        bakeryId,
+      });
+
+    // 6. Create users
+    console.log('Creating users...');
+    const userBatch = db.batch();
+    testData.users.forEach((user) => {
+      const userRef = db
+        .collection(`bakeries/${bakeryId}/users`)
+        .doc(); // Auto-generated ID
+      userBatch.set(userRef, {
+        ...user,
+        bakeryId,
+      });
+    });
+    await userBatch.commit();
+
     console.log('Test environment setup complete!');
     console.log('Bakery ID:', bakeryId);
     console.log('User ID:', userRecord.uid);
@@ -130,7 +153,7 @@ async function setupTestEnvironment() {
   }
 }
 
-// Cleanup function remains the same
+// Updated cleanup function to include new collections
 async function cleanupTestEnvironment(userId, bakeryId) {
   try {
     console.log('Cleaning up test environment...');
@@ -155,6 +178,22 @@ async function cleanupTestEnvironment(userId, bakeryId) {
     });
     await ingredientBatch.commit();
 
+    // Delete all users
+    const usersSnapshot = await db
+      .collection(`bakeries/${bakeryId}/users`)
+      .get();
+    const userBatch = db.batch();
+    usersSnapshot.docs.forEach((doc) => {
+      userBatch.delete(doc.ref);
+    });
+    await userBatch.commit();
+
+    // Delete settings
+    await db
+      .collection(`bakeries/${bakeryId}/settings`)
+      .doc('default')
+      .delete();
+
     // Delete bakery and user
     await db.collection('bakeries').doc(bakeryId).delete();
     await db.collection('users').doc(userId).delete();
@@ -167,7 +206,6 @@ async function cleanupTestEnvironment(userId, bakeryId) {
   }
 }
 
-// Usage function remains the same
 async function runTests() {
   let testEnv = null;
   try {
