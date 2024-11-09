@@ -53,7 +53,7 @@ class Product extends BaseModel {
     bakeryId,
     name,
     description,
-    categoryName,    // Changed from categoryId to categoryName to match BakerySettings
+    categoryId,    // Changed from categoryId to categoryName to match BakerySettings
     recipeId,
     // Variations
     variations = [],
@@ -78,7 +78,7 @@ class Product extends BaseModel {
     this.bakeryId = bakeryId;
     this.name = name;
     this.description = description;
-    this.categoryName = categoryName;
+    this.categoryId = categoryId;
     this.recipeId = recipeId;
 
     // Handle variations based on category

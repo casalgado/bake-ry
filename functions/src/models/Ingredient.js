@@ -1,21 +1,27 @@
 // models/Ingredient.js
-
 const BaseModel = require('./base/BaseModel');
+const { BadRequestError } = require('../utils/errors');
 
 class Ingredient extends BaseModel {
+  static TYPES = {
+    MANUFACTURED: 'manufactured',
+    RESALE: 'resale',
+  };
+
   constructor({
     // Basic Information
     id,
     bakeryId,
     name,
     description,
-    category,
+    type = Ingredient.TYPES.MANUFACTURED,
+    categoryId, // Reference to category
+    categoryName, // Denormalized category name
     createdAt,
     updatedAt,
 
     // Usage and Recipes
     usedInRecipes = [],
-    isResaleProduct = false,
     notes,
 
     // Cost and Pricing
@@ -36,8 +42,8 @@ class Ingredient extends BaseModel {
     storageTemp,
 
     // Status
-    isActive,
-    isDiscontinued,
+    isActive = true,
+    isDiscontinued = false,
 
     // Custom Attributes
     customAttributes = {},
@@ -45,15 +51,21 @@ class Ingredient extends BaseModel {
     // Pass common fields to BaseModel
     super({ id, createdAt, updatedAt });
 
+    // Validate type
+    if (!Object.values(Ingredient.TYPES).includes(type)) {
+      throw new BadRequestError('Invalid ingredient type');
+    }
+
     // Basic Information
     this.bakeryId = bakeryId;
     this.name = name;
     this.description = description;
-    this.category = category;
+    this.type = type;
+    this.categoryId = categoryId;
+    this.categoryName = categoryName;
 
     // Usage and Recipes
     this.usedInRecipes = usedInRecipes;
-    this.isResaleProduct = isResaleProduct;
     this.notes = notes;
 
     // Cost and Pricing
@@ -74,11 +86,39 @@ class Ingredient extends BaseModel {
     this.storageTemp = storageTemp;
 
     // Status
-    this.isActive = isActive ?? true;
-    this.isDiscontinued = isDiscontinued ?? false;
+    this.isActive = isActive;
+    this.isDiscontinued = isDiscontinued;
 
     // Custom Attributes
     this.customAttributes = customAttributes;
+  }
+
+  // Helper methods
+  isManufactured() {
+    return this.type === Ingredient.TYPES.MANUFACTURED;
+  }
+
+  isResale() {
+    return this.type === Ingredient.TYPES.RESALE;
+  }
+
+  // Validation helper
+  validate() {
+    if (!this.name) {
+      throw new BadRequestError('Ingredient name is required');
+    }
+    if (!this.categoryId) {
+      throw new BadRequestError('Category ID is required');
+    }
+    if (!this.categoryName) {
+      throw new BadRequestError('Category name is required');
+    }
+    if (!this.unit) {
+      throw new BadRequestError('Unit is required');
+    }
+    if (this.costPerUnit < 0) {
+      throw new BadRequestError('Cost per unit cannot be negative');
+    }
   }
 }
 
