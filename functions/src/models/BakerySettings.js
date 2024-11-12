@@ -250,6 +250,7 @@ class BakerySettings extends BaseModel {
   static FULFILLMENT_TYPES = ['delivery', 'pickup'];
   static PAYMENT_METHODS = ['transfer', 'cash', 'card'];
   static UNIT_OPTIONS = ['kg', 'g', 'L', 'ml', 'unidades', 'docena', 'paquete'];
+  static STORAGE_TEMPERATURES = ['Ambiente', 'Refrigeracion', 'Congelacion'];
 
   constructor({
     id,
@@ -286,6 +287,8 @@ class BakerySettings extends BaseModel {
     this.orderStatuses = BakerySettings.ORDER_STATUSES;
     this.fulfillmentTypes = BakerySettings.FULFILLMENT_TYPES;
     this.paymentMethods = BakerySettings.PAYMENT_METHODS;
+    this.unitOptions = BakerySettings.UNIT_OPTIONS;
+    this.storageTemperatures = BakerySettings.STORAGE_TEMPERATURES;
     this.theme = theme;
   }
 

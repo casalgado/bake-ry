@@ -3,6 +3,7 @@ const BaseModel = require('./base/BaseModel');
 class RecipeIngredient {
   constructor({
     ingredientId,
+    type,
     name,
     quantity,
     unit,
@@ -11,6 +12,7 @@ class RecipeIngredient {
 
   }) {
     this.ingredientId = ingredientId;
+    this.type = type;
     this.name = name;
     this.quantity = quantity;
     this.unit = unit;

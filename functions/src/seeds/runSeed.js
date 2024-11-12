@@ -1,5 +1,6 @@
 const admin = require('firebase-admin');
 const testData = require('./testData');
+const { BakerySettings } = require('./../models/BakerySettings');
 
 const BAKERY_ID = 'bakery-betos-001';
 const ADMIN_USER_ID = 'admin-betos-001';
@@ -54,7 +55,21 @@ async function setupTestEnvironment() {
       isActive: true,
     });
 
-    // 3. Create admin user document
+    // 3. Create settings using BakerySettings model
+    console.log('Creating settings...');
+    const bakerySettings = new BakerySettings({
+      id: 'default',
+      bakeryId: BAKERY_ID,
+      createdAt: timestamp(),
+      updatedAt: timestamp(),
+    });
+
+    await db
+      .collection(`bakeries/${BAKERY_ID}/settings`)
+      .doc('default')
+      .set(bakerySettings.toFirestore());
+
+    // 4. Create admin user document
     console.log('Creating admin user document...');
     await db.collection('users').doc(ADMIN_USER_ID).set({
       email: testData.bakery.email,
@@ -65,7 +80,7 @@ async function setupTestEnvironment() {
       updatedAt: timestamp(),
     });
 
-    // 4. Build ingredient-recipe relationship map
+    // 5. Build ingredient-recipe relationship map
     const ingredientRecipeMap = new Map();
     testData.recipes.forEach((recipe) => {
       recipe.ingredients.forEach((ing) => {
@@ -76,7 +91,7 @@ async function setupTestEnvironment() {
       });
     });
 
-    // 5. Create ingredients
+    // 6. Create ingredients
     console.log('Creating ingredients...');
     const ingredientBatch = db.batch();
     testData.ingredients.forEach((ingredient) => {
@@ -92,7 +107,7 @@ async function setupTestEnvironment() {
     });
     await ingredientBatch.commit();
 
-    // 6. Create recipes
+    // 7. Create recipes
     console.log('Creating recipes...');
     const recipeBatch = db.batch();
     testData.recipes.forEach((recipe) => {
@@ -107,18 +122,6 @@ async function setupTestEnvironment() {
       });
     });
     await recipeBatch.commit();
-
-    // 7. Create settings
-    console.log('Creating settings...');
-    await db
-      .collection(`bakeries/${BAKERY_ID}/settings`)
-      .doc('default')
-      .set({
-        ...testData.settings,
-        createdAt: timestamp(),
-        updatedAt: timestamp(),
-        bakeryId: BAKERY_ID,
-      });
 
     // 8. Create users
     console.log('Creating users...');
@@ -152,42 +155,6 @@ async function setupTestEnvironment() {
   }
 }
 
-async function cleanupTestEnvironment() {
-  try {
-    console.log('Cleaning up test environment...');
-
-    // Delete all subcollections using batches
-    const collections = ['recipes', 'ingredients', 'users', 'settings'];
-
-    for (const collection of collections) {
-      const snapshot = await db
-        .collection(`bakeries/${BAKERY_ID}/${collection}`)
-        .get();
-
-      if (!snapshot.empty) {
-        const batch = db.batch();
-        snapshot.docs.forEach((doc) => {
-          batch.delete(doc.ref);
-        });
-        await batch.commit();
-        console.log(`Deleted ${collection} collection`);
-      }
-    }
-
-    // Delete bakery and admin user documents
-    await db.collection('bakeries').doc(BAKERY_ID).delete();
-    await db.collection('users').doc(ADMIN_USER_ID).delete();
-
-    // Delete admin user from Auth
-    await auth.deleteUser(ADMIN_USER_ID);
-
-    console.log('Cleanup complete!');
-  } catch (error) {
-    console.error('Error cleaning up test environment:', error);
-    throw error;
-  }
-}
-
 async function runTests() {
   let testEnv = null;
   try {
@@ -200,24 +167,9 @@ async function runTests() {
       '\nPress Ctrl+C when you\'re done testing to cleanup the test environment.',
     );
 
-    process.on('SIGINT', async () => {
-      console.log('\nReceived SIGINT. Starting cleanup...');
-      try {
-        await cleanupTestEnvironment();
-        console.log('Cleanup successful, exiting...');
-        process.exit(0);
-      } catch (error) {
-        console.error('Error during cleanup:', error);
-        process.exit(1);
-      }
-    });
-
     return new Promise(() => {});
   } catch (error) {
     console.error('Test run failed:', error);
-    if (testEnv) {
-      await cleanupTestEnvironment();
-    }
     process.exit(1);
   }
 }

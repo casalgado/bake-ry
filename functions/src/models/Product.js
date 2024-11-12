@@ -54,6 +54,7 @@ class Product extends BaseModel {
     name,
     description,
     categoryId,    // Changed from categoryId to categoryName to match BakerySettings
+    // should we add catergoryName here for denormalization?
     recipeId,
     // Variations
     variations = [],
@@ -64,7 +65,7 @@ class Product extends BaseModel {
     displayOrder,
     featured = false,
     tags = [],
-    // Status
+    // Status+
     isActive = true,
     // Common fields
     createdAt,
