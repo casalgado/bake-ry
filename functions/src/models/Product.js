@@ -53,7 +53,7 @@ class Product extends BaseModel {
     bakeryId,
     name,
     description,
-    categoryId,    // Changed from categoryId to categoryName to match BakerySettings
+    collectionId,    // Changed from collectionId to categoryName to match BakerySettings
     // should we add catergoryName here for denormalization?
     recipeId,
     // Variations
@@ -79,7 +79,7 @@ class Product extends BaseModel {
     this.bakeryId = bakeryId;
     this.name = name;
     this.description = description;
-    this.categoryId = categoryId;
+    this.collectionId = collectionId;
     this.recipeId = recipeId;
 
     // Handle variations based on category
