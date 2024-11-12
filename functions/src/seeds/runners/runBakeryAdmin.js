@@ -1,14 +1,18 @@
 const bakery = require('../data/bakery');
 const { initializeFirebase } = require('../utils/seedUtils');
+const { saveEnvironment } = require('../utils/environment');
 const seedBakeryAndAdmin = require('../methods/seedBakeryAndAdmin');
 
 async function runBakeryAdminSeed() {
   try {
     console.log('Initializing Firebase...');
-    const { db, auth } = initializeFirebase();
+    initializeFirebase();
 
     console.log('Starting bakery and admin seed...');
-    const environment = await seedBakeryAndAdmin(bakery, { db, auth });
+    const environment = await seedBakeryAndAdmin(bakery);
+
+    // Save environment for other seeds to use
+    saveEnvironment(environment);
 
     console.log('\nBakery and admin created successfully!');
     console.log('Environment details:');

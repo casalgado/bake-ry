@@ -1,66 +1,40 @@
-const { BakerySettings } = require('../../models/BakerySettings');
-const { BAKERY_ID, ADMIN_USER_ID, timestamp } = require('../utils/constants');
+const AuthService = require('../../services/AuthService');
+const BakeryService = require('../../services/BakeryService');
 
-const seedBakeryAndAdmin = async (bakery, { db, auth }) => {
+const seedBakeryAndAdmin = async (bakery) => {
   try {
     console.log('Creating bakery admin user and bakery...');
 
-    // 1. Create bakery admin user in Firebase Auth with hardcoded UID
+    const authService = new AuthService();
+    const bakeryService = new BakeryService();
+
+    // 1. Register admin user
     console.log('Creating bakery admin user...');
-    await auth.createUser({
-      uid: ADMIN_USER_ID,
+    const adminData = {
       email: bakery.email,
       password: bakery.password,
-    });
-
-    // Set custom claims with bakeryId
-    await auth.setCustomUserClaims(ADMIN_USER_ID, {
-      role: bakery.role,
-      bakeryId: BAKERY_ID,
-    });
-
-    // 2. Create bakery document with hardcoded ID
-    console.log('Creating bakery document...');
-    const bakeryRef = db.collection('bakeries').doc(BAKERY_ID);
-    await bakeryRef.set({
       name: bakery.name,
-      ownerId: ADMIN_USER_ID,
+      role: 'bakery_admin',
+    };
+
+    const userData = await authService.register(adminData);
+
+    // 2. Create bakery
+    console.log('Creating bakery document...');
+    const bakeryData = {
+      name: bakery.name,
+      ownerId: userData.uid,
       operatingHours: bakery.openingHours,
       socialMedia: bakery.socialMedia,
-      createdAt: timestamp(),
-      updatedAt: timestamp(),
       isActive: true,
-    });
+    };
 
-    // 3. Create settings using BakerySettings model
-    console.log('Creating settings...');
-    const bakerySettings = new BakerySettings({
-      id: 'default',
-      bakeryId: BAKERY_ID,
-      createdAt: timestamp(),
-      updatedAt: timestamp(),
-    });
-
-    await db
-      .collection(`bakeries/${BAKERY_ID}/settings`)
-      .doc('default')
-      .set(bakerySettings.toFirestore());
-
-    // 4. Create admin user document
-    console.log('Creating admin user document...');
-    await db.collection('users').doc(ADMIN_USER_ID).set({
-      email: bakery.email,
-      name: bakery.name,
-      role: bakery.role,
-      bakeryId: BAKERY_ID,
-      createdAt: timestamp(),
-      updatedAt: timestamp(),
-    });
+    const createdBakery = await bakeryService.create(bakeryData);
 
     console.log('Successfully created bakery and admin user');
     return {
-      userId: ADMIN_USER_ID,
-      bakeryId: BAKERY_ID,
+      userId: userData.uid,
+      bakeryId: createdBakery.id,
       email: bakery.email,
       password: bakery.password,
     };
