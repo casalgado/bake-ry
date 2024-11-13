@@ -11,8 +11,8 @@
     "test": "jest",
     "test:silent": "jest --silent ",
     "test:watch": "jest --watch",
-    "seed:bakery": "node src/seeds/runners/runBakeryAdmin.js",
-    "seed:ingredients": "node src/seeds/runners/runIngredients.js"
+    "seed:bakery": "node src/seeds/runners/seedBakery.js",
+    "seed:ingredients": "node src/seeds/runners/seedIngredients.js"
   },
   "engines": {
     "node": "20"

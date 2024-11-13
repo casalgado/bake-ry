@@ -1,6 +1,7 @@
 node_modules/
 *.local
 *.log
+env.bat
 config/serviceAccountKey.json
 src/config/serviceAccountKey.json
 /src/config/serviceAccountKey.json
