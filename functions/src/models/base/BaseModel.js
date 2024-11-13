@@ -29,7 +29,7 @@ class BaseModel {
 
     // Remove any undefined values
     Object.keys(data).forEach((key) => {
-      if (data[key] === undefined) {
+      if (data[key] === undefined, data[key] === null) {
         delete data[key];
       }
     });

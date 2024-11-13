@@ -12,7 +12,8 @@
     "test:silent": "jest --silent ",
     "test:watch": "jest --watch",
     "seed:bakery": "node src/seeds/runners/seedBakery.js",
-    "seed:ingredients": "node src/seeds/runners/seedIngredients.js"
+    "seed:ingredients": "node src/seeds/runners/seedIngredients.js",
+    "seed:recipes": "node src/seeds/runners/seedRecipes.js"
   },
   "engines": {
     "node": "20"
