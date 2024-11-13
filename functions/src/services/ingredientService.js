@@ -3,8 +3,10 @@
 const { db } = require('../config/firebase');
 const Ingredient = require('../models/Ingredient');
 const BaseService = require('./base/BaseService');
-const recipeService = require('./RecipeService');
+const RecipeService = require('./RecipeService');
 const { NotFoundError } = require('../utils/errors');
+
+const recipeService = new RecipeService();
 
 class IngredientService extends BaseService {
   constructor() {
