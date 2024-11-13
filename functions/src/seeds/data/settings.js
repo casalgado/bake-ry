@@ -53,8 +53,7 @@ const settings = {
     'En Produccion',
     'Preparada',
     'En Camino',
-    'Entregada',
-    'Cancelada',
+    'Completada',
   ],
   'theme': {},
 };

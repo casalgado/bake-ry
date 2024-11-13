@@ -5,13 +5,17 @@ const functions = require('firebase-functions');
 // Import the service account key JSON file
 const serviceAccount = require('./serviceAccountKey.json');
 
+// Check if any Firebase apps are already initialized
+if (!admin.apps.length) {
 // Initialize the app with a service account, granting admin privileges
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://bake-ry.firebaseio.com',
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: 'https://bake-ry.firebaseio.com',
   // If you're using other Firebase services, include their configs here
   // For example: databaseURL: "https://your-database-name.firebaseio.com"
-});
+  });
+
+}
 
 const db = admin.firestore();
 
