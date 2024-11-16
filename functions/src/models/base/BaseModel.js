@@ -24,7 +24,6 @@ class BaseModel {
     // Create a copy of the object without private fields
 
     const data = { ...this };
-    console.log('toFirestore', data);
     // Remove id as it's stored as document ID
     delete data.id;
 
@@ -34,8 +33,6 @@ class BaseModel {
         delete data[key];
       }
     });
-
-    console.log('toFirestoreNext', data);
 
     return data;
   }

@@ -2,27 +2,12 @@ const BaseModel = require('./base/BaseModel');
 const { BadRequestError } = require('../utils/errors');
 
 class ProductCollection extends BaseModel {
-  static DISPLAY_TYPES = {
-    WEIGHT: {
-      label: 'Weight',
-      unit: 'g',
-      formatValue: (value) => `${value}${ProductCollection.DISPLAY_TYPES.WEIGHT.unit}`,
-    },
-    QUANTITY: {
-      label: 'Quantity',
-      prefix: 'x',
-      formatValue: (value) => `${ProductCollection.DISPLAY_TYPES.QUANTITY.prefix}${value}`,
-    },
-  };
 
   constructor({
     id,
     bakeryId,
     name,
     description,
-    displayType = null, // 'weight' or 'quantity' or null
-    displayOrder = 0,
-    suggestedVariations = [],
     isActive = true,
     createdAt,
     updatedAt,
@@ -32,9 +17,6 @@ class ProductCollection extends BaseModel {
     this.bakeryId = bakeryId;
     this.name = name;
     this.description = description;
-    this.displayType = displayType;
-    this.displayOrder = displayOrder;
-    this.suggestedVariations = suggestedVariations;
     this.isActive = isActive;
   }
 

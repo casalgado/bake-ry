@@ -3,18 +3,43 @@ const BaseModel = require('./base/BaseModel');
 const { BadRequestError } = require('../utils/errors');
 
 class ProductVariation {
+  static SUGGESTED_VARIATIONS = {
+    WEIGHT: {
+      label: 'Weight',
+      unit: 'g',
+      formatValue: (value) => `${value}${ProductVariation.SUGGESTED_VARIATIONS.WEIGHT.unit}`,
+      defaults: [
+        { name: 'mini', value: 100, basePrice: 5000, recipeId: '' },
+        { name: 'peq', value: 550, basePrice: 16000, recipeId: '' },
+        { name: 'med', value: 950, basePrice: 25000, recipeId: '' },
+        { name: 'gra', value: 1700, basePrice: 34000, recipeId: '' },
+      ],
+    },
+    QUANTITY: {
+      label: 'Quantity',
+      prefix: 'x',
+      formatValue: (value) => `${ProductVariation.SUGGESTED_VARIATIONS.QUANTITY.prefix}${value}`,
+      defaults: [
+        { name: 'x5', value: 5, basePrice: 9000, recipeId: '' },
+        { name: 'x6', value: 6, basePrice: 15000, recipeId: '' },
+        { name: 'x10', value: 10, basePrice: 12000, recipeId: '' },
+        { name: 'x12', value: 12, basePrice: 18000, recipeId: '' },
+        { name: 'x16', value: 16, basePrice: 20000, recipeId: '' },
+      ],
+    },
+  };
   constructor({
     name,
-    value,          // weight in grams or quantity
-    recipeMultiplier = 1,
+    value,
     basePrice,
     currentPrice,
+    recipeId,
   }) {
     this.name = name;
     this.value = value;
-    this.recipeMultiplier = recipeMultiplier;
     this.basePrice = basePrice;
     this.currentPrice = currentPrice || basePrice;
+    this.recipeId = recipeId;
   }
 
   validate(category) {
@@ -52,19 +77,17 @@ class Product extends BaseModel {
     id,
     bakeryId,
     name,
-    description,
     collectionId,    // Changed from collectionId to categoryName to match BakerySettings
-    // should we add catergoryName here for denormalization?
-    recipeId,
+    collectionName,
     // Variations
     variations = [],
-    // Basic price (for products without variations)
+    // Basic price and recipe (for products without variations)
+    recipeId,
     basePrice,
     currentPrice,
+
     // Display & Marketing
     displayOrder,
-    featured = false,
-    tags = [],
     // Status+
     isActive = true,
     // Common fields
@@ -78,8 +101,8 @@ class Product extends BaseModel {
     // Basic Information
     this.bakeryId = bakeryId;
     this.name = name;
-    this.description = description;
     this.collectionId = collectionId;
+    this.collectionName = collectionName;
     this.recipeId = recipeId;
 
     // Handle variations based on category
@@ -89,8 +112,6 @@ class Product extends BaseModel {
 
     // Display & Marketing
     this.displayOrder = displayOrder;
-    this.featured = featured;
-    this.tags = tags;
 
     // Status
     this.isActive = isActive;
