@@ -22,17 +22,20 @@ class BaseModel {
   // Convert model instance to Firestore format
   toFirestore() {
     // Create a copy of the object without private fields
-    const data = { ...this };
 
+    const data = { ...this };
+    console.log('toFirestore', data);
     // Remove id as it's stored as document ID
     delete data.id;
 
     // Remove any undefined values
     Object.keys(data).forEach((key) => {
-      if (data[key] === undefined, data[key] === null) {
+      if (data[key] === undefined || data[key] === null) {
         delete data[key];
       }
     });
+
+    console.log('toFirestoreNext', data);
 
     return data;
   }
