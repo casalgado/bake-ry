@@ -13,10 +13,7 @@ class Ingredient extends BaseModel {
     id,
     bakeryId,
     name,
-    description,
     type = Ingredient.TYPES.MANUFACTURED,
-    categoryId, // Reference to category
-    categoryName, // Denormalized category name
     createdAt,
     updatedAt,
 
@@ -33,10 +30,6 @@ class Ingredient extends BaseModel {
 
     // Units and Measurements
     unit,
-
-    // Supplier Information
-    suppliers,
-    preferredSupplierId,
 
     // Storage Requirements
     storageTemp,
@@ -59,10 +52,9 @@ class Ingredient extends BaseModel {
     // Basic Information
     this.bakeryId = bakeryId;
     this.name = name;
-    this.description = description;
+
     this.type = type;
-    this.categoryId = categoryId;
-    this.categoryName = categoryName;
+
 
     // Usage and Recipes
     this.usedInRecipes = usedInRecipes;
@@ -78,9 +70,7 @@ class Ingredient extends BaseModel {
     // Units and Measurements
     this.unit = unit;
 
-    // Supplier Information
-    this.suppliers = suppliers;
-    this.preferredSupplierId = preferredSupplierId;
+
 
     // Storage Requirements
     this.storageTemp = storageTemp;
