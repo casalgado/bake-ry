@@ -1,6 +1,11 @@
 const { db, auth, BAKERY_ID, ADMIN_USER_ID, timestamp } = require('../seedConfig');
 const bakery = require('../data/bakery');
 const settings = require('../data/settings');
+const { BakerySettings } = require('../../models/BakerySettings');
+const productCollections = require('../data/productCollections');
+const ProductCollectionService = require('../../services/ProductCollectionService');
+
+const productCollectionService = new ProductCollectionService();
 
 async function seedBakery() {
   try {
@@ -45,12 +50,13 @@ async function seedBakery() {
     await db
       .collection(`bakeries/${BAKERY_ID}/settings`)
       .doc('default')
-      .set({
-        settings,
-        createdAt: timestamp(),
-        updatedAt: timestamp(),
-        bakeryId: BAKERY_ID,
-      });
+      .set(new BakerySettings(settings).toFirestore());
+
+    // Create product collections
+    console.log('Creating product collections...');
+    for (const collection of productCollections) {
+      await productCollectionService.create(collection, BAKERY_ID);
+    }
 
     return {
       bakeryId: BAKERY_ID,
@@ -75,4 +81,10 @@ async function runSeed() {
   }
 }
 
-runSeed();
+// Export the function so it can be used by other seeders
+module.exports = seedBakery;
+
+// Only run if this is the main file being executed
+if (require.main === module) {
+  runSeed();
+}

@@ -1,376 +1,233 @@
 [
   {
-    "id": "ySRtMzalgRL59WLy4M6u",
+    "id": "dJO4DkwbAaMUy3enAFiz",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
     "name": "Cafe Beatriz",
-    "description": "Cafe",
     "type": "manufactured",
-    "categoryId": "category-id",
-    "categoryName": "category-name",
     "usedInRecipes": [],
     "notes": "notes",
     "costPerUnit": 14,
     "currency": "COP",
     "currentStock": 25,
     "unit": "unidades",
-    "suppliers": [
-      {
-        "name": "Molinos del Norte",
-        "contact": "3155484849",
-        "address": "Calle 123 #45-67"
-      }
-    ],
-    "preferredSupplierId": "preferred-supplier-id",
     "storageTemp": "Ambiente",
     "isActive": true,
     "isDiscontinued": false,
     "customAttributes": {}
   },
   {
-    "id": "Bq0zoMmfrDk8eSOLH57E",
+    "id": "ssPVXeCcGDCSfCJcE2Cc",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
     "name": "Harina Integral",
-    "description": "Harina de trigo integral rica en fibra",
     "type": "manufactured",
-    "categoryId": "category-id",
-    "categoryName": "category-name",
     "usedInRecipes": [],
     "notes": "notes",
     "costPerUnit": 14,
     "currency": "COP",
     "currentStock": 25,
     "unit": "g",
-    "suppliers": [
-      {
-        "name": "Molinos del Norte",
-        "contact": "3155484849",
-        "address": "Calle 123 #45-67"
-      }
-    ],
-    "preferredSupplierId": "preferred-supplier-id",
     "storageTemp": "Ambiente",
     "isActive": true,
     "isDiscontinued": false,
     "customAttributes": {}
   },
   {
-    "id": "R6KqKNTGrvYO1aYG4WzH",
+    "id": "SxRwUxXE0G8jul4y2zS2",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
     "name": "Harina de Centeno",
-    "description": "Harina de centeno para panes especiales",
     "type": "manufactured",
-    "categoryId": "category-id",
-    "categoryName": "category-name",
     "usedInRecipes": [],
     "notes": "notes",
     "costPerUnit": 16,
     "currency": "COP",
     "currentStock": 15,
     "unit": "g",
-    "suppliers": [
-      {
-        "name": "Granos Premium",
-        "contact": "3155484850",
-        "address": "Av Principal #78-90"
-      }
-    ],
-    "preferredSupplierId": "preferred-supplier-id",
     "storageTemp": "Ambiente",
     "isActive": true,
     "isDiscontinued": false,
     "customAttributes": {}
   },
   {
-    "id": "fed0KutTTZrFp0bjMap6",
+    "id": "mZpp67LD2SNESRVeZDb8",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
     "name": "Leche Entera",
-    "description": "Leche entera pasteurizada",
     "type": "manufactured",
-    "categoryId": "category-id",
-    "categoryName": "category-name",
     "usedInRecipes": [],
     "notes": "notes",
     "costPerUnit": 3,
     "currency": "COP",
     "currentStock": 50,
     "unit": "ml",
-    "suppliers": [
-      {
-        "name": "Lácteos del Valle",
-        "contact": "3155484851",
-        "address": "Carrera 34 #56-78"
-      }
-    ],
-    "preferredSupplierId": "preferred-supplier-id",
     "storageTemp": "Refrigeracion",
     "isActive": true,
     "isDiscontinued": false,
     "customAttributes": {}
   },
   {
-    "id": "Pf0yQ2n5JUMuCqWJM16O",
+    "id": "0sVknq8O3PCJHXntZvjw",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
     "name": "Mantequilla Sin Sal",
-    "description": "Mantequilla sin sal para repostería",
     "type": "manufactured",
-    "categoryId": "category-id",
-    "categoryName": "category-name",
     "usedInRecipes": [],
     "notes": "notes",
     "costPerUnit": 18,
     "currency": "COP",
     "currentStock": 20,
     "unit": "g",
-    "suppliers": [
-      {
-        "name": "Lácteos Premium",
-        "contact": "3155484852",
-        "address": "Calle 90 #12-34"
-      }
-    ],
-    "preferredSupplierId": "preferred-supplier-id",
     "storageTemp": "Refrigeracion",
     "isActive": true,
     "isDiscontinued": false,
     "customAttributes": {}
   },
   {
-    "id": "axAL4pQPdXbgO2lY15n4",
+    "id": "aTzVeipCGrB3e4QDuzUi",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
     "name": "Extracto de Vainilla",
-    "description": "Extracto natural de vainilla",
     "type": "manufactured",
-    "categoryId": "category-id",
-    "categoryName": "category-name",
     "usedInRecipes": [],
     "notes": "notes",
     "costPerUnit": 45,
     "currency": "COP",
     "currentStock": 10,
     "unit": "ml",
-    "suppliers": [
-      {
-        "name": "Esencias del Mundo",
-        "contact": "3155484853",
-        "address": "Av Central #45-67"
-      }
-    ],
-    "preferredSupplierId": "preferred-supplier-id",
     "storageTemp": "Ambiente",
     "isActive": true,
     "isDiscontinued": false,
     "customAttributes": {}
   },
   {
-    "id": "hfwET0N3XbqNFKOBmLMw",
+    "id": "ujhBZ88IDDnKfKjNI0aW",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
     "name": "Cardamomo Molido",
-    "description": "Cardamomo molido para especiados",
     "type": "manufactured",
-    "categoryId": "category-id",
-    "categoryName": "category-name",
     "usedInRecipes": [],
     "notes": "notes",
     "costPerUnit": 120,
     "currency": "COP",
     "currentStock": 5,
     "unit": "g",
-    "suppliers": [
-      {
-        "name": "Especias Orientales",
-        "contact": "3155484854",
-        "address": "Calle 67 #89-12"
-      }
-    ],
-    "preferredSupplierId": "preferred-supplier-id",
     "storageTemp": "Ambiente",
     "isActive": true,
     "isDiscontinued": false,
     "customAttributes": {}
   },
   {
-    "id": "ZfJ4diRPxjHQ4K4uTNcN",
+    "id": "uENQ4TVEf8Q7vnU5ITmd",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
     "name": "Arándanos Deshidratados",
-    "description": "Arándanos deshidratados sin azúcar",
     "type": "manufactured",
-    "categoryId": "category-id",
-    "categoryName": "category-name",
     "usedInRecipes": [],
     "notes": "notes",
     "costPerUnit": 45,
     "currency": "COP",
     "currentStock": 15,
     "unit": "g",
-    "suppliers": [
-      {
-        "name": "Frutos Secos del Valle",
-        "contact": "3155484855",
-        "address": "Carrera 78 #90-12"
-      }
-    ],
-    "preferredSupplierId": "preferred-supplier-id",
     "storageTemp": "Ambiente",
     "isActive": true,
     "isDiscontinued": false,
     "customAttributes": {}
   },
   {
-    "id": "Pv4CMiFoH19t6YKJXzCU",
+    "id": "5nemi0Eos9Acaz9WwJAW",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
     "name": "Harina de Almendra",
-    "description": "Harina de almendra finamente molida",
     "type": "manufactured",
-    "categoryId": "category-id",
-    "categoryName": "category-name",
     "usedInRecipes": [],
     "notes": "notes",
     "costPerUnit": 45,
     "currency": "COP",
     "currentStock": 10,
     "unit": "g",
-    "suppliers": [
-      {
-        "name": "Frutos Secos Premium",
-        "contact": "3155484856",
-        "address": "Calle 45 #12-34"
-      }
-    ],
-    "preferredSupplierId": "preferred-supplier-id",
     "storageTemp": "Ambiente",
     "isActive": true,
     "isDiscontinued": false,
     "customAttributes": {}
   },
   {
-    "id": "wd9NoKkEeeBj9ZLDWkmp",
+    "id": "faNHGA6yyV9MX7mmsxCP",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
     "name": "Harina de Avena",
-    "description": "Avena molida fina",
     "type": "manufactured",
-    "categoryId": "category-id",
-    "categoryName": "category-name",
     "usedInRecipes": [],
     "notes": "notes",
     "costPerUnit": 20,
     "currency": "COP",
     "currentStock": 15,
     "unit": "g",
-    "suppliers": [
-      {
-        "name": "Cereales del Valle",
-        "contact": "3155484857",
-        "address": "Av 23 #45-67"
-      }
-    ],
-    "preferredSupplierId": "preferred-supplier-id",
     "storageTemp": "Ambiente",
     "isActive": true,
     "isDiscontinued": false,
     "customAttributes": {}
   },
   {
-    "id": "TKm7uteSRgAIsmNcWJhw",
+    "id": "voBeE2urdn1TxXHcIysG",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
     "name": "Crema de Leche",
-    "description": "Crema de leche 35% grasa",
     "type": "manufactured",
-    "categoryId": "category-id",
-    "categoryName": "category-name",
     "usedInRecipes": [],
     "notes": "notes",
     "costPerUnit": 12,
     "currency": "COP",
     "currentStock": 20,
     "unit": "ml",
-    "suppliers": [
-      {
-        "name": "Lácteos Premium",
-        "contact": "3155484858",
-        "address": "Cra 67 #89-12"
-      }
-    ],
-    "preferredSupplierId": "preferred-supplier-id",
     "storageTemp": "Refrigeracion",
     "isActive": true,
     "isDiscontinued": false,
     "customAttributes": {}
   },
   {
-    "id": "BQpWOFxbNFIjObVp3RJ7",
+    "id": "CIoQ60Pi42w1w5iGAWtZ",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
     "name": "Queso Crema",
-    "description": "Queso crema para repostería",
     "type": "manufactured",
-    "categoryId": "category-id",
-    "categoryName": "category-name",
     "usedInRecipes": [],
     "notes": "notes",
     "costPerUnit": 25,
     "currency": "COP",
     "currentStock": 15,
     "unit": "g",
-    "suppliers": [
-      {
-        "name": "Lácteos Premium",
-        "contact": "3155484858",
-        "address": "Cra 67 #89-12"
-      }
-    ],
-    "preferredSupplierId": "preferred-supplier-id",
     "storageTemp": "Refrigeracion",
     "isActive": true,
     "isDiscontinued": false,
     "customAttributes": {}
   },
   {
-    "id": "svonEzHkmdVZKQ0pOopU",
+    "id": "TDEFfo6PE3jNStcm0Oru",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
     "name": "Jengibre Molido",
-    "description": "Jengibre en polvo",
     "type": "manufactured",
-    "categoryId": "category-id",
-    "categoryName": "category-name",
     "usedInRecipes": [],
     "notes": "notes",
     "costPerUnit": 85,
     "currency": "COP",
     "currentStock": 5,
     "unit": "g",
-    "suppliers": [
-      {
-        "name": "Especias Orientales",
-        "contact": "3155484859",
-        "address": "Calle 78 #90-12"
-      }
-    ],
-    "preferredSupplierId": "preferred-supplier-id",
     "storageTemp": "Ambiente",
     "isActive": true,
     "isDiscontinued": false,

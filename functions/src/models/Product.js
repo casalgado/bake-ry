@@ -3,31 +3,7 @@ const BaseModel = require('./base/BaseModel');
 const { BadRequestError } = require('../utils/errors');
 
 class ProductVariation {
-  static SUGGESTED_VARIATIONS = {
-    WEIGHT: {
-      label: 'Weight',
-      unit: 'g',
-      formatValue: (value) => `${value}${ProductVariation.SUGGESTED_VARIATIONS.WEIGHT.unit}`,
-      defaults: [
-        { name: 'mini', value: 100, basePrice: 5000, recipeId: '' },
-        { name: 'peq', value: 550, basePrice: 16000, recipeId: '' },
-        { name: 'med', value: 950, basePrice: 25000, recipeId: '' },
-        { name: 'gra', value: 1700, basePrice: 34000, recipeId: '' },
-      ],
-    },
-    QUANTITY: {
-      label: 'Quantity',
-      prefix: 'x',
-      formatValue: (value) => `${ProductVariation.SUGGESTED_VARIATIONS.QUANTITY.prefix}${value}`,
-      defaults: [
-        { name: 'x5', value: 5, basePrice: 9000, recipeId: '' },
-        { name: 'x6', value: 6, basePrice: 15000, recipeId: '' },
-        { name: 'x10', value: 10, basePrice: 12000, recipeId: '' },
-        { name: 'x12', value: 12, basePrice: 18000, recipeId: '' },
-        { name: 'x16', value: 16, basePrice: 20000, recipeId: '' },
-      ],
-    },
-  };
+
   constructor({
     name,
     value,

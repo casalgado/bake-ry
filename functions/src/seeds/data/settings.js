@@ -1,5 +1,7 @@
+const { BAKERY_ID } = require('../seedConfig');
 const settings = {
   'id': 'default',
+  'bakeryId': BAKERY_ID,
 
   'ingredientCategories': [
     {
