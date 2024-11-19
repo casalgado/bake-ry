@@ -6,3 +6,5 @@ config/serviceAccountKey.json
 src/config/serviceAccountKey.json
 /src/config/serviceAccountKey.json
 .env
+src/seeds/data/
+*.csv

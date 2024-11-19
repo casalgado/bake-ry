@@ -3,13 +3,15 @@ const recipes = require('../data/recipes');
 const RecipeService = require('../../services/RecipeService');
 const { Recipe } = require('../../models/Recipe');
 const seedIngredients = require('./seedIngredients');
+const fs = require('fs');
+const path = require('path');
 
 const recipeService = new RecipeService();
 
 async function seedRecipes() {
   try {
     console.log('Creating recipes...');
-    console.log('Using BAKERY_ID:', BAKERY_ID); //
+    console.log('Using BAKERY_ID:', BAKERY_ID);
 
     // First, ensure ingredients exist by either reading from file or creating them
     let ingredients;
@@ -27,31 +29,52 @@ async function seedRecipes() {
       return map;
     }, {});
 
+    // Store created recipes with their IDs for reference
+    const createdRecipes = [];
+
     // Create recipes through service
     for (const recipe of recipes) {
-      // Map ingredient names to their IDs
-      const recipeIngredients = recipe.ingredients.map(ingredient => ({
-        ...ingredient,
-        ingredientId: ingredientMap[ingredient.name],
-      })).filter(ingredient => ingredient.ingredientId);
-      delete recipe.id; // Remove ID from seed data
+      try {
+        // Map ingredient names to their IDs
+        const recipeIngredients = recipe.ingredients.map(ingredient => ({
+          ...ingredient,
+          ingredientId: ingredientMap[ingredient.name],
+        })).filter(ingredient => ingredient.ingredientId);
+        delete recipe.id; // Remove ID from seed data
 
-      const newRecipe = new Recipe({
-        ...recipe,
-        ingredients: recipeIngredients,
-        bakeryId: BAKERY_ID,
-        isActive: recipe.isActive || true,
-        isDiscontinued: recipe.isDiscontinued || false,
-        customAttributes: recipe.customAttributes || {},
-      }).toFirestore();
+        const newRecipe = new Recipe({
+          ...recipe,
+          ingredients: recipeIngredients,
+          bakeryId: BAKERY_ID,
+          isActive: recipe.isActive || true,
+          isDiscontinued: recipe.isDiscontinued || false,
+          customAttributes: recipe.customAttributes || {},
+        }).toFirestore();
 
-      const createdRecipe = await recipeService.create(newRecipe, BAKERY_ID);
+        const createdRecipe = await recipeService.create(newRecipe, BAKERY_ID);
 
-      console.log(`Created recipe: ${createdRecipe.name}`);
+        createdRecipes.push({
+          id: createdRecipe.id,
+          ...createdRecipe,
+        });
 
+        console.log(`Created recipe: ${createdRecipe.name}`);
+      } catch (error) {
+        console.error(`Error creating recipe ${recipe.name}:`, error);
+        // Continue with next recipe if one fails
+        continue;
+      }
     }
 
+    // Write created recipes to a file for reference
+    const seedDataDir = path.join(__dirname, '../data');
+    fs.writeFileSync(
+      path.join(seedDataDir, 'seededRecipes.json'),
+      JSON.stringify(createdRecipes, null, 2),
+    );
+
     console.log('Recipes seeded successfully');
+    return createdRecipes;
   } catch (error) {
     console.error('Error seeding recipes:', error);
     throw error;

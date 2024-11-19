@@ -29,11 +29,10 @@ class BaseModel {
 
     // Remove any undefined values
     Object.keys(data).forEach((key) => {
-      if (data[key] === undefined || data[key] === null) {
+      if (data[key] === undefined || data[key] === null || data[key] === '' || Number.isNaN(data[key])) {
         delete data[key];
       }
     });
-
     return data;
   }
 

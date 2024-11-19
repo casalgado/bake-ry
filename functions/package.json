@@ -14,7 +14,8 @@
     "seed:all": "node src/seeds/runners/seedAll.js",
     "seed:bakery": "node src/seeds/runners/seedBakery.js",
     "seed:ingredients": "node src/seeds/runners/seedIngredients.js",
-    "seed:recipes": "node src/seeds/runners/seedRecipes.js"
+    "seed:recipes": "node src/seeds/runners/seedRecipes.js",
+    "seed:users": "node src/seeds/runners/seedUsers.js"
   },
   "engines": {
     "node": "20"
