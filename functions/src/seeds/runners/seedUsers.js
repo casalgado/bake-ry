@@ -65,6 +65,7 @@ async function seedUsers() {
     // Store created users with their IDs for reference
     const createdUsers = [];
     let progress = '';
+    console.log('Creating users...');
 
     // Create users through service
     for (const userData of users) {
@@ -78,7 +79,7 @@ async function seedUsers() {
         BAKERY_ID,
         );
 
-        console.log(':');
+       
         progress += '✓'; // Checkmark for success
         process.stdout.write('\rProgress: ' + progress);
 
