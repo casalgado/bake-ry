@@ -59,7 +59,7 @@ async function seedProducts() {
           id: createdProduct.id,
           ...createdProduct,
         });
-        console.log(`Created product: ${createdProduct.name}`);
+        console.log(`Created product: ${createdProduct.name}, ${createdProduct.id}`);
 
       } catch (error) {
         console.error(`Error creating product ${product.name}:`, error);

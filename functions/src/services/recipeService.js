@@ -59,6 +59,8 @@ class RecipeService extends BaseService {
         const recipeId = recipeRef.id;
 
         const newRecipe = new this.ModelClass({
+          id: recipeId,
+          bakeryId,
           ...recipeData,
           ingredients: ingredientsWithCosts.map((item) => item.ingredient),
         });

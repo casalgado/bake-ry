@@ -30,15 +30,15 @@ class ProductService extends BaseService {
         }
         */
 
-        // Create new product
         const productRef = this.getCollectionRef(bakeryId).doc();
+        const productId = productRef.id;
+
         const newProduct = new this.ModelClass({
-          id: productRef.id,
-          bakeryId,
           ...productData,
+          id: productId,
+          bakeryId,
         });
 
-        // Update both documents atomically
         transaction.set(productRef, newProduct.toFirestore());
         /* Recipe Implementation TBD
         transaction.update(recipeRef, {

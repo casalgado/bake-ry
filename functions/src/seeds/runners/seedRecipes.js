@@ -58,7 +58,7 @@ async function seedRecipes() {
           ...createdRecipe,
         });
 
-        console.log(`Created recipe: ${createdRecipe.name}`);
+        console.log(`Created recipe: ${createdRecipe.name}, ${createdRecipe.id}`);
       } catch (error) {
         console.error(`Error creating recipe ${recipe.name}:`, error);
         // Continue with next recipe if one fails

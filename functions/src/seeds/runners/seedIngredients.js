@@ -2,6 +2,8 @@ const { BAKERY_ID } = require('../seedConfig');
 const ingredients = require('../data/ingredients');
 const IngredientService = require('../../services/ingredientService');
 const Ingredient = require('../../models/Ingredient');
+const fs = require('fs');
+const path = require('path');
 
 const ingredientService = new IngredientService();
 
@@ -32,12 +34,10 @@ async function seedIngredients() {
         id: createdIngredient.id,
         ...createdIngredient,
       });
-      console.log(`Created ingredient: ${createdIngredient.name}`);
+      console.log(`Created ingredient: ${createdIngredient.name}, ${createdIngredient.id}`);
     }
 
     // Write created ingredients to a file for recipes to use
-    const fs = require('fs');
-    const path = require('path');
 
     const seedDataDir = path.join(__dirname, '../data');
     fs.writeFileSync(
