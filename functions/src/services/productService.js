@@ -15,6 +15,7 @@ class ProductService extends BaseService {
     try {
       return await db.runTransaction(async (transaction) => {
         // Check recipe exists and is available
+        /* Recipe Implementation TBD
         const recipeRef = db
           .collection(`bakeries/${bakeryId}/recipes`)
           .doc(productData.recipeId);
@@ -27,6 +28,7 @@ class ProductService extends BaseService {
         if (recipeDoc.data().productId) {
           throw new BadRequestError('Recipe is already assigned to another product');
         }
+        */
 
         // Create new product
         const productRef = this.getCollectionRef(bakeryId).doc();
@@ -38,10 +40,12 @@ class ProductService extends BaseService {
 
         // Update both documents atomically
         transaction.set(productRef, newProduct.toFirestore());
+        /* Recipe Implementation TBD
         transaction.update(recipeRef, {
           productId: productRef.id,
           updatedAt: new Date(),
         });
+        */
 
         return newProduct;
       });

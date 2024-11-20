@@ -15,6 +15,7 @@
     "seed:bakery": "node src/seeds/runners/seedBakery.js",
     "seed:ingredients": "node src/seeds/runners/seedIngredients.js",
     "seed:recipes": "node src/seeds/runners/seedRecipes.js",
+    "seed:products": "node src/seeds/runners/seedProducts.js",
     "seed:users": "node src/seeds/runners/seedUsers.js"
   },
   "engines": {

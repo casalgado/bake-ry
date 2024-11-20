@@ -1,18 +1,24 @@
 const productCollections = [
   {
-    name: 'Sourdough',
+    name: 'sourdough',
   },
   {
-    name: 'Baguettes',
+    name: 'baguette',
   },
   {
-    name: 'Tortillas',
+    name: 'tortillas',
   },
   {
-    name: 'Congelados',
+    name: 'untables',
   },
   {
-    name: 'Cafe',
+    name: 'congelados',
+  },
+  {
+    name: 'panaderia tradicional',
+  },
+  {
+    name: 'cafe el diario',
   },
 ];
 

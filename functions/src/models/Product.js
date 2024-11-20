@@ -10,12 +10,14 @@ class ProductVariation {
     basePrice,
     currentPrice,
     recipeId,
+    isWholeGrain = false,
   }) {
     this.name = name;
     this.value = value;
     this.basePrice = basePrice;
     this.currentPrice = currentPrice || basePrice;
     this.recipeId = recipeId;
+    this.isWholeGrain = isWholeGrain;
   }
 
   validate(category) {
@@ -53,7 +55,7 @@ class Product extends BaseModel {
     id,
     bakeryId,
     name,
-    collectionId,    // Changed from collectionId to categoryName to match BakerySettings
+    collectionId,
     collectionName,
     // Variations
     variations = [],
@@ -81,8 +83,14 @@ class Product extends BaseModel {
     this.collectionName = collectionName;
     this.recipeId = recipeId;
 
-    // Handle variations based on category
-    this.variations = [];
+    // Handle variations - create instances right in constructor
+    this.variations = variations.map(variation =>
+      variation instanceof ProductVariation
+        ? variation
+        : new ProductVariation(variation),
+    );
+
+    // Basic price
     this.basePrice = basePrice;
     this.currentPrice = currentPrice || basePrice;
 
@@ -96,39 +104,14 @@ class Product extends BaseModel {
     this.customAttributes = customAttributes;
   }
 
-  // Method to set variations after category is available
-  setVariations(variations, category) {
-    if (!category) {
-      throw new BadRequestError('Category is required to set variations');
-    }
-
-    // If category doesn't support variations, ensure no variations are set
-    if (!category.hasVariations()) {
-      if (variations.length > 0) {
-        throw new BadRequestError('This product category does not support variations');
-      }
-      this.variations = [];
-      return;
-    }
-
-    // Validate and set each variation
-    this.variations = variations.map(variation => {
-      const productVariation = variation instanceof ProductVariation
+  // Method to update variations
+  setVariations(variations) {
+    this.variations = variations.map(variation =>
+      variation instanceof ProductVariation
         ? variation
-        : new ProductVariation(variation);
-
-      productVariation.validate(category);
-      return productVariation;
-    });
-  }
-
-  // Helper to apply suggested variations from category
-  applyCategoryVariations(category) {
-    if (!category.hasVariations() || !category.suggestedVariations.length) {
-      return;
-    }
-
-    this.setVariations(category.suggestedVariations, category);
+        : new ProductVariation(variation),
+    );
+    return this.variations;
   }
 
   // Override toFirestore to handle variations
@@ -140,17 +123,13 @@ class Product extends BaseModel {
     return data;
   }
 
-  // Override fromFirestore to handle variations
   static fromFirestore(doc) {
     const data = super.fromFirestore(doc);
     return new Product({
       id: doc.id,
       ...data,
       variations: data.variations?.map(v => new ProductVariation(v)),
-      createdAt: data.createdAt?.toDate(),
-      updatedAt: data.updatedAt?.toDate(),
     });
   }
 }
-
 module.exports = { Product, ProductVariation };

@@ -4,6 +4,8 @@ const settings = require('../data/settings');
 const { BakerySettings } = require('../../models/BakerySettings');
 const productCollections = require('../data/productCollections');
 const ProductCollectionService = require('../../services/ProductCollectionService');
+const fs = require('fs');
+const path = require('path');
 
 const productCollectionService = new ProductCollectionService();
 
@@ -52,11 +54,27 @@ async function seedBakery() {
       .doc('default')
       .set(new BakerySettings(settings).toFirestore());
 
-    // Create product collections
+    // Create product collections and store created ones
     console.log('Creating product collections...');
+    const createdCollections = [];
+
     for (const collection of productCollections) {
-      await productCollectionService.create(collection, BAKERY_ID);
+      const createdCollection = await productCollectionService.create(collection, BAKERY_ID);
+      createdCollections.push({
+        id: createdCollection.id,
+        ...createdCollection,
+      });
+      console.log(`Created collection: ${createdCollection.name}`);
     }
+
+    // Write created collections to a file for reference
+    const seedDataDir = path.join(__dirname, '../data');
+    fs.writeFileSync(
+      path.join(seedDataDir, 'seededProductCollections.json'),
+      JSON.stringify(createdCollections, null, 2),
+    );
+
+    console.log('Product collections saved to seededProductCollections.json');
 
     return {
       bakeryId: BAKERY_ID,
@@ -68,7 +86,6 @@ async function seedBakery() {
     console.error('Error seeding bakery:', error);
     throw error;
   }
-
 }
 
 async function runSeed() {
