@@ -4,7 +4,6 @@ const { functions } = require('./config/firebase');
 const cors = require('cors');
 
 const authRoutes = require('./routes/authRoutes');
-
 const bakeryRoutes = require('./routes/bakeryRoutes');
 const productRoutes = require('./routes/productRoutes');
 const ingredientRoutes = require('./routes/ingredientRoutes');

@@ -1,6 +1,5 @@
 const BaseController = require('./base/BaseController');
 const OrderService = require('../services/OrderService');
-const { BadRequestError } = require('../utils/errors');
 
 class OrderController extends BaseController {
   constructor() {
@@ -87,11 +86,11 @@ class OrderController extends BaseController {
       const orderData = req.body;
       const { bakeryId } = req.params;
 
-      // Validate data
-      const errors = this.validateOrderData(orderData);
-      if (errors.length > 0) {
-        throw new BadRequestError(errors.join('. '));
-      }
+      // // Validate data
+      // const errors = this.validateOrderData(orderData);
+      // if (errors.length > 0) {
+      //   throw new BadRequestError(errors.join('. '));
+      // }
 
       const order = await this.service.create(orderData, bakeryId);
       this.handleResponse(res, order, 201);
@@ -106,16 +105,17 @@ class OrderController extends BaseController {
   async update(req, res) {
     try {
       const { id } = req.params;
+      const { bakeryId } = req.params;
       const updateData = req.body;
       const editor = req.user; // Added by auth middleware
 
-      // Validate update data
-      const errors = this.validateOrderUpdate(updateData);
-      if (errors.length > 0) {
-        throw new BadRequestError(errors.join('. '));
-      }
+      // // Validate update data
+      // const errors = this.validateOrderUpdate(updateData);
+      // if (errors.length > 0) {
+      //   throw new BadRequestError(errors.join('. '));
+      // }
 
-      const order = await this.service.update(id, updateData, editor);
+      const order = await this.service.update(id, updateData, bakeryId, editor);
       this.handleResponse(res, order);
     } catch (error) {
       this.handleError(res, error);

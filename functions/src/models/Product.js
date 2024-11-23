@@ -1,10 +1,12 @@
 // models/Product.js
 const BaseModel = require('./base/BaseModel');
 const { BadRequestError } = require('../utils/errors');
+const { generateId } = require('../utils/helpers');
 
 class ProductVariation {
 
   constructor({
+    id,
     name,
     value,
     basePrice,
@@ -12,6 +14,7 @@ class ProductVariation {
     recipeId,
     isWholeGrain = false,
   }) {
+    this.id = id || generateId();
     this.name = name;
     this.value = value;
     this.basePrice = basePrice;

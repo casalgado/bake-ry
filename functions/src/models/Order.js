@@ -3,27 +3,33 @@ const BaseModel = require('./base/BaseModel');
 class OrderItem {
   constructor({
     productId,
-    productVariantId,
     productName,
+    collectionId,
+    collectionName,
     quantity,
-    unitPrice,
+    basePrice,
+    currentPrice, // prices here are of orderitem total
+    variation,
     recipeId,
-    recipeVersion,
     isComplimentary = false,
+    status = 0,
   }) {
     this.productId = productId;
-    this.productVariantId = productVariantId;
     this.productName = productName;
+    this.collectionId = collectionId;
+    this.collectionName = collectionName;
     this.quantity = quantity;
-    this.unitPrice = unitPrice;
+    this.basePrice = basePrice; // prices here are of variation in order item
+    this.currentPrice = currentPrice;
+    this.variation = variation;  // stores the full variation object
     this.recipeId = recipeId;
-    this.recipeVersion = recipeVersion;
     this.isComplimentary = isComplimentary;
+    this.status = status;
     this.subtotal = this.calculateSubtotal();
   }
 
   calculateSubtotal() {
-    return this.isComplimentary ? 0 : this.quantity * this.unitPrice;
+    return this.isComplimentary ? 0 : this.quantity * this.currentPrice;
   }
 
   toPlainObject() {
@@ -39,10 +45,12 @@ class OrderItem {
   toHistoryObject() {
     return {
       productId: this.productId,
-      productVariantId: this.productVariantId,
       productName: this.productName,
+      collectionId: this.collectionId,
+      collectionName: this.collectionName,
       quantity: this.quantity,
-      unitPrice: this.unitPrice,
+      currentPrice: this.currentPrice,
+      variation: this.variation,
       subtotal: this.subtotal,
     };
   }
@@ -68,7 +76,7 @@ class Order extends BaseModel {
     // Status and Payment
     status = 0,
     isPaid = false,
-    paymentMethod = 'transfer-',
+    paymentMethod = 'transfer', // Remove the hyphen
     paymentDetails = null,
 
     // Fulfillment
@@ -118,9 +126,8 @@ class Order extends BaseModel {
     this.deliveryFee = deliveryFee;
 
     // Pricing
-    this.subtotal = subtotal || this.calculateSubtotal();
-    this.tax = tax || this.calculateTax();
-    this.total = total || this.calculateTotal();
+    this.subtotal = this.calculateSubtotal();
+    this.total = this.calculateTotal();
 
     // Notes
     this.customerNotes = customerNotes;
@@ -142,12 +149,8 @@ class Order extends BaseModel {
     return this.isComplimentary ? 0 : this.items.reduce((sum, item) => sum + item.subtotal, 0);
   }
 
-  calculateTax() {
-    return this.isComplimentary ? 0 : this.subtotal * 0.1;
-  }
-
   calculateTotal() {
-    return this.isComplimentary ? 0 : this.subtotal + this.tax + this.deliveryFee;
+    return this.isComplimentary ? 0 : this.subtotal + this.deliveryFee;
   }
 
   toFirestore() {

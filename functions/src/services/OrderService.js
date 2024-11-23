@@ -5,7 +5,7 @@ const { BadRequestError, NotFoundError } = require('../utils/errors');
 
 class OrderService extends BaseService {
   constructor() {
-    super('orders', Order);
+    super('orders', Order, 'bakeries/{bakeryId}');
   }
 
   /**
@@ -15,7 +15,7 @@ class OrderService extends BaseService {
     try {
       return await db.runTransaction(async (transaction) => {
         // 1. Create main order
-        const orderRef = this.getCollectionRef().doc();
+        const orderRef = this.getCollectionRef(bakeryId).doc();
         const order = new Order({
           id: orderRef.id,
           bakeryId,
@@ -44,11 +44,11 @@ class OrderService extends BaseService {
   /**
    * Update order and its history record
    */
-  async update(orderId, updateData, editor) {
+  async update(orderId, updateData, bakeryId, editor) {
     try {
       return await db.runTransaction(async (transaction) => {
         // 1. Get current order
-        const orderRef = this.getCollectionRef().doc(orderId);
+        const orderRef = this.getCollectionRef(bakeryId).doc(orderId);
         const doc = await transaction.get(orderRef);
 
         if (!doc.exists) {

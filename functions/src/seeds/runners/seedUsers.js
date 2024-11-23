@@ -56,7 +56,7 @@ const staff = [
   },
 ];
 
-const users = [...customers, ...staff];
+const users = [...customers.slice(0, 200), ...staff];
 
 async function seedUsers() {
   try {
@@ -64,8 +64,8 @@ async function seedUsers() {
 
     // Store created users with their IDs for reference
     const createdUsers = [];
-    let progress = '';
-    console.log('Creating users...');
+    let spinner = ['─', '\\', '│', '/', '─', '\\', '│', '/'];
+    let index = 0;
 
     // Create users through service
     for (const userData of users) {
@@ -79,9 +79,8 @@ async function seedUsers() {
         BAKERY_ID,
         );
 
-       
-        progress += '✓'; // Checkmark for success
-        process.stdout.write('\rProgress: ' + progress);
+        process.stdout.write(`\rCreating users... ${spinner[index]}`);
+        index = (index + 1) % spinner.length;
 
         createdUsers.push({
           id: createdUser.uid,
