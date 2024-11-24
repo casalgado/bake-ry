@@ -14,6 +14,8 @@ class Ingredient extends BaseModel {
     bakeryId,
     name,
     type = Ingredient.TYPES.MANUFACTURED,
+    categoryId,
+    categoryName,
     createdAt,
     updatedAt,
 
@@ -52,9 +54,10 @@ class Ingredient extends BaseModel {
     // Basic Information
     this.bakeryId = bakeryId;
     this.name = name;
+    this.categoryId = categoryId;
+    this.categoryName = categoryName;
 
     this.type = type;
-
 
     // Usage and Recipes
     this.usedInRecipes = usedInRecipes;
@@ -69,8 +72,6 @@ class Ingredient extends BaseModel {
 
     // Units and Measurements
     this.unit = unit;
-
-
 
     // Storage Requirements
     this.storageTemp = storageTemp;
@@ -92,24 +93,6 @@ class Ingredient extends BaseModel {
     return this.type === Ingredient.TYPES.RESALE;
   }
 
-  // Validation helper
-  validate() {
-    if (!this.name) {
-      throw new BadRequestError('Ingredient name is required');
-    }
-    if (!this.categoryId) {
-      throw new BadRequestError('Category ID is required');
-    }
-    if (!this.categoryName) {
-      throw new BadRequestError('Category name is required');
-    }
-    if (!this.unit) {
-      throw new BadRequestError('Unit is required');
-    }
-    if (this.costPerUnit < 0) {
-      throw new BadRequestError('Cost per unit cannot be negative');
-    }
-  }
 }
 
 module.exports = Ingredient;
