@@ -58,13 +58,7 @@ class BakeryUserService extends BaseService {
 
         transaction.set(userRef, userToSave);
 
-        return {
-          uid: userRecord.uid,
-          email: newUser.email,
-          role: newUser.role,
-          name: newUser.name,
-          bakeryId,
-        };
+        return userToSave;
       });
 
       return result;

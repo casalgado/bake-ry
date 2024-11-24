@@ -56,7 +56,7 @@ const staff = [
   },
 ];
 
-const users = [...customers.slice(0, 200), ...staff];
+const users = [...customers.slice(0, 100), ...staff];
 
 async function seedUsers() {
   try {
@@ -64,12 +64,14 @@ async function seedUsers() {
 
     // Store created users with their IDs for reference
     const createdUsers = [];
-    let spinner = ['─', '\\', '│', '/', '─', '\\', '│', '/'];
-    let index = 0;
+    let successCount = 0;
+    const spinner = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+    let spinnerIndex = 0;
 
     // Create users through service
     for (const userData of users) {
       try {
+
         const createdUser = await bakeryUserService.create({
           ...userData,
           bakeryId: BAKERY_ID,
@@ -79,8 +81,8 @@ async function seedUsers() {
         BAKERY_ID,
         );
 
-        process.stdout.write(`\rCreating users... ${spinner[index]}`);
-        index = (index + 1) % spinner.length;
+        process.stdout.write(`\rCreating users... ${spinner[spinnerIndex]} (${successCount}/${users.length})`);
+        spinnerIndex = (spinnerIndex + 1) % spinner.length;
 
         createdUsers.push({
           id: createdUser.uid,
@@ -88,7 +90,6 @@ async function seedUsers() {
         });
       } catch (error) {
         console.error(`Error creating user ${userData.email}:`, error);
-        // Continue with next user if one fails
         continue;
       }
     }
