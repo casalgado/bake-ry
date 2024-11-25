@@ -29,13 +29,29 @@ class User extends BaseModel {
     this.birthday = birthday;
     this.category = category;
     this.comment = comment;
-    this.phone = phone;
+    this.phone = this.formatPhone(phone);
     this.national_id = national_id;
     this.isActive = isActive;
   }
 
   static get dateFields() {
     return [...super.dateFields];
+  }
+
+  formatPhone(phone) {
+    if (!phone) return '';
+
+    // Convert to string if it's a number
+    const phoneStr = phone.toString();
+
+    // Remove all non-numeric characters
+    const cleaned = phoneStr.replace(/[^\d]/g, '');
+
+    // If there are no digits, return empty string
+    if (!cleaned) return '';
+
+    // Return the cleaned string
+    return cleaned;
   }
 
   toFirestore() {

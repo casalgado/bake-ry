@@ -43,10 +43,10 @@ function generateRandomOrder(date) {
 
   // Generate random number of items (1-5)
   const numberOfItems = getRandomInt(1, 5);
-  const items = generateRandomItems(numberOfItems);
+  const orderItems = generateRandomItems(numberOfItems);
 
   // Calculate totals
-  const subtotal = items.reduce((sum, item) => sum + item.subtotal, 0);
+  const subtotal = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
   const total = subtotal + deliveryFee;
 
   // Add comments randomly
@@ -60,8 +60,8 @@ function generateRandomOrder(date) {
     userId: user.id,
     userName: user.name,
     userEmail: user.email,
-    userPhone: user.phone,
-    items,
+    userPhone: user.phone ? user.phone.toString() : '',
+    orderItems,
     status: 0,
     isPaid: false,
     paymentMethod: getRandomElement(PAYMENT_METHODS),
@@ -79,10 +79,10 @@ function generateRandomOrder(date) {
 }
 
 function generateRandomItems(count) {
-  const items = [];
+  const orderItems = [];
   const selectedProducts = new Set();
 
-  while (items.length < count) {
+  while (orderItems.length < count) {
     const product = getRandomElement(seededProducts);
 
     // Avoid duplicate products
@@ -100,7 +100,7 @@ function generateRandomItems(count) {
     const currentPrice = variation ? variation.currentPrice || basePrice : product.currentPrice || basePrice;
     const subtotal = quantity * currentPrice;
 
-    items.push({
+    orderItems.push({
       productId: product.id,
       productName: product.name,
       collectionId: product.collectionId,
@@ -123,7 +123,7 @@ function generateRandomItems(count) {
     });
   }
 
-  return items;
+  return orderItems;
 }
 
 async function generateOrders() {
@@ -133,7 +133,7 @@ async function generateOrders() {
     const currentDate = new Date();
 
     // Generate orders for the past 30 days
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 60; i++) {
       const date = new Date(currentDate);
       date.setDate(date.getDate() - i);
 
@@ -143,7 +143,7 @@ async function generateOrders() {
       }
 
       // Generate 10-15 orders per day
-      const ordersPerDay = getRandomInt(10, 15);
+      const ordersPerDay = getRandomInt(3, 5);
       for (let j = 0; j < ordersPerDay; j++) {
         const order = generateRandomOrder(date);
         orders.push(order);

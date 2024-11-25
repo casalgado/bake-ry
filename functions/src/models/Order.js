@@ -65,7 +65,7 @@ class Order extends BaseModel {
     userName,
     userEmail,
     userPhone,
-    items = [],
+    orderItems = [],
 
     // Dates
     preparationDate,
@@ -105,7 +105,7 @@ class Order extends BaseModel {
     this.userName = userName;
     this.userEmail = userEmail;
     this.userPhone = userPhone;
-    this.items = items.map(item =>
+    this.orderItems = orderItems.map(item =>
       item instanceof OrderItem ? item : new OrderItem({ ...item, isComplimentary }),
     );
 
@@ -146,7 +146,7 @@ class Order extends BaseModel {
   }
 
   calculateSubtotal() {
-    return this.isComplimentary ? 0 : this.items.reduce((sum, item) => sum + item.subtotal, 0);
+    return this.isComplimentary ? 0 : this.orderItems.reduce((sum, item) => sum + item.subtotal, 0);
   }
 
   calculateTotal() {
@@ -155,8 +155,8 @@ class Order extends BaseModel {
 
   toFirestore() {
     const data = super.toFirestore();
-    if (this.items.length > 0) {
-      data.items = this.items.map(item => item.toPlainObject());
+    if (this.orderItems.length > 0) {
+      data.orderItems = this.orderItems.map(item => item.toPlainObject());
     }
     return data;
   }
@@ -167,7 +167,7 @@ class Order extends BaseModel {
       bakeryId: this.bakeryId,
       dueDate: this.dueDate,
       total: this.total,
-      items: this.items.map(item => item.toHistoryObject()),
+      orderItems: this.orderItems.map(item => item.toHistoryObject()),
       fulfillmentType: this.fulfillmentType,
     };
   }
@@ -177,7 +177,7 @@ class Order extends BaseModel {
     return new Order({
       ...data,
       id: doc.id,
-      items: data.items?.map(item => new OrderItem(item)),
+      orderItems: data.orderItems?.map(item => new OrderItem(item)),
     });
   }
 }

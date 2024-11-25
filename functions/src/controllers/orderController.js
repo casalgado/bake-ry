@@ -13,16 +13,16 @@ class OrderController extends BaseController {
     const errors = [];
 
     // Required fields
-    const requiredFields = ['userId', 'items', 'dueDate'];
+    const requiredFields = ['userId', 'orderItems', 'dueDate'];
     requiredFields.forEach(field => {
       if (!data[field]) {
         errors.push(`${field} is required`);
       }
     });
 
-    // Validate items array
-    if (data.items && Array.isArray(data.items)) {
-      data.items.forEach((item, index) => {
+    // Validate orderItems array
+    if (data.orderItems && Array.isArray(data.orderItems)) {
+      data.orderItems.forEach((item, index) => {
         if (!item.productId || !item.quantity || !item.unitPrice) {
           errors.push(`Item at index ${index} is missing required fields`);
         }

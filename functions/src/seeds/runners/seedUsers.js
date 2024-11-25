@@ -56,7 +56,7 @@ const staff = [
   },
 ];
 
-const users = [...customers.slice(0, 100), ...staff];
+const users = [...customers.slice(0, 20), ...staff];
 
 async function seedUsers() {
   try {
@@ -83,7 +83,7 @@ async function seedUsers() {
 
         process.stdout.write(`\rCreating users... ${spinner[spinnerIndex]} (${successCount}/${users.length})`);
         spinnerIndex = (spinnerIndex + 1) % spinner.length;
-
+        successCount++;
         createdUsers.push({
           id: createdUser.uid,
           ...createdUser,

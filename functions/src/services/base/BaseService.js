@@ -140,31 +140,32 @@ class BaseService {
 
   /**
  * Partially updates a document
+ * Possible optimization here if necessary in the future
+ * considering application costs
  */
   async patch(id, data, parentId = null) {
     try {
       const docRef = this.getCollectionRef(parentId).doc(id);
-      const doc = await docRef.get();
 
-      if (!doc.exists) {
-        throw new NotFoundError(`${this.collectionName} not found`);
-      }
+      return await db.runTransaction(async (transaction) => {
+        const doc = await transaction.get(docRef);
 
-      // Get current data
-      const currentData = this.ModelClass.fromFirestore(doc);
+        if (!doc.exists) {
+          throw new NotFoundError(`${this.collectionName} not found`);
+        }
 
-      // Create new instance with merged data
-      const patchedInstance = new this.ModelClass({
-        ...currentData,
-        ...data,
-        id,
-        updatedAt: new Date(),
+        const currentData = this.ModelClass.fromFirestore(doc);
+        const patchedInstance = new this.ModelClass({
+          ...currentData,
+          ...data,
+          id,
+          updatedAt: new Date(),
+        });
+
+        transaction.update(docRef, patchedInstance.toFirestore());
+        return patchedInstance;
       });
 
-      // Use update to perform partial update
-      await docRef.update(patchedInstance.toFirestore());
-
-      return patchedInstance;
     } catch (error) {
       console.error(`Error patching ${this.collectionName}:`, error);
       throw error;
