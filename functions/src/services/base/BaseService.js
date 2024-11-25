@@ -79,6 +79,11 @@ class BaseService {
     try {
       let query = this.getCollectionRef(parentId);
 
+      console.log('\n\n\n\n\n');
+      console.log('parentId', parentId);
+      console.log('filters', filters);
+      console.log('options', options);
+
       // Apply filters
       Object.entries(filters).forEach(([field, value]) => {
         if (value !== undefined && value !== '') {

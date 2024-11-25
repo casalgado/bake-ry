@@ -61,6 +61,8 @@ const requestLogger = (req, res, next) => {
     // Log response details
     const responseTime = Date.now() - startTime;
 
+    console.log(`\nURL: ${req.originalUrl}`);
+    console.log(`Method: ${req.method}`);
     console.log(`Status: ${res.statusCode}`);
     console.log(`Response Time: ${responseTime}ms`);
 

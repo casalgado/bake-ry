@@ -4,12 +4,6 @@ const flavors = ['original', 'integral', 'zaatar', 'queso costeño', '5 semillas
 
 const sourdough_variations = [
   {
-    name: 'mini',
-    value: 100,
-    basePrice: 7000,
-    recipeId: 1,
-  },
-  {
     name: 'pequeño',
     value: 550,
     basePrice: 12000,
@@ -26,6 +20,12 @@ const sourdough_variations = [
     value: 1000,
     basePrice: 30000,
     recipeId: 4,
+  },
+  {
+    name: 'otra',
+    value: 500,
+    basePrice: 5000,
+    recipeId: 1,
   },
 ];
 
