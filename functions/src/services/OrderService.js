@@ -24,6 +24,8 @@ class OrderService extends BaseService {
 
         // 2. Create history record
         const historyRef = db
+          .collection('bakeries')
+          .doc(bakeryId)
           .collection('users')
           .doc(order.userId)
           .collection('orderHistory')
