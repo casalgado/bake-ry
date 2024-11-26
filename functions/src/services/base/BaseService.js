@@ -75,40 +75,75 @@ class BaseService {
     }
   }
 
-  async getAll(parentId = null, filters = {}, options = {}) {
+  async getAll(parentId = null, query = {}) {
     try {
-      let query = this.getCollectionRef(parentId);
-
-      console.log('\n\n\n\n\n');
-      console.log('parentId', parentId);
+      let dbQuery = this.getCollectionRef(parentId);
+      const { pagination, sort, filters } = query;
+      console.log('query', query);
+      console.log('pagination', pagination);
+      console.log('sort', sort);
       console.log('filters', filters);
-      console.log('options', options);
 
       // Apply filters
-      Object.entries(filters).forEach(([field, value]) => {
-        if (value !== undefined && value !== '') {
-          const [operator = '==', filterValue] = Array.isArray(value) ? value : ['==', value];
-          query = query.where(field, operator, filterValue);
+      if (filters) {
+        // Handle date range filters
+        if (filters.dateRange) {
+          const { dateField, startDate, endDate } = filters.dateRange;
+
+          if (startDate) {
+            dbQuery = dbQuery.where(dateField, '>=', new Date(startDate));
+          }
+
+          if (endDate) {
+            dbQuery = dbQuery.where(dateField, '<=', new Date(endDate));
+          }
         }
-      });
+
+        // Handle other filters
+        Object.entries(filters).forEach(([key, value]) => {
+          if (key !== 'dateRange' && value !== undefined) {
+            dbQuery = dbQuery.where(key, '==', value);
+          }
+        });
+      }
 
       // Apply sorting
-      if (options.orderBy) {
-        const [field, direction] = options.orderBy;
-        query = query.orderBy(field, direction);
+      if (sort) {
+        dbQuery = dbQuery.orderBy(sort.field, sort.direction);
+      } else {
+        // Default sorting by createdAt desc if no sort specified
+        dbQuery = dbQuery.orderBy('createdAt', 'desc');
       }
 
       // Apply pagination
-      if (options.offset) {
-        query = query.offset(options.offset);
+      if (pagination) {
+        const { perPage, offset } = pagination;
+
+        if (offset) {
+          dbQuery = dbQuery.offset(offset);
+        }
+
+        if (perPage) {
+          dbQuery = dbQuery.limit(perPage);
+        }
       }
 
-      if (options.limit) {
-        query = query.limit(options.limit);
-      }
+      // Execute query
+      const snapshot = await dbQuery.get();
 
-      const snapshot = await query.get();
-      return snapshot.docs.map(doc => this.ModelClass.fromFirestore(doc));
+      // Transform to model instances
+      const documents = snapshot.docs.map(doc => this.ModelClass.fromFirestore(doc));
+
+      // Return results with metadata
+      return {
+        items: documents,
+        pagination: pagination ? {
+          page: pagination.page,
+          perPage: pagination.perPage,
+          total: snapshot.size, // Note: This is the current page size, not total collection size
+        } : null,
+      };
+
     } catch (error) {
       console.error(`Error getting all ${this.collectionName}:`, error);
       throw error;
