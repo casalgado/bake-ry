@@ -167,12 +167,7 @@ function generateProducts() {
           basePrice: v.basePrice,
           recipeId: v.recipeId,
           isWholeGrain: true,
-        })),   {
-          name: 'otra',
-          value: 500,
-          basePrice: 5000,
-          recipeId: 1,
-        }],
+        }))],
         isActive: true,
       });
     });
