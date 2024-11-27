@@ -133,7 +133,7 @@ async function generateOrders() {
     const currentDate = new Date();
 
     // Generate orders for the past 30 days
-    for (let i = 0; i < 365; i++) {
+    for (let i = 0; i < 60; i++) {
       const date = new Date(currentDate);
       date.setDate(date.getDate() - i);
 
@@ -143,7 +143,7 @@ async function generateOrders() {
       }
 
       // Generate 10-15 orders per day
-      const ordersPerDay = getRandomInt(6, 15);
+      const ordersPerDay = getRandomInt(1, 3);
       for (let j = 0; j < ordersPerDay; j++) {
         const order = generateRandomOrder(date);
         orders.push(order);

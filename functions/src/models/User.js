@@ -8,6 +8,8 @@ class User extends BaseModel {
     role, // can be bakery_customer, bakery_staff, bakery_admin, or system_admin
     bakeryId,
     name,
+    firstName,
+    lastName,
     createdAt,
     updatedAt,
     address = '',
@@ -25,6 +27,8 @@ class User extends BaseModel {
     this.role = role;
     this.bakeryId = bakeryId;
     this.name = name;
+    this.firstName = firstName;
+    this.lastName = lastName;
     this.address = address;
     this.birthday = birthday;
     this.category = category;

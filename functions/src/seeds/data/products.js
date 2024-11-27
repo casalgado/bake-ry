@@ -21,12 +21,7 @@ const sourdough_variations = [
     basePrice: 30000,
     recipeId: 4,
   },
-  {
-    name: 'otra',
-    value: 500,
-    basePrice: 5000,
-    recipeId: 1,
-  },
+
 ];
 
 const baguette_variations = [
@@ -167,12 +162,17 @@ function generateProducts() {
           basePrice: v.basePrice,
           recipeId: v.recipeId,
         })), ...variations.map(v => ({
-          name: `${v.name} - integral`,
+          name: `${v.name} integral`,
           value: v.value,
           basePrice: v.basePrice,
           recipeId: v.recipeId,
           isWholeGrain: true,
-        }))],
+        })),   {
+          name: 'otra',
+          value: 500,
+          basePrice: 5000,
+          recipeId: 1,
+        }],
         isActive: true,
       });
     });

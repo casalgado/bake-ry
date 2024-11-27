@@ -11,15 +11,21 @@ class BakeryUserController extends BaseController {
 
   async create(req, res) {
     try {
-      const { email, password, role, name } = req.body;
+      console.log('Creating bakery user', req.body);
+      const { email, password, role, name, phone } = req.body;
+      console.log('Email:', email);
+      console.log('Role:', role);
+      console.log('Name:', name);
+      console.log('Password:', password);
+      console.log('Phone:', phone);
 
       // Validate required fields
-      if (!email || !password || !role || !name) {
-        throw new BadRequestError('Email, password, role, and name are required');
+      if (!email || !role || !name) {
+        throw new BadRequestError('Email, role, and name are required');
       }
 
       // Validate bakery user role
-      if (!['bakery_staff', 'bakery_customer'].includes(role)) {
+      if (!['bakery_staff', 'bakery_customer', 'delivery_assistant', 'production_assistant'].includes(role)) {
         throw new BadRequestError('Invalid bakery user role');
       }
 
@@ -27,11 +33,6 @@ class BakeryUserController extends BaseController {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         throw new BadRequestError('Invalid email format');
-      }
-
-      // Validate password
-      if (password.length < 6) {
-        throw new BadRequestError('Password must be at least 6 characters long');
       }
 
       // Continue with base controller create

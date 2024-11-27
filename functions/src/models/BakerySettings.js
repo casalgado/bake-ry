@@ -45,10 +45,10 @@ class BakerySettings extends BaseModel {
       label: 'Weight',
       unit: 'g',
       defaults: [
-        { name: 'mini', value: 100, basePrice: 5000, recipeId: '' },
-        { name: 'peq', value: 550, basePrice: 16000, recipeId: '' },
-        { name: 'med', value: 950, basePrice: 25000, recipeId: '' },
-        { name: 'gra', value: 1700, basePrice: 34000, recipeId: '' },
+        { name: 'pequeño', value: 550, basePrice: 16000, recipeId: '' },
+        { name: 'mediano', value: 950, basePrice: 25000, recipeId: '' },
+        { name: 'grande', value: 1700, basePrice: 34000, recipeId: '' },
+        { name: 'otra', value: 200, basePrice: 5000, recipeId: '' },
       ],
     },
     QUANTITY: {
@@ -60,6 +60,8 @@ class BakerySettings extends BaseModel {
         { name: 'x10', value: 10, basePrice: 12000, recipeId: '' },
         { name: 'x12', value: 12, basePrice: 18000, recipeId: '' },
         { name: 'x16', value: 16, basePrice: 20000, recipeId: '' },
+        { name: 'otra', value: 200, basePrice: 5000, recipeId: '' },
+
       ],
     },
   };

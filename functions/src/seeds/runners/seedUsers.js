@@ -117,7 +117,7 @@ const staff = [
   },
 ];
 
-const users = [...customers.slice(0, 500), ...staff];
+const users = [...customers.slice(200, 400), ...staff];
 
 async function seedUsers() {
   try {
