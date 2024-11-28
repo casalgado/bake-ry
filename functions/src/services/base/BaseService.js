@@ -89,6 +89,9 @@ class BaseService {
         // Handle date range filters
         if (filters.dateRange) {
           const { dateField, startDate, endDate } = filters.dateRange;
+          console.log('dateField:', dateField);
+          console.log('startDate:', startDate);
+          console.log('endDate:', endDate);
 
           if (startDate) {
             dbQuery = dbQuery.where(dateField, '>=', new Date(startDate));
@@ -130,7 +133,6 @@ class BaseService {
 
       // Execute query
       const snapshot = await dbQuery.get();
-
       // Transform to model instances
       const documents = snapshot.docs.map(doc => this.ModelClass.fromFirestore(doc));
 

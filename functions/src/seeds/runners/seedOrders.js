@@ -133,7 +133,7 @@ async function generateOrders() {
     const currentDate = new Date();
 
     // Generate orders for the past 30 days
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 2; i++) {
       const date = new Date(currentDate);
       date.setDate(date.getDate() - i);
 

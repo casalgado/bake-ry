@@ -21,6 +21,7 @@ class OrderService extends BaseService {
           bakeryId,
           ...orderData,
         });
+        console.log('order in Service:', order);
 
         // 2. Create history record
         const historyRef = db

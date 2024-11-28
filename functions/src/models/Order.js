@@ -76,9 +76,7 @@ class Order extends BaseModel {
     // Status and Payment
     status = 0,
     isPaid = false,
-    paymentMethod = 'transfer', // Remove the hyphen
-    paymentDetails = null,
-
+    paymentMethod = 'transfer',
     // Fulfillment
     fulfillmentType = 'pickup',
     deliveryAddress = null,
@@ -97,7 +95,7 @@ class Order extends BaseModel {
     // Flags
     isComplimentary = false,
   } = {}) {
-    super({ id, createdAt, updatedAt });
+    super({ id, createdAt, updatedAt, preparationDate, dueDate });
 
     // Basic Information
     this.bakeryId = bakeryId;
@@ -109,15 +107,10 @@ class Order extends BaseModel {
       item instanceof OrderItem ? item : new OrderItem({ ...item, isComplimentary }),
     );
 
-    // Dates
-    this.preparationDate = preparationDate;
-    this.dueDate = dueDate;
-
     // Status and Payment
     this.status = status;
     this.isPaid = isPaid;
     this.paymentMethod = paymentMethod;
-    this.paymentDetails = paymentDetails;
 
     // Fulfillment
     this.fulfillmentType = fulfillmentType;

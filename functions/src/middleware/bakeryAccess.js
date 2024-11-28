@@ -17,7 +17,6 @@ const hasBakeryAccess = async (req, res, next) => {
       console.log('User does not have access to this bakery');
       throw new ForbiddenError('User does not have access to this bakery');
     }
-    console.log('In Bakery Access, bakeryId', bakeryId);
     next();
   } catch (error) {
     res.status(403).json({ error: error.message });

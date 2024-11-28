@@ -6,12 +6,30 @@ class BaseModel {
     // Assign remaining data to instance
     Object.assign(this, data);
 
+    if (!this.createdAt) {
+      this.createdAt = new Date();
+    }
+    if (!this.updatedAt) {
+      this.updatedAt = new Date();
+    }
+
     // Ensure dates are properly set using the static getter directly
     this.constructor.dateFields.forEach(field => {
-      if (!this[field]) {
-        this[field] = new Date();
+      if (this[field]) {
+        this[field] = BaseModel.ensureDate(this[field]);
       }
     });
+
+  }
+
+  static ensureDate(value) {
+    if (!value) return null;
+    if (value instanceof Date) return value;
+    if (value?.toDate) return value.toDate();
+    if (typeof value === 'string' && !value.includes('T') && !value.includes(':')) {
+      return new Date(value + 'T12:00:00Z');
+    }
+    return new Date(value);
   }
 
   // Define which fields should be treated as dates
@@ -48,12 +66,7 @@ class BaseModel {
     // Standardize date conversion using the static getter
     this.dateFields.forEach((field) => {
       if (data[field]) {
-        // Handle both Timestamp objects and date strings
-        if (data[field].toDate) {
-          data[field] = data[field].toDate();
-        } else if (typeof data[field] === 'string') {
-          data[field] = new Date(data[field]);
-        }
+        data[field] = BaseModel.ensureDate(data[field]);
       }
     });
 
