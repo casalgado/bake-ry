@@ -10,6 +10,10 @@ class OrderService extends BaseService {
 
   /**
    * Create order and add to user's order history
+   * if client address is flagged, changes it in client record
+   * @param {Object} orderData - Order data
+   * @param {string} bakeryId - Bakery ID
+   * @returns {Promise<Order>} Created order
    */
   async create(orderData, bakeryId) {
     try {
@@ -21,7 +25,6 @@ class OrderService extends BaseService {
           bakeryId,
           ...orderData,
         });
-        console.log('order in Service:', order);
 
         // 2. Create history record
         const historyRef = db
@@ -32,7 +35,26 @@ class OrderService extends BaseService {
           .collection('orderHistory')
           .doc(order.id);
 
-        // 3. Save both documents
+        // 3. Update client address if flag is true
+        if (orderData.shouldUpdateClientAddress && orderData.deliveryAddress) {
+          const clientRef = db
+            .collection('bakeries')
+            .doc(bakeryId)
+            .collection('users')
+            .doc(order.userId);
+
+          const clientDoc = await transaction.get(clientRef);
+          if (!clientDoc.exists) {
+            throw new NotFoundError('Client not found');
+          }
+
+          transaction.update(clientRef, {
+            address: orderData.deliveryAddress,
+            updatedAt: new Date(),
+          });
+        }
+
+        // 4. Save order documents
         transaction.set(orderRef, order.toFirestore());
         transaction.set(historyRef, order.toHistoryObject());
 

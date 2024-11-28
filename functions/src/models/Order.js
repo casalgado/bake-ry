@@ -83,11 +83,6 @@ class Order extends BaseModel {
     deliveryInstructions = '',
     deliveryFee = 0,
 
-    // Pricing
-    subtotal = null,
-    tax = null,
-    total = null,
-
     // Notes
     customerNotes = '',
     internalNotes = '',
@@ -159,6 +154,7 @@ class Order extends BaseModel {
       id: this.id,
       bakeryId: this.bakeryId,
       dueDate: this.dueDate,
+      address: this.deliveryAddress,
       total: this.total,
       orderItems: this.orderItems.map(item => item.toHistoryObject()),
       fulfillmentType: this.fulfillmentType,
