@@ -158,22 +158,25 @@ class BaseService {
   async update(id, data, parentId = null) {
     try {
       const docRef = this.getCollectionRef(parentId).doc(id);
-      const doc = await docRef.get();
 
-      if (!doc.exists) {
-        throw new NotFoundError(`${this.collectionName} not found`);
-      }
+      return await db.runTransaction(async (transaction) => {
+        const doc = await transaction.get(docRef);
 
-      const currentData = this.ModelClass.fromFirestore(doc);
-      const updatedInstance = new this.ModelClass({
-        ...currentData,
-        ...data,
-        id,
-        updatedAt: new Date(),
+        if (!doc.exists) {
+          throw new NotFoundError(`${this.collectionName} not found`);
+        }
+
+        const currentData = this.ModelClass.fromFirestore(doc);
+        const updatedInstance = new this.ModelClass({
+          ...currentData,
+          ...data,
+          id,
+          updatedAt: new Date(),
+        });
+
+        transaction.update(docRef, updatedInstance.toFirestore());
+        return updatedInstance;
       });
-
-      await docRef.update(updatedInstance.toFirestore());
-      return updatedInstance;
     } catch (error) {
       console.error(`Error updating ${this.collectionName}:`, error);
       throw error;
