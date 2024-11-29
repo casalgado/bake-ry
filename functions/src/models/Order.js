@@ -42,18 +42,6 @@ class OrderItem {
     return data;
   }
 
-  toHistoryObject() {
-    return {
-      productId: this.productId,
-      productName: this.productName,
-      collectionId: this.collectionId,
-      collectionName: this.collectionName,
-      quantity: this.quantity,
-      currentPrice: this.currentPrice,
-      variation: this.variation,
-      subtotal: this.subtotal,
-    };
-  }
 }
 
 class Order extends BaseModel {
@@ -87,8 +75,6 @@ class Order extends BaseModel {
     customerNotes = '',
     internalNotes = '',
 
-    // Flags
-    isComplimentary = false,
   } = {}) {
     super({ id, createdAt, updatedAt, preparationDate, dueDate });
 
@@ -99,7 +85,7 @@ class Order extends BaseModel {
     this.userEmail = userEmail;
     this.userPhone = userPhone;
     this.orderItems = orderItems.map(item =>
-      item instanceof OrderItem ? item : new OrderItem({ ...item, isComplimentary }),
+      item instanceof OrderItem ? item : new OrderItem({ ...item }),
     );
 
     // Status and Payment
@@ -122,7 +108,7 @@ class Order extends BaseModel {
     this.internalNotes = internalNotes;
 
     // Flags
-    this.isComplimentary = isComplimentary;
+    this.isComplimentary = paymentMethod === 'complementary';
   }
 
   static get dateFields() {
@@ -147,18 +133,6 @@ class Order extends BaseModel {
       data.orderItems = this.orderItems.map(item => item.toPlainObject());
     }
     return data;
-  }
-
-  toHistoryObject() {
-    return {
-      id: this.id,
-      bakeryId: this.bakeryId,
-      dueDate: this.dueDate,
-      address: this.deliveryAddress,
-      total: this.total,
-      orderItems: this.orderItems.map(item => item.toHistoryObject()),
-      fulfillmentType: this.fulfillmentType,
-    };
   }
 
   static fromFirestore(doc) {

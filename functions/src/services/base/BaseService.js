@@ -225,6 +225,11 @@ class BaseService {
           ...data,
           id,
           updatedAt: new Date(),
+          lastEditedBy: {
+            userId: editor?.uid,
+            name: editor?.name,
+            role: editor?.role,
+          },
         });
 
         // Compute what changed
