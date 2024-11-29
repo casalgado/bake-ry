@@ -155,18 +155,24 @@ class BaseService {
   /**
    * Updates a document
    */
-  async update(id, data, parentId = null) {
+  async update(id, data, parentId = null, editor = null) {
     try {
+      // Get reference to the document
       const docRef = this.getCollectionRef(parentId).doc(id);
 
+      // Use transaction to ensure atomic updates
       return await db.runTransaction(async (transaction) => {
+        // Get current document
         const doc = await transaction.get(docRef);
 
         if (!doc.exists) {
           throw new NotFoundError(`${this.collectionName} not found`);
         }
 
+        // Get current data as model instance
         const currentData = this.ModelClass.fromFirestore(doc);
+
+        // Create updated instance
         const updatedInstance = new this.ModelClass({
           ...currentData,
           ...data,
@@ -174,7 +180,15 @@ class BaseService {
           updatedAt: new Date(),
         });
 
+        // Compute what changed
+        const changes = this.diffObjects(currentData, updatedInstance);
+
+        // Record the changes in history
+        await this.recordHistory(transaction, docRef, changes, currentData, editor);
+
+        // Update the main document
         transaction.update(docRef, updatedInstance.toFirestore());
+
         return updatedInstance;
       });
     } catch (error) {
@@ -188,33 +202,91 @@ class BaseService {
  * Possible optimization here if necessary in the future
  * considering application costs
  */
-  async patch(id, data, parentId = null) {
+  async patch(id, data, parentId = null, editor = null) {
     try {
+      // Get reference to the document
       const docRef = this.getCollectionRef(parentId).doc(id);
 
+      // Use transaction to ensure atomic updates
       return await db.runTransaction(async (transaction) => {
+        // Get current document
         const doc = await transaction.get(docRef);
 
         if (!doc.exists) {
           throw new NotFoundError(`${this.collectionName} not found`);
         }
 
+        // Get current data as model instance
         const currentData = this.ModelClass.fromFirestore(doc);
-        const patchedInstance = new this.ModelClass({
+
+        // Create updated instance
+        const updatedInstance = new this.ModelClass({
           ...currentData,
           ...data,
           id,
           updatedAt: new Date(),
         });
 
-        transaction.update(docRef, patchedInstance.toFirestore());
-        return patchedInstance;
-      });
+        // Compute what changed
+        const changes = this.diffObjects(currentData, updatedInstance);
 
+        // Record the changes in history
+        await this.recordHistory(transaction, docRef, changes, currentData, editor);
+
+        // Update the main document
+        transaction.update(docRef, updatedInstance.toFirestore());
+
+        return updatedInstance;
+      });
     } catch (error) {
-      console.error(`Error patching ${this.collectionName}:`, error);
+      console.error(`Error updating ${this.collectionName}:`, error);
       throw error;
     }
+  }
+
+  async recordHistory(transaction, docRef, changes, currentData, editor) {
+    // Create a new document reference in the updateHistory subcollection
+    const historyRef = docRef.collection('updateHistory').doc();
+
+    // Create the history record object
+    const historyRecord = {
+      timestamp: new Date(),
+      // Store who made the changes - if no editor is provided, use 'system'
+      editor: {
+        userId: editor?.uid || 'system',
+        name: editor?.name || 'system',
+        role: editor?.role || 'system',
+      },
+      // Store the actual changes (will be computed by diffObjects)
+      changes,
+    };
+
+    // Add the history record within the same transaction
+    transaction.set(historyRef, historyRecord);
+  }
+
+  diffObjects(oldObj, newObj) {
+    const changes = {};
+
+    // Convert model instances to plain objects if needed
+    const oldData = oldObj.toFirestore ? oldObj.toFirestore() : oldObj;
+    const newData = newObj.toFirestore ? newObj.toFirestore() : newObj;
+
+    // Compare each property in the new data
+    Object.keys(newData).forEach(key => {
+      // Skip updatedAt since it changes on every update
+      if (key === 'updatedAt') return;
+
+      // If values are different, record both old and new values
+      if (JSON.stringify(oldData[key]) !== JSON.stringify(newData[key])) {
+        changes[key] = {
+          from: oldData[key],
+          to: newData[key],
+        };
+      }
+    });
+
+    return changes;
   }
 
   /**

@@ -75,3 +75,14 @@ next steps:
 
 - met with clients, conducting interviews. 
 - working on UX and models
+
+# 2024-11-28
+
+- ok, the workflow is like this.
+- in the create order, if payment method is regalo, the order is marked as complimentary.
+- in orders show, if order is complimentary, the show table shows a gift.
+  - it first shows asks if (is complimentary) beforer asking for ispaid status. 
+  - if order is complimentary, the payment satus is not editable, tooltip should not show and cannot be changed. 
+- when patching payment method, two fields are patched, if toggle result is regalo for the payment method, then the isComplimentary status is patched as true.
+- if toggle result is not regalo, then the isComplimentary status is patched as false.
+

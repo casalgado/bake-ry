@@ -131,7 +131,7 @@ class BaseController {
       // Validate update data if validation function exists
       this.validateRequestData(updateData);
 
-      const result = await this.service.update(id, updateData, bakeryId);
+      const result = await this.service.update(id, updateData, bakeryId, req.user);
       this.handleResponse(res, result);
     } catch (error) {
       this.handleError(res, error);
@@ -167,7 +167,7 @@ class BaseController {
       // Validate patch data if validation function exists
       this.validateRequestData(patchData);
 
-      const result = await this.service.patch(id, patchData, bakeryId);
+      const result = await this.service.patch(id, patchData, bakeryId, req.user);
       this.handleResponse(res, result);
     } catch (error) {
       this.handleError(res, error);
