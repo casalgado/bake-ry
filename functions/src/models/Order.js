@@ -74,6 +74,7 @@ class Order extends BaseModel {
     // Notes
     customerNotes = '',
     internalNotes = '',
+    isDeleted = false,
 
   } = {}) {
     super({ id, createdAt, updatedAt, preparationDate, dueDate });
@@ -109,6 +110,7 @@ class Order extends BaseModel {
 
     // Flags
     this.isComplimentary = paymentMethod === 'complimentary';
+    this.isDeleted = isDeleted;
   }
 
   static get dateFields() {

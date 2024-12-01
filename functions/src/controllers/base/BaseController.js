@@ -185,8 +185,8 @@ class BaseController {
         throw new BadRequestError('ID parameter is required');
       }
 
-      await this.service.delete(id, bakeryId);
-      res.status(204).send();
+      const result = await this.service.delete(id, bakeryId, req.user);
+      this.handleResponse(res, result);
     } catch (error) {
       this.handleError(res, error);
     }

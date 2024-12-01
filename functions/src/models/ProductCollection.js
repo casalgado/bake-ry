@@ -9,12 +9,14 @@ class ProductCollection extends BaseModel {
     isActive = true,
     createdAt,
     updatedAt,
+    isDeleted = false,
   }) {
     super({ id, createdAt, updatedAt });
 
     this.bakeryId = bakeryId;
     this.name = name;
     this.isActive = isActive;
+    this.isDeleted = isDeleted;
   }
 
 }

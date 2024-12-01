@@ -39,6 +39,7 @@ class Ingredient extends BaseModel {
     // Status
     isActive = true,
     isDiscontinued = false,
+    isDeleted = false,
 
     // Custom Attributes
     customAttributes = {},
@@ -79,7 +80,7 @@ class Ingredient extends BaseModel {
     // Status
     this.isActive = isActive;
     this.isDiscontinued = isDiscontinued;
-
+    this.isDeleted = isDeleted;
     // Custom Attributes
     this.customAttributes = customAttributes;
   }

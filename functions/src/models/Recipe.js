@@ -54,6 +54,7 @@ class Recipe extends BaseModel {
 
     // Status
     isActive = true,
+    isDeleted = false,
 
     // Notes
     notes,
@@ -81,7 +82,7 @@ class Recipe extends BaseModel {
 
     // Status
     this.isActive = isActive;
-
+    this.isDeleted = isDeleted;
     // Notes
     this.notes = notes;
   }

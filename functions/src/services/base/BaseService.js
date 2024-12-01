@@ -84,6 +84,11 @@ class BaseService {
       console.log('sort', sort);
       console.log('filters', filters);
 
+      // Add isDeleted filter by default unless specifically requested
+      if (!query.includeDeleted) {
+        dbQuery = dbQuery.where('isDeleted', '!=', true);
+      }
+
       // Apply filters
       if (filters) {
         // Handle date range filters
@@ -295,18 +300,48 @@ class BaseService {
   }
 
   /**
-   * Deletes a document
-   */
-  async delete(id, parentId = null) {
+ * Deletes a document
+ */
+  async delete(id, parentId = null, editor = null) {
     try {
       const docRef = this.getCollectionRef(parentId).doc(id);
-      const doc = await docRef.get();
 
-      if (!doc.exists) {
-        throw new NotFoundError(`${this.collectionName} not found`);
-      }
+      return await db.runTransaction(async (transaction) => {
+        const doc = await transaction.get(docRef);
 
-      await docRef.delete();
+        if (!doc.exists) {
+          throw new NotFoundError(`${this.collectionName} not found`);
+        }
+
+        // Get current data as model instance
+        const currentData = this.ModelClass.fromFirestore(doc);
+
+        // Create updated instance with isDeleted = true
+        const updatedInstance = new this.ModelClass({
+          ...currentData,
+          isDeleted: true,
+          updatedAt: new Date(),
+          lastEditedBy: {
+            userId: editor.uid,
+            name: editor.name,
+            role: editor.role,
+          },
+        });
+        console.log('updatedInstance model', updatedInstance);
+
+        // Compute what changed (will just be the isDeleted flag)
+        const changes = this.diffObjects(currentData, updatedInstance);
+
+        // Record the changes in history
+        await this.recordHistory(transaction, docRef, changes, currentData, editor);
+
+        // Update the main document
+        console.log('updatedInstance firestore', updatedInstance.toFirestore());
+        transaction.update(docRef, updatedInstance.toFirestore());
+
+        return updatedInstance;
+      });
+
     } catch (error) {
       console.error(`Error deleting ${this.collectionName}:`, error);
       throw error;

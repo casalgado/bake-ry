@@ -71,6 +71,7 @@ class Product extends BaseModel {
     displayOrder,
     // Status+
     isActive = true,
+    isDeleted = false,
     // Common fields
     createdAt,
     updatedAt,
@@ -102,6 +103,7 @@ class Product extends BaseModel {
 
     // Status
     this.isActive = isActive;
+    this.isDeleted = isDeleted;
 
     // Custom Attributes
     this.customAttributes = customAttributes;

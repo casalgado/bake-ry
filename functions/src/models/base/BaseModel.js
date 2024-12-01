@@ -1,6 +1,7 @@
 class BaseModel {
   constructor(data = {}) {
     // Common fields all models have
+    console.log('data in Model', data);
     this.id = data.id;
 
     // Assign remaining data to instance
@@ -71,7 +72,6 @@ class BaseModel {
         }
       }
     });
-    console.log('FROM FIRESTORE', data.dueDate);
     return new this({ id, ...data });
   }
 }

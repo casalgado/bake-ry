@@ -1,6 +1,7 @@
 [
   {
-    "id": "E9QKtDKvJvNMG9arWESF",
+    "id": "azQ1BPVDMO7rcS9vFIcV",
+    "isDeleted": false,
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -20,7 +21,8 @@
     "customAttributes": {}
   },
   {
-    "id": "yGNtRWkQ8zO90urufDaT",
+    "id": "d3QLEBDk5AdwVNGr06Qq",
+    "isDeleted": false,
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -40,7 +42,8 @@
     "customAttributes": {}
   },
   {
-    "id": "i72qY6orp1PHxZg0VB73",
+    "id": "9tZspkYu7d7kODaBCzcY",
+    "isDeleted": false,
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -60,7 +63,8 @@
     "customAttributes": {}
   },
   {
-    "id": "AsyxlJiaxnk2rS27O5nj",
+    "id": "JT7PUxwHsh4mvNGMB3fd",
+    "isDeleted": false,
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -80,7 +84,8 @@
     "customAttributes": {}
   },
   {
-    "id": "xFQA5shqL4ugmB8ZFyTE",
+    "id": "zl7pBnoh4NQFVqtnPPwu",
+    "isDeleted": false,
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -100,7 +105,8 @@
     "customAttributes": {}
   },
   {
-    "id": "QyS7URc4Q7QszuIMfh4T",
+    "id": "CRg7fOunTjdXbr4vIk5u",
+    "isDeleted": false,
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -120,7 +126,8 @@
     "customAttributes": {}
   },
   {
-    "id": "j0BCLO3BaiN463G1Ou6d",
+    "id": "0qOpbdecRZf8K0S11C6r",
+    "isDeleted": false,
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -140,7 +147,8 @@
     "customAttributes": {}
   },
   {
-    "id": "t64Gctv4msDdX87Orkuq",
+    "id": "n3RKINgKNBYwJ9ROc3Zh",
+    "isDeleted": false,
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -160,7 +168,8 @@
     "customAttributes": {}
   },
   {
-    "id": "WmcrFSGoltoek3xU3HHp",
+    "id": "pJZX46KpP38W02HScwFh",
+    "isDeleted": false,
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -180,7 +189,8 @@
     "customAttributes": {}
   },
   {
-    "id": "H0SMxgw2KSQrpoDwiF2T",
+    "id": "Vt80TnpvtMp5C4tihBxR",
+    "isDeleted": false,
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -200,7 +210,8 @@
     "customAttributes": {}
   },
   {
-    "id": "h0crBrUDzvsXyKWscvUG",
+    "id": "BsMPmWTXo5WcUVvbfhrP",
+    "isDeleted": false,
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -220,7 +231,8 @@
     "customAttributes": {}
   },
   {
-    "id": "pONIoTjUt7VlVKHRGWaA",
+    "id": "CHQvOzmnwYsq3DS3Jlf9",
+    "isDeleted": false,
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -240,7 +252,8 @@
     "customAttributes": {}
   },
   {
-    "id": "Wkzd6bxNIzHhTZHXY9q2",
+    "id": "s6LY1PMPF1mqNkVZtBDl",
+    "isDeleted": false,
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",

@@ -13,6 +13,7 @@ const customers = Object.values(clients).filter(e => {
 }).map(e => {
   if (e.email == '' || e.email == null || e.email == undefined || e.email == ' ' || e.email == 'no lo dio') e.email = `placeholder@${e.name.split(' ').join('').toLowerCase()}.com`;
   e.category = Math.floor(Math.random()) > .9 ? 'B2B' : 'B2C';
+  if (e.address == '') e.address = 'direccion';
   const cleanItem = { ...e, createdAt: e.since };
   delete cleanItem.history;
   return cleanItem;
