@@ -94,3 +94,9 @@ next steps:
 - se hicieron cambios al order form para que se adabpte a edit y a create.
 - hubo un problema con date conversion que se arreglo en BaseModel, se convertia siempre que se instanciaba, es mejor solo cuando sale y vuelve de firebase.
 
+# 2024-12-01
+
+- tenia un bug en el seeding de users, la creacion de orders estaba tomando los users del seed pasado. hay que seed en dos runs, primero users y despues orders
+- se agregó el campo isDeleted a todos los modelos.
+
+

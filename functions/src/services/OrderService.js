@@ -46,7 +46,9 @@ class OrderService extends BaseService {
         }
 
         // 4. Save order documents
+        console.log('order before toFirestore', order);
         transaction.set(orderRef, order.toFirestore());
+        console.log('order after toFirestore', order);
 
         return order;
       });

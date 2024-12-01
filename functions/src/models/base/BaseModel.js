@@ -1,7 +1,6 @@
 class BaseModel {
   constructor(data = {}) {
     // Common fields all models have
-    console.log('data in Model', data);
     this.id = data.id;
 
     // Assign remaining data to instance
@@ -10,6 +9,12 @@ class BaseModel {
     if (!this.createdAt) {
       this.createdAt = new Date();
     }
+
+    this.constructor.dateFields.forEach(field => {
+      if (this[field]) {
+        this[field] = BaseModel.ensureDate(this[field]);
+      }
+    });
 
   }
 
@@ -36,13 +41,6 @@ class BaseModel {
     // Remove id as it's stored as document ID
     delete data.id;
 
-    // Ensure dates are properly set using the static getter directly
-    this.constructor.dateFields.forEach(field => {
-      if (this[field]) {
-        this[field] = BaseModel.ensureDate(this[field]);
-      }
-    });
-
     // Remove any undefined values
     Object.keys(data).forEach((key) => {
       if (data[key] === undefined || data[key] === null || data[key] === '' || Number.isNaN(data[key])) {
@@ -62,16 +60,6 @@ class BaseModel {
     const data = doc.data();
     const id = doc.id;
 
-    // Standardize date conversion using the static getter
-    this.dateFields.forEach((field) => {
-      if (data[field]) {
-        if (field === 'createdAt' || field === 'updatedAt') {
-          data[field] = BaseModel.ensureDate(data[field]);
-        } else {
-          data[field] = data[field].toDate().toISOString().slice(0, 10);
-        }
-      }
-    });
     return new this({ id, ...data });
   }
 }
