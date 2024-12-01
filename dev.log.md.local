@@ -86,3 +86,11 @@ next steps:
 - when patching payment method, two fields are patched, if toggle result is regalo for the payment method, then the isComplimentary status is patched as true.
 - if toggle result is not regalo, then the isComplimentary status is patched as false.
 
+# 2024-11-29
+
+- se agrego la funcion de guardar el updateHistory en patch y update. 
+- se hizo que isComplimentary se compute de acuerdo al payment method
+- agregue el modal form a order show, edit order funciona con el modal.
+- se hicieron cambios al order form para que se adabpte a edit y a create.
+- hubo un problema con date conversion que se arreglo en BaseModel, se convertia siempre que se instanciaba, es mejor solo cuando sale y vuelve de firebase.
+

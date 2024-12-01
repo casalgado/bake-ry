@@ -108,7 +108,7 @@ class Order extends BaseModel {
     this.internalNotes = internalNotes;
 
     // Flags
-    this.isComplimentary = paymentMethod === 'complementary';
+    this.isComplimentary = paymentMethod === 'complimentary';
   }
 
   static get dateFields() {

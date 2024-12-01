@@ -11,7 +11,7 @@
     "test": "jest",
     "test:silent": "jest --silent ",
     "test:watch": "jest --watch",
-    "seed:all": "node src/seeds/runners/seedAll.js",
+    "seed:setup": "node src/seeds/runners/seedSetup.js",
     "seed:bakery": "node src/seeds/runners/seedBakery.js",
     "seed:ingredients": "node src/seeds/runners/seedIngredients.js",
     "seed:recipes": "node src/seeds/runners/seedRecipes.js",

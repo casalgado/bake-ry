@@ -3,15 +3,13 @@ const seedIngredients = require('./seedIngredients');
 const seedRecipes = require('./seedRecipes');
 const seedProducts = require('./seedProducts');
 const seedUsers = require('./seedUsers');
-const seedOrders = require('./seedOrders');
 
-async function seedAll() {
+async function seedSetup() {
   await seedBakery();
   await seedIngredients();
   await seedRecipes();
   await seedProducts();
   await seedUsers();
-  await seedOrders();
 }
 
-seedAll();
+seedSetup();

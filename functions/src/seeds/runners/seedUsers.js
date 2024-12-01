@@ -132,7 +132,6 @@ async function seedUsers() {
     // Create users through service
     for (const userData of users) {
       try {
-
         const createdUser = await bakeryUserService.create({
           ...userData,
           bakeryId: BAKERY_ID,
@@ -142,12 +141,11 @@ async function seedUsers() {
         },
         BAKERY_ID,
         );
-
         process.stdout.write(`\rCreating users... ${spinner[spinnerIndex]} (${successCount}/${users.length})`);
         spinnerIndex = (spinnerIndex + 1) % spinner.length;
         successCount++;
         createdUsers.push({
-          id: createdUser.uid,
+          id: createdUser.id,
           ...createdUser,
         });
       } catch (error) {
