@@ -1,7 +1,9 @@
 const BaseModel = require('./base/BaseModel');
+const { generateId } = require('../utils/helpers');
 
 class OrderItem {
   constructor({
+    id,
     productId,
     productName,
     collectionId,
@@ -12,8 +14,10 @@ class OrderItem {
     variation,
     recipeId,
     isComplimentary = false,
+    productionBatch = 1,
     status = 0,
   }) {
+    this.id = id || generateId();
     this.productId = productId;
     this.productName = productName;
     this.collectionId = collectionId;
@@ -24,6 +28,7 @@ class OrderItem {
     this.variation = variation;  // stores the full variation object
     this.recipeId = recipeId;
     this.isComplimentary = isComplimentary;
+    this.productionBatch = productionBatch;
     this.status = status;
     this.subtotal = this.calculateSubtotal();
   }
@@ -40,6 +45,20 @@ class OrderItem {
       }
     });
     return data;
+  }
+
+  toClientHistoryObject() {
+    return {
+      productId: this.productId,
+      productName: this.productName,
+      collectionId: this.collectionId,
+      collectionName: this.collectionName,
+      isComplimentary: this.isComplimentary,
+      quantity: this.quantity,
+      currentPrice: this.currentPrice,
+      variation: this.variation,
+      subtotal: this.subtotal,
+    };
   }
 
 }
@@ -127,6 +146,20 @@ class Order extends BaseModel {
 
   calculateTotal() {
     return this.isComplimentary ? 0 : this.subtotal + this.deliveryFee;
+  }
+
+  toClientHistoryObject() {
+    return {
+      id: this.id,
+      bakeryId: this.bakeryId,
+      dueDate: this.dueDate,
+      address: this.deliveryAddress,
+      total: this.total,
+      isDeleted: this.isDeleted,
+      isComplimentary: this.isComplimentary,
+      orderItems: this.orderItems.map(item => item.toClientHistoryObject()),
+      fulfillmentType: this.fulfillmentType,
+    };
   }
 
   toFirestore() {

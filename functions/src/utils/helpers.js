@@ -1,4 +1,4 @@
-const generateId = (length = 8) => {
+const generateId = (length = 16) => {
   const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   return Array.from(
     { length },

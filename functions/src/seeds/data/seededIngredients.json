@@ -1,7 +1,6 @@
 [
   {
-    "id": "azQ1BPVDMO7rcS9vFIcV",
-    "isDeleted": false,
+    "id": "TqKnxEj7svLjdABs94rk",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -18,11 +17,11 @@
     "storageTemp": "Ambiente",
     "isActive": true,
     "isDiscontinued": false,
+    "isDeleted": false,
     "customAttributes": {}
   },
   {
-    "id": "d3QLEBDk5AdwVNGr06Qq",
-    "isDeleted": false,
+    "id": "KKnkv3YTPhRUZ4blX7Ho",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -39,11 +38,11 @@
     "storageTemp": "Ambiente",
     "isActive": true,
     "isDiscontinued": false,
+    "isDeleted": false,
     "customAttributes": {}
   },
   {
-    "id": "9tZspkYu7d7kODaBCzcY",
-    "isDeleted": false,
+    "id": "RVbG2dRPa6nA3FD7JUvc",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -60,11 +59,11 @@
     "storageTemp": "Ambiente",
     "isActive": true,
     "isDiscontinued": false,
+    "isDeleted": false,
     "customAttributes": {}
   },
   {
-    "id": "JT7PUxwHsh4mvNGMB3fd",
-    "isDeleted": false,
+    "id": "pdFpzRCDhtVQ7TDZ37CD",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -81,11 +80,11 @@
     "storageTemp": "Refrigeracion",
     "isActive": true,
     "isDiscontinued": false,
+    "isDeleted": false,
     "customAttributes": {}
   },
   {
-    "id": "zl7pBnoh4NQFVqtnPPwu",
-    "isDeleted": false,
+    "id": "twywsEhXHKc3LqjzbUTX",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -102,11 +101,11 @@
     "storageTemp": "Refrigeracion",
     "isActive": true,
     "isDiscontinued": false,
+    "isDeleted": false,
     "customAttributes": {}
   },
   {
-    "id": "CRg7fOunTjdXbr4vIk5u",
-    "isDeleted": false,
+    "id": "sXt2rdPHyhTRCioWgAkc",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -123,11 +122,11 @@
     "storageTemp": "Ambiente",
     "isActive": true,
     "isDiscontinued": false,
+    "isDeleted": false,
     "customAttributes": {}
   },
   {
-    "id": "0qOpbdecRZf8K0S11C6r",
-    "isDeleted": false,
+    "id": "RZrYAsEDRObeHXD4G0Lm",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -144,11 +143,11 @@
     "storageTemp": "Ambiente",
     "isActive": true,
     "isDiscontinued": false,
+    "isDeleted": false,
     "customAttributes": {}
   },
   {
-    "id": "n3RKINgKNBYwJ9ROc3Zh",
-    "isDeleted": false,
+    "id": "FPez66mHkVJmukBIySYX",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -165,11 +164,11 @@
     "storageTemp": "Ambiente",
     "isActive": true,
     "isDiscontinued": false,
+    "isDeleted": false,
     "customAttributes": {}
   },
   {
-    "id": "pJZX46KpP38W02HScwFh",
-    "isDeleted": false,
+    "id": "iTzCpEf4emjOQ54j2kWs",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -186,11 +185,11 @@
     "storageTemp": "Ambiente",
     "isActive": true,
     "isDiscontinued": false,
+    "isDeleted": false,
     "customAttributes": {}
   },
   {
-    "id": "Vt80TnpvtMp5C4tihBxR",
-    "isDeleted": false,
+    "id": "99TbElTh3vbgOBsNsnlO",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -207,11 +206,11 @@
     "storageTemp": "Ambiente",
     "isActive": true,
     "isDiscontinued": false,
+    "isDeleted": false,
     "customAttributes": {}
   },
   {
-    "id": "BsMPmWTXo5WcUVvbfhrP",
-    "isDeleted": false,
+    "id": "YzU9EJmHGpSMEtPE1sqd",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -228,11 +227,11 @@
     "storageTemp": "Refrigeracion",
     "isActive": true,
     "isDiscontinued": false,
+    "isDeleted": false,
     "customAttributes": {}
   },
   {
-    "id": "CHQvOzmnwYsq3DS3Jlf9",
-    "isDeleted": false,
+    "id": "dEJ8a9fUQFqZSzBTTG70",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -249,11 +248,11 @@
     "storageTemp": "Refrigeracion",
     "isActive": true,
     "isDiscontinued": false,
+    "isDeleted": false,
     "customAttributes": {}
   },
   {
-    "id": "s6LY1PMPF1mqNkVZtBDl",
-    "isDeleted": false,
+    "id": "RAexq3WhWgTRkMLzNQeu",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
     "bakeryId": "bakery-betos-001",
@@ -270,6 +269,7 @@
     "storageTemp": "Ambiente",
     "isActive": true,
     "isDiscontinued": false,
+    "isDeleted": false,
     "customAttributes": {}
   }
 ]

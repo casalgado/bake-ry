@@ -45,10 +45,18 @@ class OrderService extends BaseService {
           });
         }
 
+        // 3. Create history record
+        const clientHistoryRef = db
+          .collection('bakeries')
+          .doc(bakeryId)
+          .collection('users')
+          .doc(order.userId)
+          .collection('orderHistory')
+          .doc(order.id);
+
         // 4. Save order documents
-        console.log('order before toFirestore', order);
         transaction.set(orderRef, order.toFirestore());
-        console.log('order after toFirestore', order);
+        transaction.set(clientHistoryRef, order.toClientHistoryObject());
 
         return order;
       });
