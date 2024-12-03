@@ -63,6 +63,7 @@ class BakeryUserService extends BaseService {
             name: newUser.name,
             first_name: newUser.name.split(' ')[0],
             role: newUser.role,
+            id: userRecord.uid,
           });
         }
 
@@ -124,7 +125,6 @@ class BakeryUserService extends BaseService {
             bakeryId,
           });
 
-          // Handle staff collection updates
           const staffRef = db
             .collection('bakeries')
             .doc(bakeryId)
@@ -137,13 +137,16 @@ class BakeryUserService extends BaseService {
           const wasAssistant = assistantRoles.includes(currentUser.role);
           const willBeAssistant = assistantRoles.includes(data.role);
 
-          if (!wasAssistant && willBeAssistant) {
+          if (willBeAssistant) {
+            // Set or update staff entry
             transaction.set(staffRef, {
               name: updatedUser.name,
               first_name: updatedUser.name.split(' ')[0],
               role: data.role,
+              id: updatedUser.id,
             });
           } else if (wasAssistant && !willBeAssistant) {
+            // Remove from staff collection if no longer an assistant
             transaction.delete(staffRef);
           }
         }

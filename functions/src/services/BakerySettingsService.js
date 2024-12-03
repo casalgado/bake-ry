@@ -49,6 +49,16 @@ class BakerySettingsService extends BaseService {
     }
   }
 
+  async getStaffList(bakeryId) {
+    try {
+      const staff = await this.getCollectionRef(bakeryId).doc('default').collection('staff').get();
+      return staff.docs.map(doc => doc.data());
+    } catch (error) {
+      console.error('Error getting staff list:', error);
+      throw error;
+    }
+  }
+
   updateProductCategories(existingCategories, incomingCategory) {
     const categoryIndex = existingCategories.findIndex(
       cat => cat.id === incomingCategory.id,
