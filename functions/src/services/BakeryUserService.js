@@ -1,7 +1,7 @@
 const BaseService = require('./base/BaseService');
 const User = require('../models/User');
 const { admin, db } = require('../config/firebase');
-const { BadRequestError } = require('../utils/errors');
+const { BadRequestError, NotFoundError } = require('../utils/errors');
 
 class BakeryUserService extends BaseService {
   constructor() {
@@ -56,6 +56,16 @@ class BakeryUserService extends BaseService {
         };
         delete userToSave.password;
 
+        // 4. Add user to bakery's assistant list if they are an assistant
+        if (newUser.role === 'delivery_assistant' || newUser.role === 'production_assistant' || newUser.role === 'bakery_staff') {
+          const assistantsRef = db.collection('bakeries').doc(bakeryId).collection('settings').doc('default').collection('staff');
+          assistantsRef.doc(userRecord.uid).set({
+            name: newUser.name,
+            first_name: newUser.name.split(' ')[0],
+            role: newUser.role,
+          });
+        }
+
         transaction.set(userRef, userToSave);
 
         return userToSave;
@@ -82,13 +92,75 @@ class BakeryUserService extends BaseService {
     return super.getById(id, bakeryId);
   }
 
-  async update(id, updateData, bakeryId) {
-    // Update Firebase Auth if email is being changed
-    if (updateData.email) {
-      await admin.auth().updateUser(id, { email: updateData.email });
-    }
+  async update(id, data, bakeryId, editor = null) {
+    try {
+      const docRef = this.getCollectionRef(bakeryId).doc(id);
 
-    return super.update(id, updateData, bakeryId);
+      return await db.runTransaction(async (transaction) => {
+
+        const doc = await transaction.get(docRef);
+
+        if (!doc.exists) {
+          throw new NotFoundError(`${this.collectionName} not found`);
+        }
+
+        if (data.email) {
+          await admin.auth().updateUser(id, { email: data.email });
+        }
+
+        const currentUser = this.ModelClass.fromFirestore(doc);
+        const updatedUser = new this.ModelClass({
+          ...currentUser,
+          ...data,
+          id,
+          updatedAt: new Date(),
+        });
+
+        // Handle role-specific updates if role is changing
+        if (data.role && data.role !== currentUser.role) {
+          // Update Firebase Auth claims
+          await admin.auth().setCustomUserClaims(id, {
+            role: data.role,
+            bakeryId,
+          });
+
+          // Handle staff collection updates
+          const staffRef = db
+            .collection('bakeries')
+            .doc(bakeryId)
+            .collection('settings')
+            .doc('default')
+            .collection('staff')
+            .doc(id);
+
+          const assistantRoles = ['delivery_assistant', 'production_assistant', 'bakery_staff'];
+          const wasAssistant = assistantRoles.includes(currentUser.role);
+          const willBeAssistant = assistantRoles.includes(data.role);
+
+          if (!wasAssistant && willBeAssistant) {
+            transaction.set(staffRef, {
+              name: updatedUser.name,
+              first_name: updatedUser.name.split(' ')[0],
+              role: data.role,
+            });
+          } else if (wasAssistant && !willBeAssistant) {
+            transaction.delete(staffRef);
+          }
+        }
+
+        // Record changes in history
+        const changes = this.diffObjects(currentUser, updatedUser);
+        await this.recordHistory(transaction, docRef, changes, currentUser, editor);
+
+        // Update main document
+        transaction.update(docRef, updatedUser.toFirestore());
+
+        return updatedUser;
+      });
+    } catch (error) {
+      console.error(`Error updating ${this.collectionName}:`, error);
+      throw error;
+    }
   }
 
   async delete(id, bakeryId) {
