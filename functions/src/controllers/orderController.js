@@ -9,13 +9,20 @@ class OrderController extends BaseController {
   async patchAll(req, res) {
     try {
       const { bakeryId } = req.params;
-      const data = req.body;
-      console.log('bakeryId', bakeryId);
-      console.log('patch all', data);
+      const updates = req.body.updates;
+
+      const results = await this.service.patchAll(
+        bakeryId,
+        updates,
+        req.user,
+      );
+
+      this.handleResponse(res, results);
     } catch (error) {
       this.handleError(res, error);
     }
   }
+
 }
 
 /**
@@ -51,6 +58,21 @@ function validateOrderData(data) {
   // if (dueDate < currentDate) {
   //   errors.push('Required date must be in the future');
   // }
+
+  // FOR PATCH ALL
+  //       // Validate input structure
+  //       if (!Array.isArray(updates)) {
+  //         throw new BadRequestError('Request body must be an array of updates');
+  //       }
+
+  //       // Validate each update object
+  //       updates.forEach((update, index) => {
+  //         if (!update.id || typeof update.status !== 'number') {
+  //           throw new BadRequestError(
+  //             `Invalid update at index ${index}. Each update must have id and status`,
+  //           );
+  //         }
+  //       });
 
   return errors;
 }

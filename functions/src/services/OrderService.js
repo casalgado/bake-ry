@@ -67,20 +67,21 @@ class OrderService extends BaseService {
   }
 
   /**
-   * Bulk update orders status
+   * Patch multiple orders at once
    * @param {string} bakeryId - Bakery ID
-   * @param {Array<{id: string, status: number}>} updates - Array of order updates
+   * @param {Array<{id: string, data: Object}>} updates - Array of order updates
    * @param {Object} editor - User performing the update
    * @returns {Promise<{success: Array, failed: Array}>}
    */
   async patchAll(bakeryId, updates, editor) {
+    console.log('updates', updates);
+    console.log('bakeryId', bakeryId);
+    console.log('editor', editor);
     try {
-      // Validate input
       if (!Array.isArray(updates)) {
         throw new BadRequestError('Updates must be an array');
       }
 
-      // Initialize results
       const results = {
         success: [],
         failed: [],
@@ -98,10 +99,11 @@ class OrderService extends BaseService {
       // Process each batch
       for (const batchUpdates of batches) {
         await db.runTransaction(async (transaction) => {
-          // Process each update in the batch
           for (const update of batchUpdates) {
             try {
-              const { id, status } = update;
+              const { id, data } = update;
+              console.log('id', id);
+              console.log('data', data);
               const orderRef = this.getCollectionRef(bakeryId).doc(id);
               const orderDoc = await transaction.get(orderRef);
 
@@ -115,7 +117,7 @@ class OrderService extends BaseService {
               // Create updated instance
               const updatedOrder = new this.ModelClass({
                 ...currentOrder,
-                status,
+                ...data,
                 updatedAt: new Date(),
                 lastEditedBy: {
                   userId: editor?.uid,
@@ -124,12 +126,26 @@ class OrderService extends BaseService {
                 },
               });
 
-              // Update the order (no history record for bulk status updates)
+              // Compute what changed
+              const changes = this.diffObjects(currentOrder, updatedOrder);
+
+              // Record history only if changes don't include orderItems
+              if (!data.orderItems) {
+                await this.recordHistory(transaction, orderRef, changes, currentOrder, editor);
+              }
+
+              // Update the order
               transaction.update(orderRef, updatedOrder.toFirestore());
 
-              results.success.push({ id, status });
+              results.success.push({
+                id,
+                changes,
+              });
             } catch (error) {
-              results.failed.push({ id: update.id, error: error.message });
+              results.failed.push({
+                id: update.id,
+                error: error.message,
+              });
             }
           }
         });
@@ -137,7 +153,7 @@ class OrderService extends BaseService {
 
       return results;
     } catch (error) {
-      console.error('Error in bulkUpdateStatus:', error);
+      console.error('Error in patchAll:', error);
       throw error;
     }
   }
