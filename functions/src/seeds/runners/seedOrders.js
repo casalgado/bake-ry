@@ -10,6 +10,8 @@ const seededProducts = require('../data/seededProducts.json');
 const seededUsers = require('../data/seededUsers.json');
 
 // Constants
+const NUMBER_OF_DAYS = 30;
+const APPROX_ORDERS_PER_DAY = 15;
 const DELIVERY_PROBABILITY = 0.9;
 const COMMENT_PROBABILITY = 0.2;
 const DELIVERY_FEES = [7000, 8000, 9000];
@@ -133,7 +135,7 @@ async function generateOrders() {
     const currentDate = new Date();
 
     // Generate orders for the past 30 days
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < NUMBER_OF_DAYS; i++) {
       const date = new Date(currentDate);
       date.setDate(date.getDate() - i);
 
@@ -143,7 +145,7 @@ async function generateOrders() {
       }
 
       // Generate 10-15 orders per day
-      const ordersPerDay = getRandomInt(1, 3);
+      const ordersPerDay = getRandomInt(APPROX_ORDERS_PER_DAY - 2, APPROX_ORDERS_PER_DAY + 2);
       for (let j = 0; j < ordersPerDay; j++) {
         const order = generateRandomOrder(date);
         orders.push(order);

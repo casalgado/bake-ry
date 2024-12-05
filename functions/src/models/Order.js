@@ -30,6 +30,7 @@ class OrderItem {
     this.isComplimentary = isComplimentary;
     this.productionBatch = productionBatch;
     this.status = status;
+
     this.subtotal = this.calculateSubtotal();
   }
 
@@ -88,7 +89,10 @@ class Order extends BaseModel {
     fulfillmentType = 'pickup',
     deliveryAddress = null,
     deliveryInstructions = '',
+    deliveryDriver = '-',
     deliveryFee = 0,
+    deliveryCost = 0,
+    numberOfBags = 1,
 
     // Notes
     customerNotes = '',
@@ -117,7 +121,10 @@ class Order extends BaseModel {
     this.fulfillmentType = fulfillmentType;
     this.deliveryAddress = deliveryAddress;
     this.deliveryInstructions = deliveryInstructions;
+    this.deliveryDriver = deliveryDriver;
     this.deliveryFee = deliveryFee;
+    this.deliveryCost = deliveryCost;
+    this.numberOfBags = numberOfBags;
 
     // Pricing
     this.subtotal = this.calculateSubtotal();

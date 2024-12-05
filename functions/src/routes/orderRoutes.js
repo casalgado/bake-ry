@@ -13,6 +13,7 @@ const bindController = (controller) => ({
   getAll: controller.getAll.bind(controller),
   update: controller.update.bind(controller),
   patch: controller.patch.bind(controller),
+  patchAll: controller.patchAll.bind(controller),
   delete: controller.delete.bind(controller),
 });
 
@@ -34,6 +35,7 @@ bakeryRouter.use(requireBakeryStaffOrAdmin);
 bakeryRouter.post('/orders', orderController.create);
 bakeryRouter.get('/orders', orderController.getAll);
 bakeryRouter.get('/orders/:id', orderController.getById);
+bakeryRouter.patch('/orders/bulk-update', orderController.patchAll);
 bakeryRouter.patch('/orders/:id', orderController.patch);
 bakeryRouter.put('/orders/:id', orderController.update);
 bakeryRouter.delete('/orders/:id', orderController.delete);

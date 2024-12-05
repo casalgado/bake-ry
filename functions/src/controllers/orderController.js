@@ -6,6 +6,16 @@ class OrderController extends BaseController {
     super(new OrderService(), validateOrderData);
   }
 
+  async patchAll(req, res) {
+    try {
+      const { bakeryId } = req.params;
+      const data = req.body;
+      console.log('bakeryId', bakeryId);
+      console.log('patch all', data);
+    } catch (error) {
+      this.handleError(res, error);
+    }
+  }
 }
 
 /**
