@@ -99,54 +99,105 @@ class OrderService extends BaseService {
       // Process each batch
       for (const batchUpdates of batches) {
         await db.runTransaction(async (transaction) => {
-          for (const update of batchUpdates) {
-            try {
-              const { id, data } = update;
-              console.log('id', id);
-              console.log('data', data);
-              const orderRef = this.getCollectionRef(bakeryId).doc(id);
-              const orderDoc = await transaction.get(orderRef);
+          // First, perform all reads and prepare updates
+          const updateOperations = await Promise.all(
+            batchUpdates.map(async (update) => {
+              try {
+                const { id, data } = update;
+                const orderRef = this.getCollectionRef(bakeryId).doc(id);
+                const orderDoc = await transaction.get(orderRef);
 
-              if (!orderDoc.exists) {
-                results.failed.push({ id, error: 'Order not found' });
-                continue;
+                if (!orderDoc.exists) {
+                  return {
+                    success: false,
+                    id,
+                    error: 'Order not found',
+                  };
+                }
+
+                const currentOrder = this.ModelClass.fromFirestore(orderDoc);
+
+                // Create updated instance
+                const updatedOrder = new this.ModelClass({
+                  ...currentOrder,
+                  ...data,
+                  updatedAt: new Date(),
+                  lastEditedBy: {
+                    userId: editor?.uid,
+                    name: editor?.name,
+                    role: editor?.role,
+                  },
+                });
+
+                // Compute what changed
+                let changes = this.diffObjects(currentOrder, updatedOrder);
+                if (data.orderItems) {
+                  changes = {
+                    orderItems: currentOrder.orderItems.map((item, index) => {
+                      let change = this.diffObjects(
+                        item,
+                        updatedOrder.orderItems[index],
+                      );
+                      change.id = item.id;
+                      return change;
+                    }),
+                  };
+                }
+
+                return {
+                  success: true,
+                  orderRef,
+                  updatedOrder,
+                  changes,
+                  data,
+                  id,
+                };
+              } catch (error) {
+                return {
+                  success: false,
+                  id: update.id,
+                  error: error.message,
+                };
               }
+            }),
+          );
 
-              const currentOrder = this.ModelClass.fromFirestore(orderDoc);
-
-              // Create updated instance
-              const updatedOrder = new this.ModelClass({
-                ...currentOrder,
-                ...data,
-                updatedAt: new Date(),
-                lastEditedBy: {
-                  userId: editor?.uid,
-                  name: editor?.name,
-                  role: editor?.role,
-                },
+          // Then, perform all writes
+          for (const operation of updateOperations) {
+            if (!operation.success) {
+              results.failed.push({
+                id: operation.id,
+                error: operation.error,
               });
+              continue;
+            }
 
-              // Compute what changed
-              const changes = this.diffObjects(currentOrder, updatedOrder);
+            const {
+              orderRef,
+              updatedOrder,
+              changes,
+              id,
+            } = operation;
 
-              // Record history only if changes don't include orderItems
-              if (!data.orderItems) {
-                await this.recordHistory(transaction, orderRef, changes, currentOrder, editor);
-              }
-
-              // Update the order
-              transaction.update(orderRef, updatedOrder.toFirestore());
-
-              results.success.push({
-                id,
+            // update order and history only if changes are present
+            if (Object.keys(changes).length > 0) {
+              const historyRef = orderRef.collection('updateHistory').doc();
+              transaction.set(historyRef, {
+                timestamp: new Date(),
+                editor: {
+                  userId: editor?.uid || 'system',
+                  name: editor?.name || 'system',
+                  role: editor?.role || 'system',
+                },
                 changes,
               });
-            } catch (error) {
-              results.failed.push({
-                id: update.id,
-                error: error.message,
-              });
+              transaction.update(orderRef, updatedOrder.toFirestore());
             }
+
+            results.success.push({
+              id,
+              changes,
+            });
           }
         });
       }
