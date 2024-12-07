@@ -74,9 +74,7 @@ class OrderService extends BaseService {
    * @returns {Promise<{success: Array, failed: Array}>}
    */
   async patchAll(bakeryId, updates, editor) {
-    console.log('updates', updates);
-    console.log('bakeryId', bakeryId);
-    console.log('editor', editor);
+
     try {
       if (!Array.isArray(updates)) {
         throw new BadRequestError('Updates must be an array');
@@ -98,71 +96,76 @@ class OrderService extends BaseService {
 
       // Process each batch
       for (const batchUpdates of batches) {
+
         await db.runTransaction(async (transaction) => {
-          // First, perform all reads and prepare updates
-          const updateOperations = await Promise.all(
-            batchUpdates.map(async (update) => {
-              try {
-                const { id, data } = update;
-                const orderRef = this.getCollectionRef(bakeryId).doc(id);
-                const orderDoc = await transaction.get(orderRef);
 
-                if (!orderDoc.exists) {
-                  return {
-                    success: false,
-                    id,
-                    error: 'Order not found',
-                  };
-                }
+          // Process reads sequentially instead of Promise.all
+          const updateOperations = [];
+          for (const update of batchUpdates) {
+            try {
+              const { id, data } = update;
+              const orderRef = this.getCollectionRef(bakeryId).doc(id);
+              const orderDoc = await transaction.get(orderRef);
 
-                const currentOrder = this.ModelClass.fromFirestore(orderDoc);
-
-                // Create updated instance
-                const updatedOrder = new this.ModelClass({
-                  ...currentOrder,
-                  ...data,
-                  updatedAt: new Date(),
-                  lastEditedBy: {
-                    userId: editor?.uid,
-                    name: editor?.name,
-                    role: editor?.role,
-                  },
-                });
-
-                // Compute what changed
-                let changes = this.diffObjects(currentOrder, updatedOrder);
-                if (data.orderItems) {
-                  changes = {
-                    orderItems: currentOrder.orderItems.map((item, index) => {
-                      let change = this.diffObjects(
-                        item,
-                        updatedOrder.orderItems[index],
-                      );
-                      change.id = item.id;
-                      return change;
-                    }),
-                  };
-                }
-
-                return {
-                  success: true,
-                  orderRef,
-                  updatedOrder,
-                  changes,
-                  data,
-                  id,
-                };
-              } catch (error) {
-                return {
+              if (!orderDoc.exists) {
+                updateOperations.push({
                   success: false,
-                  id: update.id,
-                  error: error.message,
+                  id,
+                  error: 'Order not found',
+                });
+                continue;
+              }
+
+              const currentOrder = this.ModelClass.fromFirestore(orderDoc);
+
+              // Create updated instance
+              const updatedOrder = new this.ModelClass({
+                ...currentOrder,
+                ...data,
+                updatedAt: new Date(),
+                lastEditedBy: {
+                  userId: editor?.uid,
+                  name: editor?.name,
+                  role: editor?.role,
+                },
+              });
+
+              // Compute what changed
+              let changes = this.diffObjects(currentOrder, updatedOrder);
+              if (data.orderItems) {
+                changes = {
+                  orderItems: currentOrder.orderItems.map((item, index) => {
+                    let change = this.diffObjects(
+                      item,
+                      updatedOrder.orderItems[index],
+                    );
+                    change.id = item.id;
+                    return change;
+                  }),
                 };
               }
-            }),
-          );
 
-          // Then, perform all writes
+              console.log('changes', changes);
+              console.log('updatedOrder in Reads', updatedOrder);
+
+              updateOperations.push({
+                success: true,
+                orderRef,
+                updatedOrder,
+                changes,
+                data,
+                id,
+              });
+            } catch (error) {
+              updateOperations.push({
+                success: false,
+                id: update.id,
+                error: error.message,
+              });
+            }
+          }
+
+          // Process writes
           for (const operation of updateOperations) {
             if (!operation.success) {
               results.failed.push({
@@ -172,12 +175,7 @@ class OrderService extends BaseService {
               continue;
             }
 
-            const {
-              orderRef,
-              updatedOrder,
-              changes,
-              id,
-            } = operation;
+            const { orderRef, updatedOrder, changes, id } = operation;
 
             // update order and history only if changes are present
             if (Object.keys(changes).length > 0) {
@@ -191,6 +189,7 @@ class OrderService extends BaseService {
                 },
                 changes,
               });
+              console.log('updatedOrder in Writes', updatedOrder.toFirestore());
               transaction.update(orderRef, updatedOrder.toFirestore());
             }
 
@@ -199,7 +198,9 @@ class OrderService extends BaseService {
               changes,
             });
           }
+
         });
+
       }
 
       return results;
