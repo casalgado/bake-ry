@@ -20,8 +20,8 @@ class BakeryUserController extends BaseController {
       console.log('Phone:', phone);
 
       // Validate required fields
-      if (!email || !role || !name) {
-        throw new BadRequestError('Email, role, and name are required');
+      if (!email || !role) {
+        throw new BadRequestError('Email and role are required');
       }
 
       // Validate bakery user role

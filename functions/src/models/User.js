@@ -26,7 +26,7 @@ class User extends BaseModel {
     this.password = password;
     this.role = role;
     this.bakeryId = bakeryId;
-    this.name = name;
+    this.name = this.formatName(name, firstName, lastName);
     this.firstName = firstName;
     this.lastName = lastName;
     this.address = address;
@@ -40,6 +40,13 @@ class User extends BaseModel {
 
   static get dateFields() {
     return [...super.dateFields];
+  }
+
+  formatName(name, firstName, lastName) {
+    if (firstName) {
+      return `${firstName} ${lastName || ''}`.trim();
+    }
+    return name || '';
   }
 
   formatPhone(phone) {

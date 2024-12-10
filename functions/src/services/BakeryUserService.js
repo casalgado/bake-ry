@@ -19,6 +19,8 @@ class BakeryUserService extends BaseService {
     let userRecord = null;
 
     try {
+      userData.password = 'password';
+      console.log('userData', userData);
       const newUser = new User({
         ...userData,
         bakeryId,
@@ -85,8 +87,8 @@ class BakeryUserService extends BaseService {
     }
   }
 
-  async getAll(bakeryId, filters = {}) {
-    return super.getAll(bakeryId, filters);
+  async getAll(bakeryId, filters = {}, options = {}) {
+    return super.getAll(bakeryId, filters, options);
   }
 
   async getById(id, bakeryId) {

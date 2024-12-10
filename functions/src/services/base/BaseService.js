@@ -84,9 +84,14 @@ class BaseService {
       console.log('sort', sort);
       console.log('filters', filters);
 
+      const hasIsDeletedField =
+      Object.prototype.hasOwnProperty.call(this.ModelClass.prototype, 'isDeleted') ||
+      Object.prototype.hasOwnProperty.call(this.ModelClass, 'isDeleted');
+
       // Add isDeleted filter by default unless specifically requested
-      if (!query.includeDeleted) {
+      if (!query.includeDeleted && hasIsDeletedField) {
         dbQuery = dbQuery.where('isDeleted', '!=', true);
+        console.log('Added isDeleted filter');
       }
 
       // Apply filters

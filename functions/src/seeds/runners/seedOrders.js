@@ -15,7 +15,7 @@ const APPROX_ORDERS_PER_DAY = 15;
 const DELIVERY_PROBABILITY = 0.9;
 const COMMENT_PROBABILITY = 0.2;
 const DELIVERY_FEES = [7000, 8000, 9000];
-const PAYMENT_METHODS = ['cash', 'transfer', 'card'];
+const PAYMENT_METHODS = ['cash', 'transfer', 'bold'];
 const RANDOM_COMMENTS = [
   'Entrega especial para cumpleaños',
   'Cliente frecuente',
