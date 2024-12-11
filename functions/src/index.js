@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const { functions } = require('./config/firebase');
+const functions = require('firebase-functions');
 const cors = require('cors');
 
 const authRoutes = require('./routes/authRoutes');

@@ -1,6 +1,5 @@
 require('dotenv').config();
 const admin = require('firebase-admin');
-const functions = require('firebase-functions');
 
 // Import the service account key JSON file
 const serviceAccount = require('./serviceAccountKey.json');
@@ -14,9 +13,7 @@ if (!admin.apps.length) {
   // If you're using other Firebase services, include their configs here
   // For example: databaseURL: "https://your-database-name.firebaseio.com"
   });
-
 }
-
 const db = admin.firestore();
 
 if (process.env.FIREBASE_AUTH_EMULATOR_HOST) {
@@ -26,4 +23,4 @@ if (process.env.FIREBASE_AUTH_EMULATOR_HOST) {
 // Replace 'user-id' with the UID of your test user
 // comment out when testing
 
-module.exports = { admin, functions, db };
+module.exports = { admin, db };
