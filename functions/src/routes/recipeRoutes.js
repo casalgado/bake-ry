@@ -1,23 +1,10 @@
 const express = require('express');
-const RecipeController = require('../controllers/recipeController');
-const RecipeService = require('../services/RecipeService');
+const recipeController = require('../controllers/recipeController');
 const {
   authenticateUser,
   requireBakeryStaffOrAdmin,
 } = require('../middleware/userAccess');
 const hasBakeryAccess = require('../middleware/bakeryAccess');
-
-const bindController = (controller) => ({
-  create: controller.create.bind(controller),
-  getById: controller.getById.bind(controller),
-  getAll: controller.getAll.bind(controller),
-  update: controller.update.bind(controller),
-  patch: controller.patch.bind(controller),
-  delete: controller.delete.bind(controller),
-});
-
-const controller = new RecipeController(new RecipeService);
-const recipeController = bindController(controller);
 
 const router = express.Router();
 
