@@ -1,21 +1,9 @@
 const express = require('express');
-const AdminUserController = require('../controllers/AdminUserController');
-const AdminUserService = require('../services/AdminUserService');
+const adminController = require('../controllers/adminController');
 const {
   authenticateUser,
   requireSystemAdmin,
 } = require('../middleware/userAccess');
-
-const bindController = (controller) => ({
-  create: controller.create.bind(controller),
-  getById: controller.getById.bind(controller),
-  getAll: controller.getAll.bind(controller),
-  update: controller.update.bind(controller),
-  delete: controller.delete.bind(controller),
-});
-
-const controller = new AdminUserController(new AdminUserService());
-const adminUserController = bindController(controller);
 
 const router = express.Router();
 
@@ -26,10 +14,10 @@ router.use(authenticateUser);
 router.use(requireSystemAdmin);
 
 // CRUD routes
-router.post('/admin-users', adminUserController.create);
-router.get('/admin-users', adminUserController.getAll);
-router.get('/admin-users/:id', adminUserController.getById);
-router.put('/admin-users/:id', adminUserController.update);
-router.delete('/admin-users/:id', adminUserController.delete);
+router.post('/admin-users', adminController.create);
+router.get('/admin-users', adminController.getAll);
+router.get('/admin-users/:id', adminController.getById);
+router.put('/admin-users/:id', adminController.update);
+router.delete('/admin-users/:id', adminController.delete);
 
 module.exports = router;

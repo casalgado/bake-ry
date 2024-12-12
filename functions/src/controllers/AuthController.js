@@ -1,38 +1,51 @@
-const BaseController = require('./base/BaseController');
+const createBaseController = require('./base/controllerFactory');
+const AuthService = require('../services/AuthService');
 const { BadRequestError } = require('../utils/errors');
 
-class AuthController extends BaseController {
-  /**
-   * AuthController constructor
-   * @param {AuthService} authService - Instance of AuthService
-   */
-  constructor(authService) {
-    if (!authService) {
-      throw new Error('AuthService is required');
+const validateRegistrationData = (data) => {
+  const errors = [];
+
+  if (!data.email) {
+    errors.push('Email is required');
+  } else {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email)) {
+      errors.push('Invalid email format');
     }
-    super(authService);
   }
 
-  /**
-   * Register new user
-   * @param {Request} req - Express request object
-   * @param {Response} res - Express response object
-   */
+  if (!data.password) {
+    errors.push('Password is required');
+  }
+
+  if (!data.role) {
+    errors.push('Role is required');
+  }
+
+  if (!data.name) {
+    errors.push('Name is required');
+  }
+
+  if (data.role !== 'system_admin' && data.role !== 'bakery_admin' && !data.bakeryId) {
+    errors.push('BakeryId is required for non-admin users');
+  }
+
+  return errors;
+};
+
+const authService = new AuthService();
+const baseController = createBaseController(authService, validateRegistrationData);
+
+const authController = {
+  ...baseController,
+
   async register(req, res) {
     try {
       const { email, password, role, name, bakeryId } = req.body;
 
-      // Validate required fields
-      if (!email || !password || !role || !name) {
-        throw new BadRequestError('Email, password, role, and name are required');
-      }
+      baseController.validateRequestData(req.body);
 
-      // Validate role and bakeryId
-      if (role !== 'system_admin' && role !== 'bakery_admin' && !bakeryId) {
-        throw new BadRequestError('BakeryId is required for non-admin users');
-      }
-
-      const user = await this.service.register({
+      const user = await authService.register({
         email,
         password,
         role,
@@ -40,20 +53,15 @@ class AuthController extends BaseController {
         bakeryId,
       });
 
-      this.handleResponse(res, {
+      baseController.handleResponse(res, {
         message: 'User created successfully',
         user,
       }, 201);
     } catch (error) {
-      this.handleError(res, error);
+      baseController.handleError(res, error);
     }
-  }
+  },
 
-  /**
-   * Login user
-   * @param {Request} req - Express request object
-   * @param {Response} res - Express response object
-   */
   async login(req, res) {
     try {
       // Get the ID token from the Authorization header
@@ -69,13 +77,12 @@ class AuthController extends BaseController {
         throw new BadRequestError('Email is required');
       }
 
-      const userData = await this.service.login(idToken, email);
-      this.handleResponse(res, userData);
+      const userData = await authService.login(idToken, email);
+      baseController.handleResponse(res, userData);
     } catch (error) {
-      this.handleError(res, error);
+      baseController.handleError(res, error);
     }
-  }
+  },
+};
 
-}
-
-module.exports = AuthController;
+module.exports = authController;
