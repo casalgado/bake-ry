@@ -1,5 +1,5 @@
 const express = require('express');
-const productCollectionController = require('../controllers/ProductCollectionController');
+const productCollectionController = require('../controllers/productCollectionController');
 const {
   authenticateUser,
   requireBakeryStaffOrAdmin,
