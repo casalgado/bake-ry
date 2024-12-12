@@ -1,6 +1,5 @@
 const express = require('express');
-const BakeryController = require('../controllers/BakeryController');
-const BakeryService = require('../services/BakeryService');
+const bakeryController = require('../controllers/bakeryController');
 const {
   authenticateUser,
   requireSystemAdmin,
@@ -8,24 +7,13 @@ const {
 } = require('../middleware/userAccess');
 const hasBakeryAccess = require('../middleware/bakeryAccess');
 
+// Keep the parameter mapping middleware
 const mapBakeryIdToId = (req, res, next) => {
   if (req.params.bakeryId) {
     req.params.id = req.params.bakeryId;
   }
   next();
 };
-
-const bindController = (controller) => ({
-  create: controller.create.bind(controller),
-  getById: controller.getById.bind(controller),
-  getAll: controller.getAll.bind(controller),
-  update: controller.update.bind(controller),
-  patch: controller.patch.bind(controller),
-  delete: controller.delete.bind(controller),
-});
-
-const controller = new BakeryController(new BakeryService());
-const bakeryController = bindController(controller);
 
 const router = express.Router();
 

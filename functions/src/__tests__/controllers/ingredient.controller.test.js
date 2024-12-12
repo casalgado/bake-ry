@@ -1,5 +1,6 @@
 const IngredientService = require('../../services/IngredientService');
 const ingredientController = require('../../controllers/ingredientController');
+const { BadRequestError } = require('../../utils/errors');
 
 // Mock Firebase Admin SDK
 jest.mock('../../config/firebase', () => ({

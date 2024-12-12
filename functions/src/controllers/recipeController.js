@@ -29,9 +29,10 @@ const validateRecipeData = (recipeData) => {
 };
 
 const recipeService = new RecipeService();
+const baseController = createBaseController(recipeService, validateRecipeData);
 
 const recipeController = {
-  ...createBaseController(recipeService, validateRecipeData),
+  ...baseController,
 
   // Recipe-specific overrides would go here
   // For example, if we needed special version handling:
@@ -44,12 +45,12 @@ const recipeController = {
       if (!id) throw new BadRequestError('ID parameter is required');
       if (!updateData) throw new BadRequestError('Update data is required');
 
-      this.validateRequestData(updateData);
+      baseController.validateRequestData(updateData);
 
       const result = await recipeService.update(id, updateData, bakeryId, req.user);
-      this.handleResponse(res, result);
+      baseController.handleResponse(res, result);
     } catch (error) {
-      this.handleError(res, error);
+      baseController.handleError(res, error);
     }
   },
 };

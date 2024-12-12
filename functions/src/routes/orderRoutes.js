@@ -1,5 +1,5 @@
 const express = require('express');
-const orderController = require('../controllers/orderController');
+const orderController = require('../controllers/OrderController');
 const {
   authenticateUser,
   requireBakeryStaffOrAdmin,

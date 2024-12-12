@@ -1,22 +1,10 @@
 const express = require('express');
-const BakeryUserController = require('../controllers/BakeryUserController');
-const BakeryUserService = require('../services/BakeryUserService');
+const bakeryUserController = require('../controllers/BakeryUserController');
 const {
   authenticateUser,
   requireBakeryAdmin,
 } = require('../middleware/userAccess');
 const hasBakeryAccess = require('../middleware/bakeryAccess');
-
-const bindController = (controller) => ({
-  create: controller.create.bind(controller),
-  getById: controller.getById.bind(controller),
-  getAll: controller.getAll.bind(controller),
-  update: controller.update.bind(controller),
-  delete: controller.delete.bind(controller),
-});
-
-const controller = new BakeryUserController(new BakeryUserService());
-const bakeryUserController = bindController(controller);
 
 const router = express.Router({ mergeParams: true });
 

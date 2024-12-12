@@ -1,24 +1,10 @@
 const express = require('express');
-const BakerySettingsController = require('../controllers/bakerySettingsController');
-const bakerySettingsService = require('../services/BakerySettingsService');
+const bakerySettingsController = require('../controllers/BakerySettingsController');
 const {
   authenticateUser,
   requireBakeryStaffOrAdmin,
 } = require('../middleware/userAccess');
 const hasBakeryAccess = require('../middleware/bakeryAccess');
-
-const bindController = (controller) => ({
-  create: controller.create.bind(controller),
-  getById: controller.getById.bind(controller),
-  getAll: controller.getAll.bind(controller),
-  update: controller.update.bind(controller),
-  patch: controller.patch.bind(controller),
-  delete: controller.delete.bind(controller),
-  getStaffList: controller.getStaffList.bind(controller),
-});
-
-const controller = new BakerySettingsController(bakerySettingsService);
-const settingsController = bindController(controller);
 
 const router = express.Router({ mergeParams: true });
 
@@ -33,9 +19,10 @@ bakeryRouter.use(hasBakeryAccess);
 bakeryRouter.use(requireBakeryStaffOrAdmin);
 
 // CRUD routes
-bakeryRouter.get('/settings/:id', settingsController.getById);
-bakeryRouter.patch('/settings/:id', settingsController.patch);
-bakeryRouter.get('/settings/:id/staff', settingsController.getStaffList);
+bakeryRouter.get('/settings/:id', bakerySettingsController.getById);
+bakeryRouter.patch('/settings/:id', bakerySettingsController.patch);
+bakeryRouter.get('/settings/:id/staff', bakerySettingsController.getStaffList);
+
 // Mount the bakery router
 router.use('/:bakeryId', bakeryRouter);
 

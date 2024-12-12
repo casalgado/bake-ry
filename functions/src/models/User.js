@@ -26,9 +26,10 @@ class User extends BaseModel {
     this.password = password;
     this.role = role;
     this.bakeryId = bakeryId;
-    this.name = this.formatName(name, firstName, lastName);
+
     this.firstName = firstName;
     this.lastName = lastName;
+    this.name = this.formatName(name, firstName, lastName);
     this.address = address;
     this.birthday = birthday;
     this.category = category;
@@ -43,6 +44,7 @@ class User extends BaseModel {
   }
 
   formatName(name, firstName, lastName) {
+    console.log('formatName', name, firstName, lastName);
     if (firstName) {
       return `${firstName} ${lastName || ''}`.trim();
     }

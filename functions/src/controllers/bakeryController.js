@@ -1,23 +1,39 @@
-const BaseController = require('./base/BaseController');
-const { ForbiddenError, BadRequestError } = require('../utils/errors');
+const createBaseController = require('./base/controllerFactory');
+const BakeryService = require('../services/BakeryService');
+const { ForbiddenError } = require('../utils/errors');
 
-class BakeryController extends BaseController {
-  /**
-   * BakeryController constructor
-   * @param {BakeryService} bakeryService - Instance of BakeryService
-   */
-  constructor(bakeryService) {
-    if (!bakeryService) {
-      throw new Error('BakeryService is required');
-    }
-    super(bakeryService);
+const validateBakeryData = (data) => {
+  const errors = [];
+
+  if (!data.name) {
+    errors.push('Name is required');
   }
 
-  /**
-   * Create bakery - Override base create method to add bakery-specific logic
-   * @param {Request} req - Express request object
-   * @param {Response} res - Express response object
-   */
+  if (!data.address) {
+    errors.push('Address is required');
+  }
+
+  // Validate operating hours if provided
+  if (data.operatingHours) {
+    ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].forEach(day => {
+      const hours = data.operatingHours[day];
+      if (hours && hours.isOpen) {
+        if (!hours.open || !hours.close) {
+          errors.push(`${day} operating hours must include open and close times`);
+        }
+      }
+    });
+  }
+
+  return errors;
+};
+
+const bakeryService = new BakeryService();
+const baseController = createBaseController(bakeryService, validateBakeryData);
+
+const bakeryController = {
+  ...baseController,
+
   async create(req, res) {
     try {
       // Get user info from request (added by authentication middleware)
@@ -30,11 +46,7 @@ class BakeryController extends BaseController {
         );
       }
 
-      // Validate required fields in request body
-      const { name, address } = req.body;
-      if (!name || !address) {
-        throw new BadRequestError('Name and address are required');
-      }
+      baseController.validateRequestData(req.body);
 
       // Prepare bakery data with owner ID
       const bakeryData = {
@@ -45,16 +57,13 @@ class BakeryController extends BaseController {
       };
 
       // Create bakery using service
-      const result = await this.service.create(bakeryData);
-
-      // Use base controller's response handler
-      this.handleResponse(res, result, 201);
+      const result = await bakeryService.create(bakeryData);
+      baseController.handleResponse(res, result, 201);
     } catch (error) {
-      // Use base controller's error handler
-      this.handleError(res, error);
+      baseController.handleError(res, error);
     }
-  }
+  },
 
-}
+};
 
-module.exports = BakeryController;
+module.exports = bakeryController;

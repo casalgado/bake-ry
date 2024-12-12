@@ -1,58 +1,66 @@
-const BaseController = require('./base/BaseController');
+const createBaseController = require('./base/controllerFactory');
+const BakeryUserService = require('../services/BakeryUserService');
 const { BadRequestError } = require('../utils/errors');
 
-class BakeryUserController extends BaseController {
-  constructor(bakeryUserService) {
-    if (!bakeryUserService) {
-      throw new Error('BakeryUserService is required');
+const validateUserData = (data) => {
+  const errors = [];
+
+  if (!data.email) {
+    errors.push('Email is required');
+  } else {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email)) {
+      errors.push('Invalid email format');
     }
-    super(bakeryUserService);
   }
+
+  if (!data.role) {
+    errors.push('Role is required');
+  } else if (!['bakery_staff', 'bakery_customer', 'delivery_assistant', 'production_assistant'].includes(data.role)) {
+    errors.push('Invalid bakery user role');
+  }
+
+  return errors;
+};
+
+const bakeryUserService = new BakeryUserService();
+const baseController = createBaseController(bakeryUserService, validateUserData);
+
+const bakeryUserController = {
+  ...baseController,
 
   async create(req, res) {
     try {
       console.log('Creating bakery user', req.body);
       const { email, password, role, name, phone } = req.body;
-      console.log('Email:', email);
-      console.log('Role:', role);
-      console.log('Name:', name);
-      console.log('Password:', password);
-      console.log('Phone:', phone);
+      const { bakeryId } = req.params;
 
-      // Validate required fields
-      if (!email || !role) {
-        throw new BadRequestError('Email and role are required');
-      }
+      baseController.validateRequestData(req.body);
 
-      // Validate bakery user role
-      if (!['bakery_staff', 'bakery_customer', 'delivery_assistant', 'production_assistant'].includes(role)) {
-        throw new BadRequestError('Invalid bakery user role');
-      }
+      const result = await bakeryUserService.create({
+        email,
+        password,
+        role,
+        name,
+        phone,
+      }, bakeryId);
 
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        throw new BadRequestError('Invalid email format');
-      }
-
-      // Continue with base controller create
-      return super.create(req, res);
+      baseController.handleResponse(res, result, 201);
     } catch (error) {
-      this.handleError(res, error);
+      baseController.handleError(res, error);
     }
-  }
-
-  async getAll(req, res) {
-    return super.getAll(req, res);
-  }
+  },
 
   async update(req, res) {
     try {
       const { id, bakeryId } = req.params;
       const updateData = req.body;
 
+      if (!id) throw new BadRequestError('ID parameter is required');
+      if (!updateData) throw new BadRequestError('Update data is required');
+
       // Get current user data to verify it's a bakery user
-      const currentUser = await this.service.getById(id, bakeryId);
+      const currentUser = await bakeryUserService.getById(id, bakeryId);
       if (!['bakery_staff', 'bakery_customer'].includes(currentUser.role)) {
         throw new BadRequestError('Invalid bakery user role');
       }
@@ -63,31 +71,33 @@ class BakeryUserController extends BaseController {
       }
 
       // Validate email if it's being updated
-      if (updateData.email !== currentUser.email) {
+      if (updateData.email && updateData.email !== currentUser.email) {
         throw new BadRequestError('Email cannot be updated');
       }
 
-      return super.update(req, res);
+      const result = await bakeryUserService.update(id, updateData, bakeryId);
+      baseController.handleResponse(res, result);
     } catch (error) {
-      this.handleError(res, error);
+      baseController.handleError(res, error);
     }
-  }
+  },
 
   async delete(req, res) {
     try {
       const { id, bakeryId } = req.params;
 
       // Verify user is a bakery user before deletion
-      const user = await this.service.getById(id, bakeryId);
+      const user = await bakeryUserService.getById(id, bakeryId);
       if (!['bakery_staff', 'bakery_customer'].includes(user.role)) {
         throw new BadRequestError('Invalid bakery user role');
       }
 
-      return super.delete(req, res);
+      await bakeryUserService.delete(id, bakeryId);
+      baseController.handleResponse(res, null, 204);
     } catch (error) {
-      this.handleError(res, error);
+      baseController.handleError(res, error);
     }
-  }
-}
+  },
+};
 
-module.exports = BakeryUserController;
+module.exports = bakeryUserController;

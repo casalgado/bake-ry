@@ -31,9 +31,10 @@ const validateIngredientData = (data) => {
 };
 
 const ingredientService = new IngredientService();
+const baseController = createBaseController(ingredientService, validateIngredientData);
 
 const ingredientController = {
-  ...createBaseController(ingredientService, validateIngredientData),
+  ...baseController,
 
   // Ingredient-specific overrides would go here
   async update(req, res) {
@@ -45,13 +46,13 @@ const ingredientController = {
       if (!id) throw new BadRequestError('ID parameter is required');
       if (!updateData) throw new BadRequestError('Update data is required');
 
-      this.validateRequestData(updateData);
+      baseController.validateRequestData(updateData);
 
       // Special handling for ingredients used in recipes
       const result = await ingredientService.update(id, updateData, bakeryId);
-      this.handleResponse(res, result);
+      baseController.handleResponse(res, result);
     } catch (error) {
-      this.handleError(res, error);
+      baseController.handleError(res, error);
     }
   },
 
@@ -62,9 +63,9 @@ const ingredientController = {
 
       // Special handling to prevent deletion if ingredient is used in recipes
       const result = await ingredientService.delete(id, bakeryId, req.user);
-      this.handleResponse(res, result, 204);
+      baseController.handleResponse(res, result, 204);
     } catch (error) {
-      this.handleError(res, error);
+      baseController.handleError(res, error);
     }
   },
 };

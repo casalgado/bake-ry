@@ -82,4 +82,4 @@ class BakerySettingsService extends BaseService {
 
 }
 
-module.exports = new BakerySettingsService();
+module.exports = BakerySettingsService;

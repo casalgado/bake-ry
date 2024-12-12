@@ -12,6 +12,9 @@ const hasBakeryAccess = async (req, res, next) => {
       return next();
     }
 
+    console.log('user', user);
+    console.log('bakeryId', bakeryId);
+
     // For other roles, check if they belong to the bakery
     if (user.bakeryId !== bakeryId) {
       console.log('User does not have access to this bakery');

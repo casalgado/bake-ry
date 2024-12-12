@@ -8,9 +8,10 @@ const validateOrderData = (data) => {
 };
 
 const orderService = new OrderService();
+const baseController = createBaseController(orderService, validateOrderData);
 
 const orderController = {
-  ...createBaseController(orderService, validateOrderData),
+  ...baseController,
 
   // Custom method override
   async patchAll(req, res) {
@@ -24,9 +25,9 @@ const orderController = {
         req.user,
       );
 
-      this.handleResponse(res, results);
+      baseController.handleResponse(res, results);
     } catch (error) {
-      this.handleError(res, error);
+      baseController.handleError(res, error);
     }
   },
 };
