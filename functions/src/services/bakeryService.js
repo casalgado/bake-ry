@@ -2,16 +2,12 @@
 const { db, admin } = require('../config/firebase');
 const Bakery = require('../models/Bakery');
 const { BakerySettings } = require('../models/BakerySettings');
-const BaseService = require('./base/BaseService');
+const createBaseService = require('./base/serviceFactory');
 
-class BakeryService extends BaseService {
-  constructor() {
-    // Bakeries is a top-level collection, so no parentPath needed
-    super('bakeries', Bakery);
-  }
+const createBakeryService = () => {
+  const baseService = createBaseService('bakeries', Bakery);
 
-  // Override create method to handle the special case with user claims
-  async create(bakeryData) {
+  const create = async (bakeryData) => {
     try {
       // Get the uid from bakeryData since it's passed from the controller
       const { ownerId: uid } = bakeryData;
@@ -19,10 +15,10 @@ class BakeryService extends BaseService {
       // Start a transaction to ensure atomicity
       const result = await db.runTransaction(async (transaction) => {
         // Create new bakery with generated ID
-        const bakeryRef = this.getCollectionRef().doc();
+        const bakeryRef = baseService.getCollectionRef().doc();
         const bakeryId = bakeryRef.id;
 
-        const newBakery = new this.ModelClass(bakeryData);
+        const newBakery = new Bakery(bakeryData);
 
         // Create default settings
         const settingsRef = bakeryRef.collection('settings').doc('default');
@@ -62,24 +58,13 @@ class BakeryService extends BaseService {
       console.error('Error in bakery create:', error);
       throw error;
     }
-  }
+  };
 
-  // Use parent class methods for basic operations
-  async getById(id) {
-    return super.getById(id);
-  }
+  return {
+    ...baseService,
+    create,
+  };
+};
 
-  async getAll() {
-    return super.getAll();
-  }
-
-  async update(id, bakeryData) {
-    return super.update(id, bakeryData);
-  }
-
-  async delete(id) {
-    return super.delete(id);
-  }
-}
-
-module.exports = BakeryService;
+// Export a singleton instance
+module.exports = createBakeryService();

@@ -1,28 +1,23 @@
+// services/authService.js
 const { admin } = require('../config/firebase');
-const BaseService = require('./base/BaseService');
+const createBaseService = require('./base/serviceFactory');
 const User = require('../models/User');
-const AdminUserService = require('./AdminUserService');
-const {  NotFoundError, AuthenticationError } = require('../utils/errors');
+const adminUserService = require('./adminUserService');
+const { NotFoundError, AuthenticationError } = require('../utils/errors');
 
-class AuthService extends BaseService {
-  constructor() {
-    // Pass users collection and User model to BaseService
-    super('users', User);
-    this.adminUserService = new AdminUserService();
-  }
+const createAuthService = () => {
+  // Initialize base service
+  const baseService = createBaseService('users', User);
 
-  /**
-   * Register a new user
-   * @param {Object} userData - User registration data
-   * @returns {Promise<Object>} Created user data
-   */
-  async register(userData) {
+  // Custom methods
+  const register = async (userData) => {
     let userRecord = null;
 
     try {
       // If role is bakery_admin, delegate to AdminUserService
       if (userData.role === 'bakery_admin') {
-        return await this.adminUserService.create(userData);
+
+        return await adminUserService.create(userData);
       }
       return null;
     } catch (error) {
@@ -34,24 +29,17 @@ class AuthService extends BaseService {
           console.error('Error cleaning up Auth user:', cleanupError);
         }
       }
-
       throw error;
     }
-  }
+  };
 
-  /**
-   * Login user
-   * @param {string} idToken - Firebase ID token
-   * @param {string} email - User email
-   * @returns {Promise<Object>} User data
-   */
-  async login(idToken, email) {
+  const login = async (idToken, email) => {
     try {
       // 1. Verify token
       const decodedToken = await admin.auth().verifyIdToken(idToken);
 
       // 2. Get user document
-      const userSnapshot = await this.getCollectionRef()
+      const userSnapshot = await baseService.getCollectionRef()
         .where('email', '==', email)
         .limit(1)
         .get();
@@ -83,14 +71,9 @@ class AuthService extends BaseService {
       }
       throw error;
     }
-  }
+  };
 
-  /**
-   * Verify Firebase ID token
-   * @param {string} idToken - Firebase ID token
-   * @returns {Promise<Object>} Decoded token
-   */
-  async verifyToken(idToken) {
+  const verifyToken = async (idToken) => {
     try {
       return await admin.auth().verifyIdToken(idToken);
     } catch (error) {
@@ -98,9 +81,16 @@ class AuthService extends BaseService {
         throw new AuthenticationError('Invalid token');
       }
     }
-  }
+  };
 
-}
+  // Return the service object combining base service and custom methods
+  return {
+    ...baseService,
+    register,
+    login,
+    verifyToken,
+  };
+};
 
-// Export a single instance
-module.exports = AuthService;
+// Export a singleton instance
+module.exports = createAuthService();

@@ -27,3 +27,33 @@ module.exports = {
   auth,
   timestamp,
 };
+
+/* PRODUCTION CONFIG
+const admin = require('firebase-admin');
+
+const BAKERY_ID = 'bakery-betos-001';
+const ADMIN_USER_ID = 'admin-betos-001';
+
+const serviceAccount = require('./../config/serviceAccountKey.json');
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'https://bake-ry.firebaseio.com',
+// If you're using other Firebase services, include their configs here
+// For example: databaseURL: "https://your-database-name.firebaseio.com"
+});
+
+const db = admin.firestore();
+const auth = admin.auth();
+
+const timestamp = () => admin.firestore.Timestamp.now();
+
+module.exports = {
+  BAKERY_ID,
+  ADMIN_USER_ID,
+  db,
+  auth,
+  timestamp,
+};
+
+*/

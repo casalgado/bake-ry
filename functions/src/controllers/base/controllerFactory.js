@@ -119,12 +119,12 @@ const createBaseController = (service, validateData = null) => {
       }
     },
 
-    async delete(req, res) {
+    async remove(req, res) {
       try {
         const { id, bakeryId } = req.params;
         if (!id) throw new BadRequestError('ID parameter is required');
 
-        await service.delete(id, bakeryId, req.user);
+        await service.remove(id, bakeryId, req.user);
         handleResponse(res, null, 204);
       } catch (error) {
         handleError(res, error);

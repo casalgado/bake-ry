@@ -1,3 +1,4 @@
+// routes/bakeryRoutes.js
 const express = require('express');
 const bakeryController = require('../controllers/bakeryController');
 const {
@@ -7,7 +8,6 @@ const {
 } = require('../middleware/userAccess');
 const hasBakeryAccess = require('../middleware/bakeryAccess');
 
-// Keep the parameter mapping middleware
 const mapBakeryIdToId = (req, res, next) => {
   if (req.params.bakeryId) {
     req.params.id = req.params.bakeryId;
@@ -22,7 +22,7 @@ router.use(authenticateUser);
 
 // System admin routes
 router.get('/', requireSystemAdmin, mapBakeryIdToId, bakeryController.getAll);
-router.delete('/:bakeryId', requireSystemAdmin, mapBakeryIdToId, bakeryController.delete);
+router.delete('/:bakeryId', requireSystemAdmin, mapBakeryIdToId, bakeryController.remove);
 
 // Bakery admin routes
 router.post('/', requireBakeryAdmin, mapBakeryIdToId, bakeryController.create);

@@ -1,7 +1,5 @@
-const AuthService = require('../services/AuthService');
+const authService = require('../services/authService');
 const { ForbiddenError } = require('../utils/errors');
-
-const authService = new AuthService();
 
 const authenticateUser = async (req, res, next) => {
   try {

@@ -1,5 +1,6 @@
+// controllers/bakeryController.js
 const createBaseController = require('./base/controllerFactory');
-const BakeryService = require('../services/BakeryService');
+const bakeryService = require('../services/bakeryService');
 const { ForbiddenError } = require('../utils/errors');
 
 const validateBakeryData = (data) => {
@@ -28,7 +29,6 @@ const validateBakeryData = (data) => {
   return errors;
 };
 
-const bakeryService = new BakeryService();
 const baseController = createBaseController(bakeryService, validateBakeryData);
 
 const bakeryController = {
@@ -63,7 +63,6 @@ const bakeryController = {
       baseController.handleError(res, error);
     }
   },
-
 };
 
 module.exports = bakeryController;

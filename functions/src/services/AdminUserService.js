@@ -1,26 +1,20 @@
-const BaseService = require('./base/BaseService');
-const User = require('../models/User');
+// services/adminUserService.js
 const { admin, db } = require('../config/firebase');
-const { BadRequestError } = require('../utils/errors');
+const User = require('../models/User');
+const createBaseService = require('./base/serviceFactory');
+const { NotFoundError, BadRequestError } = require('../utils/errors');
 
-class AdminUserService extends BaseService {
-  constructor() {
-    super('users', User);
-  }
+const createAdminUserService = () => {
+  const baseService = createBaseService('users', User);
 
-  /**
-   * Create an admin user
-   * @param {Object} userData - User data
-   * @returns {Promise<Object>} Created user data
-   */
-  async create(userData) {
+  const create = async (userData) => {
     let userRecord = null;
 
     try {
       const newUser = new User(userData);
 
       // Check for existing user with same email
-      const existingUser = await this.getCollectionRef()
+      const existingUser = await baseService.getCollectionRef()
         .where('email', '==', newUser.email)
         .get();
 
@@ -44,7 +38,7 @@ class AdminUserService extends BaseService {
         await admin.auth().setCustomUserClaims(userRecord.uid, customClaims);
 
         // 3. Create Firestore document
-        const userRef = this.getCollectionRef().doc(userRecord.uid);
+        const userRef = baseService.getCollectionRef().doc(userRecord.uid);
         const userToSave = {
           ...newUser.toFirestore(),
           id: userRecord.uid,
@@ -72,49 +66,64 @@ class AdminUserService extends BaseService {
           console.error('Error cleaning up Auth user:', cleanupError);
         }
       }
-
       throw error;
     }
-  }
-  /**
-   * Get all admin users
-   * @param {Object} filters - Query filters
-   * @returns {Promise<Array>} List of admin users
-   */
-  async getAll(filters = {}) {
-    return super.getAll(null, filters);
-  }
+  };
 
-  /**
-   * Get admin user by ID
-   * @param {string} id - User ID
-   * @returns {Promise<Object>} User data
-   */
-  async getById(id) {
-    return super.getById(id);
-  }
+  const update = async (id, updateData, parentId = null) => {
+    try {
+      const docRef = baseService.getCollectionRef().doc(id);
 
-  /**
-   * Update admin user
-   * @param {string} id - User ID
-   * @param {Object} updateData - Data to update
-   * @returns {Promise<Object>} Updated user data
-   */
-  async update(id, updateData) {
-    return super.update(id, updateData);
-  }
+      return await db.runTransaction(async (transaction) => {
+        const doc = await transaction.get(docRef);
 
-  /**
-   * Delete admin user
-   * @param {string} id - User ID
-   */
-  async delete(id) {
-    // Delete from Firebase Auth
-    await admin.auth().deleteUser(id);
+        if (!doc.exists) {
+          throw new NotFoundError('User not found');
+        }
 
-    // Delete from Firestore
-    await super.delete(id);
-  }
-}
+        if (updateData.email) {
+          await admin.auth().updateUser(id, { email: updateData.email });
+        }
 
-module.exports = AdminUserService;
+        const currentUser = User.fromFirestore(doc);
+        const updatedUser = new User({
+          ...currentUser,
+          ...updateData,
+          id,
+          updatedAt: new Date(),
+        });
+
+        const changes = baseService.diffObjects(currentUser, updatedUser);
+        await baseService.recordHistory(transaction, docRef, changes, currentUser);
+
+        transaction.update(docRef, updatedUser.toFirestore());
+        return updatedUser;
+      });
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
+  };
+
+  const remove = async (id) => {
+    try {
+      // Delete from Firebase Auth
+      await admin.auth().deleteUser(id);
+      // Delete from Firestore using base service
+      return await baseService.remove(id);
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      throw error;
+    }
+  };
+
+  return {
+    ...baseService,
+    create,
+    update,
+    remove,
+  };
+};
+
+// Export a singleton instance
+module.exports = createAdminUserService();

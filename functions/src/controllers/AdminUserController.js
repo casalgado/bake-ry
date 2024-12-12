@@ -1,5 +1,5 @@
 const createBaseController = require('./base/controllerFactory');
-const AdminUserService = require('../services/AdminUserService');
+const adminUserService = require('../services/adminUserService');
 const { BadRequestError } = require('../utils/errors');
 
 const validateAdminData = (data) => {
@@ -34,7 +34,6 @@ const validateAdminData = (data) => {
   return errors;
 };
 
-const adminUserService = new AdminUserService();
 const baseController = createBaseController(adminUserService, validateAdminData);
 
 const adminController = {

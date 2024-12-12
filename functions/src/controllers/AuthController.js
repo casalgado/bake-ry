@@ -1,5 +1,6 @@
+// controllers/authController.js
 const createBaseController = require('./base/controllerFactory');
-const AuthService = require('../services/AuthService');
+const authService = require('../services/authService');
 const { BadRequestError } = require('../utils/errors');
 
 const validateRegistrationData = (data) => {
@@ -33,7 +34,6 @@ const validateRegistrationData = (data) => {
   return errors;
 };
 
-const authService = new AuthService();
 const baseController = createBaseController(authService, validateRegistrationData);
 
 const authController = {
@@ -64,7 +64,6 @@ const authController = {
 
   async login(req, res) {
     try {
-      // Get the ID token from the Authorization header
       const authHeader = req.headers.authorization;
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
         throw new BadRequestError('No token provided');
