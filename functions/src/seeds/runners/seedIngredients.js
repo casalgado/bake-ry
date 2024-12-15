@@ -1,11 +1,9 @@
 const { BAKERY_ID } = require('../seedConfig');
 const ingredients = require('../data/ingredients');
-const IngredientService = require('../../services/ingredientService');
+const ingredientService = require('../../services/ingredientService');
 const Ingredient = require('../../models/Ingredient');
 const fs = require('fs');
 const path = require('path');
-
-const ingredientService = new IngredientService();
 
 async function seedIngredients() {
   try {

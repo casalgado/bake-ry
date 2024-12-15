@@ -1,11 +1,9 @@
 const { BAKERY_ID } = require('../seedConfig');
 const generateProducts = require('../data/products');
-const ProductService = require('../../services/ProductService');
+const productService = require('../../services/productService');
 const { Product } = require('../../models/Product');
 const fs = require('fs');
 const path = require('path');
-
-const productService = new ProductService();
 
 async function seedProducts() {
   try {

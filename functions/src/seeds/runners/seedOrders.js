@@ -1,9 +1,7 @@
 const { BAKERY_ID } = require('../seedConfig');
 const fs = require('fs');
 const path = require('path');
-const OrderService = require('../../services/OrderService');
-
-const orderService = new OrderService();
+const orderService = require('../../services/orderService');
 
 // Load seeded data
 const seededProducts = require('../data/seededProducts.json');
