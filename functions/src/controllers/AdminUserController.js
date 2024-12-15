@@ -89,7 +89,7 @@ const adminController = {
     }
   },
 
-  async delete(req, res) {
+  async remove(req, res) {
     try {
       const { id } = req.params;
       if (!id) throw new BadRequestError('User ID is required');
@@ -100,7 +100,7 @@ const adminController = {
         throw new BadRequestError('User is not an admin');
       }
 
-      await adminUserService.delete(id);
+      await adminUserService.remove(id);
       baseController.handleResponse(res, null, 204);
     } catch (error) {
       baseController.handleError(res, error);

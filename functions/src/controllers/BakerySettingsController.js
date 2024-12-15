@@ -1,5 +1,5 @@
 const createBaseController = require('./base/controllerFactory');
-const BakerySettingsService = require('../services/BakerySettingsService');
+const bakerySettingsService = require('../services/bakerySettingsService');
 const { BadRequestError } = require('../utils/errors');
 
 const validateSettingsData = (data) => {
@@ -8,7 +8,6 @@ const validateSettingsData = (data) => {
   return errors;
 };
 
-const bakerySettingsService = new BakerySettingsService();
 const baseController = createBaseController(bakerySettingsService, validateSettingsData);
 
 const bakerySettingsController = {

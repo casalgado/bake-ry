@@ -3,11 +3,9 @@ const bakery = require('../data/bakery');
 const settings = require('../data/settings');
 const { BakerySettings } = require('../../models/BakerySettings');
 const productCollections = require('../data/productCollections');
-const ProductCollectionService = require('../../services/ProductCollectionService');
+const productCollectionService = require('../../services/productCollectionService');
 const fs = require('fs');
 const path = require('path');
-
-const productCollectionService = new ProductCollectionService();
 
 async function seedBakery() {
   try {

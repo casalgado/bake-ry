@@ -64,7 +64,7 @@ class IngredientService extends BaseService {
     }
   }
 
-  async delete(ingredientId, bakeryId) {
+  async remove(ingredientId, bakeryId) {
     try {
       // First check if the ingredient is used in any recipes
       const recipesRef = db
@@ -80,7 +80,7 @@ class IngredientService extends BaseService {
         throw new Error('Cannot delete ingredient that is used in recipes');
       }
 
-      return super.delete(ingredientId, bakeryId);
+      return super.remove(ingredientId, bakeryId);
     } catch (error) {
       console.error('Error in deleteIngredient:', error);
       throw error;

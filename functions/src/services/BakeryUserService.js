@@ -1,33 +1,24 @@
-const BaseService = require('./base/BaseService');
-const User = require('../models/User');
+// services/bakeryUserService.js
 const { admin, db } = require('../config/firebase');
+const User = require('../models/User');
+const createBaseService = require('./base/serviceFactory');
 const { BadRequestError, NotFoundError } = require('../utils/errors');
 
-class BakeryUserService extends BaseService {
-  constructor() {
-    // Note the nested collection path pattern
-    super('users', User, 'bakeries/{bakeryId}');
-  }
+const createBakeryUserService = () => {
+  const baseService = createBaseService('users', User, 'bakeries/{bakeryId}');
 
-  /**
-   * Create a bakery user
-   * @param {Object} userData - User data
-   * @param {string} bakeryId - Bakery ID
-   * @returns {Promise<Object>} Created user data
-   */
-  async create(userData, bakeryId) {
+  const create = async (userData, bakeryId) => {
     let userRecord = null;
 
     try {
       userData.password = 'password';
-      console.log('userData', userData);
       const newUser = new User({
         ...userData,
         bakeryId,
       });
 
       // Check for existing user in this bakery
-      const existingUser = await this.getCollectionRef(bakeryId)
+      const existingUser = await baseService.getCollectionRef(bakeryId)
         .where('email', '==', newUser.email)
         .get();
 
@@ -51,7 +42,7 @@ class BakeryUserService extends BaseService {
         await admin.auth().setCustomUserClaims(userRecord.uid, customClaims);
 
         // 3. Create Firestore document
-        const userRef = this.getCollectionRef(bakeryId).doc(userRecord.uid);
+        const userRef = baseService.getCollectionRef(bakeryId).doc(userRecord.uid);
         const userToSave = {
           ...newUser.toFirestore(),
           id: userRecord.uid,
@@ -59,8 +50,16 @@ class BakeryUserService extends BaseService {
         delete userToSave.password;
 
         // 4. Add user to bakery's assistant list if they are an assistant
-        if (newUser.role === 'delivery_assistant' || newUser.role === 'production_assistant' || newUser.role === 'bakery_staff') {
-          const assistantsRef = db.collection('bakeries').doc(bakeryId).collection('settings').doc('default').collection('staff');
+        if (newUser.role === 'delivery_assistant' ||
+            newUser.role === 'production_assistant' ||
+            newUser.role === 'bakery_staff') {
+          const assistantsRef = db
+            .collection('bakeries')
+            .doc(bakeryId)
+            .collection('settings')
+            .doc('default')
+            .collection('staff');
+
           assistantsRef.doc(userRecord.uid).set({
             name: newUser.name,
             first_name: newUser.name.split(' ')[0],
@@ -70,12 +69,12 @@ class BakeryUserService extends BaseService {
         }
 
         transaction.set(userRef, userToSave);
-
         return userToSave;
       });
 
       return result;
     } catch (error) {
+      // Cleanup if Firebase Auth user was created but transaction failed
       if (userRecord) {
         try {
           await admin.auth().deleteUser(userRecord.uid);
@@ -85,34 +84,25 @@ class BakeryUserService extends BaseService {
       }
       throw error;
     }
-  }
+  };
 
-  async getAll(bakeryId, filters = {}, options = {}) {
-    return super.getAll(bakeryId, filters, options);
-  }
-
-  async getById(id, bakeryId) {
-    return super.getById(id, bakeryId);
-  }
-
-  async update(id, data, bakeryId, editor = null) {
+  const update = async (id, data, bakeryId, editor = null) => {
     try {
-      const docRef = this.getCollectionRef(bakeryId).doc(id);
+      const docRef = baseService.getCollectionRef(bakeryId).doc(id);
 
       return await db.runTransaction(async (transaction) => {
-
         const doc = await transaction.get(docRef);
 
         if (!doc.exists) {
-          throw new NotFoundError(`${this.collectionName} not found`);
+          throw new NotFoundError('User not found');
         }
 
         if (data.email) {
           await admin.auth().updateUser(id, { email: data.email });
         }
 
-        const currentUser = this.ModelClass.fromFirestore(doc);
-        const updatedUser = new this.ModelClass({
+        const currentUser = User.fromFirestore(doc);
+        const updatedUser = new User({
           ...currentUser,
           ...data,
           id,
@@ -154,8 +144,8 @@ class BakeryUserService extends BaseService {
         }
 
         // Record changes in history
-        const changes = this.diffObjects(currentUser, updatedUser);
-        await this.recordHistory(transaction, docRef, changes, currentUser, editor);
+        const changes = baseService.diffObjects(currentUser, updatedUser);
+        await baseService.recordHistory(transaction, docRef, changes, currentUser, editor);
 
         // Update main document
         transaction.update(docRef, updatedUser.toFirestore());
@@ -163,18 +153,30 @@ class BakeryUserService extends BaseService {
         return updatedUser;
       });
     } catch (error) {
-      console.error(`Error updating ${this.collectionName}:`, error);
+      console.error('Error updating user:', error);
       throw error;
     }
-  }
+  };
 
-  async delete(id, bakeryId) {
-    // Delete from Firebase Auth
-    await admin.auth().deleteUser(id);
+  const remove = async (id, bakeryId) => {
+    try {
+      // Delete from Firebase Auth
+      await admin.auth().deleteUser(id);
+      // Delete from Firestore using base service
+      return await baseService.remove(id, bakeryId);
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      throw error;
+    }
+  };
 
-    // Delete from Firestore
-    await super.delete(id, bakeryId);
-  }
-}
+  return {
+    ...baseService,
+    create,
+    update,
+    delete: remove,
+  };
+};
 
-module.exports = BakeryUserService;
+// Export a singleton instance
+module.exports = createBakeryUserService();

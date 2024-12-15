@@ -1,5 +1,5 @@
 const createBaseController = require('./base/controllerFactory');
-const ProductCollectionService = require('../services/ProductCollectionService');
+const productCollectionService = require('../services/productCollectionService');
 
 const validateCollectionData = (data) => {
   const errors = [];
@@ -7,7 +7,6 @@ const validateCollectionData = (data) => {
   return errors;
 };
 
-const productCollectionService = new ProductCollectionService();
 const baseController = createBaseController(productCollectionService, validateCollectionData);
 
 const productCollectionController = {

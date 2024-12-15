@@ -18,6 +18,6 @@ router.post('/admin-users', adminController.create);
 router.get('/admin-users', adminController.getAll);
 router.get('/admin-users/:id', adminController.getById);
 router.put('/admin-users/:id', adminController.update);
-router.delete('/admin-users/:id', adminController.delete);
+router.delete('/admin-users/:id', adminController.remove);
 
 module.exports = router;

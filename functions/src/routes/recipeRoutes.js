@@ -24,7 +24,7 @@ bakeryRouter.get('/recipes', recipeController.getAll);
 bakeryRouter.get('/recipes/:id', recipeController.getById);
 bakeryRouter.patch('/recipes/:id', recipeController.patch);
 bakeryRouter.put('/recipes/:id', recipeController.update);
-bakeryRouter.delete('/recipes/:id', recipeController.delete);
+bakeryRouter.delete('/recipes/:id', recipeController.remove);
 
 // Mount the bakery router
 router.use('/:bakeryId', bakeryRouter);

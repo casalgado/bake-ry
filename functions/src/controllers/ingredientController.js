@@ -56,13 +56,13 @@ const ingredientController = {
     }
   },
 
-  async delete(req, res) {
+  async remove(req, res) {
     try {
       const { id, bakeryId } = req.params;
       if (!id) throw new BadRequestError('ID parameter is required');
 
       // Special handling to prevent deletion if ingredient is used in recipes
-      const result = await ingredientService.delete(id, bakeryId, req.user);
+      const result = await ingredientService.remove(id, bakeryId, req.user);
       baseController.handleResponse(res, result, 204);
     } catch (error) {
       baseController.handleError(res, error);

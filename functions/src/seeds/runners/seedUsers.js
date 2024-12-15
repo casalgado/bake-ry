@@ -1,8 +1,6 @@
 const { BAKERY_ID } = require('../seedConfig');
-const BakeryUserService = require('../../services/BakeryUserService');
+const bakeryUserService = require('../../services/bakeryUserService');
 const clients = require('./../data/clientes.json');
-
-const bakeryUserService = new BakeryUserService();
 
 // Sample user data
 const customers = Object.values(clients).filter(e => {

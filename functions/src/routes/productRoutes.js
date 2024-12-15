@@ -19,7 +19,7 @@ bakeryRouter.get('/products/:id', productController.getById);
 // Staff/Admin only routes
 bakeryRouter.post('/products', requireBakeryStaffOrAdmin, productController.create);
 bakeryRouter.put('/products/:id', requireBakeryStaffOrAdmin, productController.update);
-bakeryRouter.delete('/products/:id', requireBakeryStaffOrAdmin, productController.delete);
+bakeryRouter.delete('/products/:id', requireBakeryStaffOrAdmin, productController.remove);
 
 router.use('/:bakeryId', bakeryRouter);
 

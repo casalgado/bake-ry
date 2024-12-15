@@ -1,5 +1,5 @@
 const createBaseController = require('./base/controllerFactory');
-const BakeryUserService = require('../services/BakeryUserService');
+const bakeryUserService = require('../services/bakeryUserService');
 const { BadRequestError } = require('../utils/errors');
 
 const validateUserData = (data) => {
@@ -23,7 +23,6 @@ const validateUserData = (data) => {
   return errors;
 };
 
-const bakeryUserService = new BakeryUserService();
 const baseController = createBaseController(bakeryUserService, validateUserData);
 
 const bakeryUserController = {
@@ -82,7 +81,7 @@ const bakeryUserController = {
     }
   },
 
-  async delete(req, res) {
+  async remove(req, res) {
     try {
       const { id, bakeryId } = req.params;
 
@@ -92,7 +91,7 @@ const bakeryUserController = {
         throw new BadRequestError('Invalid bakery user role');
       }
 
-      await bakeryUserService.delete(id, bakeryId);
+      await bakeryUserService.remove(id, bakeryId);
       baseController.handleResponse(res, null, 204);
     } catch (error) {
       baseController.handleError(res, error);

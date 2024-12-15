@@ -24,7 +24,7 @@ bakeryRouter.get('/productCollections', productCollectionController.getAll);
 bakeryRouter.get('/productCollections/:id', productCollectionController.getById);
 bakeryRouter.patch('/productCollections/:id', productCollectionController.patch);
 bakeryRouter.put('/productCollections/:id', productCollectionController.update);
-bakeryRouter.delete('/productCollections/:id', productCollectionController.delete);
+bakeryRouter.delete('/productCollections/:id', productCollectionController.remove);
 
 // Mount the bakery router
 router.use('/:bakeryId', bakeryRouter);

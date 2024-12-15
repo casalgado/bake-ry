@@ -1,16 +1,14 @@
-const BaseService = require('./base/BaseService');
+// services/bakerySettingsService.js
+const createBaseService = require('./base/serviceFactory');
 const { BakerySettings, ProductCategory } = require('../models/BakerySettings');
 const { NotFoundError } = require('../utils/errors');
 
-class BakerySettingsService extends BaseService {
-  constructor() {
-    super('settings', BakerySettings, 'bakeries/{bakeryId}');
-  }
+const createBakerySettingsService = () => {
+  const baseService = createBaseService('settings', BakerySettings, 'bakeries/{bakeryId}');
 
-  async getById(id, bakeryId) {
-    console.log('bakeryId', bakeryId);
+  const getById = async (id, bakeryId) => {
     try {
-      const doc = await this.getCollectionRef(bakeryId).doc('default').get();
+      const doc = await baseService.getCollectionRef(bakeryId).doc('default').get();
 
       if (!doc.exists) {
         throw new NotFoundError('Settings not found');
@@ -21,11 +19,11 @@ class BakerySettingsService extends BaseService {
       console.error('Error getting settings:', error);
       throw error;
     }
-  }
+  };
 
-  async patch(id, data, bakeryId) {
+  const patch = async (id, data, bakeryId) => {
     try {
-      const docRef = this.getCollectionRef(bakeryId).doc('default');
+      const docRef = baseService.getCollectionRef(bakeryId).doc('default');
       const doc = await docRef.get();
 
       if (!doc.exists) {
@@ -36,30 +34,33 @@ class BakerySettingsService extends BaseService {
 
       // If we have product categories to update, process them
       if (data.productCategories) {
-        data.productCategories = this.updateProductCategories(
+        data.productCategories = updateProductCategories(
           currentSettings.productCategories || [],
           data.productCategories,
         );
       }
 
-      return super.patch('default', data, bakeryId);
+      return baseService.patch('default', data, bakeryId);
     } catch (error) {
       console.error('Error patching settings:', error);
       throw error;
     }
-  }
+  };
 
-  async getStaffList(bakeryId) {
+  const getStaffList = async (bakeryId) => {
     try {
-      const staff = await this.getCollectionRef(bakeryId).doc('default').collection('staff').get();
+      const staff = await baseService.getCollectionRef(bakeryId)
+        .doc('default')
+        .collection('staff')
+        .get();
       return staff.docs.map(doc => doc.data());
     } catch (error) {
       console.error('Error getting staff list:', error);
       throw error;
     }
-  }
+  };
 
-  updateProductCategories(existingCategories, incomingCategory) {
+  const updateProductCategories = (existingCategories, incomingCategory) => {
     const categoryIndex = existingCategories.findIndex(
       cat => cat.id === incomingCategory.id,
     );
@@ -78,8 +79,15 @@ class BakerySettingsService extends BaseService {
     }
 
     return updatedCategories;
-  }
+  };
 
-}
+  return {
+    ...baseService,
+    getById,
+    patch,
+    getStaffList,
+  };
+};
 
-module.exports = BakerySettingsService;
+// Export a singleton instance
+module.exports = createBakerySettingsService();

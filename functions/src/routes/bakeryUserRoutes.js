@@ -23,7 +23,7 @@ bakeryRouter.post('/users', bakeryUserController.create);
 bakeryRouter.get('/users', bakeryUserController.getAll);
 bakeryRouter.get('/users/:id', bakeryUserController.getById);
 bakeryRouter.put('/users/:id', bakeryUserController.update);
-bakeryRouter.delete('/users/:id', bakeryUserController.delete);
+bakeryRouter.delete('/users/:id', bakeryUserController.remove);
 
 // Mount the bakery router
 router.use('/:bakeryId', bakeryRouter);

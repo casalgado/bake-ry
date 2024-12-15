@@ -177,7 +177,7 @@ class BaseController {
   /**
    * Delete resource
    */
-  async delete(req, res) {
+  async remove(req, res) {
     try {
       const { id, bakeryId } = req.params;
 
@@ -185,7 +185,7 @@ class BaseController {
         throw new BadRequestError('ID parameter is required');
       }
 
-      const result = await this.service.delete(id, bakeryId, req.user);
+      const result = await this.service.remove(id, bakeryId, req.user);
       this.handleResponse(res, result);
     } catch (error) {
       this.handleError(res, error);
