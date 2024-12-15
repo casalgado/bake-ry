@@ -1,25 +1,17 @@
-const BaseService = require('./base/BaseService');
+// services/orderService.js
 const { Order } = require('../models/Order');
+const createBaseService = require('./base/serviceFactory');
 const { db } = require('../config/firebase');
 const { NotFoundError, BadRequestError } = require('../utils/errors');
 
-class OrderService extends BaseService {
-  constructor() {
-    super('orders', Order, 'bakeries/{bakeryId}');
-  }
+const createOrderService = () => {
+  const baseService = createBaseService('orders', Order, 'bakeries/{bakeryId}');
 
-  /**
-   * Create order and add to user's order history
-   * if client address is flagged, changes it in client record
-   * @param {Object} orderData - Order data
-   * @param {string} bakeryId - Bakery ID
-   * @returns {Promise<Order>} Created order
-   */
-  async create(orderData, bakeryId) {
+  const create = async (orderData, bakeryId) => {
     try {
       return await db.runTransaction(async (transaction) => {
         // 1. Create main order
-        const orderRef = this.getCollectionRef(bakeryId).doc();
+        const orderRef = baseService.getCollectionRef(bakeryId).doc();
         const order = new Order({
           id: orderRef.id,
           bakeryId,
@@ -64,17 +56,9 @@ class OrderService extends BaseService {
       console.error('Error in order create:', error);
       throw error;
     }
-  }
+  };
 
-  /**
-   * Patch multiple orders at once
-   * @param {string} bakeryId - Bakery ID
-   * @param {Array<{id: string, data: Object}>} updates - Array of order updates
-   * @param {Object} editor - User performing the update
-   * @returns {Promise<{success: Array, failed: Array}>}
-   */
-  async patchAll(bakeryId, updates, editor) {
-
+  const patchAll = async (bakeryId, updates, editor) => {
     try {
       if (!Array.isArray(updates)) {
         throw new BadRequestError('Updates must be an array');
@@ -96,15 +80,13 @@ class OrderService extends BaseService {
 
       // Process each batch
       for (const batchUpdates of batches) {
-
         await db.runTransaction(async (transaction) => {
-
           // Process reads sequentially instead of Promise.all
           const updateOperations = [];
           for (const update of batchUpdates) {
             try {
               const { id, data } = update;
-              const orderRef = this.getCollectionRef(bakeryId).doc(id);
+              const orderRef = baseService.getCollectionRef(bakeryId).doc(id);
               const orderDoc = await transaction.get(orderRef);
 
               if (!orderDoc.exists) {
@@ -116,10 +98,10 @@ class OrderService extends BaseService {
                 continue;
               }
 
-              const currentOrder = this.ModelClass.fromFirestore(orderDoc);
+              const currentOrder = Order.fromFirestore(orderDoc);
 
               // Create updated instance
-              const updatedOrder = new this.ModelClass({
+              const updatedOrder = new Order({
                 ...currentOrder,
                 ...data,
                 updatedAt: new Date(),
@@ -131,11 +113,11 @@ class OrderService extends BaseService {
               });
 
               // Compute what changed
-              let changes = this.diffObjects(currentOrder, updatedOrder);
+              let changes = baseService.diffObjects(currentOrder, updatedOrder);
               if (data.orderItems) {
                 changes = {
                   orderItems: currentOrder.orderItems.map((item, index) => {
-                    let change = this.diffObjects(
+                    let change = baseService.diffObjects(
                       item,
                       updatedOrder.orderItems[index],
                     );
@@ -144,9 +126,6 @@ class OrderService extends BaseService {
                   }),
                 };
               }
-
-              console.log('changes', changes);
-              console.log('updatedOrder in Reads', updatedOrder);
 
               updateOperations.push({
                 success: true,
@@ -189,7 +168,6 @@ class OrderService extends BaseService {
                 },
                 changes,
               });
-              console.log('updatedOrder in Writes', updatedOrder.toFirestore());
               transaction.update(orderRef, updatedOrder.toFirestore());
             }
 
@@ -198,9 +176,7 @@ class OrderService extends BaseService {
               changes,
             });
           }
-
         });
-
       }
 
       return results;
@@ -208,8 +184,14 @@ class OrderService extends BaseService {
       console.error('Error in patchAll:', error);
       throw error;
     }
-  }
+  };
 
-}
+  return {
+    ...baseService,
+    create,
+    patchAll,
+  };
+};
 
-module.exports = OrderService;
+// Export a singleton instance
+module.exports = createOrderService();

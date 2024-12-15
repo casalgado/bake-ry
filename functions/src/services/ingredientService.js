@@ -1,46 +1,69 @@
 // services/ingredientService.js
-
 const { db } = require('../config/firebase');
 const Ingredient = require('../models/Ingredient');
-const BaseService = require('./base/BaseService');
-const RecipeService = require('./RecipeService');
+const createBaseService = require('./base/serviceFactory');
 const { NotFoundError } = require('../utils/errors');
 
-const recipeService = new RecipeService();
+const createIngredientService = () => {
+  const baseService = createBaseService('ingredients', Ingredient, 'bakeries/{bakeryId}');
 
-class IngredientService extends BaseService {
-  constructor() {
-    super('ingredients', Ingredient, 'bakeries/{bakeryId}');
-  }
+  const hasCostChanged = (currentIngredient, updateData) => {
+    return (
+      updateData.costPerUnit !== undefined &&
+      updateData.costPerUnit !== currentIngredient.costPerUnit
+    );
+  };
 
-  async create(ingredientData, bakeryId) {
-    return super.create(ingredientData, bakeryId);
-  }
+  const updateRecipesWithNewCost = async (
+    transaction,
+    bakeryId,
+    ingredientId,
+    newCostPerUnit,
+    usedInRecipes,
+  ) => {
+    const updatePromises = usedInRecipes.map(async (recipeId) => {
+      const recipeRef = db
+        .collection('bakeries')
+        .doc(bakeryId)
+        .collection('recipes')
+        .doc(recipeId);
 
-  async getById(ingredientId, bakeryId) {
-    return super.getById(ingredientId, bakeryId);
-  }
+      const recipeDoc = await transaction.get(recipeRef);
+      if (!recipeDoc.exists) return;
 
-  async getAll(bakeryId, filters = {}, options = {}) {
-    return super.getAll(bakeryId, filters, options);
-  }
+      const recipe = recipeDoc.data();
 
-  async update(ingredientId, updateData, bakeryId) {
+      // Update the ingredient cost in the recipe
+      const updatedIngredients = recipe.ingredients.map((ing) =>
+        ing.ingredientId === ingredientId
+          ? { ...ing, costPerUnit: newCostPerUnit }
+          : ing,
+      );
+
+      transaction.update(recipeRef, {
+        ingredients: updatedIngredients,
+        updatedAt: new Date(),
+      });
+    });
+
+    await Promise.all(updatePromises);
+  };
+
+  const update = async (ingredientId, updateData, bakeryId) => {
     try {
-      const ingredientRef = this.getCollectionRef(bakeryId).doc(ingredientId);
+      const ingredientRef = baseService.getCollectionRef(bakeryId).doc(ingredientId);
 
-      // Start a transaction
       return await db.runTransaction(async (transaction) => {
         const doc = await transaction.get(ingredientRef);
         if (!doc.exists) {
           throw new NotFoundError('Ingredient not found');
         }
 
-        const currentIngredient = this.ModelClass.fromFirestore(doc);
+        const currentIngredient = Ingredient.fromFirestore(doc);
 
         // Check if cost has changed
-        if (this.hasCostChanged(currentIngredient, updateData)) {
-          await this.updateRecipesWithNewCost(
+        if (hasCostChanged(currentIngredient, updateData)) {
+          await updateRecipesWithNewCost(
             transaction,
             bakeryId,
             ingredientId,
@@ -49,7 +72,7 @@ class IngredientService extends BaseService {
           );
         }
 
-        const updatedIngredient = new this.ModelClass({
+        const updatedIngredient = new Ingredient({
           ...currentIngredient,
           ...updateData,
           updatedAt: new Date(),
@@ -62,9 +85,9 @@ class IngredientService extends BaseService {
       console.error('Error in updateIngredient:', error);
       throw error;
     }
-  }
+  };
 
-  async remove(ingredientId, bakeryId) {
+  const remove = async (ingredientId, bakeryId) => {
     try {
       // First check if the ingredient is used in any recipes
       const recipesRef = db
@@ -80,53 +103,18 @@ class IngredientService extends BaseService {
         throw new Error('Cannot delete ingredient that is used in recipes');
       }
 
-      return super.remove(ingredientId, bakeryId);
+      return baseService.remove(ingredientId, bakeryId);
     } catch (error) {
       console.error('Error in deleteIngredient:', error);
       throw error;
     }
-  }
+  };
 
-  // Helper Methods
-  hasCostChanged(currentIngredient, updateData) {
-    return (
-      updateData.costPerUnit !== undefined &&
-        updateData.costPerUnit !== currentIngredient.costPerUnit
-    );
-  }
+  return {
+    ...baseService,
+    update,
+    remove,
+  };
+};
 
-  async updateRecipesWithNewCost(
-    transaction,
-    bakeryId,
-    ingredientId,
-    newCostPerUnit,
-    usedInRecipes,
-  ) {
-    const updatePromises = usedInRecipes.map(async (recipeId) => {
-      const recipe = await recipeService.getById(recipeId, bakeryId);
-      if (!recipe) return;
-
-      // Update the ingredient cost in the recipe
-      const updatedIngredients = recipe.ingredients.map((ing) =>
-        ing.ingredientId === ingredientId
-          ? { ...ing, costPerUnit: newCostPerUnit }
-          : ing,
-      );
-
-      console.log('in ingredientService updating recipe', recipeId);
-      await recipeService.update(
-        recipeId,
-        {
-          ingredients: updatedIngredients,
-        },
-        bakeryId,
-        transaction,
-      );
-    });
-
-    await Promise.all(updatePromises);
-  }
-
-}
-
-module.exports =  IngredientService;
+module.exports = createIngredientService();

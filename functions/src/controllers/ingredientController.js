@@ -1,5 +1,5 @@
 const createBaseController = require('./base/controllerFactory');
-const IngredientService = require('../services/IngredientService');
+const ingredientService = require('../services/ingredientService');
 const { BadRequestError } = require('../utils/errors');
 
 const validateIngredientData = (data) => {
@@ -30,7 +30,6 @@ const validateIngredientData = (data) => {
   return errors;
 };
 
-const ingredientService = new IngredientService();
 const baseController = createBaseController(ingredientService, validateIngredientData);
 
 const ingredientController = {

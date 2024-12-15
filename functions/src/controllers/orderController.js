@@ -1,5 +1,5 @@
 const createBaseController = require('./base/controllerFactory');
-const OrderService = require('../services/OrderService');
+const orderService = require('../services/orderService');
 
 const validateOrderData = (data) => {
   const errors = [];
@@ -7,7 +7,6 @@ const validateOrderData = (data) => {
   return errors;
 };
 
-const orderService = new OrderService();
 const baseController = createBaseController(orderService, validateOrderData);
 
 const orderController = {

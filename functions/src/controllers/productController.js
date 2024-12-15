@@ -1,5 +1,5 @@
 const createBaseController = require('./base/controllerFactory');
-const ProductService = require('../services/ProductService');
+const productService = require('../services/productService');
 
 const validateProductData = (productData) => {
   const errors = [];
@@ -8,7 +8,6 @@ const validateProductData = (productData) => {
   return errors;
 };
 
-const productService = new ProductService();
 const productController = createBaseController(productService, validateProductData);
 
 module.exports = productController;

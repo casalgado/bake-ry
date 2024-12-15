@@ -1,17 +1,13 @@
+// services/productService.js
 const { db } = require('../config/firebase');
 const { Product } = require('../models/Product');
-const BaseService = require('./base/BaseService');
+const createBaseService = require('./base/serviceFactory');
 const { NotFoundError, BadRequestError } = require('../utils/errors');
 
-class ProductService extends BaseService {
-  constructor() {
-    super('products', Product, 'bakeries/{bakeryId}');
-  }
+const createProductService = () => {
+  const baseService = createBaseService('products', Product, 'bakeries/{bakeryId}');
 
-  /**
-   * Create a new product and associate it with a recipe
-   */
-  async create(productData, bakeryId) {
+  const create = async (productData, bakeryId) => {
     try {
       return await db.runTransaction(async (transaction) => {
         // Check recipe exists and is available
@@ -30,10 +26,10 @@ class ProductService extends BaseService {
         }
         */
 
-        const productRef = this.getCollectionRef(bakeryId).doc();
+        const productRef = baseService.getCollectionRef(bakeryId).doc();
         const productId = productRef.id;
 
-        const newProduct = new this.ModelClass({
+        const newProduct = new Product({
           ...productData,
           id: productId,
           bakeryId,
@@ -53,36 +49,19 @@ class ProductService extends BaseService {
       console.error('Error in createProduct:', error);
       throw error;
     }
-  }
+  };
 
-  /**
-   * Get a product by ID
-   */
-  async getById(productId, bakeryId) {
-    return super.getById(productId, bakeryId);
-  }
-
-  /**
-   * Get all products with optional filters
-   */
-  async getAll(bakeryId, filters = {}, options = {}) {
-    return super.getAll(bakeryId, filters, options);
-  }
-
-  /**
-   * Update a product and handle recipe reassignment if needed
-   */
-  async update(productId, updateData, bakeryId) {
+  const update = async (productId, updateData, bakeryId) => {
     try {
       return await db.runTransaction(async (transaction) => {
-        const productRef = this.getCollectionRef(bakeryId).doc(productId);
+        const productRef = baseService.getCollectionRef(bakeryId).doc(productId);
         const productDoc = await transaction.get(productRef);
 
         if (!productDoc.exists) {
           throw new NotFoundError('Product not found');
         }
 
-        const currentProduct = this.ModelClass.fromFirestore(productDoc);
+        const currentProduct = Product.fromFirestore(productDoc);
 
         // Handle recipe reassignment if recipe is being changed
         if (updateData.recipeId && updateData.recipeId !== currentProduct.recipeId) {
@@ -117,7 +96,7 @@ class ProductService extends BaseService {
           });
         }
 
-        const updatedProduct = new this.ModelClass({
+        const updatedProduct = new Product({
           ...currentProduct,
           ...updateData,
           updatedAt: new Date(),
@@ -130,15 +109,12 @@ class ProductService extends BaseService {
       console.error('Error in updateProduct:', error);
       throw error;
     }
-  }
+  };
 
-  /**
-   * Delete a product (soft delete) and release its recipe
-   */
-  async delete(productId, bakeryId) {
+  const remove = async (productId, bakeryId) => {
     try {
       return await db.runTransaction(async (transaction) => {
-        const productRef = this.getCollectionRef(bakeryId).doc(productId);
+        const productRef = baseService.getCollectionRef(bakeryId).doc(productId);
         const productDoc = await transaction.get(productRef);
 
         if (!productDoc.exists) {
@@ -165,7 +141,14 @@ class ProductService extends BaseService {
       console.error('Error in deleteProduct:', error);
       throw error;
     }
-  }
-}
+  };
 
-module.exports =  ProductService;
+  return {
+    ...baseService,
+    create,
+    update,
+    remove,
+  };
+};
+
+module.exports = createProductService();
