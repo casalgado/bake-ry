@@ -1,7 +1,7 @@
 const admin = require('firebase-admin');
 
-const BAKERY_ID = 'bakery-betos-001';
-const ADMIN_USER_ID = 'admin-betos-001';
+const BAKERY_ID = 'bakery-es';
+const ADMIN_USER_ID = 'admin-beto';
 
 admin.initializeApp({
   projectId: 'bake-ry',
@@ -31,7 +31,7 @@ module.exports = {
 /* PRODUCTION CONFIG
 const admin = require('firebase-admin');
 
-const BAKERY_ID = 'bakery-betos-001';
+const BAKERY_ID = 'bakery-es';
 const ADMIN_USER_ID = 'admin-betos-001';
 
 const serviceAccount = require('./../config/serviceAccountKey.json');

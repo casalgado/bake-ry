@@ -1,9 +1,9 @@
 [
   {
-    "id": "upwB9qqAI4cyeSZTGX7A",
+    "id": "HLVYHWdaxX18bzCoi7FB",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
-    "bakeryId": "bakery-betos-001",
+    "bakeryId": "bakery-es",
     "name": "Cafe Beatriz",
     "categoryId": "cafe",
     "categoryName": "Café",
@@ -21,10 +21,10 @@
     "customAttributes": {}
   },
   {
-    "id": "sAxeUQA7ERX5J3gwtF5z",
+    "id": "nqMpjT7nGsEczqT6JYRS",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
-    "bakeryId": "bakery-betos-001",
+    "bakeryId": "bakery-es",
     "name": "Harina Integral",
     "categoryId": "harinas-y-almidones",
     "categoryName": "Harinas y Almidones",
@@ -42,10 +42,10 @@
     "customAttributes": {}
   },
   {
-    "id": "bTkzNalwX0SiaNaQXoAx",
+    "id": "9i0qG1Vl0UXy2lmWZ6sb",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
-    "bakeryId": "bakery-betos-001",
+    "bakeryId": "bakery-es",
     "name": "Harina de Centeno",
     "categoryId": "harinas-y-almidones",
     "categoryName": "Harinas y Almidones",
@@ -63,10 +63,10 @@
     "customAttributes": {}
   },
   {
-    "id": "De2HYAiMjrPTUU0LD8RN",
+    "id": "ChXHAEm2u1RO6VO437Y4",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
-    "bakeryId": "bakery-betos-001",
+    "bakeryId": "bakery-es",
     "name": "Leche Entera",
     "categoryId": "lacteos-y-proteinas",
     "categoryName": "Lácteos y Proteínas",
@@ -84,10 +84,10 @@
     "customAttributes": {}
   },
   {
-    "id": "c1o0uvEdI9s9p6ulCclQ",
+    "id": "g6byF7lfFCaVxRAlJwW1",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
-    "bakeryId": "bakery-betos-001",
+    "bakeryId": "bakery-es",
     "name": "Mantequilla Sin Sal",
     "categoryId": "lacteos-y-proteinas",
     "categoryName": "Lácteos y Proteínas",
@@ -105,10 +105,10 @@
     "customAttributes": {}
   },
   {
-    "id": "hcNjEAgliuOH4kPsSgvR",
+    "id": "FAHAx0X87anQeEAPZSxZ",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
-    "bakeryId": "bakery-betos-001",
+    "bakeryId": "bakery-es",
     "name": "Extracto de Vainilla",
     "categoryId": "especias-y-aromaticos",
     "categoryName": "Especias y Aromáticos",
@@ -126,10 +126,10 @@
     "customAttributes": {}
   },
   {
-    "id": "qyAwaP2uIWrrwgtii4lh",
+    "id": "PAV6IY3fkrPeUXzYzB9j",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
-    "bakeryId": "bakery-betos-001",
+    "bakeryId": "bakery-es",
     "name": "Cardamomo Molido",
     "categoryId": "especias-y-aromaticos",
     "categoryName": "Especias y Aromáticos",
@@ -147,10 +147,10 @@
     "customAttributes": {}
   },
   {
-    "id": "Y4KNsBXk2Q45EUChP1Qa",
+    "id": "an2d5SKHYDQrvclG4sXD",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
-    "bakeryId": "bakery-betos-001",
+    "bakeryId": "bakery-es",
     "name": "Arándanos Deshidratados",
     "categoryId": "frutas-y-vegetales",
     "categoryName": "Frutas y Vegetales",
@@ -168,10 +168,10 @@
     "customAttributes": {}
   },
   {
-    "id": "m4W5ouXpJpbT9fLY4dL2",
+    "id": "vVAdTZlcEAulA14pvlbT",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
-    "bakeryId": "bakery-betos-001",
+    "bakeryId": "bakery-es",
     "name": "Harina de Almendra",
     "categoryId": "harinas-y-almidones",
     "categoryName": "Harinas y Almidones",
@@ -189,10 +189,10 @@
     "customAttributes": {}
   },
   {
-    "id": "GAnCzAIJHaHNMG8IqsIp",
+    "id": "759GWuq4tTFJ3PrANIWd",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
-    "bakeryId": "bakery-betos-001",
+    "bakeryId": "bakery-es",
     "name": "Harina de Avena",
     "categoryId": "harinas-y-almidones",
     "categoryName": "Harinas y Almidones",
@@ -210,10 +210,10 @@
     "customAttributes": {}
   },
   {
-    "id": "Hp2sVlKkPn4MaeqIlPjq",
+    "id": "0NxMmSMmVTkMuaKdzXHd",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
-    "bakeryId": "bakery-betos-001",
+    "bakeryId": "bakery-es",
     "name": "Crema de Leche",
     "categoryId": "lacteos-y-proteinas",
     "categoryName": "Lácteos y Proteínas",
@@ -231,10 +231,10 @@
     "customAttributes": {}
   },
   {
-    "id": "rjLKg4msGCto3qGATVPc",
+    "id": "vf1pz7tbz98pkD1XBpyF",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
-    "bakeryId": "bakery-betos-001",
+    "bakeryId": "bakery-es",
     "name": "Queso Crema",
     "categoryId": "lacteos-y-proteinas",
     "categoryName": "Lácteos y Proteínas",
@@ -252,10 +252,10 @@
     "customAttributes": {}
   },
   {
-    "id": "23YUxFzD0p0Pys8Zlmzd",
+    "id": "uJB5x2vsKpOqe1vfzP3j",
     "createdAt": "2024-11-04T01:34:12.149Z",
     "updatedAt": "2024-11-04T01:51:12.733Z",
-    "bakeryId": "bakery-betos-001",
+    "bakeryId": "bakery-es",
     "name": "Jengibre Molido",
     "categoryId": "especias-y-aromaticos",
     "categoryName": "Especias y Aromáticos",

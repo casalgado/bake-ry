@@ -1,8 +1,8 @@
 const admin = require('firebase-admin');
 const testData = require('./testData');
 
-const BAKERY_ID = 'bakery-betos-001';
-const ADMIN_USER_ID = 'admin-betos-001';
+const BAKERY_ID = 'bakery-es';
+const ADMIN_USER_ID = 'admin-beto';
 
 // Initialize Firebase Admin with a project ID
 admin.initializeApp({

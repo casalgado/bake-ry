@@ -44,7 +44,6 @@ class User extends BaseModel {
   }
 
   formatName(name, firstName, lastName) {
-    console.log('formatName', name, firstName, lastName);
     if (firstName) {
       return `${firstName} ${lastName || ''}`.trim();
     }
