@@ -111,43 +111,10 @@ const createProductService = () => {
     }
   };
 
-  const remove = async (productId, bakeryId) => {
-    try {
-      return await db.runTransaction(async (transaction) => {
-        const productRef = baseService.getCollectionRef(bakeryId).doc(productId);
-        const productDoc = await transaction.get(productRef);
-
-        if (!productDoc.exists) {
-          throw new NotFoundError('Product not found');
-        }
-
-        // Release recipe
-        const recipeRef = db
-          .collection(`bakeries/${bakeryId}/recipes`)
-          .doc(productDoc.data().recipeId);
-
-        // Soft delete product and release recipe
-        transaction.update(productRef, {
-          isActive: false,
-          updatedAt: new Date(),
-        });
-
-        transaction.update(recipeRef, {
-          productId: null,
-          updatedAt: new Date(),
-        });
-      });
-    } catch (error) {
-      console.error('Error in deleteProduct:', error);
-      throw error;
-    }
-  };
-
   return {
     ...baseService,
     create,
     update,
-    remove,
   };
 };
 

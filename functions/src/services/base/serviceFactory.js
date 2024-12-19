@@ -90,11 +90,7 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
       let dbQuery = getCollectionRef(parentId);
       const { pagination, sort, filters } = query;
 
-      const hasIsDeletedField =
-        Object.prototype.hasOwnProperty.call(ModelClass.prototype, 'isDeleted') ||
-        Object.prototype.hasOwnProperty.call(ModelClass, 'isDeleted');
-
-      if (!query.includeDeleted && hasIsDeletedField) {
+      if (!query.includeDeleted) {
         dbQuery = dbQuery.where('isDeleted', '!=', true);
       }
 

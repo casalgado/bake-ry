@@ -19,6 +19,7 @@ class User extends BaseModel {
     phone = '',
     national_id = '',
     isActive = true,
+    isDeleted = false,
   }) {
     super({ id, createdAt, updatedAt });
 
@@ -37,6 +38,7 @@ class User extends BaseModel {
     this.phone = this.formatPhone(phone);
     this.national_id = national_id;
     this.isActive = isActive;
+    this.isDeleted = isDeleted;
   }
 
   static get dateFields() {
