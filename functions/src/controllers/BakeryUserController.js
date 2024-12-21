@@ -2,6 +2,8 @@ const createBaseController = require('./base/controllerFactory');
 const bakeryUserService = require('../services/bakeryUserService');
 const { BadRequestError } = require('../utils/errors');
 
+const validRoles = ['bakery_staff', 'bakery_customer', 'delivery_assistant', 'production_assistant'];
+
 const validateUserData = (data) => {
   const errors = [];
 
@@ -16,7 +18,7 @@ const validateUserData = (data) => {
 
   if (!data.role) {
     errors.push('Role is required');
-  } else if (!['bakery_staff', 'bakery_customer', 'delivery_assistant', 'production_assistant'].includes(data.role)) {
+  } else if (!validRoles.includes(data.role)) {
     errors.push('Invalid bakery user role');
   }
 
@@ -31,7 +33,7 @@ const bakeryUserController = {
   async create(req, res) {
     try {
       console.log('Creating bakery user', req.body);
-      const { email, password, role, name, phone } = req.body;
+      const { email, password, role, name, phone, ...data } = req.body;
       const { bakeryId } = req.params;
 
       baseController.validateRequestData(req.body);
@@ -42,6 +44,7 @@ const bakeryUserController = {
         role,
         name,
         phone,
+        ...data,
       }, bakeryId);
 
       baseController.handleResponse(res, result, 201);
@@ -60,12 +63,12 @@ const bakeryUserController = {
 
       // Get current user data to verify it's a bakery user
       const currentUser = await bakeryUserService.getById(id, bakeryId);
-      if (!['bakery_staff', 'bakery_customer'].includes(currentUser.role)) {
+      if (!validRoles.includes(currentUser.role)) {
         throw new BadRequestError('Invalid bakery user role');
       }
 
       // Validate role if it's being updated
-      if (updateData.role && !['bakery_staff', 'bakery_customer'].includes(updateData.role)) {
+      if (updateData.role && !validRoles.includes(updateData.role)) {
         throw new BadRequestError('Cannot change to non-bakery user role');
       }
 
@@ -87,7 +90,7 @@ const bakeryUserController = {
 
       // Verify user is a bakery user before deletion
       const user = await bakeryUserService.getById(id, bakeryId);
-      if (!['bakery_staff', 'bakery_customer'].includes(user.role)) {
+      if (!validRoles.includes(user.role)) {
         throw new BadRequestError('Invalid bakery user role');
       }
 

@@ -12,6 +12,7 @@ const createBakeryUserService = () => {
 
     try {
       userData.password = 'password';
+
       const newUser = new User({
         ...userData,
         bakeryId,

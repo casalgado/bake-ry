@@ -1,6 +1,7 @@
 const { BAKERY_ID } = require('../seedConfig');
 const bakeryUserService = require('../../services/bakeryUserService');
 const clients = require('./../data/clientes.json');
+const { parseSpanishName } = require('../../utils/helpers.js');
 
 // Sample user data
 const customers = Object.values(clients).filter(e => {
@@ -10,9 +11,9 @@ const customers = Object.values(clients).filter(e => {
   return true;
 }).map(e => {
   if (e.email == '' || e.email == null || e.email == undefined || e.email == ' ' || e.email == 'no lo dio') e.email = `placeholder@${e.name.split(' ').join('').toLowerCase()}.com`;
-  e.category = Math.floor(Math.random()) > .9 ? 'B2B' : 'B2C';
+  e.category = Math.floor(Math.random()) > .8 ? 'B2B' : 'B2C';
   if (e.address == '') e.address = 'direccion';
-  const cleanItem = { ...e, createdAt: e.since };
+  const cleanItem = { ...e, ...parseSpanishName(e.name), createdAt: e.since };
   delete cleanItem.history;
   return cleanItem;
 });
@@ -116,7 +117,7 @@ const staff = [
   },
 ];
 
-const users = [...customers.slice(200, 210), ...staff];
+const users = [...customers.slice(200, 400), ...staff];
 
 async function seedUsers() {
   try {
