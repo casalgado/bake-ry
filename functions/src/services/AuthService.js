@@ -7,7 +7,7 @@ const { NotFoundError, AuthenticationError } = require('../utils/errors');
 
 const createAuthService = () => {
   // Initialize base service
-  const baseService = createBaseService('users', User);
+  const baseService = createBaseService('users', User, 'bakeries/{bakeryId}');
 
   // Custom methods
   const register = async (userData) => {
@@ -16,7 +16,6 @@ const createAuthService = () => {
     try {
       // If role is bakery_admin, delegate to AdminUserService
       if (userData.role === 'bakery_admin') {
-
         return await adminUserService.create(userData);
       }
       return null;
@@ -39,10 +38,20 @@ const createAuthService = () => {
       const decodedToken = await admin.auth().verifyIdToken(idToken);
 
       // 2. Get user document
-      const userSnapshot = await baseService.getCollectionRef()
-        .where('email', '==', email)
-        .limit(1)
-        .get();
+      let userSnapshot;
+      if (decodedToken.role === 'bakery_admin') {
+        console.log('decodedToken.role1', decodedToken.role);
+        userSnapshot = await baseService.getRootRef()
+          .where('email', '==', decodedToken.email)
+          .limit(1)
+          .get();
+      } else {
+        console.log('decodedToken.role2', decodedToken.role);
+        userSnapshot = await baseService.getCollectionRef(decodedToken.bakeryId)
+          .where('email', '==', decodedToken.email)
+          .limit(1)
+          .get();
+      }
 
       if (userSnapshot.empty) {
         throw new NotFoundError('User not found');

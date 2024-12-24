@@ -16,6 +16,8 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
     return db.collection(collectionName);
   };
 
+  const getRootRef = () => db.collection(collectionName);
+
   const diffObjects = (oldObj, newObj) => {
     const changes = {};
     const oldData = oldObj.toFirestore ? oldObj.toFirestore() : oldObj;
@@ -253,6 +255,7 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
     remove,
     // Expose helper functions if needed by extending services
     getCollectionRef,
+    getRootRef,
     diffObjects,
     recordHistory,
   };

@@ -12,7 +12,7 @@ const customers = Object.values(clients).filter(e => {
 }).map(e => {
   if (e.email == '' || e.email == null || e.email == undefined || e.email == ' ' || e.email == 'no lo dio') e.email = `placeholder@${e.name.split(' ').join('').toLowerCase()}.com`;
   e.category = Math.floor(Math.random()) > .8 ? 'B2B' : 'B2C';
-  if (e.address == '') e.address = 'direccion';
+  if (e.address == '' || !e.address || e.address == null) e.address = 'direccion';
   const cleanItem = { ...e, ...parseSpanishName(e.name), createdAt: e.since };
   delete cleanItem.history;
   return cleanItem;
@@ -21,7 +21,7 @@ const customers = Object.values(clients).filter(e => {
 const staff = [
   {
     email: 'baker1@example.com',
-    password: 'password123',
+    password: 'aoeuao',
     role: 'bakery_staff',
     name: 'John Baker',
     address: '123 Bakery Lane',
@@ -33,7 +33,7 @@ const staff = [
   },
   {
     email: 'baker2@example.com',
-    password: 'password123',
+    password: 'aoeuao',
     role: 'bakery_staff',
     name: 'Jane Dough',
     address: '456 Pastry Ave',
@@ -45,7 +45,7 @@ const staff = [
   },
   {
     email: 'manager@example.com',
-    password: 'password123',
+    password: 'aoeuao',
     role: 'bakery_admin',
     name: 'Beto',
     address: '789 Admin Street',
@@ -57,7 +57,7 @@ const staff = [
   },
   {
     email: 'delivery1@example.com',
-    password: 'password123',
+    password: 'aoeuao',
     role: 'delivery_assistant',
     name: 'Josias Perez',
     address: '321 Delivery Road',
@@ -69,7 +69,7 @@ const staff = [
   },
   {
     email: 'delivery2@example.com',
-    password: 'password123',
+    password: 'aoeuao',
     role: 'delivery_assistant',
     name: 'Alex Lopez',
     address: '654 Transit Way',
@@ -81,7 +81,7 @@ const staff = [
   },
   {
     email: 'delivery3@example.com',
-    password: 'password123',
+    password: 'aoeuao',
     role: 'delivery_assistant',
     name: 'Juan Gomez',
     address: '987 Express Street',
@@ -93,7 +93,7 @@ const staff = [
   },
   {
     email: 'production1@example.com',
-    password: 'password123',
+    password: 'aoeuao',
     role: 'production_assistant',
     name: 'Lisa Gonzales',
     address: '147 Factory Lane',
@@ -105,7 +105,7 @@ const staff = [
   },
   {
     email: 'production2@example.com',
-    password: 'password123',
+    password: 'aoeuao',
     role: 'production_assistant',
     name: 'Amanda Martinez',
     address: '258 Assembly Road',

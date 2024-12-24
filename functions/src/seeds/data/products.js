@@ -1,5 +1,5 @@
 const masa_madre_collections = ['sourdough', 'baguette', 'tortillas'];
-const flavors = ['original', 'integral', 'zaatar', 'queso costeño', '5 semillas', 'chocolate', 'arandanos & chocolate'];
+const flavors = ['original', 'integral', 'zaatar', 'queso costeño', 'semillas', 'chocolate', 'arandanos & chocolate'];
 // const other_collections = ['untables', 'congelados', 'panaderia tradicional', 'cafe el diario'];
 
 const sourdough_variations = [

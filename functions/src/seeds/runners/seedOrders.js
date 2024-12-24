@@ -8,8 +8,8 @@ const seededProducts = require('../data/seededProducts.json');
 const seededUsers = require('../data/seededUsers.json');
 
 // Constants
-const NUMBER_OF_DAYS = 30;
-const APPROX_ORDERS_PER_DAY = 15;
+const NUMBER_OF_DAYS = 10;
+const APPROX_ORDERS_PER_DAY = 10;
 const DELIVERY_PROBABILITY = 0.9;
 const COMMENT_PROBABILITY = 0.2;
 const DELIVERY_FEES = [7000, 8000, 9000];

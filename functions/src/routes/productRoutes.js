@@ -2,7 +2,7 @@ const express = require('express');
 const productController = require('../controllers/productController');
 const {
   authenticateUser,
-  requireBakeryStaffOrAdmin,
+  requireBakeryAssistant,
 } = require('../middleware/userAccess');
 const hasBakeryAccess = require('../middleware/bakeryAccess');
 
@@ -17,9 +17,9 @@ bakeryRouter.get('/products', productController.getAll);
 bakeryRouter.get('/products/:id', productController.getById);
 
 // Staff/Admin only routes
-bakeryRouter.post('/products', requireBakeryStaffOrAdmin, productController.create);
-bakeryRouter.put('/products/:id', requireBakeryStaffOrAdmin, productController.update);
-bakeryRouter.delete('/products/:id', requireBakeryStaffOrAdmin, productController.remove);
+bakeryRouter.post('/products', requireBakeryAssistant, productController.create);
+bakeryRouter.put('/products/:id', requireBakeryAssistant, productController.update);
+bakeryRouter.delete('/products/:id', requireBakeryAssistant, productController.remove);
 
 router.use('/:bakeryId', bakeryRouter);
 

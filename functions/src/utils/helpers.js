@@ -13,12 +13,14 @@ const parseSpanishName = (fullName) => {
   }
 
   // Clean the input
-  fullName = fullName.normalize('NFKD')  // Normalize Unicode characters
+  fullName = fullName.replace(/ñ/g, '__n__').replace(/Ñ/g, '__N__');  // Preserve ñ/Ñ
+  fullName = fullName.normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
     .replace(/\.$/, '')  // Remove trailing period
     .replace(/\s+/g, ' ') // Normalize multiple spaces
     .trim()
     .toLowerCase();
+  fullName = fullName.replace(/__n__/g, 'ñ').replace(/__N__/g, 'ñ');
 
   // Explicit business name patterns
   const businessPatterns = [

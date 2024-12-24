@@ -2,7 +2,7 @@ const express = require('express');
 const orderController = require('../controllers/orderController');
 const {
   authenticateUser,
-  requireBakeryStaffOrAdmin,
+  requireBakeryAssistant,
 } = require('../middleware/userAccess');
 const hasBakeryAccess = require('../middleware/bakeryAccess');
 
@@ -12,7 +12,7 @@ router.use(authenticateUser);
 
 const bakeryRouter = express.Router({ mergeParams: true });
 bakeryRouter.use(hasBakeryAccess);
-bakeryRouter.use(requireBakeryStaffOrAdmin);
+bakeryRouter.use(requireBakeryAssistant);
 
 bakeryRouter.post('/orders', orderController.create);
 bakeryRouter.get('/orders', orderController.getAll);

@@ -2,7 +2,7 @@ const express = require('express');
 const bakeryUserController = require('../controllers/bakeryUserController');
 const {
   authenticateUser,
-  requireBakeryAdmin,
+  requireBakeryAssistant,
 } = require('../middleware/userAccess');
 const hasBakeryAccess = require('../middleware/bakeryAccess');
 
@@ -16,7 +16,7 @@ const bakeryRouter = express.Router({ mergeParams: true });
 
 // Apply bakery access middleware to the sub-router
 bakeryRouter.use(hasBakeryAccess);
-bakeryRouter.use(requireBakeryAdmin);
+bakeryRouter.use(requireBakeryAssistant);
 
 // CRUD routes
 bakeryRouter.post('/users', bakeryUserController.create);

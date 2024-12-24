@@ -51,9 +51,18 @@ const requireBakeryStaffOrAdmin = (req, res, next) => {
   next();
 };
 
+const requireBakeryAssistant = (req, res, next) => {
+  const allowedRoles = ['bakery_staff', 'bakery_admin', 'system_admin', 'delivery_assistant', 'production_assistant'];
+  if (!allowedRoles.includes(req.user.role)) {
+    throw new ForbiddenError('Requires at least assistant role');
+  }
+  next();
+};
+
 module.exports = {
   authenticateUser,
   requireSystemAdmin,
   requireBakeryAdmin,
   requireBakeryStaffOrAdmin,
+  requireBakeryAssistant,
 };
