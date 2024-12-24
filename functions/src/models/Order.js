@@ -84,6 +84,7 @@ class Order extends BaseModel {
     // Status and Payment
     status = 0,
     isPaid = false,
+    isDeliveryPaid = false,
     paymentMethod = 'transfer',
     // Fulfillment
     fulfillmentType = 'pickup',
@@ -115,6 +116,7 @@ class Order extends BaseModel {
     // Status and Payment
     this.status = status;
     this.isPaid = isPaid;
+    this.isDeliveryPaid = isDeliveryPaid;
     this.paymentMethod = paymentMethod;
 
     // Fulfillment
