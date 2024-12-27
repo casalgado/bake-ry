@@ -31,17 +31,31 @@ const PRICES = {
       mediano: { weight: 950, price: 38000 },
     },
     'arandanos & chocolate': {
-      unico: { weight: 650, price: 33000 },
+      mediano: { weight: 650, price: 33000 },
     },
   },
   baguette: {
-    original: { weight: 130, price: 9000 },
-    integral: { weight: 130, price: 9000 },
-    zaatar: { weight: 130, price: 9500 },
-    'queso costeño': { weight: 130, price: 14000 },
-    semillas: { weight: 130, price: 15000 },
-    chocolate: { weight: 130, price: 24000 },
-    'arandanos & chocolate': { weight: 130, price: 26000 },
+    original: {
+      x5: { quantity: 5, price: 9000 },
+    },
+    integral: {
+      x5: { quantity: 5, price: 9000 },
+    },
+    zaatar: {
+      x5: { quantity: 5, price: 9500 },
+    },
+    'queso costeño': {
+      x5: { quantity: 5, price: 14000 },
+    },
+    semillas: {
+      x5: { quantity: 5, price: 15000 },
+    },
+    chocolate: {
+      x5: { quantity: 5, price: 24000 },
+    },
+    'arandanos & chocolate': {
+      x5: { quantity: 5, price: 26000 },
+    },
   },
   tortillas: {
     original: {
@@ -70,7 +84,7 @@ const PRICES = {
     },
   },
   untables: {
-    'mermelada de fresa': { weight: 230, price: 18000 },
+    'mermelada de fresa': {  price: 18000 },
     'cebolla caramelizada': { price: 18500 },
   },
   congelados: {
@@ -94,12 +108,12 @@ const PRICES = {
       intensity: 'ALTA',
       variations: [
         { name: 'entero', value: 1 },
-        { name: 'grueso', value: 1 },
-        { name: 'semigrueso', value: 2 },
-        { name: 'medio alto', value: 3 },
-        { name: 'medio bajo', value: 4 },
-        { name: 'semifino', value: 5 },
-        { name: 'fino', value: 6 },
+        { name: '1 grueso', value: 1 },
+        { name: '2 semigrueso', value: 1 },
+        { name: '3 medio alto', value: 1 },
+        { name: '4 medio bajo', value: 1 },
+        { name: '5 semifino', value: 1 },
+        { name: '6 fino', value: 1 },
       ],
     },
     'margarita': {
@@ -109,12 +123,12 @@ const PRICES = {
       intensity: 'MEDIA',
       variations: [
         { name: 'entero', value: 1 },
-        { name: 'grueso', value: 1 },
-        { name: 'semigrueso', value: 2 },
-        { name: 'medio alto', value: 3 },
-        { name: 'medio bajo', value: 4 },
-        { name: 'semifino', value: 5 },
-        { name: 'fino', value: 6 },
+        { name: '1 grueso', value: 1 },
+        { name: '2 semigrueso', value: 1 },
+        { name: '3 medio alto', value: 1 },
+        { name: '4 medio bajo', value: 1 },
+        { name: '5 semifino', value: 1 },
+        { name: '6 fino', value: 1 },
       ],
     },
     'cold brew': {
@@ -136,18 +150,42 @@ function generateProducts() {
       const flavorPrices = PRICES[collection][flavor];
 
       Object.entries(flavorPrices).forEach(([size, details]) => {
+        // Add regular variation
         variations.push({
-          name: size,
+          name: size.toLowerCase(),
           value: details.weight || details.quantity,
           basePrice: details.price,
+          currentPrice: details.price,
+          isWholeGrain: false,
         });
+
+        // Add wholegrain variation if not already integral product
+        if (!['integral', 'arandanos & chocolate'].includes(flavor)) {
+          variations.push({
+            name: `${size.toLowerCase()} integral`,
+            value: details.weight || details.quantity,
+            basePrice: details.price,
+            currentPrice: details.price,
+            isWholeGrain: true,
+          });
+        }
+      });
+
+      variations.push({
+        name: 'otra',
+        value: 1000,
+        basePrice: 10000,
+        currentPrice: 10000,
+        isWholeGrain: false,
       });
 
       products.push({
-        name: flavor,
+        name: flavor.toLowerCase(),
         collectionName: collection,
         variations,
         isActive: true,
+        isDeleted: false,
+        customAttributes: {},
       });
     });
   });
