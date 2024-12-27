@@ -1,8 +1,8 @@
 // This file is used to seed the database with a bakery user and bakery data.
 const bakery = {
   email: 'test@bakery.com',
-  password: 'aoeuao',
-  name: 'Betos Bakery',
+  password: 'password',
+  name: 'Es Alimento',
   role: 'bakery_admin',
   openingHours: {
     monday: {
@@ -42,12 +42,12 @@ const bakery = {
     },
   },
   socialMedia: {
-    facebook: 'https://facebook.com/a',
-    instagram: 'https://instagram.com/a',
-    tiktok: 'https://tiktok.com/a',
-    youtube: 'https://youtube.com/a',
-    twitter: 'https://twitter.com/a',
-    pinterest: 'https://pinterest.com/a',
+    facebook: '',
+    instagram: 'https://instagram.com/es_alimento',
+    tiktok: '',
+    youtube: '',
+    twitter: '',
+    pinterest: '',
   },
 };
 

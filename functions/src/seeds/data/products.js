@@ -1,238 +1,218 @@
-const masa_madre_collections = ['sourdough', 'baguette', 'tortillas'];
-const flavors = ['original', 'integral', 'zaatar', 'queso costeño', 'semillas', 'chocolate', 'arandanos & chocolate'];
-// const other_collections = ['untables', 'congelados', 'panaderia tradicional', 'cafe el diario'];
-
-const sourdough_variations = [
-  {
-    name: 'pequeño',
-    value: 550,
-    basePrice: 12000,
-    recipeId: 2,
+// productCatalog.js
+const PRICES = {
+  sourdough: {
+    original: {
+      pequeño: { weight: 500, price: 12000 },
+      mediano: { weight: 950, price: 18000 },
+      grande: { weight: 1700, price: 29000 },
+    },
+    integral: {
+      pequeño: { weight: 500, price: 12000 },
+      mediano: { weight: 950, price: 18000 },
+      grande: { weight: 1700, price: 29000 },
+    },
+    zaatar: {
+      pequeño: { weight: 500, price: 13000 },
+      mediano: { weight: 950, price: 20000 },
+      grande: { weight: 1700, price: 34000 },
+    },
+    'queso costeño': {
+      pequeño: { weight: 500, price: 16000 },
+      mediano: { weight: 950, price: 25000 },
+      grande: { weight: 1700, price: 39000 },
+    },
+    semillas: {
+      pequeño: { weight: 500, price: 18000 },
+      mediano: { weight: 950, price: 27000 },
+      grande: { weight: 1700, price: 40000 },
+    },
+    chocolate: {
+      pequeño: { weight: 500, price: 29000 },
+      mediano: { weight: 950, price: 38000 },
+    },
+    'arandanos & chocolate': {
+      unico: { weight: 650, price: 33000 },
+    },
   },
-  {
-    name: 'mediano',
-    value: 750,
-    basePrice: 20000,
-    recipeId: 3,
+  baguette: {
+    original: { weight: 130, price: 9000 },
+    integral: { weight: 130, price: 9000 },
+    zaatar: { weight: 130, price: 9500 },
+    'queso costeño': { weight: 130, price: 14000 },
+    semillas: { weight: 130, price: 15000 },
+    chocolate: { weight: 130, price: 24000 },
+    'arandanos & chocolate': { weight: 130, price: 26000 },
   },
-  {
-    name: 'grande',
-    value: 1000,
-    basePrice: 30000,
-    recipeId: 4,
+  tortillas: {
+    original: {
+      x6: { quantity: 6, price: 8500 },
+      x10: { quantity: 10, price: 11500 },
+    },
+    integral: {
+      x6: { quantity: 6, price: 8500 },
+      x10: { quantity: 10, price: 11500 },
+    },
+    zaatar: {
+      x6: { quantity: 6, price: 9000 },
+      x10: { quantity: 10, price: 12500 },
+    },
+    'queso costeño': {
+      x6: { quantity: 6, price: 10500 },
+      x10: { quantity: 10, price: 15000 },
+    },
+    semillas: {
+      x6: { quantity: 6, price: 10500 },
+      x10: { quantity: 10, price: 15000 },
+    },
+    chocolate: {
+      x6: { quantity: 6, price: 13000 },
+      x10: { quantity: 10, price: 18000 },
+    },
   },
-
-];
-
-const baguette_variations = [
-  {
-    name: 'x5',
-    value: 5,
-    basePrice: 10000,
-    recipeId: 5,
+  untables: {
+    'mermelada de fresa': { weight: 230, price: 18000 },
+    'cebolla caramelizada': { price: 18500 },
   },
-];
-
-const tortillas_variations = [
-  {
-    name: 'x6',
-    value: 6,
-    basePrice: 10000,
-    recipeId: 6,
+  congelados: {
+    'pan de bono': {
+      x6: { quantity: 6, price: 15000 },
+      x12: { quantity: 12, price: 28000 },
+    },
+    'deditos olaya': {
+      x16: { quantity: 16, price: 18500 },
+    },
   },
-  {
-    name: 'x10',
-    value: 10,
-    basePrice: 15000,
-    recipeId: 7,
+  'panaderia tradicional': {
+    'pan de molde': { price: 14000 },
+    'focaccia': { price: 18000 },
   },
-];
-
-const untable_products = [
-  {
-    name: 'mermelada de fresa',
-    basePrice: 18000,
-    recipeId: 8,
+  'cafe el diario': {
+    'beatriz': {
+      weight: 340,
+      price: 34500,
+      description: 'Resalta los dulces como el caramelo y la panela del perfil de nuestro café de la Sierra Nevada',
+      intensity: 'ALTA',
+      variations: [
+        { name: 'entero', value: 1 },
+        { name: 'grueso', value: 1 },
+        { name: 'semigrueso', value: 2 },
+        { name: 'medio alto', value: 3 },
+        { name: 'medio bajo', value: 4 },
+        { name: 'semifino', value: 5 },
+        { name: 'fino', value: 6 },
+      ],
+    },
+    'margarita': {
+      weight: 340,
+      price: 34500,
+      description: 'Resalta los tonos frutales del perfil. En esta tostión somos capaces de percibir la naranja y el limoncillo',
+      intensity: 'MEDIA',
+      variations: [
+        { name: 'entero', value: 1 },
+        { name: 'grueso', value: 1 },
+        { name: 'semigrueso', value: 2 },
+        { name: 'medio alto', value: 3 },
+        { name: 'medio bajo', value: 4 },
+        { name: 'semifino', value: 5 },
+        { name: 'fino', value: 6 },
+      ],
+    },
+    'cold brew': {
+      x1: { volume: 250, price: 6000 },
+      x4: { volume: 1000, price: 20000, note: 'IVA incluido' },
+    },
   },
-  {
-    name: 'cebolla caramelizada',
-    basePrice: 18500,
-    recipeId: 9,
-  },
-];
-
-const panaderia_tradicional_products = [
-  {
-    name: 'pan de molde',
-    basePrice: 14000,
-    recipeId: 10,
-  },
-  {
-    name: 'focaccia',
-    basePrice: 15000,
-    recipeId: 11,
-  },
-];
-
-const congelados_products = [
-  {
-    name: 'pan de bono',
-    variations: [
-      {
-        name: 'x6',
-        value: 6,
-        basePrice: 15000,
-        recipeId: 12,
-      },
-      {
-        name: 'x12',
-        value: 12,
-        basePrice: 25000,
-        recipeId: 13,
-      },
-    ],
-  },
-  {
-    name: 'deditos de olaya',
-    variations: [
-      {
-        name: 'x16',
-        value: 16,
-        basePrice: 20000,
-        recipeId: 14,
-      },
-    ],
-  },
-];
-
-const cafe_el_diario_products = [
-  {
-    name: 'beatriz',
-    basePrice: 34500,
-    recipeId: 15,
-  },
-  {
-    name: 'margarita',
-    basePrice: 34500,
-    recipeId: 16,
-  },
-  { name: 'coldBrew',
-    variations: [
-      {
-        name: 'x 250ml',
-        value: 1,
-        basePrice: 6000,
-      },
-      {
-        name: '4 unid',
-        value: 4,
-        basePrice: 20000,
-      },
-    ],
-  },
-];
+};
 
 function generateProducts() {
   const products = [];
 
-  // 1. Generate products for masa madre collections (with flavors and their variations)
-  masa_madre_collections.forEach(collection => {
-    // For each flavor in the collection
-    flavors.forEach(flavor => {
-      let variations;
+  // 1. Generate masa madre products (sourdough, baguette, tortillas)
+  ['sourdough', 'baguette', 'tortillas'].forEach(collection => {
+    const availableFlavors = Object.keys(PRICES[collection]);
 
-      switch (collection) {
-      case 'sourdough':
-        variations = sourdough_variations;
-        break;
-      case 'baguette':
-        variations = baguette_variations;
-        break;
-      case 'tortillas':
-        variations = tortillas_variations;
-        break;
-      }
+    availableFlavors.forEach(flavor => {
+      const variations = [];
+      const flavorPrices = PRICES[collection][flavor];
+
+      Object.entries(flavorPrices).forEach(([size, details]) => {
+        variations.push({
+          name: size,
+          value: details.weight || details.quantity,
+          basePrice: details.price,
+        });
+      });
 
       products.push({
         name: flavor,
         collectionName: collection,
-        variations: [...variations.map(v => ({
-          name: v.name,
-          value: v.value,
-          basePrice: v.basePrice,
-          recipeId: v.recipeId,
-        })), ...variations.map(v => ({
-          name: `${v.name} integral`,
-          value: v.value,
-          basePrice: v.basePrice,
-          recipeId: v.recipeId,
-          isWholeGrain: true,
-        }))],
+        variations,
         isActive: true,
       });
     });
   });
 
-  // 2. Add untables products
-  untable_products.forEach(product => {
-    products.push({
-      name: product.name,
-      collectionName: 'untables',
-      basePrice: product.basePrice,
-      currentPrice: product.basePrice,
-      recipeId: product.recipeId,
-      isActive: true,
-    });
-  });
-
-  // 3. Add panaderia tradicional products
-  panaderia_tradicional_products.forEach(product => {
-    products.push({
-      name: product.name,
-      collectionName: 'panaderia tradicional',
-      basePrice: product.basePrice,
-      currentPrice: product.basePrice,
-      recipeId: product.recipeId,
-      isActive: true,
-    });
-  });
-
-  // 4. Add congelados products
-  congelados_products.forEach(product => {
-    products.push({
-      name: product.name,
-      collectionName: 'congelados',
-      variations: product.variations.map(v => ({
-        name: v.name,
-        value: v.value,
-        basePrice: v.basePrice,
-        recipeId: v.recipeId,
-      })),
-      isActive: true,
-    });
-  });
-
-  // 5. Add cafe products
-  cafe_el_diario_products.forEach(product => {
-    if (product.variations) {
+  // 2. Generate simple products (untables, panaderia tradicional)
+  ['untables', 'panaderia tradicional'].forEach(collection => {
+    Object.entries(PRICES[collection]).forEach(([productName, details]) => {
       products.push({
-        name: product.name,
+        name: productName,
+        collectionName: collection,
+        basePrice: details.price,
+        currentPrice: details.price,
+        weight: details.weight,
+        isActive: true,
+      });
+    });
+  });
+
+  // 3. Generate congelados products
+  Object.entries(PRICES.congelados).forEach(([productName, variations]) => {
+    const productVariations = Object.entries(variations).map(([size, details]) => ({
+      name: size,
+      value: details.quantity,
+      basePrice: details.price,
+    }));
+
+    products.push({
+      name: productName,
+      collectionName: 'congelados',
+      variations: productVariations,
+      isActive: true,
+    });
+  });
+
+  // 4. Generate cafe products
+  Object.entries(PRICES['cafe el diario']).forEach(([productName, details]) => {
+    if (productName === 'cold brew') {
+      // Handle cold brew variations
+      const variations = Object.entries(details).map(([size, sizeDetails]) => ({
+        name: size,
+        value: sizeDetails.volume,
+        basePrice: sizeDetails.price,
+        note: sizeDetails.note,
+      }));
+
+      products.push({
+        name: productName,
         collectionName: 'cafe el diario',
-        variations: product.variations.map(v => ({
-          name: v.name,
-          value: v.value,
-          basePrice: v.basePrice,
-          recipeId: v.recipeId,
-        })),
+        variations,
         isActive: true,
       });
     } else {
+      // Handle regular coffee products with grinding variations
+      const variations = details.variations.map(variation => ({
+        ...variation,
+        basePrice: details.price,
+      }));
+
       products.push({
-        name: product.name,
+        name: productName,
         collectionName: 'cafe el diario',
-        basePrice: product.basePrice,
-        currentPrice: product.basePrice,
-        recipeId: product.recipeId,
+        variations,
+        weight: details.weight,
+        description: details.description,
+        intensity: details.intensity,
         isActive: true,
       });
     }
@@ -241,5 +221,4 @@ function generateProducts() {
   return products;
 }
 
-// Export both the data arrays and the generator function
 module.exports = generateProducts;
