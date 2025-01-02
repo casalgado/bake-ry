@@ -236,6 +236,7 @@ function generateProducts() {
         collectionName: 'cafe el diario',
         variations,
         isActive: true,
+        taxPercentage: 9.5,
       });
     } else {
       // Handle regular coffee products with grinding variations
@@ -252,6 +253,7 @@ function generateProducts() {
         description: details.description,
         intensity: details.intensity,
         isActive: true,
+        taxPercentage: 9.5,
       });
     }
   });

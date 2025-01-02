@@ -10,9 +10,10 @@ class OrderItem {
     collectionName,
     quantity,
     basePrice,
-    currentPrice, // prices here are of orderitem total
+    currentPrice,
     variation,
     recipeId,
+    taxPercentage = 0,
     isComplimentary = false,
     productionBatch = 1,
     status = 0,
@@ -23,19 +24,35 @@ class OrderItem {
     this.collectionId = collectionId;
     this.collectionName = collectionName;
     this.quantity = quantity;
-    this.basePrice = basePrice; // prices here are of variation in order item
+    this.basePrice = basePrice;
     this.currentPrice = currentPrice;
-    this.variation = variation;  // stores the full variation object
+    this.variation = variation;
     this.recipeId = recipeId;
+    this.taxPercentage = parseFloat(taxPercentage) || 0;
     this.isComplimentary = isComplimentary;
     this.productionBatch = productionBatch;
     this.status = status;
 
+    // Calculate derived values
+    this.taxAmount = this.calculateTaxAmount();
+    this.preTaxPrice = this.calculatePreTaxPrice();
     this.subtotal = this.calculateSubtotal();
   }
 
+  calculateTaxAmount() {
+    if (this.isComplimentary) return 0;
+    return this.taxPercentage ?
+      Math.round((this.currentPrice * this.taxPercentage) / (100 + this.taxPercentage)) : 0;
+  }
+
+  calculatePreTaxPrice() {
+    if (this.isComplimentary) return 0;
+    return this.currentPrice - this.taxAmount;
+  }
+
   calculateSubtotal() {
-    return this.isComplimentary ? 0 : this.quantity * this.currentPrice;
+    if (this.isComplimentary) return 0;
+    return this.quantity * this.currentPrice;
   }
 
   toPlainObject() {
@@ -58,10 +75,11 @@ class OrderItem {
       quantity: this.quantity,
       currentPrice: this.currentPrice,
       variation: this.variation,
+      taxAmount: this.taxAmount,
+      preTaxPrice: this.preTaxPrice,
       subtotal: this.subtotal,
     };
   }
-
 }
 
 class Order extends BaseModel {
@@ -86,6 +104,7 @@ class Order extends BaseModel {
     isPaid = false,
     isDeliveryPaid = false,
     paymentMethod = 'transfer',
+
     // Fulfillment
     fulfillmentType = 'pickup',
     deliveryAddress = null,
@@ -99,7 +118,6 @@ class Order extends BaseModel {
     customerNotes = '',
     internalNotes = '',
     isDeleted = false,
-
   } = {}) {
     super({ id, createdAt, updatedAt, preparationDate, dueDate });
 
@@ -128,17 +146,49 @@ class Order extends BaseModel {
     this.deliveryCost = deliveryCost;
     this.numberOfBags = numberOfBags;
 
-    // Pricing
-    this.subtotal = this.calculateSubtotal();
-    this.total = this.calculateTotal();
+    // Set isComplimentary based on paymentMethod
+    this.isComplimentary = paymentMethod === 'complimentary';
 
-    // Notes
+    // Calculate all pricing components
+    this.calculatePricing();
+
+    // Notes and Flags
     this.customerNotes = customerNotes;
     this.internalNotes = internalNotes;
-
-    // Flags
-    this.isComplimentary = paymentMethod === 'complimentary';
     this.isDeleted = isDeleted;
+  }
+
+  calculatePricing() {
+    if (this.isComplimentary) {
+      this.taxableSubtotal = 0;
+      this.nonTaxableSubtotal = 0;
+      this.subtotal = 0;
+      this.totalTaxAmount = 0;
+      this.preTaxTotal = 0;
+      this.total = 0;
+      return;
+    }
+
+    // Calculate subtotals
+    this.taxableSubtotal = this.orderItems
+      .filter(item => item.taxPercentage > 0)
+      .reduce((sum, item) => sum + item.subtotal, 0);
+
+    this.nonTaxableSubtotal = this.orderItems
+      .filter(item => !item.taxPercentage)
+      .reduce((sum, item) => sum + item.subtotal, 0);
+
+    this.subtotal = this.taxableSubtotal + this.nonTaxableSubtotal;
+
+    // Calculate tax amounts
+    this.totalTaxAmount = this.orderItems
+      .reduce((sum, item) => sum + (item.taxAmount * item.quantity), 0);
+
+    // Calculate pre-tax total
+    this.preTaxTotal = this.subtotal - this.totalTaxAmount;
+
+    // Calculate final total
+    this.total = this.subtotal + this.deliveryFee;
   }
 
   static get dateFields() {
@@ -149,20 +199,15 @@ class Order extends BaseModel {
     ];
   }
 
-  calculateSubtotal() {
-    return this.isComplimentary ? 0 : this.orderItems.reduce((sum, item) => sum + item.subtotal, 0);
-  }
-
-  calculateTotal() {
-    return this.isComplimentary ? 0 : this.subtotal + this.deliveryFee;
-  }
-
   toClientHistoryObject() {
     return {
       id: this.id,
       bakeryId: this.bakeryId,
       dueDate: this.dueDate,
       address: this.deliveryAddress,
+      subtotal: this.subtotal,
+      preTaxTotal: this.preTaxTotal,
+      totalTaxAmount: this.totalTaxAmount,
       total: this.total,
       isDeleted: this.isDeleted,
       isComplimentary: this.isComplimentary,

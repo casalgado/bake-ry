@@ -11,7 +11,7 @@ const customers = Object.values(clients).filter(e => {
   return true;
 }).map(e => {
   if (e.email == '' || e.email == null || e.email == undefined || e.email == ' ' || e.email == 'no lo dio') e.email = `placeholder@${e.name.split(' ').join('').toLowerCase()}.com`;
-  e.category = Math.floor(Math.random()) > .8 ? 'B2B' : 'B2C';
+  e.category = (Math.random() > .8) ? 'B2B' : 'B2C';
   if (e.address == '' || !e.address || e.address == null) e.address = 'direccion';
   const cleanItem = { ...e, ...parseSpanishName(e.name), createdAt: e.since };
   delete cleanItem.history;
