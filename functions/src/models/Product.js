@@ -98,7 +98,7 @@ class Product extends BaseModel {
     // Basic price
     this.basePrice = basePrice;
     this.currentPrice = currentPrice || basePrice;
-    this.taxPercentage = parseInt(taxPercentage);
+    this.taxPercentage = Number(Number(taxPercentage).toFixed(1));
 
     // Display & Marketing
     this.displayOrder = displayOrder;

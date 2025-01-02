@@ -28,7 +28,7 @@ class OrderItem {
     this.currentPrice = currentPrice;
     this.variation = variation;
     this.recipeId = recipeId;
-    this.taxPercentage = parseFloat(taxPercentage) || 0;
+    this.taxPercentage = Number(Number(taxPercentage).toFixed(1));
     this.isComplimentary = isComplimentary;
     this.productionBatch = productionBatch;
     this.status = status;
