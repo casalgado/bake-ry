@@ -2,89 +2,89 @@
 const PRICES = {
   sourdough: {
     original: {
-      pequeño: { weight: 500, price: 12000 },
-      mediano: { weight: 950, price: 18000 },
-      grande: { weight: 1700, price: 29000 },
+      pequeño: { weight: 500, price: 13200 },
+      mediano: { weight: 950, price: 19800 },
+      grande: { weight: 1700, price: 31900 },
     },
     integral: {
-      pequeño: { weight: 500, price: 12000 },
-      mediano: { weight: 950, price: 18000 },
-      grande: { weight: 1700, price: 29000 },
+      pequeño: { weight: 500, price: 13200 },
+      mediano: { weight: 950, price: 19800 },
+      grande: { weight: 1700, price: 31900 },
     },
     zaatar: {
-      pequeño: { weight: 500, price: 13000 },
-      mediano: { weight: 950, price: 20000 },
-      grande: { weight: 1700, price: 34000 },
+      pequeño: { weight: 500, price: 14300 },
+      mediano: { weight: 950, price: 22000 },
+      grande: { weight: 1700, price: 37400 },
     },
     'queso costeño': {
-      pequeño: { weight: 500, price: 16000 },
-      mediano: { weight: 950, price: 25000 },
-      grande: { weight: 1700, price: 39000 },
+      pequeño: { weight: 500, price: 17600 },
+      mediano: { weight: 950, price: 27500 },
+      grande: { weight: 1700, price: 42900 },
     },
     semillas: {
-      pequeño: { weight: 500, price: 18000 },
-      mediano: { weight: 950, price: 27000 },
-      grande: { weight: 1700, price: 40000 },
+      pequeño: { weight: 500, price: 19800 },
+      mediano: { weight: 950, price: 29700 },
+      grande: { weight: 1700, price: 44000 },
     },
     chocolate: {
-      pequeño: { weight: 500, price: 29000 },
-      mediano: { weight: 950, price: 38000 },
+      pequeño: { weight: 500, price: 31900 },
+      mediano: { weight: 950, price: 42900 },
     },
     'arandanos & chocolate': {
-      mediano: { weight: 650, price: 33000 },
+      mediano: { weight: 650, price: 36300 },
     },
   },
   baguette: {
     original: {
-      x5: { quantity: 5, price: 9000 },
+      x5: { quantity: 5, price: 9900 },
     },
     integral: {
-      x5: { quantity: 5, price: 9000 },
+      x5: { quantity: 5, price: 9900 },
     },
     zaatar: {
-      x5: { quantity: 5, price: 9500 },
+      x5: { quantity: 5, price: 10500 },
     },
     'queso costeño': {
-      x5: { quantity: 5, price: 14000 },
+      x5: { quantity: 5, price: 15400 },
     },
     semillas: {
-      x5: { quantity: 5, price: 15000 },
+      x5: { quantity: 5, price: 16500 },
     },
     chocolate: {
-      x5: { quantity: 5, price: 24000 },
+      x5: { quantity: 5, price: 26400 },
     },
     'arandanos & chocolate': {
-      x5: { quantity: 5, price: 26000 },
+      x5: { quantity: 5, price: 28600 },
     },
   },
   tortillas: {
     original: {
-      x6: { quantity: 6, price: 8500 },
-      x10: { quantity: 10, price: 11500 },
+      x6: { quantity: 6, price: 9400 },
+      x10: { quantity: 10, price: 12700 },
     },
     integral: {
-      x6: { quantity: 6, price: 8500 },
-      x10: { quantity: 10, price: 11500 },
+      x6: { quantity: 6, price: 9400 },
+      x10: { quantity: 10, price: 12700 },
     },
     zaatar: {
-      x6: { quantity: 6, price: 9000 },
-      x10: { quantity: 10, price: 12500 },
+      x6: { quantity: 6, price: 9900 },
+      x10: { quantity: 10, price: 13800 },
     },
     'queso costeño': {
-      x6: { quantity: 6, price: 10500 },
-      x10: { quantity: 10, price: 15000 },
+      x6: { quantity: 6, price: 11600 },
+      x10: { quantity: 10, price: 16500 },
     },
     semillas: {
-      x6: { quantity: 6, price: 10500 },
-      x10: { quantity: 10, price: 15000 },
+      x6: { quantity: 6, price: 11600 },
+      x10: { quantity: 10, price: 16500 },
     },
     chocolate: {
-      x6: { quantity: 6, price: 13000 },
-      x10: { quantity: 10, price: 18000 },
+      x6: { quantity: 6, price: 14300 },
+      x10: { quantity: 10, price: 19800 },
     },
   },
   untables: {
-    'mermelada de fresa': {  price: 18000 },
+    'mermelada de fresa': { price: 18000 },
     'cebolla caramelizada': { price: 18500 },
   },
   congelados: {

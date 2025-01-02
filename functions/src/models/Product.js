@@ -66,6 +66,7 @@ class Product extends BaseModel {
     recipeId,
     basePrice,
     currentPrice,
+    taxPercentage = 0,
 
     // Display & Marketing
     displayOrder,
@@ -97,6 +98,7 @@ class Product extends BaseModel {
     // Basic price
     this.basePrice = basePrice;
     this.currentPrice = currentPrice || basePrice;
+    this.taxPercentage = parseInt(taxPercentage);
 
     // Display & Marketing
     this.displayOrder = displayOrder;
