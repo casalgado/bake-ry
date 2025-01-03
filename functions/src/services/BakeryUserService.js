@@ -69,6 +69,15 @@ const createBakeryUserService = () => {
           });
         }
 
+        // add user to b2b clients list if they are a b2b client
+        if (newUser.category === 'B2B') {
+          const b2bClientsRef = db.collection('bakeries').doc(bakeryId).collection('settings').doc('default').collection('b2b_clients');
+          b2bClientsRef.doc(userRecord.uid).set({
+            name: newUser.name,
+            id: userRecord.uid,
+          });
+        }
+
         transaction.set(userRef, userToSave);
         return userToSave;
       });
@@ -86,6 +95,8 @@ const createBakeryUserService = () => {
       throw error;
     }
   };
+
+  // services/bakeryUserService.js
 
   const update = async (id, data, bakeryId, editor = null) => {
     try {
@@ -112,7 +123,7 @@ const createBakeryUserService = () => {
 
         // Handle role-specific updates if role is changing
         if (data.role && data.role !== currentUser.role) {
-          // Update Firebase Auth claims
+        // Update Firebase Auth claims
           await admin.auth().setCustomUserClaims(id, {
             role: data.role,
             bakeryId,
@@ -131,7 +142,7 @@ const createBakeryUserService = () => {
           const willBeAssistant = assistantRoles.includes(data.role);
 
           if (willBeAssistant) {
-            // Set or update staff entry
+          // Set or update staff entry
             transaction.set(staffRef, {
               name: updatedUser.name,
               first_name: updatedUser.name.split(' ')[0],
@@ -139,9 +150,47 @@ const createBakeryUserService = () => {
               id: updatedUser.id,
             });
           } else if (wasAssistant && !willBeAssistant) {
-            // Remove from staff collection if no longer an assistant
+          // Remove from staff collection if no longer an assistant
             transaction.delete(staffRef);
           }
+        }
+
+        // Handle category changes if category is changing
+        if (data.category && data.category !== currentUser.category) {
+          const settingsRef = db
+            .collection('bakeries')
+            .doc(bakeryId)
+            .collection('settings')
+            .doc('default');
+
+          // Handle removal from old category collections
+          if (currentUser.category === 'B2B') {
+            const oldB2bRef = settingsRef.collection('b2b_clients').doc(id);
+            transaction.delete(oldB2bRef);
+          }
+
+          // Handle addition to new category collections
+          if (data.category === 'B2B') {
+            const newB2bRef = settingsRef.collection('b2b_clients').doc(id);
+            transaction.set(newB2bRef, {
+              name: updatedUser.name,
+              id: updatedUser.id,
+            });
+          }
+
+          // Record category change in history
+          const categoryHistoryRef = docRef.collection('category_history').doc();
+          transaction.set(categoryHistoryRef, {
+            previous_category: currentUser.category || 'none',
+            new_category: data.category,
+            changed_at: new Date(),
+            changed_by: {
+              userId: editor?.uid || 'system',
+              name: editor?.name || 'system',
+              role: editor?.role || 'system',
+            },
+            reason: data.categoryChangeReason || 'Manual update',
+          });
         }
 
         // Record changes in history

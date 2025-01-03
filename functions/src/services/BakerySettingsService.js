@@ -60,6 +60,19 @@ const createBakerySettingsService = () => {
     }
   };
 
+  const getB2bClientsList = async (bakeryId) => {
+    try {
+      const b2bClients = await baseService.getCollectionRef(bakeryId)
+        .doc('default')
+        .collection('b2b_clients')
+        .get();
+      return b2bClients.docs.map(doc => doc.data());
+    } catch (error) {
+      console.error('Error getting b2b clients list:', error);
+      throw error;
+    }
+  };
+
   const updateProductCategories = (existingCategories, incomingCategory) => {
     const categoryIndex = existingCategories.findIndex(
       cat => cat.id === incomingCategory.id,
@@ -86,6 +99,7 @@ const createBakerySettingsService = () => {
     getById,
     patch,
     getStaffList,
+    getB2bClientsList,
   };
 };
 

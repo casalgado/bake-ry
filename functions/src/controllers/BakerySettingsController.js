@@ -23,6 +23,16 @@ const bakerySettingsController = {
     }
   },
 
+  async getB2bClientsList(req, res) {
+    try {
+      const { bakeryId } = req.params;
+      const b2bClients = await bakerySettingsService.getB2bClientsList(bakeryId);
+      baseController.handleResponse(res, b2bClients);
+    } catch (error) {
+      baseController.handleError(res, error);
+    }
+  },
+
   // Override patch to handle product categories
   async patch(req, res) {
     try {

@@ -22,6 +22,7 @@ bakeryRouter.use(requireBakeryAssistant);
 bakeryRouter.get('/settings/:id', bakerySettingsController.getById);
 bakeryRouter.patch('/settings/:id', bakerySettingsController.patch);
 bakeryRouter.get('/settings/:id/staff', bakerySettingsController.getStaffList);
+bakeryRouter.get('/settings/:id/b2b_clients', bakerySettingsController.getB2bClientsList);
 
 // Mount the bakery router
 router.use('/:bakeryId', bakeryRouter);
