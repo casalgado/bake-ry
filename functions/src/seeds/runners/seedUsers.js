@@ -7,12 +7,12 @@ const { parseSpanishName } = require('../../utils/helpers.js');
 const customers = Object.values(clients).filter(e => {
   if (!e.history) return false;
   if (Object.values(e.history).length === 0) return false;
-  if (e.address == '' && e.phone == '') return false;
+  if (e.address == '' || e.phone == '') return false;
   return true;
 }).map(e => {
-  if (e.email == '' || e.email == null || e.email == undefined || e.email == ' ' || e.email == 'no lo dio') e.email = `placeholder@${e.name.split(' ').join('').toLowerCase()}.com`;
+  if (e.email == '' || e.email == null || e.email == undefined || e.email == ' ' || e.email == 'no lo dio') e.email = `pendiente@${e.name.split(' ').join('').toLowerCase()}.com`;
   e.category = (Math.random() > .8) ? 'B2B' : 'B2C';
-  if (e.address == '' || !e.address || e.address == null) e.address = 'direccion';
+  if (e.address == '' || e.address == ' ' || !e.address || e.address == null || e.address == 'paso por el pedido') e.address = 'pendiente';
   const cleanItem = { ...e, ...parseSpanishName(e.name), createdAt: e.since };
   delete cleanItem.history;
   return cleanItem;
@@ -117,7 +117,7 @@ const staff = [
   },
 ];
 
-const users = [...customers.slice(200, 205), ...staff];
+const users = [...customers.slice(300, 400), ...staff];
 
 async function seedUsers() {
   try {
