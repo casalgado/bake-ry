@@ -34,7 +34,7 @@ class SalesReport {
   generateMetadata() {
     return {
       dateRange: this.dateRange,
-      totalOrders: this.orders.length,
+      totalPaidOrders: this.orders.length,
       totalRevenue: this.orders.reduce((sum, order) => sum + order.total, 0),
       totalComplimentaryOrders: this.complimentaryOrders.length,
       currency: 'COP',

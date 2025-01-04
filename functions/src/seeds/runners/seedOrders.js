@@ -8,8 +8,9 @@ const seededProducts = require('../data/seededProducts.json');
 const seededUsers = require('../data/seededUsers.json');
 
 // Constants
-const NUMBER_OF_DAYS = 10;
-const APPROX_ORDERS_PER_DAY = 10;
+const NUMBER_OF_DAYS = 100;
+const APPROX_ORDERS_PER_DAY = 4; // min 3
+const ORDER_ITEM_QUANTITY = getRandomInt(1, 3);
 const DELIVERY_PROBABILITY = 0.9;
 const COMMENT_PROBABILITY = 0.2;
 const DELIVERY_FEES = [6000, 7000, 8000, 9000];
@@ -91,7 +92,7 @@ function generateRandomItems(count) {
     }
     selectedProducts.add(product.id);
 
-    const quantity = getRandomInt(1, 3);
+    const quantity = ORDER_ITEM_QUANTITY;
     const variation = product.variations?.length > 0
       ? getRandomElement(product.variations)
       : null;
