@@ -16,7 +16,7 @@ class SalesReport {
       revenueMetrics: this.generateRevenueMetrics(),
       productMetrics: this.generateProductMetrics(),
       operationalMetrics: this.generateOperationalMetrics(),
-
+      taxMetrics: this.generateTaxMetrics(),
     };
   }
 
@@ -35,6 +35,7 @@ class SalesReport {
     return {
       dateRange: this.dateRange,
       totalOrders: this.orders.length,
+      totalRevenue: this.orders.reduce((sum, order) => sum + order.total, 0),
       totalComplimentaryOrders: this.complimentaryOrders.length,
       currency: 'COP',
     };
@@ -56,7 +57,6 @@ class SalesReport {
         byQuantity: this.calculateBestSellersByQuantity(),
         byRevenue: this.calculateBestSellersByRevenue(),
       },
-      productMix: this.calculateProductMix(),
       averageItemsPerOrder: this.calculateAverageItemsPerOrder(),
       popularVariations: this.calculatePopularVariations(),
     };
@@ -67,6 +67,30 @@ class SalesReport {
       fulfillment: this.calculateFulfillmentMetrics(),
       deliveryMetrics: this.calculateDeliveryMetrics(),
     };
+  }
+
+  generateTaxMetrics() {
+    const taxMetrics = {
+      taxableItems: 0,          // Count of items that have tax
+      preTaxSubtotal: 0,        // Subtotal of taxable items before tax
+      totalTax: 0,              // Total tax amount collected
+      total: 0,                  // Total with tax
+    };
+
+    // Process each order item
+    this.orders.forEach(order => {
+      order.orderItems.filter(item => !item.isComplimentary).forEach(item => {
+        // Only count items with tax (coffee products)
+        if (item.taxPercentage > 0) {
+          taxMetrics.taxableItems += item.quantity;
+          taxMetrics.preTaxSubtotal += item.preTaxPrice * item.quantity;
+          taxMetrics.totalTax += item.taxAmount * item.quantity;
+          taxMetrics.total += item.subtotal;
+        }
+      });
+    });
+
+    return taxMetrics;
   }
 
   calculateTimeRanges() {
@@ -131,25 +155,31 @@ class SalesReport {
   calculateRevenueByCollection() {
     const collections = {};
     let totalRevenue = 0;
+    let totalQuantity = 0;
 
     this.orders.forEach(order => {
       order.orderItems.filter(item => !item.isComplimentary).forEach(item => {
         if (!collections[item.collectionName]) {
           collections[item.collectionName] = {
-            total: 0,
-            orders: 0,
+            revenue: 0,
+            quantity: 0,
           };
         }
-        collections[item.collectionName].total += item.subtotal;
-        collections[item.collectionName].orders += 1;
+        collections[item.collectionName].revenue += item.subtotal;
+        collections[item.collectionName].quantity += item.quantity;
         totalRevenue += item.subtotal;
+        totalQuantity += item.quantity;
       });
     });
 
     // Calculate percentages
     Object.keys(collections).forEach(collection => {
-      collections[collection].percentage =
-          (collections[collection].total / totalRevenue) * 100;
+      collections[collection].averagePrice = collections[collection].revenue / collections[collection].quantity;
+
+      collections[collection].percentageRevenue =
+          (collections[collection].revenue / totalRevenue) * 100;
+      collections[collection].percentageQuantity =
+          (collections[collection].quantity / totalQuantity) * 100;
     });
 
     return collections;
@@ -157,8 +187,8 @@ class SalesReport {
 
   calculateRevenueByCustomerSegment() {
     const segments = {
-      b2b: { total: 0, orders: 0 },
-      b2c: { total: 0, orders: 0 },
+      b2b: { total: 0, orders: 0, averagePrice: 0 },
+      b2c: { total: 0, orders: 0, averagePrice: 0 },
     };
 
     let totalRevenue = 0;
@@ -169,15 +199,17 @@ class SalesReport {
 
       segments[segment].total += order.total;
       segments[segment].orders += 1;
+
       totalRevenue += order.total;
     });
 
     // Calculate percentages
     Object.keys(segments).forEach(segment => {
       if (totalRevenue > 0) {
-        segments[segment].percentage = (segments[segment].total / totalRevenue) * 100;
+        segments[segment].averagePrice = segments[segment].total / segments[segment].orders;
+        segments[segment].percentageRevenue = (segments[segment].total / totalRevenue) * 100;
       } else {
-        segments[segment].percentage = 0;
+        segments[segment].percentageRevenue = 0;
       }
     });
 
@@ -219,36 +251,6 @@ class SalesReport {
     return [...products]
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 10);
-  }
-
-  calculateProductMix() {
-    const collections = {};
-    let totalQuantity = 0;
-    let totalRevenue = 0;
-
-    this.orders.forEach(order => {
-      order.orderItems.filter(item => !item.isComplimentary).forEach(item => {
-        if (!collections[item.collectionName]) {
-          collections[item.collectionName] = {
-            quantity: 0,
-            revenue: 0,
-          };
-        }
-        collections[item.collectionName].quantity += item.quantity;
-        collections[item.collectionName].revenue += item.subtotal;
-        totalQuantity += item.quantity;
-        totalRevenue += item.subtotal;
-      });
-    });
-
-    Object.keys(collections).forEach(collection => {
-      collections[collection].quantityPercentage =
-          (collections[collection].quantity / totalQuantity) * 100;
-      collections[collection].revenuePercentage =
-          (collections[collection].revenue / totalRevenue) * 100;
-    });
-
-    return collections;
   }
 
   calculateAverageItemsPerOrder() {
@@ -314,9 +316,16 @@ class SalesReport {
       (sum, order) => sum + order.deliveryFee, 0,
     );
 
+    const totalCost = deliveryOrders.reduce(
+      (sum, order) => sum + order.deliveryCost, 0,
+    );
+
     return {
-      averageFee: deliveryOrders.length ? totalFees / deliveryOrders.length : 0,
       totalFees,
+      averageFee: deliveryOrders.length ? totalFees / deliveryOrders.length : 0,
+      totalCost,
+      averageCost: deliveryOrders.length ? totalCost / deliveryOrders.length : 0,
+      deliveryRevenue: totalFees - totalCost,
       totalOrders: deliveryOrders.length,
     };
   }
