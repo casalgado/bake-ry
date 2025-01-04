@@ -1,5 +1,6 @@
 // services/orderService.js
 const { Order } = require('../models/Order');
+const SalesReport = require('../models/SalesReport');
 const createBaseService = require('./base/serviceFactory');
 const { db } = require('../config/firebase');
 const { NotFoundError, BadRequestError } = require('../utils/errors');
@@ -186,10 +187,33 @@ const createOrderService = () => {
     }
   };
 
+  const getSalesReport = async (bakeryId, query) => {
+    try {
+      // Get orders using the existing getAll method
+      const orders = await baseService.getAll(bakeryId, query);
+      const b2b_clients_query = await db.collection('bakeries').doc(bakeryId).collection('settings').doc('default').collection('b2b_clients').get();
+      const b2b_clients = [];
+      b2b_clients_query.forEach(doc => {
+        b2b_clients.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+      console.log('b2b_clients in service', b2b_clients);
+      // Create a new sales report instance and generate the report
+      const salesReport = new SalesReport(orders.items, b2b_clients);
+      return salesReport.generateReport();
+    } catch (error) {
+      console.error('Error generating sales report:', error);
+      throw error;
+    }
+  };
+
   return {
     ...baseService,
     create,
     patchAll,
+    getSalesReport,
   };
 };
 

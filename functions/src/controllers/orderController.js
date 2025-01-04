@@ -1,5 +1,6 @@
 const createBaseController = require('./base/controllerFactory');
 const orderService = require('../services/orderService');
+const QueryParser = require('../utils/queryParser');
 
 const validateOrderData = (data) => {
   const errors = [];
@@ -25,6 +26,20 @@ const orderController = {
       );
 
       baseController.handleResponse(res, results);
+    } catch (error) {
+      baseController.handleError(res, error);
+    }
+  },
+
+  async getSalesReport(req, res) {
+    try {
+      const { bakeryId } = req.params;
+      const queryParser = new QueryParser(req);
+      const query = queryParser.getQuery();
+
+      const report = await orderService.getSalesReport(bakeryId, query);
+      console.log('report', report);
+      baseController.handleResponse(res, report);
     } catch (error) {
       baseController.handleError(res, error);
     }

@@ -11,6 +11,7 @@ const customers = Object.values(clients).filter(e => {
   return true;
 }).map(e => {
   if (e.email == '' || e.email == null || e.email == undefined || e.email == ' ' || e.email == 'no lo dio') e.email = `pendiente@${e.name.split(' ').join('').toLowerCase()}.com`;
+  if (e.phone == '' || e.phone == null || e.phone == undefined || e.phone == ' ') e.phone = '5555555555';
   e.category = (Math.random() > .8) ? 'B2B' : 'B2C';
   if (e.address == '' || e.address == ' ' || !e.address || e.address == null || e.address == 'paso por el pedido') e.address = 'pendiente';
   const cleanItem = { ...e, ...parseSpanishName(e.name), createdAt: e.since };
@@ -117,7 +118,7 @@ const staff = [
   },
 ];
 
-const users = [...customers.slice(300, 400), ...staff];
+const users = [...customers.slice(300, 400), ...staff.map(e => ({ ...e, ...parseSpanishName(e.name) }))];
 
 async function seedUsers() {
   try {
