@@ -156,11 +156,11 @@ function generateProducts() {
           value: details.weight || details.quantity,
           basePrice: details.price,
           currentPrice: details.price,
-          isWholeGrain: false,
+          isWholeGrain: ['integral'].includes(flavor) ? true : false,
         });
 
         // Add wholegrain variation if not already integral product
-        if (!['integral', 'arandanos & chocolate'].includes(flavor)) {
+        if (!['integral'].includes(flavor)) {
           variations.push({
             name: `${size.toLowerCase()} integral`,
             value: details.weight || details.quantity,
