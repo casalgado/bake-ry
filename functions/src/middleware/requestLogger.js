@@ -72,6 +72,7 @@ const requestLogger = (req, res, next) => {
         // Only save to file if in development
         if (isDevelopment()) {
           try {
+            console.log('Saving request log to file');
             // Create logs directory if it doesn't exist
             const logsDir = path.join(__dirname, 'request_logs');
             if (!fs.existsSync(logsDir)) {
@@ -94,8 +95,9 @@ const requestLogger = (req, res, next) => {
                 responseTime: Date.now() - startTime,
               },
             };
-
-            const filename = `request_${Date.now()}.json`;
+            let url = req.originalUrl.split('/');
+            let last_part = url[url.length - 1].split('?')[0];
+            const filename = `${req.method}_${last_part}_${Date.now()}.json`;
             fs.writeFileSync(
               path.join(logsDir, filename),
               JSON.stringify(logEntry, null, 2),
