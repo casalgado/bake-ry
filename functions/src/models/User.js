@@ -30,7 +30,7 @@ class User extends BaseModel {
 
     this.firstName = firstName;
     this.lastName = lastName;
-    this.name = this.formatName(name, firstName, lastName);
+    this.name = name;
     this.address = address;
     this.birthday = birthday;
     this.category = category;
@@ -43,13 +43,6 @@ class User extends BaseModel {
 
   static get dateFields() {
     return [...super.dateFields];
-  }
-
-  formatName(name, firstName, lastName) {
-    if (firstName) {
-      return `${firstName} ${lastName || ''}`.trim();
-    }
-    return name || '';
   }
 
   formatPhone(phone) {
