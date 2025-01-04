@@ -1,14 +1,16 @@
 const fs = require('fs');
 const path = require('path');
 
+// Helper to check if we're in development
+const isDevelopment = () => {
+  return process.env.NODE_ENV === 'development' ||
+         process.env.FUNCTIONS_EMULATOR === 'true' ||
+         process.env.FIREBASE_CONFIG?.includes('"projectId":"demo-') ||
+         false;
+};
+
 const requestLogger = (req, res, next) => {
   const startTime = Date.now();
-
-  // Create logs directory if it doesn't exist
-  const logsDir = path.join(__dirname, 'request_logs');
-  if (!fs.existsSync(logsDir)) {
-    fs.mkdirSync(logsDir, { recursive: true });
-  }
 
   // Log request details
   console.log('\n=== Incoming Request ===');
@@ -62,38 +64,46 @@ const requestLogger = (req, res, next) => {
           logData = parsed;
         } catch (e) {
           // If response is not JSON, store as plain text
-          console.log('Response Body:', e);
+          console.log('error', e);
           logData = body.length > 1000 ? body.substring(0, 1000) + '...' : body;
           console.log('Response Body:', logData);
         }
 
-        // Create log entry with request and response data
-        const logEntry = {
-          timestamp: new Date().toISOString(),
-          request: {
-            method: req.method,
-            url: req.originalUrl,
-            body: req.body,
-            query: req.query,
-            params: req.params,
-          },
-          response: {
-            statusCode: res.statusCode,
-            body: logData,
-            responseTime: Date.now() - startTime,
-          },
-        };
+        // Only save to file if in development
+        if (isDevelopment()) {
+          try {
+            // Create logs directory if it doesn't exist
+            const logsDir = path.join(__dirname, 'request_logs');
+            if (!fs.existsSync(logsDir)) {
+              fs.mkdirSync(logsDir, { recursive: true });
+            }
 
-        // Write log entry to file
-        try {
-          const filename = `request_${Date.now()}.json`;
-          fs.writeFileSync(
-            path.join(logsDir, filename),
-            JSON.stringify(logEntry, null, 2),
-          );
-          console.log(`Request log saved to ${filename}`);
-        } catch (error) {
-          console.error('Error saving request log:', error);
+            // Create log entry with request and response data
+            const logEntry = {
+              timestamp: new Date().toISOString(),
+              request: {
+                method: req.method,
+                url: req.originalUrl,
+                body: req.body,
+                query: req.query,
+                params: req.params,
+              },
+              response: {
+                statusCode: res.statusCode,
+                body: logData,
+                responseTime: Date.now() - startTime,
+              },
+            };
+
+            const filename = `request_${Date.now()}.json`;
+            fs.writeFileSync(
+              path.join(logsDir, filename),
+              JSON.stringify(logEntry, null, 2),
+            );
+            console.log(`Request log saved to ${filename}`);
+          } catch (error) {
+            console.error('Error saving request log:', error);
+          }
         }
 
       } catch (e) {
