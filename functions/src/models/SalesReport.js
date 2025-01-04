@@ -95,30 +95,91 @@ class SalesReport {
 
   calculateTimeRanges() {
     const dailyTotals = {};
-    const weeklyTotals = {};
-    const monthlyTotals = {};
 
-    this.orders.forEach(order => {
-      const orderDate = new Date(order.dueDate);
+    // Initialize a template for each day
+    const uniqueDays = [...new Set(this.orders.map(order =>
+      new Date(order.dueDate).toISOString().split('T')[0],
+    ))].sort();
 
-      // Daily total
-      const dateKey = orderDate.toISOString().split('T')[0];
-      dailyTotals[dateKey] = (dailyTotals[dateKey] || 0) + order.total;
-
-      // Weekly total
-      const weekKey = this.getWeekRange(orderDate);
-      weeklyTotals[weekKey] = (weeklyTotals[weekKey] || 0) + order.total;
-
-      // Monthly total
-      const monthKey = this.getMonthKey(orderDate);
-      monthlyTotals[monthKey] = (monthlyTotals[monthKey] || 0) + order.total;
+    uniqueDays.forEach(date => {
+      dailyTotals[date] = {
+        b2b: 0,          // B2B sales without delivery
+        b2c: 0,          // B2C sales without delivery
+        subtotal: 0,     // Total sales without delivery
+        delivery: 0,     // Total delivery fees
+        total: 0,         // Grand total including delivery
+      };
     });
+
+    // Calculate totals for each day
+    this.orders.forEach(order => {
+      const dateKey = new Date(order.dueDate).toISOString().split('T')[0];
+      const isB2B = this.b2b_clientIds.has(order.userId);
+
+      // Calculate order subtotal (without delivery)
+      const subtotal = order.subtotal;
+
+      // Add to appropriate category
+      if (isB2B) {
+        dailyTotals[dateKey].b2b += subtotal;
+      } else {
+        dailyTotals[dateKey].b2c += subtotal;
+      }
+
+      // Add delivery fee if present
+      if (order.fulfillmentType === 'delivery' && order.deliveryFee) {
+        dailyTotals[dateKey].delivery += order.deliveryFee;
+      }
+
+      // Update totals
+      dailyTotals[dateKey].subtotal = dailyTotals[dateKey].b2b + dailyTotals[dateKey].b2c;
+      dailyTotals[dateKey].total = dailyTotals[dateKey].subtotal + dailyTotals[dateKey].delivery;
+    });
+
+    // Calculate weekly and monthly totals with the same structure
+    const weeklyTotals = this.calculatePeriodTotals(uniqueDays, dailyTotals, 'weekly');
+    const monthlyTotals = this.calculatePeriodTotals(uniqueDays, dailyTotals, 'monthly');
 
     return {
       daily: dailyTotals,
       weekly: weeklyTotals,
       monthly: monthlyTotals,
     };
+  }
+
+  calculatePeriodTotals(uniqueDays, dailyTotals, period) {
+    const periodTotals = {};
+    let periodKey;
+
+    if (period === 'weekly') {
+      // Get week range for first and last day
+      const firstDay = new Date(uniqueDays[0]);
+      const lastDay = new Date(uniqueDays[uniqueDays.length - 1]);
+      periodKey = `${this.getWeekRange(firstDay)}/${this.getWeekRange(lastDay)}`;
+    } else { // monthly
+      periodKey = this.getMonthKey(new Date(uniqueDays[0]));
+    }
+
+    // Initialize period totals
+    periodTotals[periodKey] = {
+      b2b: 0,
+      b2c: 0,
+      subtotal: 0,
+      delivery: 0,
+      total: 0,
+    };
+
+    // Sum up all daily totals
+    uniqueDays.forEach(date => {
+      const dayTotals = dailyTotals[date];
+      periodTotals[periodKey].b2b += dayTotals.b2b;
+      periodTotals[periodKey].b2c += dayTotals.b2c;
+      periodTotals[periodKey].delivery += dayTotals.delivery;
+      periodTotals[periodKey].subtotal += dayTotals.subtotal;
+      periodTotals[periodKey].total += dayTotals.total;
+    });
+
+    return periodTotals;
   }
 
   calculateAverageOrderValue() {

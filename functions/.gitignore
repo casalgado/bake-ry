@@ -7,4 +7,5 @@ src/config/serviceAccountKey.json
 /src/config/serviceAccountKey.json
 .env
 src/seeds/data/
+src/middleware/request_logs/
 *.csv

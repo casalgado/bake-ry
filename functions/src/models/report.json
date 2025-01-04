@@ -13,18 +13,66 @@
     "revenueMetrics": {
         "total": {
             "daily": {
-                "2024-12-29": 446500,
-                "2024-12-28": 389800,
-                "2024-12-27": 268500,
-                "2024-12-26": 382800,
-                "2024-12-25": 235100,
-                "2024-12-24": 229500
+                "2024-12-24": {
+                    "b2b": 26500,
+                    "b2c": 182000,
+                    "subtotal": 208500,
+                    "delivery": 21000,
+                    "total": 229500
+                },
+                "2024-12-25": {
+                    "b2b": 0,
+                    "b2c": 213100,
+                    "subtotal": 213100,
+                    "delivery": 22000,
+                    "total": 235100
+                },
+                "2024-12-26": {
+                    "b2b": 0,
+                    "b2c": 367800,
+                    "subtotal": 367800,
+                    "delivery": 15000,
+                    "total": 382800
+                },
+                "2024-12-27": {
+                    "b2b": 36000,
+                    "b2c": 202500,
+                    "subtotal": 238500,
+                    "delivery": 30000,
+                    "total": 268500
+                },
+                "2024-12-28": {
+                    "b2b": 0,
+                    "b2c": 355800,
+                    "subtotal": 355800,
+                    "delivery": 34000,
+                    "total": 389800
+                },
+                "2024-12-29": {
+                    "b2b": 71300,
+                    "b2c": 327200,
+                    "subtotal": 398500,
+                    "delivery": 21000,
+                    "total": 419500
+                }
             },
             "weekly": {
-                "2024-12-23/2024-12-29": 1952200
+                "2024-12-23/2024-12-29/2024-12-23/2024-12-29": {
+                    "b2b": 133800,
+                    "b2c": 1648400,
+                    "subtotal": 1782200,
+                    "delivery": 143000,
+                    "total": 1925200
+                }
             },
             "monthly": {
-                "2024-12": 1952200
+                "2024-12": {
+                    "b2b": 133800,
+                    "b2c": 1648400,
+                    "subtotal": 1782200,
+                    "delivery": 143000,
+                    "total": 1925200
+                }
             }
         },
         "averageOrderValue": 75084.61538461539,
@@ -49,7 +97,6 @@
             "tortillas": {
                 "revenue": 196000,
                 "quantity": 16,
-                "orders": 11,
                 "averagePrice": 12250,
                 "percentageRevenue": 10.997643362136685,
                 "percentageQuantity": 16.666666666666664
@@ -57,7 +104,6 @@
             "baguette": {
                 "revenue": 399500,
                 "quantity": 27,
-                "orders": 18,
                 "averagePrice": 14796.296296296296,
                 "percentageRevenue": 22.41611491415105,
                 "percentageQuantity": 28.125
@@ -65,7 +111,6 @@
             "sourdough": {
                 "revenue": 406200,
                 "quantity": 17,
-                "orders": 13,
                 "averagePrice": 23894.117647058825,
                 "percentageRevenue": 22.79205476377511,
                 "percentageQuantity": 17.708333333333336
@@ -73,7 +118,6 @@
             "cafe el diario": {
                 "revenue": 276000,
                 "quantity": 8,
-                "orders": 6,
                 "averagePrice": 34500,
                 "percentageRevenue": 15.4864773874986,
                 "percentageQuantity": 8.333333333333332
@@ -81,7 +125,6 @@
             "congelados": {
                 "revenue": 169000,
                 "quantity": 9,
-                "orders": 5,
                 "averagePrice": 18777.777777777777,
                 "percentageRevenue": 9.482661878577039,
                 "percentageQuantity": 9.375
@@ -89,7 +132,6 @@
             "panaderia tradicional": {
                 "revenue": 190000,
                 "quantity": 11,
-                "orders": 7,
                 "averagePrice": 17272.727272727272,
                 "percentageRevenue": 10.660980810234541,
                 "percentageQuantity": 11.458333333333332
@@ -97,7 +139,6 @@
             "untables": {
                 "revenue": 145500,
                 "quantity": 8,
-                "orders": 5,
                 "averagePrice": 18187.5,
                 "percentageRevenue": 8.164066883626978,
                 "percentageQuantity": 8.333333333333332
