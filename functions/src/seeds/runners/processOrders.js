@@ -1,16 +1,17 @@
-const clients = require('../data/export_clientes.json');
+const orders = require('../data/export_orders.json');
 const { parseSpanishName } = require('../../utils/helpers.js');
 const fs = require('fs');
 const path = require('path');
 
-// Track malformed data
+// Track processing errors
 const errorLog = {
-  emptyOrders: [],
-  malformedOrders: [],
-  invalidProducts: [],
-  orderValidationErrors: [],
+  invalidOrders: [], // Orders missing critical data
+  malformedProducts: [], // Products missing name/total
+  invalidProducts: [], // Products with invalid structure
+  clientValidationErrors: [], // Issues with client data
 };
 
+// Utility functions
 const formatMoney = (amount) => {
   return amount.toLocaleString('en-US', {
     minimumFractionDigits: 0,
@@ -36,54 +37,78 @@ const isRecentOrder = (dateStr) => {
   return year >= 2024;
 };
 
+// Transform orders into client-centric data structure
+const transformOrdersToClientData = () => {
+  const clientsMap = {};
+
+  Object.entries(orders).forEach(([orderId, order]) => {
+    // Validate order structure
+    if (!order || !order.client || !order.date || !Array.isArray(order.products)) {
+      errorLog.invalidOrders.push({
+        orderId,
+        orderData: order,
+        error: 'Invalid order structure',
+      });
+      return;
+    }
+
+    const clientName = order.client.toLowerCase().trim();
+
+    if (!clientsMap[clientName]) {
+      clientsMap[clientName] = {
+        name: order.client,
+        history: {},
+      };
+    }
+
+    // Validate products
+    const invalidProducts = order.products.filter(product =>
+      !product || typeof product !== 'object' || !product.name,
+    );
+
+    if (invalidProducts.length > 0) {
+      errorLog.malformedProducts.push({
+        orderId,
+        clientName: order.client,
+        products: invalidProducts,
+        error: 'Invalid product structure',
+      });
+    }
+
+    clientsMap[clientName].history[orderId] = {
+      date: order.date,
+      products: order.products,
+    };
+  });
+
+  return clientsMap;
+};
+
 const processCustomerAnalysis = () => {
+  const clientsData = transformOrdersToClientData();
   const customerAnalysis = {};
   const recentCustomers = {};
 
-  Object.entries(clients).forEach(([userId, customer]) => {
-    if (!customer?.history) {
-      errorLog.emptyOrders.push({
-        userId,
-        customerName: customer?.name || 'Unknown',
+  Object.entries(clientsData).forEach(([clientId, client]) => {
+    if (!client?.history) {
+      errorLog.clientValidationErrors.push({
+        clientId,
+        customerName: client?.name || 'Unknown',
         error: 'No history found',
       });
       return;
     }
 
-    if (Object.keys(customer.history).length === 0) {
-      errorLog.emptyOrders.push({
-        userId,
-        customerName: customer.name,
-        error: 'Empty history object',
-      });
-      return;
-    }
-
-    const orders = Object.entries(customer.history)
+    const orders = Object.entries(client.history)
       .map(([orderId, order]) => {
         if (!order || !order.date || !Array.isArray(order.products)) {
-          errorLog.malformedOrders.push({
-            userId,
-            customerName: customer.name,
+          errorLog.invalidOrders.push({
             orderId,
+            clientName: client.name,
             orderData: order,
             error: 'Invalid order structure',
           });
           return null;
-        }
-
-        const invalidProducts = order.products.filter(product =>
-          !product || typeof product !== 'object' || !product.name,
-        );
-
-        if (invalidProducts.length > 0) {
-          errorLog.invalidProducts.push({
-            userId,
-            customerName: customer.name,
-            orderId,
-            products: invalidProducts,
-            error: 'Invalid product structure',
-          });
         }
 
         const validProducts = order.products.filter(product =>
@@ -111,7 +136,7 @@ const processCustomerAnalysis = () => {
       const totalRevenue = orders.reduce((total, order) => total + order.total, 0);
 
       const customerData = {
-        ...parseSpanishName(customer.name),
+        ...parseSpanishName(client.name),
         totalOrders: orders.length,
         totalRevenue: formatMoney(totalRevenue),
         rawTotalRevenue: totalRevenue,
@@ -124,27 +149,21 @@ const processCustomerAnalysis = () => {
         orders,
       };
 
-      customerAnalysis[userId] = customerData;
+      customerAnalysis[clientId] = customerData;
 
       // Check if customer has recent orders
       const recentOrders = orders.filter(order => isRecentOrder(order.date));
       if (recentOrders.length > 0) {
-        recentCustomers[userId] = {
+        recentCustomers[clientId] = {
           ...customerData,
           orders: recentOrders,
           totalOrders: recentOrders.length,
         };
       }
-    } else {
-      errorLog.orderValidationErrors.push({
-        userId,
-        customerName: customer.name,
-        error: 'No valid orders found after processing',
-      });
     }
   });
 
-  // Sort customers by total orders (descending)
+  // Sort customers by total revenue (descending)
   const sortByRevenue = (obj) => {
     return Object.fromEntries(
       Object.entries(obj).sort(([, a], [, b]) => b.rawTotalRevenue - a.rawTotalRevenue),
@@ -160,17 +179,13 @@ const processCustomerAnalysis = () => {
 const processProductCatalog = () => {
   const uniqueProducts = new Set();
 
-  Object.values(clients).forEach(customer => {
-    if (!customer?.history) return;
+  Object.values(orders).forEach(order => {
+    if (!order?.products || !Array.isArray(order.products)) return;
 
-    Object.values(customer.history).forEach(order => {
-      if (!order?.products || !Array.isArray(order.products)) return;
-
-      order.products.forEach(product => {
-        if (product && product.name && product.name.toLowerCase() !== 'domicilio') {
-          uniqueProducts.add(product.name);
-        }
-      });
+    order.products.forEach(product => {
+      if (product && product.name && product.name.toLowerCase() !== 'domicilio') {
+        uniqueProducts.add(product.name);
+      }
     });
   });
 
@@ -200,10 +215,10 @@ const generateErrorSummary = (customerData) => {
       totalRecentOrders: totalRecentOrders,
     },
     errorMetrics: {
-      totalEmptyOrders: errorLog.emptyOrders.length,
-      totalMalformedOrders: errorLog.malformedOrders.length,
+      totalInvalidOrders: errorLog.invalidOrders.length,
+      totalMalformedProducts: errorLog.malformedProducts.length,
       totalInvalidProducts: errorLog.invalidProducts.length,
-      totalOrderValidationErrors: errorLog.orderValidationErrors.length,
+      totalClientValidationErrors: errorLog.clientValidationErrors.length,
     },
     details: errorLog,
   };
@@ -222,22 +237,22 @@ const summary = generateErrorSummary({ customerAnalysis, recentCustomers });
 
 // Save files
 fs.writeFileSync(
-  path.join(processedImportsDir, 'processedClientsProducts_customer_analysis.json'),
+  path.join(processedImportsDir, 'processedOrders_customer_analysis.json'),
   JSON.stringify(customerAnalysis, null, 2),
 );
 
 fs.writeFileSync(
-  path.join(processedImportsDir, 'processedClientsProducts_recent_customers.json'),
+  path.join(processedImportsDir, 'processedOrders_recent_customers.json'),
   JSON.stringify(recentCustomers, null, 2),
 );
 
 fs.writeFileSync(
-  path.join(processedImportsDir, 'processedClientsProducts_product_catalog.json'),
+  path.join(processedImportsDir, 'processedOrders_product_catalog.json'),
   JSON.stringify(productCatalog, null, 2),
 );
 
 fs.writeFileSync(
-  path.join(processedImportsDir, 'processedClientsProducts_error_log.json'),
+  path.join(processedImportsDir, 'processedOrders_error_log.json'),
   JSON.stringify(summary, null, 2),
 );
 
@@ -250,8 +265,8 @@ console.log('- Total processed orders:', summary.successMetrics.totalProcessedOr
 console.log('- Recent customers (2024-2025):', summary.successMetrics.totalRecentCustomers);
 console.log('- Recent orders (2024-2025):', summary.successMetrics.totalRecentOrders);
 console.log('\nError Metrics:');
-console.log('- Empty orders:', summary.errorMetrics.totalEmptyOrders);
-console.log('- Malformed orders:', summary.errorMetrics.totalMalformedOrders);
+console.log('- Invalid orders:', summary.errorMetrics.totalInvalidOrders);
+console.log('- Malformed products:', summary.errorMetrics.totalMalformedProducts);
 console.log('- Invalid products:', summary.errorMetrics.totalInvalidProducts);
-console.log('- Order validation errors:', summary.errorMetrics.totalOrderValidationErrors);
+console.log('- Client validation errors:', summary.errorMetrics.totalClientValidationErrors);
 console.log('\nFiles saved in processed_imports directory.');
