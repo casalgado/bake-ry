@@ -17,15 +17,18 @@ const isRecentOrder = (dateStr) => {
   return year >= 2024;
 };
 
-const matchAndFilterClients = () => {
-  const clientProfiles = {};
+const hasRecentOrders = (clientOrders) => {
+  return Object.values(clientOrders).some(order => isRecentOrder(order.date));
+};
+
+const findRecentClients = () => {
+  // Track unique clients from both sources
+  const recentClients = {};
   const errorLog = {
-    unmatchedClients: [],
     multipleMatches: [],
-    processingErrors: [],
   };
 
-  // First, create a normalized map of clients from export_clientes
+  // First pass: Create normalized map of clients from export_clientes
   const normalizedClientsMap = {};
   Object.entries(clients).forEach(([clientId, clientData]) => {
     if (clientData.name) {
@@ -43,96 +46,63 @@ const matchAndFilterClients = () => {
 
       normalizedClientsMap[normalizedName] = {
         id: clientId,
-        ...clientData,
+        data: clientData,
       };
     }
   });
 
-  // Process orders and match with clients
+  // Second pass: Process orders to find clients with recent orders
+  const ordersByClient = {};
   Object.entries(orders).forEach(([orderId, order]) => {
-    if (!order.client || !order.date) {
-      errorLog.processingErrors.push({
-        orderId,
-        error: 'Invalid order data',
-        orderData: order,
-      });
-      return;
+    if (!order.client || !order.date) return;
+
+    const clientName = order.client;
+    if (!ordersByClient[clientName]) {
+      ordersByClient[clientName] = {};
     }
-
-    const normalizedOrderClient = normalizeString(order.client);
-    const matchedClient = normalizedClientsMap[normalizedOrderClient];
-
-    if (!matchedClient) {
-      errorLog.unmatchedClients.push({
-        orderId,
-        clientName: order.client,
-      });
-      return;
-    }
-
-    // Initialize client profile if not exists
-    if (!clientProfiles[matchedClient.id]) {
-      clientProfiles[matchedClient.id] = {
-        id: matchedClient.id,
-        personalInfo: {
-          name: matchedClient.name,
-          phone: matchedClient.phone || null,
-          email: matchedClient.email || null,
-          address: matchedClient.address || null,
-          notes: matchedClient.notes || null,
-          since: matchedClient.since || null,
-        },
-        orders: [],
-      };
-    }
-
-    // Add order to client profile
-    clientProfiles[matchedClient.id].orders.push({
-      orderId,
-      date: order.date,
-      total: order.total,
-      products: order.products,
-    });
+    ordersByClient[clientName][orderId] = order;
   });
 
-  // Filter for clients with recent orders and sort orders by date
-  const recentClientProfiles = {};
-  Object.entries(clientProfiles).forEach(([clientId, profile]) => {
-    // Sort orders by date
-    profile.orders.sort((a, b) => new Date(b.date) - new Date(a.date));
+  // Process each unique client from orders
+  Object.entries(ordersByClient).forEach(([clientName, clientOrders]) => {
+    if (!hasRecentOrders(clientOrders)) return;
 
-    // Check for recent orders
-    const hasRecentOrders = profile.orders.some(order => isRecentOrder(order.date));
+    const normalizedName = normalizeString(clientName);
+    const matchedClient = normalizedClientsMap[normalizedName];
 
-    if (hasRecentOrders) {
-      // Add additional analytics
-      const recentOrders = profile.orders.filter(order => isRecentOrder(order.date));
-      const totalRecentRevenue = recentOrders.reduce((sum, order) => sum + (order.total || 0), 0);
-
-      recentClientProfiles[clientId] = {
-        ...profile,
-        analytics: {
-          totalRecentOrders: recentOrders.length,
-          totalRecentRevenue,
-          averageOrderValue: totalRecentRevenue / recentOrders.length,
-          firstOrderDate: profile.orders[profile.orders.length - 1].date,
-          lastOrderDate: profile.orders[0].date,
-          recentOrders,
-        },
+    if (matchedClient) {
+      // Client exists in export_clientes
+      recentClients[matchedClient.id] = {
+        id: matchedClient.id,
+        name: matchedClient.data.name,
+        phone: matchedClient.data.phone || null,
+        email: matchedClient.data.email || null,
+        address: matchedClient.data.address || null,
+        notes: matchedClient.data.notes || null,
+        since: matchedClient.data.since || null,
+      };
+    } else {
+      // Client only exists in orders
+      const sanitizedId = normalizedName.replace(/[^a-z0-9]/g, '_');
+      recentClients[sanitizedId] = {
+        id: sanitizedId,
+        name: clientName,
+        phone: null,
+        email: null,
+        address: null,
+        notes: 'Client found only in orders data',
+        since: null,
       };
     }
   });
 
   return {
-    clientProfiles: recentClientProfiles,
+    recentClients,
     summary: {
-      totalClients: Object.keys(clientProfiles).length,
-      recentClients: Object.keys(recentClientProfiles).length,
-      errorMetrics: {
-        unmatchedClients: errorLog.unmatchedClients.length,
-        multipleMatches: errorLog.multipleMatches.length,
-        processingErrors: errorLog.processingErrors.length,
-      },
+      totalRecentClients: Object.keys(recentClients).length,
+      matchedClients: Object.values(recentClients).filter(c => c.notes !== 'Client found only in orders data').length,
+      unmatchedClients: Object.values(recentClients).filter(c => c.notes === 'Client found only in orders data').length,
+      multipleMatches: errorLog.multipleMatches.length,
     },
     errorLog,
   };
@@ -145,27 +115,24 @@ if (!fs.existsSync(outputDir)) {
 }
 
 // Execute the matching and filtering
-const result = matchAndFilterClients();
+const result = findRecentClients();
 
 // Save the results
 fs.writeFileSync(
-  path.join(outputDir, 'processedMatchClients_matched_recent_clients.json'),
-  JSON.stringify(result.clientProfiles, null, 2),
+  path.join(outputDir, 'processedMatchClients_recent_clients.json'),
+  JSON.stringify(result.recentClients, null, 2),
 );
 
 fs.writeFileSync(
-  path.join(outputDir, 'processedMatchClients_matched_clients_error_log.json'),
+  path.join(outputDir, 'processedMatchClients_recent_clients_error_log.json'),
   JSON.stringify(result.errorLog, null, 2),
 );
 
 // Console output
 console.log('\nProcessing Summary:');
 console.log('------------------');
-console.log('Success Metrics:');
-console.log(`- Total matched clients: ${result.summary.totalClients}`);
-console.log(`- Clients with recent orders: ${result.summary.recentClients}`);
-console.log('\nError Metrics:');
-console.log(`- Unmatched clients: ${result.summary.errorMetrics.unmatchedClients}`);
-console.log(`- Multiple matches found: ${result.summary.errorMetrics.multipleMatches}`);
-console.log(`- Processing errors: ${result.summary.errorMetrics.processingErrors}`);
-console.log('\nDetailed results saved in processed_imports directory.');
+console.log(`- Total clients with recent orders: ${result.summary.totalRecentClients}`);
+console.log(`- Matched with client database: ${result.summary.matchedClients}`);
+console.log(`- Unmatched (orders only): ${result.summary.unmatchedClients}`);
+console.log(`- Multiple matches found: ${result.summary.multipleMatches}`);
+console.log('\nResults saved in processed_imports directory.');
