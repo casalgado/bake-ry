@@ -11,6 +11,13 @@ const errorLog = {
   orderValidationErrors: [],
 };
 
+const formatMoney = (amount) => {
+  return amount.toLocaleString('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+};
+
 const calculateOrderTotal = (products) => {
   if (!Array.isArray(products)) return 0;
 
@@ -98,15 +105,21 @@ const processCustomerAnalysis = () => {
     if (orders.length > 0) {
       // Sort orders by date to find the first order
       const sortedOrders = [...orders].sort((a, b) => new Date(a.date) - new Date(b.date));
-      const firstOrderDate = new Date(sortedOrders[0].date);
-      const yearsAsClient = Math.round((new Date() - firstOrderDate) / (1000 * 60 * 60 * 24 * 365) * 10) / 10;
+      const firstOrderDate = sortedOrders[0].date.split('T')[0];
+      const lastOrderDate = sortedOrders[sortedOrders.length - 1].date.split('T')[0];
+      const yearsAsClient = Math.round((new Date(lastOrderDate) - new Date(firstOrderDate)) / (1000 * 60 * 60 * 24 * 365) * 10) / 10;
+      const totalRevenue = orders.reduce((total, order) => total + order.total, 0);
 
       const customerData = {
         ...parseSpanishName(customer.name),
         totalOrders: orders.length,
-        totalRevenue: orders.reduce((total, order) => total + order.total, 0),
-        averageOrderValue: Math.round(orders.reduce((total, order) => total + order.total, 0) / orders.length),
+        totalRevenue: formatMoney(totalRevenue),
+        rawTotalRevenue: totalRevenue,
+        averageOrderValue: formatMoney(totalRevenue / orders.length),
         clientFor: yearsAsClient,
+        yearlyRevenue: yearsAsClient < 1 ? formatMoney(totalRevenue / yearsAsClient) : formatMoney(totalRevenue),
+        firstOrderDate: firstOrderDate,
+        lastOrderDate: lastOrderDate,
         uniqueProducts: orders.map(order => order.items).flat().filter((item, index, self) => self.indexOf(item) === index),
         orders,
       };
@@ -132,15 +145,15 @@ const processCustomerAnalysis = () => {
   });
 
   // Sort customers by total orders (descending)
-  const sortByOrders = (obj) => {
+  const sortByRevenue = (obj) => {
     return Object.fromEntries(
-      Object.entries(obj).sort(([, a], [, b]) => b.totalOrders - a.totalOrders),
+      Object.entries(obj).sort(([, a], [, b]) => b.rawTotalRevenue - a.rawTotalRevenue),
     );
   };
 
   return {
-    customerAnalysis: sortByOrders(customerAnalysis),
-    recentCustomers: sortByOrders(recentCustomers),
+    customerAnalysis: sortByRevenue(customerAnalysis),
+    recentCustomers: sortByRevenue(recentCustomers),
   };
 };
 
