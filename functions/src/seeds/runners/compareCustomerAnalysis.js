@@ -19,6 +19,31 @@ const differences = {
   },
 };
 
+// Helper to create a client key
+const createClientKey = (client) => {
+  return `${client.firstName?.toLowerCase()}_${client.lastName?.toLowerCase()}`;
+};
+
+// Create mappings of name to ID for both datasets
+const ordersMap = new Map();
+const clientsMap = new Map();
+
+Object.entries(ordersAnalysis).forEach(([id, client]) => {
+  const key = createClientKey(client);
+  if (!ordersMap.has(key)) {
+    ordersMap.set(key, []);
+  }
+  ordersMap.get(key).push({ id, data: client });
+});
+
+Object.entries(clientsAnalysis).forEach(([id, client]) => {
+  const key = createClientKey(client);
+  if (!clientsMap.has(key)) {
+    clientsMap.set(key, []);
+  }
+  clientsMap.get(key).push({ id, data: client });
+});
+
 // Helper to compare arrays
 const compareArrays = (arr1, arr2) => {
   const set1 = new Set(arr1);
@@ -48,7 +73,7 @@ const formatDifference = (key, ordersValue, clientsValue) => {
 };
 
 // Compare individual clients
-const compareClients = (clientId, ordersClient, clientsClient) => {
+const compareClients = (ordersClient, clientsClient) => {
   const differences = [];
 
   const keysToCompare = new Set([
@@ -57,11 +82,11 @@ const compareClients = (clientId, ordersClient, clientsClient) => {
   ]);
 
   keysToCompare.forEach(key => {
+    // Skip ID-related or redundant fields
+    if (['id', 'firstName', 'lastName', 'name', 'orders'].includes(key)) return;
+
     const ordersValue = ordersClient?.[key];
     const clientsValue = clientsClient?.[key];
-
-    // Skip orders array comparison for now - it's too detailed
-    if (key === 'orders') return;
 
     // Compare arrays (like uniqueProducts)
     if (Array.isArray(ordersValue) && Array.isArray(clientsValue)) {
@@ -80,38 +105,52 @@ const compareClients = (clientId, ordersClient, clientsClient) => {
   return differences;
 };
 
-// Process all clients
-const allClientIds = new Set([
-  ...Object.keys(ordersAnalysis),
-  ...Object.keys(clientsAnalysis),
-]);
+// Process all unique client names
+const allClientNames = new Set([...ordersMap.keys(), ...clientsMap.keys()]);
 
-allClientIds.forEach(clientId => {
-  const ordersClient = ordersAnalysis[clientId];
-  const clientsClient = clientsAnalysis[clientId];
+allClientNames.forEach(clientKey => {
+  const ordersClients = ordersMap.get(clientKey) || [];
+  const clientsClients = clientsMap.get(clientKey) || [];
 
-  if (!ordersClient) {
-    differences.onlyInClients.push({
-      clientId,
-      data: clientsClient,
+  if (ordersClients.length === 0) {
+    clientsClients.forEach(({ id, data }) => {
+      differences.onlyInClients.push({
+        clientId: id,
+        name: `${data.firstName} ${data.lastName}`,
+        data,
+      });
     });
     return;
   }
 
-  if (!clientsClient) {
-    differences.onlyInOrders.push({
-      clientId,
-      data: ordersClient,
+  if (clientsClients.length === 0) {
+    ordersClients.forEach(({ id, data }) => {
+      differences.onlyInOrders.push({
+        clientId: id,
+        name: `${data.firstName} ${data.lastName}`,
+        data,
+      });
     });
     return;
   }
 
-  const clientDiffs = compareClients(clientId, ordersClient, clientsClient);
+  // If we have matches, compare them
+  // Note: Currently comparing first match, but could be extended to handle multiple matches
+  const clientDiffs = compareClients(ordersClients[0].data, clientsClients[0].data);
   if (clientDiffs.length > 0) {
     differences.differentValues.push({
-      clientId,
+      ordersId: ordersClients[0].id,
+      clientsId: clientsClients[0].id,
+      name: `${ordersClients[0].data.firstName} ${ordersClients[0].data.lastName}`,
       differences: clientDiffs,
     });
+  }
+
+  // Log if we have multiple matches (potential duplicates)
+  if (ordersClients.length > 1 || clientsClients.length > 1) {
+    console.log(`Warning: Multiple matches found for client ${clientKey}`);
+    console.log(`- Orders matches: ${ordersClients.length}`);
+    console.log(`- Clients matches: ${clientsClients.length}`);
   }
 });
 
@@ -119,6 +158,12 @@ allClientIds.forEach(clientId => {
 differences.metadata.totalDifferences =
   differences.onlyInOrders.length +
   differences.onlyInClients.length +
+  differences.differentValues.length;
+
+// Add summary of matches/mismatches to metadata
+differences.metadata.exactMatches =
+  differences.metadata.totalClientsOrders -
+  differences.onlyInOrders.length -
   differences.differentValues.length;
 
 // Save comparison results
@@ -136,5 +181,6 @@ console.log('\nDifferences found:');
 console.log('- Clients only in Orders:', differences.onlyInOrders.length);
 console.log('- Clients only in Clients:', differences.onlyInClients.length);
 console.log('- Clients with different values:', differences.differentValues.length);
+console.log('- Exact matches:', differences.metadata.exactMatches);
 console.log('\nTotal differences:', differences.metadata.totalDifferences);
 console.log('\nDetailed comparison saved to analysis_comparison.json');
