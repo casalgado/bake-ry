@@ -1,4 +1,4 @@
-const clients = require('../data/clientes.json');
+const clients = require('../data/export_clientes.json');
 
 const fs = require('fs');
 

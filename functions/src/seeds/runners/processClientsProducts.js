@@ -1,4 +1,4 @@
-const clients = require('../data/clientes.json');
+const clients = require('../data/export_clientes.json');
 const { parseSpanishName } = require('../../utils/helpers.js');
 const fs = require('fs');
 const path = require('path');
@@ -97,7 +97,7 @@ const processCustomerAnalysis = () => {
       customerAnalysis[userId] = {
         ...parseSpanishName(customer.name),
         totalOrders: orders.length,
-        orders: orders.sort((a, b) => new Date(a.date) - new Date(b.date)),
+        orders: orders.sort((a, b) => new Date(b.date) - new Date(a.date)),
       };
     } else {
       errorLog.orderValidationErrors.push({
@@ -145,20 +145,31 @@ if (!fs.existsSync(processedImportsDir)) {
 }
 
 // Generate and save error log
-const generateErrorSummary = () => ({
-  summary: {
-    totalEmptyOrders: errorLog.emptyOrders.length,
-    totalMalformedOrders: errorLog.malformedOrders.length,
-    totalInvalidProducts: errorLog.invalidProducts.length,
-    totalOrderValidationErrors: errorLog.orderValidationErrors.length,
-  },
-  details: errorLog,
-});
+const generateErrorSummary = () => {
+  // Calculate success metrics
+  const successMetrics = {
+    totalProcessedClients: Object.keys(customerAnalysis).length,
+    totalProcessedOrders: Object.values(customerAnalysis).reduce((sum, client) =>
+      sum + client.totalOrders, 0,
+    ),
+  };
+
+  return {
+    successMetrics,
+    errorMetrics: {
+      totalEmptyOrders: errorLog.emptyOrders.length,
+      totalMalformedOrders: errorLog.malformedOrders.length,
+      totalInvalidProducts: errorLog.invalidProducts.length,
+      totalOrderValidationErrors: errorLog.orderValidationErrors.length,
+    },
+    details: errorLog,
+  };
+};
 
 // Generate and save all files
 const customerAnalysis = processCustomerAnalysis();
 const productCatalog = processProductCatalog();
-const errorSummary = generateErrorSummary();
+const summary = generateErrorSummary();
 
 // Save files
 fs.writeFileSync(
@@ -173,8 +184,18 @@ fs.writeFileSync(
 
 fs.writeFileSync(
   path.join(processedImportsDir, 'processedClientsProducts_error_log.json'),
-  JSON.stringify(errorSummary, null, 2),
+  JSON.stringify(summary, null, 2),
 );
 
-console.log('Data processing complete. Files saved in processed_imports directory.');
-console.log('Error summary:', errorSummary.summary);
+// Enhanced console output
+console.log('\nProcessing Summary:');
+console.log('------------------');
+console.log('Success Metrics:');
+console.log('- Successfully processed clients:', summary.successMetrics.totalProcessedClients);
+console.log('- Successfully processed orders:', summary.successMetrics.totalProcessedOrders);
+console.log('\nError Metrics:');
+console.log('- Empty orders:', summary.errorMetrics.totalEmptyOrders);
+console.log('- Malformed orders:', summary.errorMetrics.totalMalformedOrders);
+console.log('- Invalid products:', summary.errorMetrics.totalInvalidProducts);
+console.log('- Order validation errors:', summary.errorMetrics.totalOrderValidationErrors);
+console.log('\nFiles saved in processed_imports directory.');

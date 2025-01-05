@@ -1,6 +1,6 @@
 const { BAKERY_ID } = require('../seedConfig');
 const bakeryUserService = require('../../services/bakeryUserService');
-const clients = require('./../data/clientes.json');
+const clients = require('./../data/export_clientes.json');
 const { parseSpanishName } = require('../../utils/helpers.js');
 
 // Sample user data
