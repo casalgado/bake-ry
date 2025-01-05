@@ -20,7 +20,7 @@ const customers = Object.values(clients).filter(e => {
 const fs = require('fs');
 const path = require('path');
 
-const seedDataDir = path.join(__dirname, '../data');
+const seedDataDir = path.join(__dirname, '../data/processed_imports');
 fs.writeFileSync(
   path.join(seedDataDir, 'extractedNames.json'),
   JSON.stringify(customers, null, 2),
