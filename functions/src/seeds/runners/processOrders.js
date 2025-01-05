@@ -146,7 +146,6 @@ const processCustomerAnalysis = () => {
         firstOrderDate: firstOrderDate,
         lastOrderDate: lastOrderDate,
         uniqueProducts: orders.map(order => order.items).flat().filter((item, index, self) => self.indexOf(item) === index),
-        orders,
       };
 
       customerAnalysis[clientId] = customerData;
