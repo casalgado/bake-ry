@@ -142,7 +142,7 @@ const processCustomerAnalysis = () => {
         rawTotalRevenue: totalRevenue,
         averageOrderValue: formatMoney(totalRevenue / orders.length),
         clientFor: yearsAsClient,
-        yearlyRevenue: yearsAsClient < 1 ? formatMoney(totalRevenue / yearsAsClient) : formatMoney(totalRevenue),
+        yearlyRevenue: yearsAsClient < 1 ? formatMoney(totalRevenue) : formatMoney(totalRevenue / yearsAsClient),
         firstOrderDate: firstOrderDate,
         lastOrderDate: lastOrderDate,
         uniqueProducts: orders.map(order => order.items).flat().filter((item, index, self) => self.indexOf(item) === index),

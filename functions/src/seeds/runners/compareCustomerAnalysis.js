@@ -11,7 +11,7 @@ const clientsAnalysis = require(path.join(processedImportsDir, '../processed_imp
 const differences = {
   onlyInOrders: [],
   onlyInClients: [],
-  differentValues: [],
+  differentValues: {},
   metadata: {
     totalClientsOrders: Object.keys(ordersAnalysis).length,
     totalClientsClients: Object.keys(clientsAnalysis).length,
@@ -44,42 +44,82 @@ Object.entries(clientsAnalysis).forEach(([id, client]) => {
   clientsMap.get(key).push({ id, data: client });
 });
 
-// Helper to compare arrays
-const compareArrays = (arr1, arr2) => {
-  const set1 = new Set(arr1);
-  const set2 = new Set(arr2);
-  const diff1 = [...set1].filter(x => !set2.has(x));
-  const diff2 = [...set2].filter(x => !set1.has(x));
-  return diff1.length === 0 && diff2.length === 0;
-};
-
-// Helper to format difference
-const formatDifference = (key, ordersValue, clientsValue) => {
-  if (Array.isArray(ordersValue) && Array.isArray(clientsValue)) {
-    const onlyInOrders = _.difference(ordersValue, clientsValue);
-    const onlyInClients = _.difference(clientsValue, ordersValue);
+// Helper to calculate difference based on type
+const calculateDifference = (ordersValue, clientsValue, field) => {
+  if (Array.isArray(ordersValue)) {
+    const added = _.difference(ordersValue, clientsValue);
+    const removed = _.difference(clientsValue, ordersValue);
     return {
-      field: key,
-      onlyInOrders,
-      onlyInClients,
+      added,
+      removed,
+      magnitude: added.length + removed.length, // for sorting
+    };
+  }
+
+  if (field.includes('date')) {
+    const diffDays = Math.abs(
+      (new Date(ordersValue) - new Date(clientsValue)) / (1000 * 60 * 60 * 24),
+    );
+    return {
+      value: `${diffDays} days`,
+      magnitude: diffDays,
+    };
+  }
+
+  if (typeof ordersValue === 'number' || !isNaN(parseFloat(ordersValue))) {
+    const diff = Number(ordersValue.toString().replace(/,/g, '')) -
+                Number(clientsValue.toString().replace(/,/g, ''));
+    return {
+      value: field.includes('Revenue') || field.includes('Value') ?
+        formatMoney(Math.abs(diff)) :
+        Math.abs(diff),
+      magnitude: Math.abs(diff),
     };
   }
 
   return {
-    field: key,
+    value: 'different',
+    magnitude: 0,
+  };
+};
+
+// Helper to format money
+const formatMoney = (amount) => {
+  return amount.toLocaleString('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+};
+
+// Process differences and group by field
+const processFieldDifference = (field, ordersValue, clientsValue, clientName) => {
+  const diff = calculateDifference(ordersValue, clientsValue, field);
+
+  if (!differences.differentValues[field]) {
+    differences.differentValues[field] = [];
+  }
+
+  const entry = {
+    name: clientName,
     ordersValue,
     clientsValue,
+    difference: Array.isArray(ordersValue) ? diff : diff.value,
   };
+
+  differences.differentValues[field].push({
+    ...entry,
+    _sortMagnitude: diff.magnitude, // for sorting, will be removed before saving
+  });
 };
 
 // Compare individual clients
 const compareClients = (ordersClient, clientsClient) => {
-  const differences = [];
-
   const keysToCompare = new Set([
     ...Object.keys(ordersClient || {}),
     ...Object.keys(clientsClient || {}),
   ]);
+
+  const clientName = `${ordersClient.firstName} ${ordersClient.lastName}`;
 
   keysToCompare.forEach(key => {
     // Skip ID-related or redundant fields
@@ -88,21 +128,11 @@ const compareClients = (ordersClient, clientsClient) => {
     const ordersValue = ordersClient?.[key];
     const clientsValue = clientsClient?.[key];
 
-    // Compare arrays (like uniqueProducts)
-    if (Array.isArray(ordersValue) && Array.isArray(clientsValue)) {
-      if (!compareArrays(ordersValue, clientsValue)) {
-        differences.push(formatDifference(key, ordersValue, clientsValue));
-      }
-      return;
-    }
-
-    // Compare everything else
+    // Compare and track differences
     if (!_.isEqual(ordersValue, clientsValue)) {
-      differences.push(formatDifference(key, ordersValue, clientsValue));
+      processFieldDifference(key, ordersValue, clientsValue, clientName);
     }
   });
-
-  return differences;
 };
 
 // Process all unique client names
@@ -134,19 +164,10 @@ allClientNames.forEach(clientKey => {
     return;
   }
 
-  // If we have matches, compare them
-  // Note: Currently comparing first match, but could be extended to handle multiple matches
-  const clientDiffs = compareClients(ordersClients[0].data, clientsClients[0].data);
-  if (clientDiffs.length > 0) {
-    differences.differentValues.push({
-      ordersId: ordersClients[0].id,
-      clientsId: clientsClients[0].id,
-      name: `${ordersClients[0].data.firstName} ${ordersClients[0].data.lastName}`,
-      differences: clientDiffs,
-    });
-  }
+  // Compare first matches
+  compareClients(ordersClients[0].data, clientsClients[0].data);
 
-  // Log if we have multiple matches (potential duplicates)
+  // Log multiple matches
   if (ordersClients.length > 1 || clientsClients.length > 1) {
     console.log(`Warning: Multiple matches found for client ${clientKey}`);
     console.log(`- Orders matches: ${ordersClients.length}`);
@@ -154,17 +175,24 @@ allClientNames.forEach(clientKey => {
   }
 });
 
+// Sort differences by magnitude and remove sorting field
+Object.keys(differences.differentValues).forEach(field => {
+  differences.differentValues[field].sort((a, b) => b._sortMagnitude - a._sortMagnitude);
+  differences.differentValues[field].forEach(item => delete item._sortMagnitude);
+});
+
 // Update metadata
 differences.metadata.totalDifferences =
   differences.onlyInOrders.length +
   differences.onlyInClients.length +
-  differences.differentValues.length;
+  Object.values(differences.differentValues)
+    .reduce((sum, arr) => sum + arr.length, 0);
 
-// Add summary of matches/mismatches to metadata
 differences.metadata.exactMatches =
   differences.metadata.totalClientsOrders -
   differences.onlyInOrders.length -
-  differences.differentValues.length;
+  Object.values(differences.differentValues)
+    .reduce((sum, arr) => sum + arr.length, 0);
 
 // Save comparison results
 fs.writeFileSync(
@@ -180,7 +208,9 @@ console.log('Total clients in Clients analysis:', differences.metadata.totalClie
 console.log('\nDifferences found:');
 console.log('- Clients only in Orders:', differences.onlyInOrders.length);
 console.log('- Clients only in Clients:', differences.onlyInClients.length);
-console.log('- Clients with different values:', differences.differentValues.length);
+Object.entries(differences.differentValues).forEach(([field, diffs]) => {
+  console.log(`- Clients with different ${field}:`, diffs.length);
+});
 console.log('- Exact matches:', differences.metadata.exactMatches);
 console.log('\nTotal differences:', differences.metadata.totalDifferences);
 console.log('\nDetailed comparison saved to analysis_comparison.json');
