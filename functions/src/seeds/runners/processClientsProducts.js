@@ -11,7 +11,6 @@ const errorLog = {
   orderValidationErrors: [],
 };
 
-// Helper function to calculate order total excluding delivery
 const calculateOrderTotal = (products) => {
   if (!Array.isArray(products)) return 0;
 
@@ -24,12 +23,17 @@ const calculateOrderTotal = (products) => {
   }, 0);
 };
 
-// Process customer data
+const isRecentOrder = (dateStr) => {
+  const orderDate = new Date(dateStr);
+  const year = orderDate.getFullYear();
+  return year >= 2024;
+};
+
 const processCustomerAnalysis = () => {
   const customerAnalysis = {};
+  const recentCustomers = {};
 
   Object.entries(clients).forEach(([userId, customer]) => {
-    // Check for missing history
     if (!customer?.history) {
       errorLog.emptyOrders.push({
         userId,
@@ -50,7 +54,6 @@ const processCustomerAnalysis = () => {
 
     const orders = Object.entries(customer.history)
       .map(([orderId, order]) => {
-        // Validate order structure
         if (!order || !order.date || !Array.isArray(order.products)) {
           errorLog.malformedOrders.push({
             userId,
@@ -62,7 +65,6 @@ const processCustomerAnalysis = () => {
           return null;
         }
 
-        // Track invalid products
         const invalidProducts = order.products.filter(product =>
           !product || typeof product !== 'object' || !product.name,
         );
@@ -90,15 +92,36 @@ const processCustomerAnalysis = () => {
           items: validProducts.map(product => product.name),
         };
       })
-      .filter(order => order !== null); // Remove invalid orders
+      .filter(order => order !== null)
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    // Only add customer if they have valid orders
     if (orders.length > 0) {
-      customerAnalysis[userId] = {
+      // Sort orders by date to find the first order
+      const sortedOrders = [...orders].sort((a, b) => new Date(a.date) - new Date(b.date));
+      const firstOrderDate = new Date(sortedOrders[0].date);
+      const yearsAsClient = Math.round((new Date() - firstOrderDate) / (1000 * 60 * 60 * 24 * 365) * 10) / 10;
+
+      const customerData = {
         ...parseSpanishName(customer.name),
         totalOrders: orders.length,
-        orders: orders.sort((a, b) => new Date(b.date) - new Date(a.date)),
+        totalRevenue: orders.reduce((total, order) => total + order.total, 0),
+        averageOrderValue: Math.round(orders.reduce((total, order) => total + order.total, 0) / orders.length),
+        clientFor: yearsAsClient,
+        uniqueProducts: orders.map(order => order.items).flat().filter((item, index, self) => self.indexOf(item) === index),
+        orders,
       };
+
+      customerAnalysis[userId] = customerData;
+
+      // Check if customer has recent orders
+      const recentOrders = orders.filter(order => isRecentOrder(order.date));
+      if (recentOrders.length > 0) {
+        recentCustomers[userId] = {
+          ...customerData,
+          orders: recentOrders,
+          totalOrders: recentOrders.length,
+        };
+      }
     } else {
       errorLog.orderValidationErrors.push({
         userId,
@@ -108,10 +131,19 @@ const processCustomerAnalysis = () => {
     }
   });
 
-  return customerAnalysis;
+  // Sort customers by total orders (descending)
+  const sortByOrders = (obj) => {
+    return Object.fromEntries(
+      Object.entries(obj).sort(([, a], [, b]) => b.totalOrders - a.totalOrders),
+    );
+  };
+
+  return {
+    customerAnalysis: sortByOrders(customerAnalysis),
+    recentCustomers: sortByOrders(recentCustomers),
+  };
 };
 
-// Process product catalog
 const processProductCatalog = () => {
   const uniqueProducts = new Set();
 
@@ -138,24 +170,22 @@ const processProductCatalog = () => {
   };
 };
 
-// Create processed_imports directory if it doesn't exist
-const processedImportsDir = path.join(__dirname, '../data/processed_imports');
-if (!fs.existsSync(processedImportsDir)) {
-  fs.mkdirSync(processedImportsDir, { recursive: true });
-}
+const generateErrorSummary = (customerData) => {
+  // Calculate total orders across all customers
+  const totalOrders = Object.values(customerData.customerAnalysis)
+    .reduce((sum, client) => sum + client.totalOrders, 0);
 
-// Generate and save error log
-const generateErrorSummary = () => {
-  // Calculate success metrics
-  const successMetrics = {
-    totalProcessedClients: Object.keys(customerAnalysis).length,
-    totalProcessedOrders: Object.values(customerAnalysis).reduce((sum, client) =>
-      sum + client.totalOrders, 0,
-    ),
-  };
+  // Calculate total recent orders
+  const totalRecentOrders = Object.values(customerData.recentCustomers)
+    .reduce((sum, client) => sum + client.totalOrders, 0);
 
   return {
-    successMetrics,
+    successMetrics: {
+      totalProcessedClients: Object.keys(customerData.customerAnalysis).length,
+      totalProcessedOrders: totalOrders,
+      totalRecentCustomers: Object.keys(customerData.recentCustomers).length,
+      totalRecentOrders: totalRecentOrders,
+    },
     errorMetrics: {
       totalEmptyOrders: errorLog.emptyOrders.length,
       totalMalformedOrders: errorLog.malformedOrders.length,
@@ -166,15 +196,26 @@ const generateErrorSummary = () => {
   };
 };
 
-// Generate and save all files
-const customerAnalysis = processCustomerAnalysis();
+// Create processed_imports directory if it doesn't exist
+const processedImportsDir = path.join(__dirname, '../data/processed_imports');
+if (!fs.existsSync(processedImportsDir)) {
+  fs.mkdirSync(processedImportsDir, { recursive: true });
+}
+
+// Generate all data
+const { customerAnalysis, recentCustomers } = processCustomerAnalysis();
 const productCatalog = processProductCatalog();
-const summary = generateErrorSummary();
+const summary = generateErrorSummary({ customerAnalysis, recentCustomers });
 
 // Save files
 fs.writeFileSync(
   path.join(processedImportsDir, 'processedClientsProducts_customer_analysis.json'),
   JSON.stringify(customerAnalysis, null, 2),
+);
+
+fs.writeFileSync(
+  path.join(processedImportsDir, 'processedClientsProducts_recent_customers.json'),
+  JSON.stringify(recentCustomers, null, 2),
 );
 
 fs.writeFileSync(
@@ -191,8 +232,10 @@ fs.writeFileSync(
 console.log('\nProcessing Summary:');
 console.log('------------------');
 console.log('Success Metrics:');
-console.log('- Successfully processed clients:', summary.successMetrics.totalProcessedClients);
-console.log('- Successfully processed orders:', summary.successMetrics.totalProcessedOrders);
+console.log('- Total processed clients:', summary.successMetrics.totalProcessedClients);
+console.log('- Total processed orders:', summary.successMetrics.totalProcessedOrders);
+console.log('- Recent customers (2024-2025):', summary.successMetrics.totalRecentCustomers);
+console.log('- Recent orders (2024-2025):', summary.successMetrics.totalRecentOrders);
 console.log('\nError Metrics:');
 console.log('- Empty orders:', summary.errorMetrics.totalEmptyOrders);
 console.log('- Malformed orders:', summary.errorMetrics.totalMalformedOrders);
