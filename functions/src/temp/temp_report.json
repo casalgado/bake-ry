@@ -1,0 +1,4956 @@
+{
+    "metadata": {
+        "dateRange": {
+            "start": "2024-01-01T16:09:45.603Z",
+            "end": "2024-12-31T16:09:45.603Z",
+            "totalDays": 366
+        },
+        "totalPaidOrders": 904,
+        "totalRevenue": 57081900,
+        "totalSales": 50968900,
+        "totalDelivery": 6113000,
+        "totalB2B": 9389000,
+        "totalB2C": 41579900,
+        "percentageB2B": 18.4,
+        "percentageB2C": 81.6,
+        "totalComplimentaryOrders": 0,
+        "currency": "COP"
+    },
+    "salesMetrics": {
+        "total": {
+            "daily": {
+                "2024-01-01": {
+                    "total": 127100,
+                    "sales": 106100,
+                    "delivery": 21000,
+                    "b2b": {
+                        "amount": 34100,
+                        "percentage": 32.13949104618285
+                    },
+                    "b2c": {
+                        "amount": 72000,
+                        "percentage": 67.86050895381716
+                    }
+                },
+                "2024-01-02": {
+                    "total": 298200,
+                    "sales": 257200,
+                    "delivery": 41000,
+                    "b2b": {
+                        "amount": 49700,
+                        "percentage": 19.32348367029549
+                    },
+                    "b2c": {
+                        "amount": 207500,
+                        "percentage": 80.67651632970451
+                    }
+                },
+                "2024-01-03": {
+                    "total": 220800,
+                    "sales": 205800,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 93300,
+                        "percentage": 45.33527696793003
+                    },
+                    "b2c": {
+                        "amount": 112500,
+                        "percentage": 54.66472303206997
+                    }
+                },
+                "2024-01-04": {
+                    "total": 33000,
+                    "sales": 24000,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 24000,
+                        "percentage": 100
+                    }
+                },
+                "2024-01-05": {
+                    "total": 216000,
+                    "sales": 193000,
+                    "delivery": 23000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 193000,
+                        "percentage": 100
+                    }
+                },
+                "2024-01-06": {
+                    "total": 196800,
+                    "sales": 174800,
+                    "delivery": 22000,
+                    "b2b": {
+                        "amount": 78500,
+                        "percentage": 44.90846681922197
+                    },
+                    "b2c": {
+                        "amount": 96300,
+                        "percentage": 55.09153318077803
+                    }
+                },
+                "2024-01-08": {
+                    "total": 150700,
+                    "sales": 129700,
+                    "delivery": 21000,
+                    "b2b": {
+                        "amount": 18000,
+                        "percentage": 13.878180416345412
+                    },
+                    "b2c": {
+                        "amount": 111700,
+                        "percentage": 86.12181958365458
+                    }
+                },
+                "2024-01-09": {
+                    "total": 59000,
+                    "sales": 50000,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 50000,
+                        "percentage": 100
+                    }
+                },
+                "2024-01-10": {
+                    "total": 243200,
+                    "sales": 224200,
+                    "delivery": 19000,
+                    "b2b": {
+                        "amount": 184600,
+                        "percentage": 82.3371989295272
+                    },
+                    "b2c": {
+                        "amount": 39600,
+                        "percentage": 17.662801070472792
+                    }
+                },
+                "2024-01-11": {
+                    "total": 239100,
+                    "sales": 215100,
+                    "delivery": 24000,
+                    "b2b": {
+                        "amount": 16500,
+                        "percentage": 7.670850767085077
+                    },
+                    "b2c": {
+                        "amount": 198600,
+                        "percentage": 92.32914923291492
+                    }
+                },
+                "2024-01-12": {
+                    "total": 333400,
+                    "sales": 304400,
+                    "delivery": 29000,
+                    "b2b": {
+                        "amount": 175100,
+                        "percentage": 57.522996057818666
+                    },
+                    "b2c": {
+                        "amount": 129300,
+                        "percentage": 42.47700394218134
+                    }
+                },
+                "2024-01-13": {
+                    "total": 160000,
+                    "sales": 153000,
+                    "delivery": 7000,
+                    "b2b": {
+                        "amount": 118000,
+                        "percentage": 77.12418300653596
+                    },
+                    "b2c": {
+                        "amount": 35000,
+                        "percentage": 22.875816993464053
+                    }
+                },
+                "2024-01-15": {
+                    "total": 111400,
+                    "sales": 105400,
+                    "delivery": 6000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 105400,
+                        "percentage": 100
+                    }
+                },
+                "2024-01-16": {
+                    "total": 43300,
+                    "sales": 36300,
+                    "delivery": 7000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 36300,
+                        "percentage": 100
+                    }
+                },
+                "2024-01-17": {
+                    "total": 234200,
+                    "sales": 219200,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 219200,
+                        "percentage": 100
+                    }
+                },
+                "2024-01-18": {
+                    "total": 19000,
+                    "sales": 10000,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 10000,
+                        "percentage": 100
+                    }
+                },
+                "2024-01-19": {
+                    "total": 88800,
+                    "sales": 65800,
+                    "delivery": 23000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 65800,
+                        "percentage": 100
+                    }
+                },
+                "2024-01-20": {
+                    "total": 338400,
+                    "sales": 302400,
+                    "delivery": 36000,
+                    "b2b": {
+                        "amount": 34500,
+                        "percentage": 11.408730158730158
+                    },
+                    "b2c": {
+                        "amount": 267900,
+                        "percentage": 88.59126984126983
+                    }
+                },
+                "2024-01-22": {
+                    "total": 143200,
+                    "sales": 124200,
+                    "delivery": 19000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 124200,
+                        "percentage": 100
+                    }
+                },
+                "2024-01-23": {
+                    "total": 89500,
+                    "sales": 82500,
+                    "delivery": 7000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 82500,
+                        "percentage": 100
+                    }
+                },
+                "2024-01-24": {
+                    "total": 356500,
+                    "sales": 322500,
+                    "delivery": 34000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 322500,
+                        "percentage": 100
+                    }
+                },
+                "2024-01-25": {
+                    "total": 333300,
+                    "sales": 305300,
+                    "delivery": 28000,
+                    "b2b": {
+                        "amount": 76300,
+                        "percentage": 24.99181133311497
+                    },
+                    "b2c": {
+                        "amount": 229000,
+                        "percentage": 75.00818866688503
+                    }
+                },
+                "2024-01-26": {
+                    "total": 130800,
+                    "sales": 115800,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 6000,
+                        "percentage": 5.181347150259067
+                    },
+                    "b2c": {
+                        "amount": 109800,
+                        "percentage": 94.81865284974094
+                    }
+                },
+                "2024-01-27": {
+                    "total": 98500,
+                    "sales": 91500,
+                    "delivery": 7000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 91500,
+                        "percentage": 100
+                    }
+                },
+                "2024-01-29": {
+                    "total": 161600,
+                    "sales": 136600,
+                    "delivery": 25000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 136600,
+                        "percentage": 100
+                    }
+                },
+                "2024-01-30": {
+                    "total": 161500,
+                    "sales": 146500,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 31500,
+                        "percentage": 21.501706484641637
+                    },
+                    "b2c": {
+                        "amount": 115000,
+                        "percentage": 78.49829351535837
+                    }
+                },
+                "2024-01-31": {
+                    "total": 105300,
+                    "sales": 96300,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 96300,
+                        "percentage": 100
+                    }
+                },
+                "2024-02-01": {
+                    "total": 99900,
+                    "sales": 87900,
+                    "delivery": 12000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 87900,
+                        "percentage": 100
+                    }
+                },
+                "2024-02-02": {
+                    "total": 379600,
+                    "sales": 343600,
+                    "delivery": 36000,
+                    "b2b": {
+                        "amount": 139900,
+                        "percentage": 40.71594877764843
+                    },
+                    "b2c": {
+                        "amount": 203700,
+                        "percentage": 59.28405122235157
+                    }
+                },
+                "2024-02-03": {
+                    "total": 302500,
+                    "sales": 277500,
+                    "delivery": 25000,
+                    "b2b": {
+                        "amount": 109700,
+                        "percentage": 39.531531531531535
+                    },
+                    "b2c": {
+                        "amount": 167800,
+                        "percentage": 60.46846846846847
+                    }
+                },
+                "2024-02-05": {
+                    "total": 369900,
+                    "sales": 332900,
+                    "delivery": 37000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 332900,
+                        "percentage": 100
+                    }
+                },
+                "2024-02-06": {
+                    "total": 163400,
+                    "sales": 149400,
+                    "delivery": 14000,
+                    "b2b": {
+                        "amount": 88400,
+                        "percentage": 59.17001338688086
+                    },
+                    "b2c": {
+                        "amount": 61000,
+                        "percentage": 40.82998661311915
+                    }
+                },
+                "2024-02-07": {
+                    "total": 322400,
+                    "sales": 293400,
+                    "delivery": 29000,
+                    "b2b": {
+                        "amount": 60500,
+                        "percentage": 20.62031356509884
+                    },
+                    "b2c": {
+                        "amount": 232900,
+                        "percentage": 79.37968643490116
+                    }
+                },
+                "2024-02-08": {
+                    "total": 81900,
+                    "sales": 62900,
+                    "delivery": 19000,
+                    "b2b": {
+                        "amount": 9400,
+                        "percentage": 14.94435612082671
+                    },
+                    "b2c": {
+                        "amount": 53500,
+                        "percentage": 85.05564387917329
+                    }
+                },
+                "2024-02-09": {
+                    "total": 224000,
+                    "sales": 201000,
+                    "delivery": 23000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 201000,
+                        "percentage": 100
+                    }
+                },
+                "2024-02-10": {
+                    "total": 169000,
+                    "sales": 153000,
+                    "delivery": 16000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 153000,
+                        "percentage": 100
+                    }
+                },
+                "2024-02-12": {
+                    "total": 182700,
+                    "sales": 156700,
+                    "delivery": 26000,
+                    "b2b": {
+                        "amount": 39700,
+                        "percentage": 25.335035098915128
+                    },
+                    "b2c": {
+                        "amount": 117000,
+                        "percentage": 74.66496490108487
+                    }
+                },
+                "2024-02-13": {
+                    "total": 70900,
+                    "sales": 61900,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 61900,
+                        "percentage": 100
+                    }
+                },
+                "2024-02-14": {
+                    "total": 279100,
+                    "sales": 255100,
+                    "delivery": 24000,
+                    "b2b": {
+                        "amount": 128300,
+                        "percentage": 50.29400235201882
+                    },
+                    "b2c": {
+                        "amount": 126800,
+                        "percentage": 49.70599764798118
+                    }
+                },
+                "2024-02-15": {
+                    "total": 56800,
+                    "sales": 48800,
+                    "delivery": 8000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 48800,
+                        "percentage": 100
+                    }
+                },
+                "2024-02-16": {
+                    "total": 322200,
+                    "sales": 281200,
+                    "delivery": 41000,
+                    "b2b": {
+                        "amount": 64400,
+                        "percentage": 22.90184921763869
+                    },
+                    "b2c": {
+                        "amount": 216800,
+                        "percentage": 77.0981507823613
+                    }
+                },
+                "2024-02-17": {
+                    "total": 63000,
+                    "sales": 63000,
+                    "delivery": 0,
+                    "b2b": {
+                        "amount": 44500,
+                        "percentage": 70.63492063492063
+                    },
+                    "b2c": {
+                        "amount": 18500,
+                        "percentage": 29.365079365079367
+                    }
+                },
+                "2024-02-19": {
+                    "total": 18000,
+                    "sales": 10000,
+                    "delivery": 8000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 10000,
+                        "percentage": 100
+                    }
+                },
+                "2024-02-20": {
+                    "total": 202400,
+                    "sales": 184400,
+                    "delivery": 18000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 184400,
+                        "percentage": 100
+                    }
+                },
+                "2024-02-21": {
+                    "total": 135500,
+                    "sales": 122500,
+                    "delivery": 13000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 122500,
+                        "percentage": 100
+                    }
+                },
+                "2024-02-22": {
+                    "total": 233100,
+                    "sales": 202100,
+                    "delivery": 31000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 202100,
+                        "percentage": 100
+                    }
+                },
+                "2024-02-23": {
+                    "total": 401200,
+                    "sales": 361200,
+                    "delivery": 40000,
+                    "b2b": {
+                        "amount": 20000,
+                        "percentage": 5.537098560354374
+                    },
+                    "b2c": {
+                        "amount": 341200,
+                        "percentage": 94.46290143964563
+                    }
+                },
+                "2024-02-24": {
+                    "total": 31200,
+                    "sales": 31200,
+                    "delivery": 0,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 31200,
+                        "percentage": 100
+                    }
+                },
+                "2024-02-26": {
+                    "total": 179500,
+                    "sales": 149500,
+                    "delivery": 30000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 149500,
+                        "percentage": 100
+                    }
+                },
+                "2024-02-27": {
+                    "total": 322800,
+                    "sales": 290800,
+                    "delivery": 32000,
+                    "b2b": {
+                        "amount": 68300,
+                        "percentage": 23.486932599724895
+                    },
+                    "b2c": {
+                        "amount": 222500,
+                        "percentage": 76.5130674002751
+                    }
+                },
+                "2024-02-28": {
+                    "total": 184000,
+                    "sales": 171000,
+                    "delivery": 13000,
+                    "b2b": {
+                        "amount": 171000,
+                        "percentage": 100
+                    },
+                    "b2c": {
+                        "amount": 0,
+                        "percentage": 0
+                    }
+                },
+                "2024-02-29": {
+                    "total": 239900,
+                    "sales": 196900,
+                    "delivery": 43000,
+                    "b2b": {
+                        "amount": 13800,
+                        "percentage": 7.0086338242762825
+                    },
+                    "b2c": {
+                        "amount": 183100,
+                        "percentage": 92.99136617572373
+                    }
+                },
+                "2024-03-01": {
+                    "total": 250000,
+                    "sales": 218000,
+                    "delivery": 32000,
+                    "b2b": {
+                        "amount": 110700,
+                        "percentage": 50.77981651376147
+                    },
+                    "b2c": {
+                        "amount": 107300,
+                        "percentage": 49.22018348623853
+                    }
+                },
+                "2024-03-02": {
+                    "total": 96200,
+                    "sales": 80200,
+                    "delivery": 16000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 80200,
+                        "percentage": 100
+                    }
+                },
+                "2024-03-04": {
+                    "total": 182500,
+                    "sales": 162500,
+                    "delivery": 20000,
+                    "b2b": {
+                        "amount": 76200,
+                        "percentage": 46.892307692307696
+                    },
+                    "b2c": {
+                        "amount": 86300,
+                        "percentage": 53.10769230769231
+                    }
+                },
+                "2024-03-05": {
+                    "total": 154800,
+                    "sales": 130800,
+                    "delivery": 24000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 130800,
+                        "percentage": 100
+                    }
+                },
+                "2024-03-06": {
+                    "total": 77700,
+                    "sales": 71700,
+                    "delivery": 6000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 71700,
+                        "percentage": 100
+                    }
+                },
+                "2024-03-07": {
+                    "total": 63500,
+                    "sales": 54500,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 54500,
+                        "percentage": 100
+                    },
+                    "b2c": {
+                        "amount": 0,
+                        "percentage": 0
+                    }
+                },
+                "2024-03-08": {
+                    "total": 18900,
+                    "sales": 9900,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 9900,
+                        "percentage": 100
+                    }
+                },
+                "2024-03-09": {
+                    "total": 221100,
+                    "sales": 190100,
+                    "delivery": 31000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 190100,
+                        "percentage": 100
+                    }
+                },
+                "2024-03-11": {
+                    "total": 194900,
+                    "sales": 181900,
+                    "delivery": 13000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 181900,
+                        "percentage": 100
+                    }
+                },
+                "2024-03-12": {
+                    "total": 300700,
+                    "sales": 273700,
+                    "delivery": 27000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 273700,
+                        "percentage": 100
+                    }
+                },
+                "2024-03-13": {
+                    "total": 172000,
+                    "sales": 159000,
+                    "delivery": 13000,
+                    "b2b": {
+                        "amount": 109500,
+                        "percentage": 68.86792452830188
+                    },
+                    "b2c": {
+                        "amount": 49500,
+                        "percentage": 31.132075471698112
+                    }
+                },
+                "2024-03-14": {
+                    "total": 119300,
+                    "sales": 104300,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 104300,
+                        "percentage": 100
+                    }
+                },
+                "2024-03-15": {
+                    "total": 254100,
+                    "sales": 224100,
+                    "delivery": 30000,
+                    "b2b": {
+                        "amount": 61400,
+                        "percentage": 27.39848282016957
+                    },
+                    "b2c": {
+                        "amount": 162700,
+                        "percentage": 72.60151717983044
+                    }
+                },
+                "2024-03-16": {
+                    "total": 429200,
+                    "sales": 391200,
+                    "delivery": 38000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 391200,
+                        "percentage": 100
+                    }
+                },
+                "2024-03-18": {
+                    "total": 374800,
+                    "sales": 341800,
+                    "delivery": 33000,
+                    "b2b": {
+                        "amount": 29800,
+                        "percentage": 8.71854885898186
+                    },
+                    "b2c": {
+                        "amount": 312000,
+                        "percentage": 91.28145114101814
+                    }
+                },
+                "2024-03-19": {
+                    "total": 120400,
+                    "sales": 104400,
+                    "delivery": 16000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 104400,
+                        "percentage": 100
+                    }
+                },
+                "2024-03-20": {
+                    "total": 72700,
+                    "sales": 50700,
+                    "delivery": 22000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 50700,
+                        "percentage": 100
+                    }
+                },
+                "2024-03-21": {
+                    "total": 193000,
+                    "sales": 171000,
+                    "delivery": 22000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 171000,
+                        "percentage": 100
+                    }
+                },
+                "2024-03-22": {
+                    "total": 345100,
+                    "sales": 306100,
+                    "delivery": 39000,
+                    "b2b": {
+                        "amount": 50700,
+                        "percentage": 16.563214635739953
+                    },
+                    "b2c": {
+                        "amount": 255400,
+                        "percentage": 83.43678536426005
+                    }
+                },
+                "2024-03-23": {
+                    "total": 184700,
+                    "sales": 168700,
+                    "delivery": 16000,
+                    "b2b": {
+                        "amount": 87100,
+                        "percentage": 51.63011262596326
+                    },
+                    "b2c": {
+                        "amount": 81600,
+                        "percentage": 48.36988737403675
+                    }
+                },
+                "2024-03-25": {
+                    "total": 192800,
+                    "sales": 177800,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 131300,
+                        "percentage": 73.84701912260967
+                    },
+                    "b2c": {
+                        "amount": 46500,
+                        "percentage": 26.152980877390323
+                    }
+                },
+                "2024-03-26": {
+                    "total": 192500,
+                    "sales": 178500,
+                    "delivery": 14000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 178500,
+                        "percentage": 100
+                    }
+                },
+                "2024-03-27": {
+                    "total": 153500,
+                    "sales": 140500,
+                    "delivery": 13000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 140500,
+                        "percentage": 100
+                    }
+                },
+                "2024-03-28": {
+                    "total": 348700,
+                    "sales": 315700,
+                    "delivery": 33000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 315700,
+                        "percentage": 100
+                    }
+                },
+                "2024-03-29": {
+                    "total": 213300,
+                    "sales": 187300,
+                    "delivery": 26000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 187300,
+                        "percentage": 100
+                    }
+                },
+                "2024-03-30": {
+                    "total": 367900,
+                    "sales": 339900,
+                    "delivery": 28000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 339900,
+                        "percentage": 100
+                    }
+                },
+                "2024-04-01": {
+                    "total": 247600,
+                    "sales": 213600,
+                    "delivery": 34000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 213600,
+                        "percentage": 100
+                    }
+                },
+                "2024-04-02": {
+                    "total": 18000,
+                    "sales": 10000,
+                    "delivery": 8000,
+                    "b2b": {
+                        "amount": 10000,
+                        "percentage": 100
+                    },
+                    "b2c": {
+                        "amount": 0,
+                        "percentage": 0
+                    }
+                },
+                "2024-04-03": {
+                    "total": 143200,
+                    "sales": 130200,
+                    "delivery": 13000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 130200,
+                        "percentage": 100
+                    }
+                },
+                "2024-04-04": {
+                    "total": 213600,
+                    "sales": 182600,
+                    "delivery": 31000,
+                    "b2b": {
+                        "amount": 88600,
+                        "percentage": 48.521358159912374
+                    },
+                    "b2c": {
+                        "amount": 94000,
+                        "percentage": 51.478641840087626
+                    }
+                },
+                "2024-04-05": {
+                    "total": 42400,
+                    "sales": 36400,
+                    "delivery": 6000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 36400,
+                        "percentage": 100
+                    }
+                },
+                "2024-04-06": {
+                    "total": 191900,
+                    "sales": 183900,
+                    "delivery": 8000,
+                    "b2b": {
+                        "amount": 82900,
+                        "percentage": 45.07884719956498
+                    },
+                    "b2c": {
+                        "amount": 101000,
+                        "percentage": 54.92115280043501
+                    }
+                },
+                "2024-04-08": {
+                    "total": 158200,
+                    "sales": 144200,
+                    "delivery": 14000,
+                    "b2b": {
+                        "amount": 125700,
+                        "percentage": 87.17059639389736
+                    },
+                    "b2c": {
+                        "amount": 18500,
+                        "percentage": 12.829403606102636
+                    }
+                },
+                "2024-04-09": {
+                    "total": 232600,
+                    "sales": 210600,
+                    "delivery": 22000,
+                    "b2b": {
+                        "amount": 93700,
+                        "percentage": 44.49192782526116
+                    },
+                    "b2c": {
+                        "amount": 116900,
+                        "percentage": 55.50807217473884
+                    }
+                },
+                "2024-04-10": {
+                    "total": 315300,
+                    "sales": 294300,
+                    "delivery": 21000,
+                    "b2b": {
+                        "amount": 118300,
+                        "percentage": 40.19707781175671
+                    },
+                    "b2c": {
+                        "amount": 176000,
+                        "percentage": 59.80292218824329
+                    }
+                },
+                "2024-04-11": {
+                    "total": 178900,
+                    "sales": 158900,
+                    "delivery": 20000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 158900,
+                        "percentage": 100
+                    }
+                },
+                "2024-04-12": {
+                    "total": 209400,
+                    "sales": 187400,
+                    "delivery": 22000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 187400,
+                        "percentage": 100
+                    }
+                },
+                "2024-04-13": {
+                    "total": 166100,
+                    "sales": 151100,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 151100,
+                        "percentage": 100
+                    }
+                },
+                "2024-04-15": {
+                    "total": 61300,
+                    "sales": 54300,
+                    "delivery": 7000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 54300,
+                        "percentage": 100
+                    }
+                },
+                "2024-04-16": {
+                    "total": 325100,
+                    "sales": 293100,
+                    "delivery": 32000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 293100,
+                        "percentage": 100
+                    }
+                },
+                "2024-04-17": {
+                    "total": 45300,
+                    "sales": 36300,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 36300,
+                        "percentage": 100
+                    }
+                },
+                "2024-04-18": {
+                    "total": 55400,
+                    "sales": 46400,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 46400,
+                        "percentage": 100
+                    }
+                },
+                "2024-04-19": {
+                    "total": 140700,
+                    "sales": 126700,
+                    "delivery": 14000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 126700,
+                        "percentage": 100
+                    }
+                },
+                "2024-04-20": {
+                    "total": 134200,
+                    "sales": 103200,
+                    "delivery": 31000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 103200,
+                        "percentage": 100
+                    }
+                },
+                "2024-04-22": {
+                    "total": 137500,
+                    "sales": 122500,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 88000,
+                        "percentage": 71.83673469387755
+                    },
+                    "b2c": {
+                        "amount": 34500,
+                        "percentage": 28.163265306122447
+                    }
+                },
+                "2024-04-23": {
+                    "total": 238100,
+                    "sales": 208100,
+                    "delivery": 30000,
+                    "b2b": {
+                        "amount": 47400,
+                        "percentage": 22.777510812109565
+                    },
+                    "b2c": {
+                        "amount": 160700,
+                        "percentage": 77.22248918789045
+                    }
+                },
+                "2024-04-24": {
+                    "total": 143800,
+                    "sales": 129800,
+                    "delivery": 14000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 129800,
+                        "percentage": 100
+                    }
+                },
+                "2024-04-25": {
+                    "total": 37800,
+                    "sales": 30800,
+                    "delivery": 7000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 30800,
+                        "percentage": 100
+                    }
+                },
+                "2024-04-26": {
+                    "total": 265400,
+                    "sales": 236400,
+                    "delivery": 29000,
+                    "b2b": {
+                        "amount": 18500,
+                        "percentage": 7.825719120135363
+                    },
+                    "b2c": {
+                        "amount": 217900,
+                        "percentage": 92.17428087986464
+                    }
+                },
+                "2024-04-27": {
+                    "total": 338600,
+                    "sales": 315600,
+                    "delivery": 23000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 315600,
+                        "percentage": 100
+                    }
+                },
+                "2024-04-29": {
+                    "total": 264200,
+                    "sales": 230200,
+                    "delivery": 34000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 230200,
+                        "percentage": 100
+                    }
+                },
+                "2024-04-30": {
+                    "total": 206100,
+                    "sales": 193100,
+                    "delivery": 13000,
+                    "b2b": {
+                        "amount": 75800,
+                        "percentage": 39.254272397721394
+                    },
+                    "b2c": {
+                        "amount": 117300,
+                        "percentage": 60.745727602278606
+                    }
+                },
+                "2024-05-01": {
+                    "total": 48100,
+                    "sales": 39100,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 39100,
+                        "percentage": 100
+                    }
+                },
+                "2024-05-02": {
+                    "total": 165800,
+                    "sales": 138800,
+                    "delivery": 27000,
+                    "b2b": {
+                        "amount": 58300,
+                        "percentage": 42.002881844380404
+                    },
+                    "b2c": {
+                        "amount": 80500,
+                        "percentage": 57.997118155619596
+                    }
+                },
+                "2024-05-03": {
+                    "total": 36000,
+                    "sales": 28000,
+                    "delivery": 8000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 28000,
+                        "percentage": 100
+                    }
+                },
+                "2024-05-04": {
+                    "total": 46300,
+                    "sales": 46300,
+                    "delivery": 0,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 46300,
+                        "percentage": 100
+                    }
+                },
+                "2024-05-06": {
+                    "total": 54800,
+                    "sales": 48800,
+                    "delivery": 6000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 48800,
+                        "percentage": 100
+                    }
+                },
+                "2024-05-07": {
+                    "total": 177000,
+                    "sales": 141000,
+                    "delivery": 36000,
+                    "b2b": {
+                        "amount": 19800,
+                        "percentage": 14.042553191489363
+                    },
+                    "b2c": {
+                        "amount": 121200,
+                        "percentage": 85.95744680851064
+                    }
+                },
+                "2024-05-08": {
+                    "total": 284100,
+                    "sales": 253100,
+                    "delivery": 31000,
+                    "b2b": {
+                        "amount": 50500,
+                        "percentage": 19.95258790991703
+                    },
+                    "b2c": {
+                        "amount": 202600,
+                        "percentage": 80.04741209008297
+                    }
+                },
+                "2024-05-09": {
+                    "total": 305200,
+                    "sales": 288200,
+                    "delivery": 17000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 288200,
+                        "percentage": 100
+                    }
+                },
+                "2024-05-10": {
+                    "total": 334500,
+                    "sales": 300500,
+                    "delivery": 34000,
+                    "b2b": {
+                        "amount": 67000,
+                        "percentage": 22.296173044925123
+                    },
+                    "b2c": {
+                        "amount": 233500,
+                        "percentage": 77.70382695507487
+                    }
+                },
+                "2024-05-11": {
+                    "total": 108500,
+                    "sales": 102500,
+                    "delivery": 6000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 102500,
+                        "percentage": 100
+                    }
+                },
+                "2024-05-13": {
+                    "total": 358400,
+                    "sales": 325400,
+                    "delivery": 33000,
+                    "b2b": {
+                        "amount": 126300,
+                        "percentage": 38.813767670559315
+                    },
+                    "b2c": {
+                        "amount": 199100,
+                        "percentage": 61.18623232944069
+                    }
+                },
+                "2024-05-14": {
+                    "total": 370800,
+                    "sales": 342800,
+                    "delivery": 28000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 342800,
+                        "percentage": 100
+                    }
+                },
+                "2024-05-15": {
+                    "total": 447400,
+                    "sales": 412400,
+                    "delivery": 35000,
+                    "b2b": {
+                        "amount": 198300,
+                        "percentage": 48.08438409311348
+                    },
+                    "b2c": {
+                        "amount": 214100,
+                        "percentage": 51.915615906886515
+                    }
+                },
+                "2024-05-16": {
+                    "total": 112500,
+                    "sales": 106500,
+                    "delivery": 6000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 106500,
+                        "percentage": 100
+                    }
+                },
+                "2024-05-17": {
+                    "total": 381400,
+                    "sales": 343400,
+                    "delivery": 38000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 343400,
+                        "percentage": 100
+                    }
+                },
+                "2024-05-18": {
+                    "total": 116500,
+                    "sales": 102500,
+                    "delivery": 14000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 102500,
+                        "percentage": 100
+                    }
+                },
+                "2024-05-20": {
+                    "total": 305500,
+                    "sales": 283500,
+                    "delivery": 22000,
+                    "b2b": {
+                        "amount": 84900,
+                        "percentage": 29.947089947089943
+                    },
+                    "b2c": {
+                        "amount": 198600,
+                        "percentage": 70.05291005291005
+                    }
+                },
+                "2024-05-21": {
+                    "total": 94000,
+                    "sales": 80000,
+                    "delivery": 14000,
+                    "b2b": {
+                        "amount": 10500,
+                        "percentage": 13.125
+                    },
+                    "b2c": {
+                        "amount": 69500,
+                        "percentage": 86.875
+                    }
+                },
+                "2024-05-22": {
+                    "total": 454900,
+                    "sales": 416900,
+                    "delivery": 38000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 416900,
+                        "percentage": 100
+                    }
+                },
+                "2024-05-23": {
+                    "total": 287300,
+                    "sales": 257300,
+                    "delivery": 30000,
+                    "b2b": {
+                        "amount": 60400,
+                        "percentage": 23.47454333462884
+                    },
+                    "b2c": {
+                        "amount": 196900,
+                        "percentage": 76.52545666537117
+                    }
+                },
+                "2024-05-24": {
+                    "total": 203400,
+                    "sales": 186400,
+                    "delivery": 17000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 186400,
+                        "percentage": 100
+                    }
+                },
+                "2024-05-25": {
+                    "total": 25500,
+                    "sales": 18500,
+                    "delivery": 7000,
+                    "b2b": {
+                        "amount": 18500,
+                        "percentage": 100
+                    },
+                    "b2c": {
+                        "amount": 0,
+                        "percentage": 0
+                    }
+                },
+                "2024-05-27": {
+                    "total": 186300,
+                    "sales": 163300,
+                    "delivery": 23000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 163300,
+                        "percentage": 100
+                    }
+                },
+                "2024-05-28": {
+                    "total": 130000,
+                    "sales": 122000,
+                    "delivery": 8000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 122000,
+                        "percentage": 100
+                    }
+                },
+                "2024-05-29": {
+                    "total": 282800,
+                    "sales": 249800,
+                    "delivery": 33000,
+                    "b2b": {
+                        "amount": 63800,
+                        "percentage": 25.540432345876702
+                    },
+                    "b2c": {
+                        "amount": 186000,
+                        "percentage": 74.45956765412329
+                    }
+                },
+                "2024-05-30": {
+                    "total": 147300,
+                    "sales": 132300,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 132300,
+                        "percentage": 100
+                    }
+                },
+                "2024-05-31": {
+                    "total": 217300,
+                    "sales": 195300,
+                    "delivery": 22000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 195300,
+                        "percentage": 100
+                    }
+                },
+                "2024-06-01": {
+                    "total": 200100,
+                    "sales": 177100,
+                    "delivery": 23000,
+                    "b2b": {
+                        "amount": 27600,
+                        "percentage": 15.584415584415584
+                    },
+                    "b2c": {
+                        "amount": 149500,
+                        "percentage": 84.4155844155844
+                    }
+                },
+                "2024-06-03": {
+                    "total": 51300,
+                    "sales": 36300,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 36300,
+                        "percentage": 100
+                    }
+                },
+                "2024-06-04": {
+                    "total": 155700,
+                    "sales": 141700,
+                    "delivery": 14000,
+                    "b2b": {
+                        "amount": 141700,
+                        "percentage": 100
+                    },
+                    "b2c": {
+                        "amount": 0,
+                        "percentage": 0
+                    }
+                },
+                "2024-06-05": {
+                    "total": 493100,
+                    "sales": 453100,
+                    "delivery": 40000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 453100,
+                        "percentage": 100
+                    }
+                },
+                "2024-06-06": {
+                    "total": 126100,
+                    "sales": 92100,
+                    "delivery": 34000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 92100,
+                        "percentage": 100
+                    }
+                },
+                "2024-06-07": {
+                    "total": 92800,
+                    "sales": 84800,
+                    "delivery": 8000,
+                    "b2b": {
+                        "amount": 84800,
+                        "percentage": 100
+                    },
+                    "b2c": {
+                        "amount": 0,
+                        "percentage": 0
+                    }
+                },
+                "2024-06-08": {
+                    "total": 89400,
+                    "sales": 81400,
+                    "delivery": 8000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 81400,
+                        "percentage": 100
+                    }
+                },
+                "2024-06-10": {
+                    "total": 70900,
+                    "sales": 70900,
+                    "delivery": 0,
+                    "b2b": {
+                        "amount": 70900,
+                        "percentage": 100
+                    },
+                    "b2c": {
+                        "amount": 0,
+                        "percentage": 0
+                    }
+                },
+                "2024-06-11": {
+                    "total": 252100,
+                    "sales": 218100,
+                    "delivery": 34000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 218100,
+                        "percentage": 100
+                    }
+                },
+                "2024-06-12": {
+                    "total": 197600,
+                    "sales": 173600,
+                    "delivery": 24000,
+                    "b2b": {
+                        "amount": 16500,
+                        "percentage": 9.504608294930875
+                    },
+                    "b2c": {
+                        "amount": 157100,
+                        "percentage": 90.49539170506912
+                    }
+                },
+                "2024-06-13": {
+                    "total": 366500,
+                    "sales": 331500,
+                    "delivery": 35000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 331500,
+                        "percentage": 100
+                    }
+                },
+                "2024-06-14": {
+                    "total": 179800,
+                    "sales": 173800,
+                    "delivery": 6000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 173800,
+                        "percentage": 100
+                    }
+                },
+                "2024-06-15": {
+                    "total": 94100,
+                    "sales": 77100,
+                    "delivery": 17000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 77100,
+                        "percentage": 100
+                    }
+                },
+                "2024-06-17": {
+                    "total": 61300,
+                    "sales": 46300,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 46300,
+                        "percentage": 100
+                    }
+                },
+                "2024-06-18": {
+                    "total": 249200,
+                    "sales": 226200,
+                    "delivery": 23000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 226200,
+                        "percentage": 100
+                    }
+                },
+                "2024-06-19": {
+                    "total": 149900,
+                    "sales": 125900,
+                    "delivery": 24000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 125900,
+                        "percentage": 100
+                    }
+                },
+                "2024-06-20": {
+                    "total": 111300,
+                    "sales": 104300,
+                    "delivery": 7000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 104300,
+                        "percentage": 100
+                    }
+                },
+                "2024-06-21": {
+                    "total": 150900,
+                    "sales": 127900,
+                    "delivery": 23000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 127900,
+                        "percentage": 100
+                    }
+                },
+                "2024-06-22": {
+                    "total": 225400,
+                    "sales": 202400,
+                    "delivery": 23000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 202400,
+                        "percentage": 100
+                    }
+                },
+                "2024-06-24": {
+                    "total": 44300,
+                    "sales": 36300,
+                    "delivery": 8000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 36300,
+                        "percentage": 100
+                    }
+                },
+                "2024-06-25": {
+                    "total": 224900,
+                    "sales": 202900,
+                    "delivery": 22000,
+                    "b2b": {
+                        "amount": 88800,
+                        "percentage": 43.765401675702314
+                    },
+                    "b2c": {
+                        "amount": 114100,
+                        "percentage": 56.23459832429768
+                    }
+                },
+                "2024-06-26": {
+                    "total": 88700,
+                    "sales": 80700,
+                    "delivery": 8000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 80700,
+                        "percentage": 100
+                    }
+                },
+                "2024-06-27": {
+                    "total": 23500,
+                    "sales": 16500,
+                    "delivery": 7000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 16500,
+                        "percentage": 100
+                    }
+                },
+                "2024-06-28": {
+                    "total": 16000,
+                    "sales": 10000,
+                    "delivery": 6000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 10000,
+                        "percentage": 100
+                    }
+                },
+                "2024-06-29": {
+                    "total": 110400,
+                    "sales": 101400,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 101400,
+                        "percentage": 100
+                    }
+                },
+                "2024-07-01": {
+                    "total": 224500,
+                    "sales": 202500,
+                    "delivery": 22000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 202500,
+                        "percentage": 100
+                    }
+                },
+                "2024-07-02": {
+                    "total": 270700,
+                    "sales": 237700,
+                    "delivery": 33000,
+                    "b2b": {
+                        "amount": 44000,
+                        "percentage": 18.510727808161548
+                    },
+                    "b2c": {
+                        "amount": 193700,
+                        "percentage": 81.48927219183845
+                    }
+                },
+                "2024-07-03": {
+                    "total": 219200,
+                    "sales": 191200,
+                    "delivery": 28000,
+                    "b2b": {
+                        "amount": 23800,
+                        "percentage": 12.447698744769875
+                    },
+                    "b2c": {
+                        "amount": 167400,
+                        "percentage": 87.55230125523012
+                    }
+                },
+                "2024-07-04": {
+                    "total": 259100,
+                    "sales": 240100,
+                    "delivery": 19000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 240100,
+                        "percentage": 100
+                    }
+                },
+                "2024-07-05": {
+                    "total": 139600,
+                    "sales": 131600,
+                    "delivery": 8000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 131600,
+                        "percentage": 100
+                    }
+                },
+                "2024-07-06": {
+                    "total": 353100,
+                    "sales": 319100,
+                    "delivery": 34000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 319100,
+                        "percentage": 100
+                    }
+                },
+                "2024-07-08": {
+                    "total": 303700,
+                    "sales": 287700,
+                    "delivery": 16000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 287700,
+                        "percentage": 100
+                    }
+                },
+                "2024-07-09": {
+                    "total": 68700,
+                    "sales": 59700,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 59700,
+                        "percentage": 100
+                    }
+                },
+                "2024-07-10": {
+                    "total": 71300,
+                    "sales": 64300,
+                    "delivery": 7000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 64300,
+                        "percentage": 100
+                    }
+                },
+                "2024-07-11": {
+                    "total": 335300,
+                    "sales": 310300,
+                    "delivery": 25000,
+                    "b2b": {
+                        "amount": 68600,
+                        "percentage": 22.107637769900094
+                    },
+                    "b2c": {
+                        "amount": 241700,
+                        "percentage": 77.8923622300999
+                    }
+                },
+                "2024-07-12": {
+                    "total": 44900,
+                    "sales": 37900,
+                    "delivery": 7000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 37900,
+                        "percentage": 100
+                    }
+                },
+                "2024-07-13": {
+                    "total": 170600,
+                    "sales": 142600,
+                    "delivery": 28000,
+                    "b2b": {
+                        "amount": 84400,
+                        "percentage": 59.18653576437588
+                    },
+                    "b2c": {
+                        "amount": 58200,
+                        "percentage": 40.813464235624124
+                    }
+                },
+                "2024-07-15": {
+                    "total": 117400,
+                    "sales": 102400,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 30100,
+                        "percentage": 29.39453125
+                    },
+                    "b2c": {
+                        "amount": 72300,
+                        "percentage": 70.60546875
+                    }
+                },
+                "2024-07-16": {
+                    "total": 170900,
+                    "sales": 153900,
+                    "delivery": 17000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 153900,
+                        "percentage": 100
+                    }
+                },
+                "2024-07-17": {
+                    "total": 93400,
+                    "sales": 87400,
+                    "delivery": 6000,
+                    "b2b": {
+                        "amount": 87400,
+                        "percentage": 100
+                    },
+                    "b2c": {
+                        "amount": 0,
+                        "percentage": 0
+                    }
+                },
+                "2024-07-18": {
+                    "total": 42000,
+                    "sales": 26000,
+                    "delivery": 16000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 26000,
+                        "percentage": 100
+                    }
+                },
+                "2024-07-19": {
+                    "total": 98500,
+                    "sales": 80500,
+                    "delivery": 18000,
+                    "b2b": {
+                        "amount": 52500,
+                        "percentage": 65.21739130434783
+                    },
+                    "b2c": {
+                        "amount": 28000,
+                        "percentage": 34.78260869565217
+                    }
+                },
+                "2024-07-20": {
+                    "total": 153300,
+                    "sales": 128300,
+                    "delivery": 25000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 128300,
+                        "percentage": 100
+                    }
+                },
+                "2024-07-22": {
+                    "total": 332200,
+                    "sales": 303200,
+                    "delivery": 29000,
+                    "b2b": {
+                        "amount": 32800,
+                        "percentage": 10.817941952506596
+                    },
+                    "b2c": {
+                        "amount": 270400,
+                        "percentage": 89.18205804749341
+                    }
+                },
+                "2024-07-23": {
+                    "total": 164600,
+                    "sales": 146600,
+                    "delivery": 18000,
+                    "b2b": {
+                        "amount": 66100,
+                        "percentage": 45.08867667121419
+                    },
+                    "b2c": {
+                        "amount": 80500,
+                        "percentage": 54.91132332878581
+                    }
+                },
+                "2024-07-24": {
+                    "total": 81500,
+                    "sales": 72500,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 72500,
+                        "percentage": 100
+                    }
+                },
+                "2024-07-25": {
+                    "total": 121200,
+                    "sales": 104200,
+                    "delivery": 17000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 104200,
+                        "percentage": 100
+                    }
+                },
+                "2024-07-26": {
+                    "total": 158700,
+                    "sales": 137700,
+                    "delivery": 21000,
+                    "b2b": {
+                        "amount": 22600,
+                        "percentage": 16.412490922294847
+                    },
+                    "b2c": {
+                        "amount": 115100,
+                        "percentage": 83.58750907770516
+                    }
+                },
+                "2024-07-27": {
+                    "total": 88500,
+                    "sales": 82500,
+                    "delivery": 6000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 82500,
+                        "percentage": 100
+                    }
+                },
+                "2024-07-29": {
+                    "total": 67100,
+                    "sales": 58100,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 58100,
+                        "percentage": 100
+                    }
+                },
+                "2024-07-30": {
+                    "total": 124900,
+                    "sales": 97900,
+                    "delivery": 27000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 97900,
+                        "percentage": 100
+                    }
+                },
+                "2024-07-31": {
+                    "total": 199400,
+                    "sales": 190400,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 190400,
+                        "percentage": 100
+                    }
+                },
+                "2024-08-01": {
+                    "total": 54000,
+                    "sales": 48000,
+                    "delivery": 6000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 48000,
+                        "percentage": 100
+                    }
+                },
+                "2024-08-02": {
+                    "total": 136500,
+                    "sales": 112500,
+                    "delivery": 24000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 112500,
+                        "percentage": 100
+                    }
+                },
+                "2024-08-03": {
+                    "total": 286500,
+                    "sales": 255500,
+                    "delivery": 31000,
+                    "b2b": {
+                        "amount": 69800,
+                        "percentage": 27.318982387475536
+                    },
+                    "b2c": {
+                        "amount": 185700,
+                        "percentage": 72.68101761252446
+                    }
+                },
+                "2024-08-05": {
+                    "total": 75400,
+                    "sales": 66400,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 66400,
+                        "percentage": 100
+                    }
+                },
+                "2024-08-06": {
+                    "total": 321200,
+                    "sales": 283200,
+                    "delivery": 38000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 283200,
+                        "percentage": 100
+                    }
+                },
+                "2024-08-07": {
+                    "total": 178000,
+                    "sales": 162000,
+                    "delivery": 16000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 162000,
+                        "percentage": 100
+                    }
+                },
+                "2024-08-08": {
+                    "total": 194300,
+                    "sales": 171300,
+                    "delivery": 23000,
+                    "b2b": {
+                        "amount": 33200,
+                        "percentage": 19.38120256859311
+                    },
+                    "b2c": {
+                        "amount": 138100,
+                        "percentage": 80.61879743140689
+                    }
+                },
+                "2024-08-09": {
+                    "total": 98800,
+                    "sales": 98800,
+                    "delivery": 0,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 98800,
+                        "percentage": 100
+                    }
+                },
+                "2024-08-10": {
+                    "total": 259500,
+                    "sales": 221500,
+                    "delivery": 38000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 221500,
+                        "percentage": 100
+                    }
+                },
+                "2024-08-12": {
+                    "total": 169700,
+                    "sales": 146700,
+                    "delivery": 23000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 146700,
+                        "percentage": 100
+                    }
+                },
+                "2024-08-13": {
+                    "total": 330800,
+                    "sales": 299800,
+                    "delivery": 31000,
+                    "b2b": {
+                        "amount": 12700,
+                        "percentage": 4.236157438292195
+                    },
+                    "b2c": {
+                        "amount": 287100,
+                        "percentage": 95.7638425617078
+                    }
+                },
+                "2024-08-14": {
+                    "total": 145300,
+                    "sales": 133300,
+                    "delivery": 12000,
+                    "b2b": {
+                        "amount": 57100,
+                        "percentage": 42.835708927231806
+                    },
+                    "b2c": {
+                        "amount": 76200,
+                        "percentage": 57.164291072768194
+                    }
+                },
+                "2024-08-15": {
+                    "total": 277000,
+                    "sales": 236000,
+                    "delivery": 41000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 236000,
+                        "percentage": 100
+                    }
+                },
+                "2024-08-16": {
+                    "total": 146900,
+                    "sales": 117900,
+                    "delivery": 29000,
+                    "b2b": {
+                        "amount": 34500,
+                        "percentage": 29.262086513994912
+                    },
+                    "b2c": {
+                        "amount": 83400,
+                        "percentage": 70.73791348600508
+                    }
+                },
+                "2024-08-17": {
+                    "total": 295900,
+                    "sales": 256900,
+                    "delivery": 39000,
+                    "b2b": {
+                        "amount": 193400,
+                        "percentage": 75.28221097703387
+                    },
+                    "b2c": {
+                        "amount": 63500,
+                        "percentage": 24.717789022966137
+                    }
+                },
+                "2024-08-19": {
+                    "total": 241100,
+                    "sales": 215100,
+                    "delivery": 26000,
+                    "b2b": {
+                        "amount": 41500,
+                        "percentage": 19.29335192933519
+                    },
+                    "b2c": {
+                        "amount": 173600,
+                        "percentage": 80.70664807066481
+                    }
+                },
+                "2024-08-20": {
+                    "total": 45300,
+                    "sales": 30300,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 30300,
+                        "percentage": 100
+                    }
+                },
+                "2024-08-21": {
+                    "total": 252500,
+                    "sales": 222500,
+                    "delivery": 30000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 222500,
+                        "percentage": 100
+                    }
+                },
+                "2024-08-22": {
+                    "total": 221200,
+                    "sales": 199200,
+                    "delivery": 22000,
+                    "b2b": {
+                        "amount": 18500,
+                        "percentage": 9.287148594377511
+                    },
+                    "b2c": {
+                        "amount": 180700,
+                        "percentage": 90.71285140562249
+                    }
+                },
+                "2024-08-23": {
+                    "total": 129500,
+                    "sales": 113500,
+                    "delivery": 16000,
+                    "b2b": {
+                        "amount": 18000,
+                        "percentage": 15.859030837004406
+                    },
+                    "b2c": {
+                        "amount": 95500,
+                        "percentage": 84.14096916299559
+                    }
+                },
+                "2024-08-24": {
+                    "total": 171100,
+                    "sales": 142100,
+                    "delivery": 29000,
+                    "b2b": {
+                        "amount": 93500,
+                        "percentage": 65.79873328641803
+                    },
+                    "b2c": {
+                        "amount": 48600,
+                        "percentage": 34.20126671358199
+                    }
+                },
+                "2024-08-26": {
+                    "total": 211600,
+                    "sales": 190600,
+                    "delivery": 21000,
+                    "b2b": {
+                        "amount": 10000,
+                        "percentage": 5.246589716684155
+                    },
+                    "b2c": {
+                        "amount": 180600,
+                        "percentage": 94.75341028331584
+                    }
+                },
+                "2024-08-27": {
+                    "total": 82500,
+                    "sales": 76500,
+                    "delivery": 6000,
+                    "b2b": {
+                        "amount": 76500,
+                        "percentage": 100
+                    },
+                    "b2c": {
+                        "amount": 0,
+                        "percentage": 0
+                    }
+                },
+                "2024-08-28": {
+                    "total": 71800,
+                    "sales": 62800,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 62800,
+                        "percentage": 100
+                    }
+                },
+                "2024-08-29": {
+                    "total": 76500,
+                    "sales": 67500,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 67500,
+                        "percentage": 100
+                    },
+                    "b2c": {
+                        "amount": 0,
+                        "percentage": 0
+                    }
+                },
+                "2024-08-30": {
+                    "total": 217400,
+                    "sales": 192400,
+                    "delivery": 25000,
+                    "b2b": {
+                        "amount": 26400,
+                        "percentage": 13.721413721413722
+                    },
+                    "b2c": {
+                        "amount": 166000,
+                        "percentage": 86.27858627858627
+                    }
+                },
+                "2024-08-31": {
+                    "total": 161800,
+                    "sales": 155800,
+                    "delivery": 6000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 155800,
+                        "percentage": 100
+                    }
+                },
+                "2024-09-02": {
+                    "total": 347900,
+                    "sales": 315900,
+                    "delivery": 32000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 315900,
+                        "percentage": 100
+                    }
+                },
+                "2024-09-03": {
+                    "total": 191500,
+                    "sales": 176500,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 176500,
+                        "percentage": 100
+                    }
+                },
+                "2024-09-04": {
+                    "total": 74500,
+                    "sales": 67500,
+                    "delivery": 7000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 67500,
+                        "percentage": 100
+                    }
+                },
+                "2024-09-05": {
+                    "total": 263500,
+                    "sales": 240500,
+                    "delivery": 23000,
+                    "b2b": {
+                        "amount": 127500,
+                        "percentage": 53.01455301455301
+                    },
+                    "b2c": {
+                        "amount": 113000,
+                        "percentage": 46.98544698544699
+                    }
+                },
+                "2024-09-06": {
+                    "total": 127200,
+                    "sales": 110200,
+                    "delivery": 17000,
+                    "b2b": {
+                        "amount": 38400,
+                        "percentage": 34.84573502722323
+                    },
+                    "b2c": {
+                        "amount": 71800,
+                        "percentage": 65.15426497277676
+                    }
+                },
+                "2024-09-07": {
+                    "total": 368000,
+                    "sales": 332000,
+                    "delivery": 36000,
+                    "b2b": {
+                        "amount": 159300,
+                        "percentage": 47.98192771084337
+                    },
+                    "b2c": {
+                        "amount": 172700,
+                        "percentage": 52.01807228915663
+                    }
+                },
+                "2024-09-09": {
+                    "total": 111900,
+                    "sales": 95900,
+                    "delivery": 16000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 95900,
+                        "percentage": 100
+                    }
+                },
+                "2024-09-10": {
+                    "total": 24500,
+                    "sales": 16500,
+                    "delivery": 8000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 16500,
+                        "percentage": 100
+                    }
+                },
+                "2024-09-11": {
+                    "total": 236600,
+                    "sales": 215600,
+                    "delivery": 21000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 215600,
+                        "percentage": 100
+                    }
+                },
+                "2024-09-12": {
+                    "total": 289000,
+                    "sales": 256000,
+                    "delivery": 33000,
+                    "b2b": {
+                        "amount": 118400,
+                        "percentage": 46.25
+                    },
+                    "b2c": {
+                        "amount": 137600,
+                        "percentage": 53.75
+                    }
+                },
+                "2024-09-13": {
+                    "total": 448900,
+                    "sales": 407900,
+                    "delivery": 41000,
+                    "b2b": {
+                        "amount": 119800,
+                        "percentage": 29.369943613630795
+                    },
+                    "b2c": {
+                        "amount": 288100,
+                        "percentage": 70.6300563863692
+                    }
+                },
+                "2024-09-14": {
+                    "total": 82900,
+                    "sales": 75900,
+                    "delivery": 7000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 75900,
+                        "percentage": 100
+                    }
+                },
+                "2024-09-16": {
+                    "total": 205300,
+                    "sales": 190300,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 105800,
+                        "percentage": 55.59642669469259
+                    },
+                    "b2c": {
+                        "amount": 84500,
+                        "percentage": 44.40357330530741
+                    }
+                },
+                "2024-09-17": {
+                    "total": 196700,
+                    "sales": 183700,
+                    "delivery": 13000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 183700,
+                        "percentage": 100
+                    }
+                },
+                "2024-09-18": {
+                    "total": 372200,
+                    "sales": 335200,
+                    "delivery": 37000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 335200,
+                        "percentage": 100
+                    }
+                },
+                "2024-09-19": {
+                    "total": 69700,
+                    "sales": 61700,
+                    "delivery": 8000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 61700,
+                        "percentage": 100
+                    }
+                },
+                "2024-09-20": {
+                    "total": 136200,
+                    "sales": 127200,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 46500,
+                        "percentage": 36.556603773584904
+                    },
+                    "b2c": {
+                        "amount": 80700,
+                        "percentage": 63.443396226415096
+                    }
+                },
+                "2024-09-21": {
+                    "total": 225700,
+                    "sales": 202700,
+                    "delivery": 23000,
+                    "b2b": {
+                        "amount": 134300,
+                        "percentage": 66.255550074001
+                    },
+                    "b2c": {
+                        "amount": 68400,
+                        "percentage": 33.744449925999014
+                    }
+                },
+                "2024-09-23": {
+                    "total": 208800,
+                    "sales": 183800,
+                    "delivery": 25000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 183800,
+                        "percentage": 100
+                    }
+                },
+                "2024-09-24": {
+                    "total": 164100,
+                    "sales": 151100,
+                    "delivery": 13000,
+                    "b2b": {
+                        "amount": 98600,
+                        "percentage": 65.25479814692257
+                    },
+                    "b2c": {
+                        "amount": 52500,
+                        "percentage": 34.74520185307743
+                    }
+                },
+                "2024-09-25": {
+                    "total": 183900,
+                    "sales": 168900,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 42600,
+                        "percentage": 25.22202486678508
+                    },
+                    "b2c": {
+                        "amount": 126300,
+                        "percentage": 74.77797513321492
+                    }
+                },
+                "2024-09-26": {
+                    "total": 149700,
+                    "sales": 137700,
+                    "delivery": 12000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 137700,
+                        "percentage": 100
+                    }
+                },
+                "2024-09-27": {
+                    "total": 162100,
+                    "sales": 140100,
+                    "delivery": 22000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 140100,
+                        "percentage": 100
+                    }
+                },
+                "2024-09-28": {
+                    "total": 165900,
+                    "sales": 144900,
+                    "delivery": 21000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 144900,
+                        "percentage": 100
+                    }
+                },
+                "2024-09-30": {
+                    "total": 232300,
+                    "sales": 206300,
+                    "delivery": 26000,
+                    "b2b": {
+                        "amount": 20000,
+                        "percentage": 9.694619486185168
+                    },
+                    "b2c": {
+                        "amount": 186300,
+                        "percentage": 90.30538051381484
+                    }
+                },
+                "2024-10-01": {
+                    "total": 262700,
+                    "sales": 241700,
+                    "delivery": 21000,
+                    "b2b": {
+                        "amount": 128100,
+                        "percentage": 52.99958626396359
+                    },
+                    "b2c": {
+                        "amount": 113600,
+                        "percentage": 47.00041373603641
+                    }
+                },
+                "2024-10-02": {
+                    "total": 15900,
+                    "sales": 9900,
+                    "delivery": 6000,
+                    "b2b": {
+                        "amount": 9900,
+                        "percentage": 100
+                    },
+                    "b2c": {
+                        "amount": 0,
+                        "percentage": 0
+                    }
+                },
+                "2024-10-03": {
+                    "total": 143500,
+                    "sales": 131500,
+                    "delivery": 12000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 131500,
+                        "percentage": 100
+                    }
+                },
+                "2024-10-04": {
+                    "total": 378800,
+                    "sales": 346800,
+                    "delivery": 32000,
+                    "b2b": {
+                        "amount": 143600,
+                        "percentage": 41.40715109573241
+                    },
+                    "b2c": {
+                        "amount": 203200,
+                        "percentage": 58.59284890426759
+                    }
+                },
+                "2024-10-05": {
+                    "total": 56700,
+                    "sales": 50700,
+                    "delivery": 6000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 50700,
+                        "percentage": 100
+                    }
+                },
+                "2024-10-07": {
+                    "total": 124000,
+                    "sales": 108000,
+                    "delivery": 16000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 108000,
+                        "percentage": 100
+                    }
+                },
+                "2024-10-08": {
+                    "total": 315200,
+                    "sales": 291200,
+                    "delivery": 24000,
+                    "b2b": {
+                        "amount": 94800,
+                        "percentage": 32.55494505494506
+                    },
+                    "b2c": {
+                        "amount": 196400,
+                        "percentage": 67.44505494505495
+                    }
+                },
+                "2024-10-09": {
+                    "total": 340200,
+                    "sales": 306200,
+                    "delivery": 34000,
+                    "b2b": {
+                        "amount": 97900,
+                        "percentage": 31.972566949706078
+                    },
+                    "b2c": {
+                        "amount": 208300,
+                        "percentage": 68.02743305029392
+                    }
+                },
+                "2024-10-10": {
+                    "total": 180400,
+                    "sales": 157400,
+                    "delivery": 23000,
+                    "b2b": {
+                        "amount": 109600,
+                        "percentage": 69.6315120711563
+                    },
+                    "b2c": {
+                        "amount": 47800,
+                        "percentage": 30.368487928843713
+                    }
+                },
+                "2024-10-11": {
+                    "total": 186100,
+                    "sales": 159100,
+                    "delivery": 27000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 159100,
+                        "percentage": 100
+                    }
+                },
+                "2024-10-12": {
+                    "total": 100800,
+                    "sales": 94800,
+                    "delivery": 6000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 94800,
+                        "percentage": 100
+                    }
+                },
+                "2024-10-14": {
+                    "total": 238700,
+                    "sales": 211700,
+                    "delivery": 27000,
+                    "b2b": {
+                        "amount": 42900,
+                        "percentage": 20.26452527161077
+                    },
+                    "b2c": {
+                        "amount": 168800,
+                        "percentage": 79.73547472838924
+                    }
+                },
+                "2024-10-15": {
+                    "total": 20000,
+                    "sales": 20000,
+                    "delivery": 0,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 20000,
+                        "percentage": 100
+                    }
+                },
+                "2024-10-16": {
+                    "total": 69300,
+                    "sales": 46300,
+                    "delivery": 23000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 46300,
+                        "percentage": 100
+                    }
+                },
+                "2024-10-17": {
+                    "total": 129200,
+                    "sales": 117200,
+                    "delivery": 12000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 117200,
+                        "percentage": 100
+                    }
+                },
+                "2024-10-18": {
+                    "total": 133600,
+                    "sales": 119600,
+                    "delivery": 14000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 119600,
+                        "percentage": 100
+                    }
+                },
+                "2024-10-19": {
+                    "total": 69900,
+                    "sales": 61900,
+                    "delivery": 8000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 61900,
+                        "percentage": 100
+                    }
+                },
+                "2024-10-21": {
+                    "total": 210100,
+                    "sales": 202100,
+                    "delivery": 8000,
+                    "b2b": {
+                        "amount": 100600,
+                        "percentage": 49.77733795150915
+                    },
+                    "b2c": {
+                        "amount": 101500,
+                        "percentage": 50.222662048490854
+                    }
+                },
+                "2024-10-22": {
+                    "total": 263900,
+                    "sales": 237900,
+                    "delivery": 26000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 237900,
+                        "percentage": 100
+                    }
+                },
+                "2024-10-23": {
+                    "total": 273700,
+                    "sales": 230700,
+                    "delivery": 43000,
+                    "b2b": {
+                        "amount": 82000,
+                        "percentage": 35.54399653229302
+                    },
+                    "b2c": {
+                        "amount": 148700,
+                        "percentage": 64.45600346770698
+                    }
+                },
+                "2024-10-24": {
+                    "total": 387500,
+                    "sales": 353500,
+                    "delivery": 34000,
+                    "b2b": {
+                        "amount": 92000,
+                        "percentage": 26.025459688826025
+                    },
+                    "b2c": {
+                        "amount": 261500,
+                        "percentage": 73.97454031117398
+                    }
+                },
+                "2024-10-25": {
+                    "total": 171700,
+                    "sales": 157700,
+                    "delivery": 14000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 157700,
+                        "percentage": 100
+                    }
+                },
+                "2024-10-26": {
+                    "total": 242400,
+                    "sales": 226400,
+                    "delivery": 16000,
+                    "b2b": {
+                        "amount": 75100,
+                        "percentage": 33.171378091872796
+                    },
+                    "b2c": {
+                        "amount": 151300,
+                        "percentage": 66.8286219081272
+                    }
+                },
+                "2024-10-28": {
+                    "total": 168600,
+                    "sales": 152600,
+                    "delivery": 16000,
+                    "b2b": {
+                        "amount": 114700,
+                        "percentage": 75.16382699868939
+                    },
+                    "b2c": {
+                        "amount": 37900,
+                        "percentage": 24.836173001310616
+                    }
+                },
+                "2024-10-29": {
+                    "total": 157500,
+                    "sales": 133500,
+                    "delivery": 24000,
+                    "b2b": {
+                        "amount": 41900,
+                        "percentage": 31.38576779026217
+                    },
+                    "b2c": {
+                        "amount": 91600,
+                        "percentage": 68.61423220973782
+                    }
+                },
+                "2024-10-30": {
+                    "total": 282900,
+                    "sales": 255900,
+                    "delivery": 27000,
+                    "b2b": {
+                        "amount": 139700,
+                        "percentage": 54.59163735834311
+                    },
+                    "b2c": {
+                        "amount": 116200,
+                        "percentage": 45.40836264165689
+                    }
+                },
+                "2024-10-31": {
+                    "total": 140600,
+                    "sales": 126600,
+                    "delivery": 14000,
+                    "b2b": {
+                        "amount": 74100,
+                        "percentage": 58.53080568720379
+                    },
+                    "b2c": {
+                        "amount": 52500,
+                        "percentage": 41.46919431279621
+                    }
+                },
+                "2024-11-01": {
+                    "total": 275700,
+                    "sales": 260700,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 95400,
+                        "percentage": 36.59378596087457
+                    },
+                    "b2c": {
+                        "amount": 165300,
+                        "percentage": 63.40621403912543
+                    }
+                },
+                "2024-11-02": {
+                    "total": 69500,
+                    "sales": 62500,
+                    "delivery": 7000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 62500,
+                        "percentage": 100
+                    }
+                },
+                "2024-11-04": {
+                    "total": 173500,
+                    "sales": 151500,
+                    "delivery": 22000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 151500,
+                        "percentage": 100
+                    }
+                },
+                "2024-11-05": {
+                    "total": 134600,
+                    "sales": 119600,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 53400,
+                        "percentage": 44.64882943143812
+                    },
+                    "b2c": {
+                        "amount": 66200,
+                        "percentage": 55.35117056856187
+                    }
+                },
+                "2024-11-06": {
+                    "total": 127100,
+                    "sales": 105100,
+                    "delivery": 22000,
+                    "b2b": {
+                        "amount": 55800,
+                        "percentage": 53.09229305423406
+                    },
+                    "b2c": {
+                        "amount": 49300,
+                        "percentage": 46.90770694576594
+                    }
+                },
+                "2024-11-07": {
+                    "total": 149100,
+                    "sales": 135100,
+                    "delivery": 14000,
+                    "b2b": {
+                        "amount": 91100,
+                        "percentage": 67.43153219837158
+                    },
+                    "b2c": {
+                        "amount": 44000,
+                        "percentage": 32.56846780162842
+                    }
+                },
+                "2024-11-08": {
+                    "total": 258500,
+                    "sales": 229500,
+                    "delivery": 29000,
+                    "b2b": {
+                        "amount": 57700,
+                        "percentage": 25.14161220043573
+                    },
+                    "b2c": {
+                        "amount": 171800,
+                        "percentage": 74.85838779956427
+                    }
+                },
+                "2024-11-09": {
+                    "total": 77000,
+                    "sales": 69000,
+                    "delivery": 8000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 69000,
+                        "percentage": 100
+                    }
+                },
+                "2024-11-11": {
+                    "total": 183300,
+                    "sales": 160300,
+                    "delivery": 23000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 160300,
+                        "percentage": 100
+                    }
+                },
+                "2024-11-12": {
+                    "total": 106700,
+                    "sales": 89700,
+                    "delivery": 17000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 89700,
+                        "percentage": 100
+                    }
+                },
+                "2024-11-13": {
+                    "total": 161300,
+                    "sales": 145300,
+                    "delivery": 16000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 145300,
+                        "percentage": 100
+                    }
+                },
+                "2024-11-14": {
+                    "total": 62500,
+                    "sales": 53500,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 53500,
+                        "percentage": 100
+                    }
+                },
+                "2024-11-15": {
+                    "total": 51500,
+                    "sales": 42500,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 42500,
+                        "percentage": 100
+                    }
+                },
+                "2024-11-16": {
+                    "total": 267000,
+                    "sales": 228000,
+                    "delivery": 39000,
+                    "b2b": {
+                        "amount": 70000,
+                        "percentage": 30.701754385964914
+                    },
+                    "b2c": {
+                        "amount": 158000,
+                        "percentage": 69.2982456140351
+                    }
+                },
+                "2024-11-18": {
+                    "total": 76200,
+                    "sales": 70200,
+                    "delivery": 6000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 70200,
+                        "percentage": 100
+                    }
+                },
+                "2024-11-19": {
+                    "total": 75500,
+                    "sales": 68500,
+                    "delivery": 7000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 68500,
+                        "percentage": 100
+                    }
+                },
+                "2024-11-20": {
+                    "total": 177800,
+                    "sales": 158800,
+                    "delivery": 19000,
+                    "b2b": {
+                        "amount": 69900,
+                        "percentage": 44.0176322418136
+                    },
+                    "b2c": {
+                        "amount": 88900,
+                        "percentage": 55.9823677581864
+                    }
+                },
+                "2024-11-21": {
+                    "total": 172100,
+                    "sales": 154100,
+                    "delivery": 18000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 154100,
+                        "percentage": 100
+                    }
+                },
+                "2024-11-22": {
+                    "total": 116200,
+                    "sales": 101200,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 101200,
+                        "percentage": 100
+                    }
+                },
+                "2024-11-23": {
+                    "total": 218500,
+                    "sales": 184500,
+                    "delivery": 34000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 184500,
+                        "percentage": 100
+                    }
+                },
+                "2024-11-25": {
+                    "total": 251100,
+                    "sales": 214100,
+                    "delivery": 37000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 214100,
+                        "percentage": 100
+                    }
+                },
+                "2024-11-26": {
+                    "total": 41500,
+                    "sales": 34500,
+                    "delivery": 7000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 34500,
+                        "percentage": 100
+                    }
+                },
+                "2024-11-27": {
+                    "total": 46400,
+                    "sales": 37400,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 37400,
+                        "percentage": 100
+                    }
+                },
+                "2024-11-28": {
+                    "total": 123700,
+                    "sales": 100700,
+                    "delivery": 23000,
+                    "b2b": {
+                        "amount": 44600,
+                        "percentage": 44.28997020854022
+                    },
+                    "b2c": {
+                        "amount": 56100,
+                        "percentage": 55.71002979145978
+                    }
+                },
+                "2024-11-29": {
+                    "total": 113600,
+                    "sales": 92600,
+                    "delivery": 21000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 92600,
+                        "percentage": 100
+                    }
+                },
+                "2024-11-30": {
+                    "total": 121400,
+                    "sales": 100400,
+                    "delivery": 21000,
+                    "b2b": {
+                        "amount": 10000,
+                        "percentage": 9.9601593625498
+                    },
+                    "b2c": {
+                        "amount": 90400,
+                        "percentage": 90.0398406374502
+                    }
+                },
+                "2024-12-02": {
+                    "total": 178900,
+                    "sales": 163900,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 163900,
+                        "percentage": 100
+                    }
+                },
+                "2024-12-03": {
+                    "total": 342900,
+                    "sales": 322900,
+                    "delivery": 20000,
+                    "b2b": {
+                        "amount": 139500,
+                        "percentage": 43.20222979250542
+                    },
+                    "b2c": {
+                        "amount": 183400,
+                        "percentage": 56.79777020749458
+                    }
+                },
+                "2024-12-04": {
+                    "total": 134400,
+                    "sales": 119400,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 119400,
+                        "percentage": 100
+                    }
+                },
+                "2024-12-05": {
+                    "total": 298700,
+                    "sales": 260700,
+                    "delivery": 38000,
+                    "b2b": {
+                        "amount": 18500,
+                        "percentage": 7.096279248177982
+                    },
+                    "b2c": {
+                        "amount": 242200,
+                        "percentage": 92.90372075182202
+                    }
+                },
+                "2024-12-06": {
+                    "total": 301900,
+                    "sales": 277900,
+                    "delivery": 24000,
+                    "b2b": {
+                        "amount": 74100,
+                        "percentage": 26.66426772220223
+                    },
+                    "b2c": {
+                        "amount": 203800,
+                        "percentage": 73.33573227779777
+                    }
+                },
+                "2024-12-07": {
+                    "total": 286400,
+                    "sales": 263400,
+                    "delivery": 23000,
+                    "b2b": {
+                        "amount": 62000,
+                        "percentage": 23.538344722854973
+                    },
+                    "b2c": {
+                        "amount": 201400,
+                        "percentage": 76.46165527714503
+                    }
+                },
+                "2024-12-09": {
+                    "total": 18000,
+                    "sales": 10000,
+                    "delivery": 8000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 10000,
+                        "percentage": 100
+                    }
+                },
+                "2024-12-10": {
+                    "total": 89500,
+                    "sales": 89500,
+                    "delivery": 0,
+                    "b2b": {
+                        "amount": 89500,
+                        "percentage": 100
+                    },
+                    "b2c": {
+                        "amount": 0,
+                        "percentage": 0
+                    }
+                },
+                "2024-12-11": {
+                    "total": 58100,
+                    "sales": 45100,
+                    "delivery": 13000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 45100,
+                        "percentage": 100
+                    }
+                },
+                "2024-12-12": {
+                    "total": 129300,
+                    "sales": 121300,
+                    "delivery": 8000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 121300,
+                        "percentage": 100
+                    }
+                },
+                "2024-12-13": {
+                    "total": 117400,
+                    "sales": 105400,
+                    "delivery": 12000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 105400,
+                        "percentage": 100
+                    }
+                },
+                "2024-12-14": {
+                    "total": 265200,
+                    "sales": 237200,
+                    "delivery": 28000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 237200,
+                        "percentage": 100
+                    }
+                },
+                "2024-12-16": {
+                    "total": 110200,
+                    "sales": 103200,
+                    "delivery": 7000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 103200,
+                        "percentage": 100
+                    }
+                },
+                "2024-12-17": {
+                    "total": 334200,
+                    "sales": 298200,
+                    "delivery": 36000,
+                    "b2b": {
+                        "amount": 12700,
+                        "percentage": 4.25888665325285
+                    },
+                    "b2c": {
+                        "amount": 285500,
+                        "percentage": 95.74111334674716
+                    }
+                },
+                "2024-12-18": {
+                    "total": 90000,
+                    "sales": 74000,
+                    "delivery": 16000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 74000,
+                        "percentage": 100
+                    }
+                },
+                "2024-12-19": {
+                    "total": 53000,
+                    "sales": 45000,
+                    "delivery": 8000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 45000,
+                        "percentage": 100
+                    }
+                },
+                "2024-12-20": {
+                    "total": 206600,
+                    "sales": 179600,
+                    "delivery": 27000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 179600,
+                        "percentage": 100
+                    }
+                },
+                "2024-12-21": {
+                    "total": 333800,
+                    "sales": 304800,
+                    "delivery": 29000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 304800,
+                        "percentage": 100
+                    }
+                },
+                "2024-12-23": {
+                    "total": 168600,
+                    "sales": 147600,
+                    "delivery": 21000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 147600,
+                        "percentage": 100
+                    }
+                },
+                "2024-12-24": {
+                    "total": 30000,
+                    "sales": 24000,
+                    "delivery": 6000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 24000,
+                        "percentage": 100
+                    }
+                },
+                "2024-12-25": {
+                    "total": 306500,
+                    "sales": 266500,
+                    "delivery": 40000,
+                    "b2b": {
+                        "amount": 86300,
+                        "percentage": 32.38273921200751
+                    },
+                    "b2c": {
+                        "amount": 180200,
+                        "percentage": 67.61726078799249
+                    }
+                },
+                "2024-12-26": {
+                    "total": 278500,
+                    "sales": 248500,
+                    "delivery": 30000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 248500,
+                        "percentage": 100
+                    }
+                },
+                "2024-12-27": {
+                    "total": 84200,
+                    "sales": 75200,
+                    "delivery": 9000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 75200,
+                        "percentage": 100
+                    }
+                },
+                "2024-12-28": {
+                    "total": 214000,
+                    "sales": 175000,
+                    "delivery": 39000,
+                    "b2b": {
+                        "amount": 45900,
+                        "percentage": 26.228571428571428
+                    },
+                    "b2c": {
+                        "amount": 129100,
+                        "percentage": 73.77142857142857
+                    }
+                },
+                "2024-12-30": {
+                    "total": 271700,
+                    "sales": 240700,
+                    "delivery": 31000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 240700,
+                        "percentage": 100
+                    }
+                },
+                "2024-12-31": {
+                    "total": 279900,
+                    "sales": 264900,
+                    "delivery": 15000,
+                    "b2b": {
+                        "amount": 166900,
+                        "percentage": 63.00490751226878
+                    },
+                    "b2c": {
+                        "amount": 98000,
+                        "percentage": 36.99509248773122
+                    }
+                }
+            },
+            "weekly": {
+                "2024-01-01/2024-01-07": {
+                    "total": 1091900,
+                    "sales": 960900,
+                    "delivery": 131000,
+                    "b2b": {
+                        "amount": 255600,
+                        "percentage": 26.60006244146113
+                    },
+                    "b2c": {
+                        "amount": 705300,
+                        "percentage": 73.39993755853888
+                    }
+                },
+                "2024-01-08/2024-01-14": {
+                    "total": 1185400,
+                    "sales": 1076400,
+                    "delivery": 109000,
+                    "b2b": {
+                        "amount": 512200,
+                        "percentage": 47.58454106280193
+                    },
+                    "b2c": {
+                        "amount": 564200,
+                        "percentage": 52.41545893719807
+                    }
+                },
+                "2024-01-15/2024-01-21": {
+                    "total": 835100,
+                    "sales": 739100,
+                    "delivery": 96000,
+                    "b2b": {
+                        "amount": 34500,
+                        "percentage": 4.667839263969693
+                    },
+                    "b2c": {
+                        "amount": 704600,
+                        "percentage": 95.3321607360303
+                    }
+                },
+                "2024-01-22/2024-01-28": {
+                    "total": 1151800,
+                    "sales": 1041800,
+                    "delivery": 110000,
+                    "b2b": {
+                        "amount": 82300,
+                        "percentage": 7.8997888270301395
+                    },
+                    "b2c": {
+                        "amount": 959500,
+                        "percentage": 92.10021117296986
+                    }
+                },
+                "2024-01-29/2024-02-04": {
+                    "total": 1210400,
+                    "sales": 1088400,
+                    "delivery": 122000,
+                    "b2b": {
+                        "amount": 281100,
+                        "percentage": 25.826901874310913
+                    },
+                    "b2c": {
+                        "amount": 807300,
+                        "percentage": 74.17309812568908
+                    }
+                },
+                "2024-02-05/2024-02-11": {
+                    "total": 1330600,
+                    "sales": 1192600,
+                    "delivery": 138000,
+                    "b2b": {
+                        "amount": 158300,
+                        "percentage": 13.273520040248195
+                    },
+                    "b2c": {
+                        "amount": 1034300,
+                        "percentage": 86.7264799597518
+                    }
+                },
+                "2024-02-12/2024-02-18": {
+                    "total": 974700,
+                    "sales": 866700,
+                    "delivery": 108000,
+                    "b2b": {
+                        "amount": 276900,
+                        "percentage": 31.94877120110765
+                    },
+                    "b2c": {
+                        "amount": 589800,
+                        "percentage": 68.05122879889235
+                    }
+                },
+                "2024-02-19/2024-02-25": {
+                    "total": 1021400,
+                    "sales": 911400,
+                    "delivery": 110000,
+                    "b2b": {
+                        "amount": 20000,
+                        "percentage": 2.194426157559798
+                    },
+                    "b2c": {
+                        "amount": 891400,
+                        "percentage": 97.8055738424402
+                    }
+                },
+                "2024-02-26/2024-03-03": {
+                    "total": 1272400,
+                    "sales": 1106400,
+                    "delivery": 166000,
+                    "b2b": {
+                        "amount": 363800,
+                        "percentage": 32.88141720896602
+                    },
+                    "b2c": {
+                        "amount": 742600,
+                        "percentage": 67.11858279103399
+                    }
+                },
+                "2024-03-04/2024-03-10": {
+                    "total": 718500,
+                    "sales": 619500,
+                    "delivery": 99000,
+                    "b2b": {
+                        "amount": 130700,
+                        "percentage": 21.09765940274415
+                    },
+                    "b2c": {
+                        "amount": 488800,
+                        "percentage": 78.90234059725584
+                    }
+                },
+                "2024-03-11/2024-03-17": {
+                    "total": 1470200,
+                    "sales": 1334200,
+                    "delivery": 136000,
+                    "b2b": {
+                        "amount": 170900,
+                        "percentage": 12.809174036876032
+                    },
+                    "b2c": {
+                        "amount": 1163300,
+                        "percentage": 87.19082596312397
+                    }
+                },
+                "2024-03-18/2024-03-24": {
+                    "total": 1290700,
+                    "sales": 1142700,
+                    "delivery": 148000,
+                    "b2b": {
+                        "amount": 167600,
+                        "percentage": 14.667016714798283
+                    },
+                    "b2c": {
+                        "amount": 975100,
+                        "percentage": 85.33298328520172
+                    }
+                },
+                "2024-03-25/2024-03-31": {
+                    "total": 1468700,
+                    "sales": 1339700,
+                    "delivery": 129000,
+                    "b2b": {
+                        "amount": 131300,
+                        "percentage": 9.80070164962305
+                    },
+                    "b2c": {
+                        "amount": 1208400,
+                        "percentage": 90.19929835037695
+                    }
+                },
+                "2024-04-01/2024-04-07": {
+                    "total": 856700,
+                    "sales": 756700,
+                    "delivery": 100000,
+                    "b2b": {
+                        "amount": 181500,
+                        "percentage": 23.985727500991146
+                    },
+                    "b2c": {
+                        "amount": 575200,
+                        "percentage": 76.01427249900885
+                    }
+                },
+                "2024-04-08/2024-04-14": {
+                    "total": 1260500,
+                    "sales": 1146500,
+                    "delivery": 114000,
+                    "b2b": {
+                        "amount": 337700,
+                        "percentage": 29.454862625381594
+                    },
+                    "b2c": {
+                        "amount": 808800,
+                        "percentage": 70.5451373746184
+                    }
+                },
+                "2024-04-15/2024-04-21": {
+                    "total": 762000,
+                    "sales": 660000,
+                    "delivery": 102000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 660000,
+                        "percentage": 100
+                    }
+                },
+                "2024-04-22/2024-04-28": {
+                    "total": 1161200,
+                    "sales": 1043200,
+                    "delivery": 118000,
+                    "b2b": {
+                        "amount": 153900,
+                        "percentage": 14.752684049079754
+                    },
+                    "b2c": {
+                        "amount": 889300,
+                        "percentage": 85.24731595092024
+                    }
+                },
+                "2024-04-29/2024-05-05": {
+                    "total": 766500,
+                    "sales": 675500,
+                    "delivery": 91000,
+                    "b2b": {
+                        "amount": 134100,
+                        "percentage": 19.8519615099926
+                    },
+                    "b2c": {
+                        "amount": 541400,
+                        "percentage": 80.1480384900074
+                    }
+                },
+                "2024-05-06/2024-05-12": {
+                    "total": 1264100,
+                    "sales": 1134100,
+                    "delivery": 130000,
+                    "b2b": {
+                        "amount": 137300,
+                        "percentage": 12.10651618023102
+                    },
+                    "b2c": {
+                        "amount": 996800,
+                        "percentage": 87.89348381976897
+                    }
+                },
+                "2024-05-13/2024-05-19": {
+                    "total": 1787000,
+                    "sales": 1633000,
+                    "delivery": 154000,
+                    "b2b": {
+                        "amount": 324600,
+                        "percentage": 19.877526025719536
+                    },
+                    "b2c": {
+                        "amount": 1308400,
+                        "percentage": 80.12247397428047
+                    }
+                },
+                "2024-05-20/2024-05-26": {
+                    "total": 1370600,
+                    "sales": 1242600,
+                    "delivery": 128000,
+                    "b2b": {
+                        "amount": 174300,
+                        "percentage": 14.027040077257363
+                    },
+                    "b2c": {
+                        "amount": 1068300,
+                        "percentage": 85.97295992274263
+                    }
+                },
+                "2024-05-27/2024-06-02": {
+                    "total": 1163800,
+                    "sales": 1039800,
+                    "delivery": 124000,
+                    "b2b": {
+                        "amount": 91400,
+                        "percentage": 8.790151952298519
+                    },
+                    "b2c": {
+                        "amount": 948400,
+                        "percentage": 91.20984804770148
+                    }
+                },
+                "2024-06-03/2024-06-09": {
+                    "total": 1008400,
+                    "sales": 889400,
+                    "delivery": 119000,
+                    "b2b": {
+                        "amount": 226500,
+                        "percentage": 25.466606701146844
+                    },
+                    "b2c": {
+                        "amount": 662900,
+                        "percentage": 74.53339329885316
+                    }
+                },
+                "2024-06-10/2024-06-16": {
+                    "total": 1161000,
+                    "sales": 1045000,
+                    "delivery": 116000,
+                    "b2b": {
+                        "amount": 87400,
+                        "percentage": 8.363636363636363
+                    },
+                    "b2c": {
+                        "amount": 957600,
+                        "percentage": 91.63636363636364
+                    }
+                },
+                "2024-06-17/2024-06-23": {
+                    "total": 948000,
+                    "sales": 833000,
+                    "delivery": 115000,
+                    "b2b": {
+                        "amount": 0,
+                        "percentage": 0
+                    },
+                    "b2c": {
+                        "amount": 833000,
+                        "percentage": 100
+                    }
+                },
+                "2024-06-24/2024-06-30": {
+                    "total": 507800,
+                    "sales": 447800,
+                    "delivery": 60000,
+                    "b2b": {
+                        "amount": 88800,
+                        "percentage": 19.830281375614113
+                    },
+                    "b2c": {
+                        "amount": 359000,
+                        "percentage": 80.1697186243859
+                    }
+                },
+                "2024-07-01/2024-07-07": {
+                    "total": 1466200,
+                    "sales": 1322200,
+                    "delivery": 144000,
+                    "b2b": {
+                        "amount": 67800,
+                        "percentage": 5.127817274239903
+                    },
+                    "b2c": {
+                        "amount": 1254400,
+                        "percentage": 94.8721827257601
+                    }
+                },
+                "2024-07-08/2024-07-14": {
+                    "total": 994500,
+                    "sales": 902500,
+                    "delivery": 92000,
+                    "b2b": {
+                        "amount": 153000,
+                        "percentage": 16.952908587257618
+                    },
+                    "b2c": {
+                        "amount": 749500,
+                        "percentage": 83.04709141274238
+                    }
+                },
+                "2024-07-15/2024-07-21": {
+                    "total": 675500,
+                    "sales": 578500,
+                    "delivery": 97000,
+                    "b2b": {
+                        "amount": 170000,
+                        "percentage": 29.386343993085568
+                    },
+                    "b2c": {
+                        "amount": 408500,
+                        "percentage": 70.61365600691444
+                    }
+                },
+                "2024-07-22/2024-07-28": {
+                    "total": 946700,
+                    "sales": 846700,
+                    "delivery": 100000,
+                    "b2b": {
+                        "amount": 121500,
+                        "percentage": 14.349828746899728
+                    },
+                    "b2c": {
+                        "amount": 725200,
+                        "percentage": 85.65017125310027
+                    }
+                },
+                "2024-07-29/2024-08-04": {
+                    "total": 868400,
+                    "sales": 762400,
+                    "delivery": 106000,
+                    "b2b": {
+                        "amount": 69800,
+                        "percentage": 9.15529905561385
+                    },
+                    "b2c": {
+                        "amount": 692600,
+                        "percentage": 90.84470094438615
+                    }
+                },
+                "2024-08-05/2024-08-11": {
+                    "total": 1127200,
+                    "sales": 1003200,
+                    "delivery": 124000,
+                    "b2b": {
+                        "amount": 33200,
+                        "percentage": 3.3094098883572567
+                    },
+                    "b2c": {
+                        "amount": 970000,
+                        "percentage": 96.69059011164273
+                    }
+                },
+                "2024-08-12/2024-08-18": {
+                    "total": 1365600,
+                    "sales": 1190600,
+                    "delivery": 175000,
+                    "b2b": {
+                        "amount": 297700,
+                        "percentage": 25.00419956324542
+                    },
+                    "b2c": {
+                        "amount": 892900,
+                        "percentage": 74.99580043675458
+                    }
+                },
+                "2024-08-19/2024-08-25": {
+                    "total": 1060700,
+                    "sales": 922700,
+                    "delivery": 138000,
+                    "b2b": {
+                        "amount": 171500,
+                        "percentage": 18.58675625880568
+                    },
+                    "b2c": {
+                        "amount": 751200,
+                        "percentage": 81.41324374119432
+                    }
+                },
+                "2024-08-26/2024-09-01": {
+                    "total": 821600,
+                    "sales": 745600,
+                    "delivery": 76000,
+                    "b2b": {
+                        "amount": 180400,
+                        "percentage": 24.195278969957084
+                    },
+                    "b2c": {
+                        "amount": 565200,
+                        "percentage": 75.80472103004293
+                    }
+                },
+                "2024-09-02/2024-09-08": {
+                    "total": 1372600,
+                    "sales": 1242600,
+                    "delivery": 130000,
+                    "b2b": {
+                        "amount": 325200,
+                        "percentage": 26.170931916948337
+                    },
+                    "b2c": {
+                        "amount": 917400,
+                        "percentage": 73.82906808305167
+                    }
+                },
+                "2024-09-09/2024-09-15": {
+                    "total": 1193800,
+                    "sales": 1067800,
+                    "delivery": 126000,
+                    "b2b": {
+                        "amount": 238200,
+                        "percentage": 22.30754823000562
+                    },
+                    "b2c": {
+                        "amount": 829600,
+                        "percentage": 77.69245176999439
+                    }
+                },
+                "2024-09-16/2024-09-22": {
+                    "total": 1205800,
+                    "sales": 1100800,
+                    "delivery": 105000,
+                    "b2b": {
+                        "amount": 286600,
+                        "percentage": 26.035610465116278
+                    },
+                    "b2c": {
+                        "amount": 814200,
+                        "percentage": 73.96438953488372
+                    }
+                },
+                "2024-09-23/2024-09-29": {
+                    "total": 1034500,
+                    "sales": 926500,
+                    "delivery": 108000,
+                    "b2b": {
+                        "amount": 141200,
+                        "percentage": 15.240151106314084
+                    },
+                    "b2c": {
+                        "amount": 785300,
+                        "percentage": 84.75984889368591
+                    }
+                },
+                "2024-09-30/2024-10-06": {
+                    "total": 1089900,
+                    "sales": 986900,
+                    "delivery": 103000,
+                    "b2b": {
+                        "amount": 301600,
+                        "percentage": 30.560340460026346
+                    },
+                    "b2c": {
+                        "amount": 685300,
+                        "percentage": 69.43965953997365
+                    }
+                },
+                "2024-10-07/2024-10-13": {
+                    "total": 1246700,
+                    "sales": 1116700,
+                    "delivery": 130000,
+                    "b2b": {
+                        "amount": 302300,
+                        "percentage": 27.070833706456526
+                    },
+                    "b2c": {
+                        "amount": 814400,
+                        "percentage": 72.92916629354347
+                    }
+                },
+                "2024-10-14/2024-10-20": {
+                    "total": 660700,
+                    "sales": 576700,
+                    "delivery": 84000,
+                    "b2b": {
+                        "amount": 42900,
+                        "percentage": 7.438876365528004
+                    },
+                    "b2c": {
+                        "amount": 533800,
+                        "percentage": 92.561123634472
+                    }
+                },
+                "2024-10-21/2024-10-27": {
+                    "total": 1549300,
+                    "sales": 1408300,
+                    "delivery": 141000,
+                    "b2b": {
+                        "amount": 349700,
+                        "percentage": 24.831356955194206
+                    },
+                    "b2c": {
+                        "amount": 1058600,
+                        "percentage": 75.16864304480579
+                    }
+                },
+                "2024-10-28/2024-11-03": {
+                    "total": 1094800,
+                    "sales": 991800,
+                    "delivery": 103000,
+                    "b2b": {
+                        "amount": 465800,
+                        "percentage": 46.96511393426094
+                    },
+                    "b2c": {
+                        "amount": 526000,
+                        "percentage": 53.03488606573906
+                    }
+                },
+                "2024-11-04/2024-11-10": {
+                    "total": 919800,
+                    "sales": 809800,
+                    "delivery": 110000,
+                    "b2b": {
+                        "amount": 258000,
+                        "percentage": 31.85971844899975
+                    },
+                    "b2c": {
+                        "amount": 551800,
+                        "percentage": 68.14028155100024
+                    }
+                },
+                "2024-11-11/2024-11-17": {
+                    "total": 832300,
+                    "sales": 719300,
+                    "delivery": 113000,
+                    "b2b": {
+                        "amount": 70000,
+                        "percentage": 9.731683581259558
+                    },
+                    "b2c": {
+                        "amount": 649300,
+                        "percentage": 90.26831641874044
+                    }
+                },
+                "2024-11-18/2024-11-24": {
+                    "total": 836300,
+                    "sales": 737300,
+                    "delivery": 99000,
+                    "b2b": {
+                        "amount": 69900,
+                        "percentage": 9.48053709480537
+                    },
+                    "b2c": {
+                        "amount": 667400,
+                        "percentage": 90.51946290519463
+                    }
+                },
+                "2024-11-25/2024-12-01": {
+                    "total": 697700,
+                    "sales": 579700,
+                    "delivery": 118000,
+                    "b2b": {
+                        "amount": 54600,
+                        "percentage": 9.418664826634467
+                    },
+                    "b2c": {
+                        "amount": 525100,
+                        "percentage": 90.58133517336553
+                    }
+                },
+                "2024-12-02/2024-12-08": {
+                    "total": 1543200,
+                    "sales": 1408200,
+                    "delivery": 135000,
+                    "b2b": {
+                        "amount": 294100,
+                        "percentage": 20.884817497514558
+                    },
+                    "b2c": {
+                        "amount": 1114100,
+                        "percentage": 79.11518250248544
+                    }
+                },
+                "2024-12-09/2024-12-15": {
+                    "total": 677500,
+                    "sales": 608500,
+                    "delivery": 69000,
+                    "b2b": {
+                        "amount": 89500,
+                        "percentage": 14.708299096138045
+                    },
+                    "b2c": {
+                        "amount": 519000,
+                        "percentage": 85.29170090386195
+                    }
+                },
+                "2024-12-16/2024-12-22": {
+                    "total": 1127800,
+                    "sales": 1004800,
+                    "delivery": 123000,
+                    "b2b": {
+                        "amount": 12700,
+                        "percentage": 1.2639331210191083
+                    },
+                    "b2c": {
+                        "amount": 992100,
+                        "percentage": 98.73606687898089
+                    }
+                },
+                "2024-12-23/2024-12-29": {
+                    "total": 1081800,
+                    "sales": 936800,
+                    "delivery": 145000,
+                    "b2b": {
+                        "amount": 132200,
+                        "percentage": 14.111870196413323
+                    },
+                    "b2c": {
+                        "amount": 804600,
+                        "percentage": 85.88812980358668
+                    }
+                },
+                "2024-12-30/2025-01-05": {
+                    "total": 551600,
+                    "sales": 505600,
+                    "delivery": 46000,
+                    "b2b": {
+                        "amount": 166900,
+                        "percentage": 33.010284810126585
+                    },
+                    "b2c": {
+                        "amount": 338700,
+                        "percentage": 66.98971518987342
+                    }
+                }
+            },
+            "monthly": {
+                "2024-01": {
+                    "total": 4692600,
+                    "sales": 4197600,
+                    "delivery": 495000,
+                    "b2b": {
+                        "amount": 916100,
+                        "percentage": 21.824375833809796
+                    },
+                    "b2c": {
+                        "amount": 3281500,
+                        "percentage": 78.1756241661902
+                    }
+                },
+                "2024-02": {
+                    "total": 5034900,
+                    "sales": 4487900,
+                    "delivery": 547000,
+                    "b2b": {
+                        "amount": 957900,
+                        "percentage": 21.344058468325944
+                    },
+                    "b2c": {
+                        "amount": 3530000,
+                        "percentage": 78.65594153167406
+                    }
+                },
+                "2024-03": {
+                    "total": 5294300,
+                    "sales": 4734300,
+                    "delivery": 560000,
+                    "b2b": {
+                        "amount": 711200,
+                        "percentage": 15.022284181399574
+                    },
+                    "b2c": {
+                        "amount": 4023100,
+                        "percentage": 84.97771581860043
+                    }
+                },
+                "2024-04": {
+                    "total": 4510700,
+                    "sales": 4029700,
+                    "delivery": 481000,
+                    "b2b": {
+                        "amount": 748900,
+                        "percentage": 18.584510013152343
+                    },
+                    "b2c": {
+                        "amount": 3280800,
+                        "percentage": 81.41548998684766
+                    }
+                },
+                "2024-05": {
+                    "total": 5681600,
+                    "sales": 5124600,
+                    "delivery": 557000,
+                    "b2b": {
+                        "amount": 758300,
+                        "percentage": 14.797252468485345
+                    },
+                    "b2c": {
+                        "amount": 4366300,
+                        "percentage": 85.20274753151466
+                    }
+                },
+                "2024-06": {
+                    "total": 3825300,
+                    "sales": 3392300,
+                    "delivery": 433000,
+                    "b2b": {
+                        "amount": 430300,
+                        "percentage": 12.684609262152522
+                    },
+                    "b2c": {
+                        "amount": 2962000,
+                        "percentage": 87.31539073784748
+                    }
+                },
+                "2024-07": {
+                    "total": 4474300,
+                    "sales": 3996300,
+                    "delivery": 478000,
+                    "b2b": {
+                        "amount": 512300,
+                        "percentage": 12.819357906063109
+                    },
+                    "b2c": {
+                        "amount": 3484000,
+                        "percentage": 87.18064209393688
+                    }
+                },
+                "2024-08": {
+                    "total": 4852100,
+                    "sales": 4278100,
+                    "delivery": 574000,
+                    "b2b": {
+                        "amount": 752600,
+                        "percentage": 17.59192164746032
+                    },
+                    "b2c": {
+                        "amount": 3525500,
+                        "percentage": 82.40807835253968
+                    }
+                },
+                "2024-09": {
+                    "total": 5039000,
+                    "sales": 4544000,
+                    "delivery": 495000,
+                    "b2b": {
+                        "amount": 1011200,
+                        "percentage": 22.253521126760564
+                    },
+                    "b2c": {
+                        "amount": 3532800,
+                        "percentage": 77.74647887323944
+                    }
+                },
+                "2024-10": {
+                    "total": 5063900,
+                    "sales": 4550900,
+                    "delivery": 513000,
+                    "b2b": {
+                        "amount": 1346900,
+                        "percentage": 29.596343580390695
+                    },
+                    "b2c": {
+                        "amount": 3204000,
+                        "percentage": 70.4036564196093
+                    }
+                },
+                "2024-11": {
+                    "total": 3631300,
+                    "sales": 3169300,
+                    "delivery": 462000,
+                    "b2b": {
+                        "amount": 547900,
+                        "percentage": 17.28772915154766
+                    },
+                    "b2c": {
+                        "amount": 2621400,
+                        "percentage": 82.71227084845233
+                    }
+                },
+                "2024-12": {
+                    "total": 4981900,
+                    "sales": 4463900,
+                    "delivery": 518000,
+                    "b2b": {
+                        "amount": 695400,
+                        "percentage": 15.57830596563543
+                    },
+                    "b2c": {
+                        "amount": 3768500,
+                        "percentage": 84.42169403436456
+                    }
+                }
+            }
+        }
+    }
+}

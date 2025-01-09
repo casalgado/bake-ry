@@ -16,8 +16,8 @@ class SalesReport {
     // B2B and B2C calculations
     this.b2bOrders = this.orders.filter(order => this.b2b_clientIds.has(order.userId));
     this.b2cOrders = this.orders.filter(order => !this.b2b_clientIds.has(order.userId));
-    this.totalB2B = this.b2bOrders.reduce((sum, order) => sum + order.total, 0);
-    this.totalB2C = this.b2cOrders.reduce((sum, order) => sum + order.total, 0);
+    this.totalB2BSales = this.b2bOrders.reduce((sum, order) => sum + order.subtotal, 0);
+    this.totalB2CSales = this.b2cOrders.reduce((sum, order) => sum + order.subtotal, 0);
 
     // Calculate date range once
     this.dateRange = this.calculateDateRange();
@@ -28,7 +28,7 @@ class SalesReport {
 
   generateReport() {
     return {
-      metadata: this.generateMetadata(),
+      summary: this.generateSummary(),
       salesMetrics: this.generateSalesMetrics(),
       productMetrics: this.generateProductMetrics(),
       operationalMetrics: this.generateOperationalMetrics(),
@@ -47,17 +47,17 @@ class SalesReport {
     };
   }
 
-  generateMetadata() {
+  generateSummary() {
     return {
       dateRange: this.dateRange,
       totalPaidOrders: this.orders.length,
       totalRevenue: this.totalRevenue,
       totalSales: this.totalSales,
       totalDelivery: this.totalDelivery,
-      totalB2B: this.totalB2B,
-      totalB2C: this.totalB2C,
-      percentageB2B: Number(((this.totalB2B / this.totalSales) * 100).toFixed(1)),
-      percentageB2C: Number(((this.totalB2C / this.totalSales) * 100).toFixed(1)),
+      totalB2B: this.totalB2BSales,
+      totalB2C: this.totalB2CSales,
+      percentageB2B: Number(((this.totalB2BSales / this.totalSales) * 100).toFixed(1)),
+      percentageB2C: Number(((this.totalB2CSales / this.totalSales) * 100).toFixed(1)),
       totalComplimentaryOrders: this.complimentaryOrders.length,
       currency: 'COP',
     };
@@ -110,48 +110,87 @@ class SalesReport {
       monthly: monthlyTotals,
     };
   }
-
   calculatePeriodTotals(uniqueDays, dailyTotals, period) {
     const periodTotals = {};
-    let periodKey;
 
-    if (period === 'weekly') {
-      const firstDay = new Date(uniqueDays[0]);
-      const lastDay = new Date(uniqueDays[uniqueDays.length - 1]);
-      periodKey = `${this.getWeekRange(firstDay)}/${this.getWeekRange(lastDay)}`;
-    } else {
-      periodKey = this.getMonthKey(new Date(uniqueDays[0]));
-    }
-
-    // Initialize period totals with the same structure as daily totals
-    let totalSales = 0;
-    let totalB2B = 0;
-    let totalB2C = 0;
-    let totalDelivery = 0;
-
+    // Process each day and group into appropriate periods
     uniqueDays.forEach(date => {
+      const currentDate = new Date(date);
+      let periodKey;
+
+      if (period === 'weekly') {
+        // Get the week range for this specific date
+        periodKey = this.getWeekRange(currentDate);
+      } else {
+        // Get the month key for this specific date
+        periodKey = this.getMonthKey(currentDate);
+      }
+
+      // Initialize period if it doesn't exist
+      if (!periodTotals[periodKey]) {
+        periodTotals[periodKey] = {
+          total: 0,
+          sales: 0,
+          delivery: 0,
+          b2b: {
+            amount: 0,
+            percentage: 0,
+          },
+          b2c: {
+            amount: 0,
+            percentage: 0,
+          },
+          days: 0,
+        };
+      }
+
+      // Add this day's totals to the appropriate period
       const dayTotals = dailyTotals[date];
-      totalSales += dayTotals.sales;
-      totalB2B += dayTotals.b2b.amount;
-      totalB2C += dayTotals.b2c.amount;
-      totalDelivery += dayTotals.delivery;
+      periodTotals[periodKey].days += 1;
+      periodTotals[periodKey].total += dayTotals.total;
+      periodTotals[periodKey].sales += dayTotals.sales;
+      periodTotals[periodKey].delivery += dayTotals.delivery;
+      periodTotals[periodKey].b2b.amount += dayTotals.b2b.amount;
+      periodTotals[periodKey].b2c.amount += dayTotals.b2c.amount;
     });
 
-    periodTotals[periodKey] = {
-      total: totalSales + totalDelivery,
-      sales: totalSales,
-      delivery: totalDelivery,
-      b2b: {
-        amount: totalB2B,
-        percentage: (totalB2B / totalSales) * 100,
-      },
-      b2c: {
-        amount: totalB2C,
-        percentage: (totalB2C / totalSales) * 100,
-      },
-    };
+    // Calculate final totals and percentages for each period
+    Object.keys(periodTotals).forEach(periodKey => {
+      const period = periodTotals[periodKey];
+      period.total = period.sales + period.delivery;
+
+      // Recalculate percentages based on period totals
+      if (period.sales > 0) {
+        period.b2b.percentage = (period.b2b.amount / period.sales) * 100;
+        period.b2c.percentage = (period.b2c.amount / period.sales) * 100;
+      }
+    });
 
     return periodTotals;
+  }
+
+  getWeekRange(date) {
+    const current = new Date(date);
+    current.setHours(0, 0, 0, 0);
+
+    const day = current.getDay() || 7;
+
+    const monday = new Date(current);
+    monday.setDate(current.getDate() - (day - 1));
+
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+
+    const mondayStr = monday.toISOString().split('T')[0];
+    const sundayStr = sunday.toISOString().split('T')[0];
+
+    return `${mondayStr}/${sundayStr}`;
+  }
+
+  getMonthKey(date) {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    return `${year}-${month}`;
   }
 
   generateSalesMetrics() {
@@ -266,16 +305,16 @@ class SalesReport {
   calculateSalesByCustomerSegment() {
     return {
       b2b: {
-        total: this.totalB2B,
+        total: this.totalB2BSales,
         orders: this.b2bOrders.length,
-        averagePrice: this.totalB2B / this.b2bOrders.length,
-        percentageSales: (this.totalB2B / this.totalRevenue) * 100,
+        averagePrice: this.totalB2BSales / this.b2bOrders.length,
+        percentageSales: (this.totalB2BSales / this.totalSales) * 100,
       },
       b2c: {
-        total: this.totalB2C,
+        total: this.totalB2CSales,
         orders: this.b2cOrders.length,
-        averagePrice: this.totalB2C / this.b2cOrders.length,
-        percentageSales: (this.totalB2C / this.totalRevenue) * 100,
+        averagePrice: this.totalB2CSales / this.b2cOrders.length,
+        percentageSales: (this.totalB2CSales / this.totalSales) * 100,
       },
     };
   }
@@ -383,29 +422,6 @@ class SalesReport {
     };
   }
 
-  getWeekRange(date) {
-    const current = new Date(date);
-    current.setHours(0, 0, 0, 0);
-
-    const day = current.getDay() || 7;
-
-    const monday = new Date(current);
-    monday.setDate(current.getDate() - (day - 1));
-
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-
-    const mondayStr = monday.toISOString().split('T')[0];
-    const sundayStr = sunday.toISOString().split('T')[0];
-
-    return `${mondayStr}/${sundayStr}`;
-  }
-
-  getMonthKey(date) {
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    return `${year}-${month}`;
-  }
 }
 
 module.exports = SalesReport;
