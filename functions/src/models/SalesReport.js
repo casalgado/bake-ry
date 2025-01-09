@@ -226,7 +226,7 @@ class SalesReport {
     // Calculate percentages
     Object.keys(paymentMethods).forEach(method => {
       paymentMethods[method].percentage =
-          (paymentMethods[method].total / this.totalSales) * 100;
+          (paymentMethods[method].total / this.totalRevenue) * 100;
     });
 
     return paymentMethods;
@@ -269,13 +269,13 @@ class SalesReport {
         total: this.totalB2B,
         orders: this.b2bOrders.length,
         averagePrice: this.totalB2B / this.b2bOrders.length,
-        percentageSales: (this.totalB2B / this.totalSales) * 100,
+        percentageSales: (this.totalB2B / this.totalRevenue) * 100,
       },
       b2c: {
         total: this.totalB2C,
         orders: this.b2cOrders.length,
         averagePrice: this.totalB2C / this.b2cOrders.length,
-        percentageSales: (this.totalB2C / this.totalSales) * 100,
+        percentageSales: (this.totalB2C / this.totalRevenue) * 100,
       },
     };
   }
