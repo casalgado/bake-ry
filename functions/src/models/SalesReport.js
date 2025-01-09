@@ -8,6 +8,7 @@ class SalesReport {
     this.complimentaryOrders = orders.map(order => new Order(order)).filter(order => order.isComplimentary);
     this.b2b_clientIds = new Set(b2b_clients.map(client => client.id));
     this.dateRange = this.calculateDateRange();
+    this.aggregatedProducts = this.aggregateProductData();
   }
 
   generateReport() {
@@ -57,8 +58,11 @@ class SalesReport {
         byQuantity: this.calculateBestSellersByQuantity(),
         byRevenue: this.calculateBestSellersByRevenue(),
       },
+      lowestSellers: {
+        byQuantity: this.calculateLowestSellersByQuantity(),
+        byRevenue: this.calculateLowestSellersByRevenue(),
+      },
       averageItemsPerOrder: this.calculateAverageItemsPerOrder(),
-      popularVariations: this.calculatePopularVariations(),
     };
   }
 
@@ -277,8 +281,10 @@ class SalesReport {
     return segments;
   }
 
-  calculateBestSellersByQuantity() {
+  aggregateProductData() {
     const products = {};
+    let totalRevenue = 0;
+    let totalQuantity = 0;
 
     // Aggregate product data
     this.orders.forEach(order => {
@@ -294,24 +300,44 @@ class SalesReport {
         }
         products[item.productId].quantity += item.quantity;
         products[item.productId].revenue += item.subtotal;
+        totalQuantity += item.quantity;
+        totalRevenue += item.subtotal;
       });
     });
 
-    // Convert to array and sort by quantity
-    return Object.values(products)
+    // Calculate metrics for each product
+    return Object.values(products).map(product => ({
+      ...product,
+      averagePrice: product.revenue / product.quantity,
+      percentageOfRevenue: Number(((product.revenue / totalRevenue) * 100).toFixed(1)),
+      percentageOfQuantity: Number(((product.quantity / totalQuantity) * 100).toFixed(1)),
+      totalRevenue: totalRevenue,
+      totalQuantity: totalQuantity,
+    }));
+  }
+
+  calculateBestSellersByQuantity() {
+    return [...this.aggregatedProducts]
       .sort((a, b) => b.quantity - a.quantity)
-      .slice(0, 10)
-      .map(product => ({
-        ...product,
-        averagePrice: product.revenue / product.quantity,
-      }));
+      .slice(0, 10);
   }
 
   calculateBestSellersByRevenue() {
-    const products = this.calculateBestSellersByQuantity();
-    return [...products]
+    return [...this.aggregatedProducts]
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 10);
+  }
+
+  calculateLowestSellersByQuantity() {
+    return [...this.aggregatedProducts]
+      .sort((a, b) => a.quantity - b.quantity)
+      .slice(0, 5);
+  }
+
+  calculateLowestSellersByRevenue() {
+    return [...this.aggregatedProducts]
+      .sort((a, b) => a.revenue - b.revenue)
+      .slice(0, 5);
   }
 
   calculateAverageItemsPerOrder() {
@@ -319,35 +345,6 @@ class SalesReport {
       sum + order.orderItems.filter(item => !item.isComplimentary).reduce((itemSum, item) => itemSum + item.quantity, 0), 0,
     );
     return totalItems / this.orders.length;
-  }
-
-  calculatePopularVariations() {
-    const variations = {};
-    let totalItems = 0;
-
-    this.orders.forEach(order => {
-      order.orderItems.filter(item => !item.isComplimentary).forEach(item => {
-        if (item.variation) {
-          const varName = item.variation.name;
-          if (!variations[varName]) {
-            variations[varName] = {
-              quantity: 0,
-              revenue: 0,
-            };
-          }
-          variations[varName].quantity += item.quantity;
-          variations[varName].revenue += item.subtotal;
-          totalItems += item.quantity;
-        }
-      });
-    });
-
-    Object.keys(variations).forEach(variation => {
-      variations[variation].percentage =
-          (variations[variation].quantity / totalItems) * 100;
-    });
-
-    return variations;
   }
 
   calculateFulfillmentMetrics() {

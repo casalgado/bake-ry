@@ -7,10 +7,17 @@ const orderService = require('../../services/orderService');
 const seededProducts = require('../data/seededProducts.json');
 const seededUsers = require('../data/seededUsers.json');
 
+const getWeightedQuantity = () => {
+  const rand = Math.random() * 100;
+  if (rand < 60) return 1;       // 60% chance for quantity of 1
+  if (rand < 90) return 2;       // 30% chance for quantity of 2
+  return 3;                      // 10% chance for quantity of 3
+};
+
 // Constants
 const NUMBER_OF_DAYS = 100;
 const APPROX_ORDERS_PER_DAY = 4; // min 3
-const ORDER_ITEM_QUANTITY = getRandomInt(1, 3);
+const ORDER_ITEM_QUANTITY = getWeightedQuantity();
 const DELIVERY_PROBABILITY = 0.9;
 const COMMENT_PROBABILITY = 0.2;
 const DELIVERY_FEES = [6000, 7000, 8000, 9000];
@@ -23,6 +30,19 @@ const RANDOM_COMMENTS = [
   'Cliente nuevo',
   'Pago exacto',
   'Entregar en la mañana',
+  'Dejar en recepción',
+  'Edificio sin ascensor',
+  'No tocar el timbre',
+  'Regalo sorpresa',
+  'Entregar después de las 2pm',
+  'Cliente alérgico al gluten',
+  'Pedido para evento especial',
+  'Incluir tarjeta de felicitación',
+  'Direcciones adicionales en notas',
+  'Empresa - Preguntar en seguridad',
+  'Preferencia horario tarde',
+  'Local cerrado mediodía',
+  'Contactar WhatsApp al llegar',
 ];
 
 // Helper functions
@@ -41,6 +61,7 @@ function generateRandomOrder(date) {
   // Determine delivery vs pickup
   const isDelivery = Math.random() < DELIVERY_PROBABILITY;
   const deliveryFee = isDelivery ? getRandomElement(DELIVERY_FEES) : 0;
+  const deliveryCost = isDelivery ? deliveryFee - 1000 : 0;
 
   // Generate random number of items (1-5)
   const numberOfItems = getRandomInt(1, 5);
@@ -71,6 +92,7 @@ function generateRandomOrder(date) {
     deliveryAddress: user.address,
     deliveryInstructions: '',
     deliveryFee,
+    deliveryCost,
     subtotal,
     total,
     customerNotes: '',
