@@ -16,8 +16,8 @@ class SalesReport {
     // B2B and B2C calculations
     this.b2bOrders = this.orders.filter(order => this.b2b_clientIds.has(order.userId));
     this.b2cOrders = this.orders.filter(order => !this.b2b_clientIds.has(order.userId));
-    this.totalB2B = this.b2bOrders.reduce((sum, order) => sum + order.subtotal, 0);
-    this.totalB2C = this.b2cOrders.reduce((sum, order) => sum + order.subtotal, 0);
+    this.totalB2B = this.b2bOrders.reduce((sum, order) => sum + order.total, 0);
+    this.totalB2C = this.b2cOrders.reduce((sum, order) => sum + order.total, 0);
 
     // Calculate date range once
     this.dateRange = this.calculateDateRange();
@@ -157,7 +157,8 @@ class SalesReport {
   generateSalesMetrics() {
     return {
       total: this.calculateTimeRanges(),
-      averageOrderValue: this.totalSales / this.orders.length,
+      averageOrderValue: this.totalRevenue / this.orders.length,
+      averageOrderSales: this.totalSales / this.orders.length,
       byPaymentMethod: this.calculateSalesByPaymentMethod(),
       byCollection: this.calculateSalesByCollection(),
       byCustomerSegment: this.calculateSalesByCustomerSegment(),
