@@ -7,14 +7,29 @@ class SalesReport {
     this.orders = orders.map(order => new Order(order)).filter(order => !order.isComplimentary);
     this.complimentaryOrders = orders.map(order => new Order(order)).filter(order => order.isComplimentary);
     this.b2b_clientIds = new Set(b2b_clients.map(client => client.id));
+
+    // Pre-calculate common metrics
+    this.totalRevenue = this.orders.reduce((sum, order) => sum + order.total, 0);
+    this.totalSales = this.orders.reduce((sum, order) => sum + order.subtotal, 0);
+    this.totalDelivery = this.orders.reduce((sum, order) => sum + (order.deliveryFee || 0), 0);
+
+    // B2B and B2C calculations
+    this.b2bOrders = this.orders.filter(order => this.b2b_clientIds.has(order.userId));
+    this.b2cOrders = this.orders.filter(order => !this.b2b_clientIds.has(order.userId));
+    this.totalB2B = this.b2bOrders.reduce((sum, order) => sum + order.subtotal, 0);
+    this.totalB2C = this.b2cOrders.reduce((sum, order) => sum + order.subtotal, 0);
+
+    // Calculate date range once
     this.dateRange = this.calculateDateRange();
+
+    // Pre-calculate product aggregations
     this.aggregatedProducts = this.aggregateProductData();
   }
 
   generateReport() {
     return {
       metadata: this.generateMetadata(),
-      revenueMetrics: this.generateRevenueMetrics(),
+      salesMetrics: this.generateSalesMetrics(),
       productMetrics: this.generateProductMetrics(),
       operationalMetrics: this.generateOperationalMetrics(),
       taxMetrics: this.generateTaxMetrics(),
@@ -36,111 +51,56 @@ class SalesReport {
     return {
       dateRange: this.dateRange,
       totalPaidOrders: this.orders.length,
-      totalRevenue: this.orders.reduce((sum, order) => sum + order.total, 0),
+      totalRevenue: this.totalRevenue,
+      totalSales: this.totalSales,
+      totalDelivery: this.totalDelivery,
+      totalB2B: this.totalB2B,
+      totalB2C: this.totalB2C,
+      percentageB2B: Number(((this.totalB2B / this.totalSales) * 100).toFixed(1)),
+      percentageB2C: Number(((this.totalB2C / this.totalSales) * 100).toFixed(1)),
       totalComplimentaryOrders: this.complimentaryOrders.length,
       currency: 'COP',
     };
   }
 
-  generateRevenueMetrics() {
-    return {
-      total: this.calculateTimeRanges(),
-      averageOrderValue: this.calculateAverageOrderValue(),
-      byPaymentMethod: this.calculateRevenueByPaymentMethod(),
-      byCollection: this.calculateRevenueByCollection(),
-      byCustomerSegment: this.calculateRevenueByCustomerSegment(),
-    };
-  }
-
-  generateProductMetrics() {
-    return {
-      bestSellers: {
-        byQuantity: this.calculateBestSellersByQuantity(),
-        byRevenue: this.calculateBestSellersByRevenue(),
-      },
-      lowestSellers: {
-        byQuantity: this.calculateLowestSellersByQuantity(),
-        byRevenue: this.calculateLowestSellersByRevenue(),
-      },
-      averageItemsPerOrder: this.calculateAverageItemsPerOrder(),
-    };
-  }
-
-  generateOperationalMetrics() {
-    return {
-      fulfillment: this.calculateFulfillmentMetrics(),
-      deliveryMetrics: this.calculateDeliveryMetrics(),
-    };
-  }
-
-  generateTaxMetrics() {
-    const taxMetrics = {
-      taxableItems: 0,          // Count of items that have tax
-      preTaxSubtotal: 0,        // Subtotal of taxable items before tax
-      totalTax: 0,              // Total tax amount collected
-      total: 0,                  // Total with tax
-    };
-
-    // Process each order item
-    this.orders.forEach(order => {
-      order.orderItems.filter(item => !item.isComplimentary).forEach(item => {
-        // Only count items with tax (coffee products)
-        if (item.taxPercentage > 0) {
-          taxMetrics.taxableItems += item.quantity;
-          taxMetrics.preTaxSubtotal += item.preTaxPrice * item.quantity;
-          taxMetrics.totalTax += item.taxAmount * item.quantity;
-          taxMetrics.total += item.subtotal;
-        }
-      });
-    });
-
-    return taxMetrics;
-  }
-
   calculateTimeRanges() {
     const dailyTotals = {};
 
-    // Initialize a template for each day
+    // Initialize daily totals
     const uniqueDays = [...new Set(this.orders.map(order =>
       new Date(order.dueDate).toISOString().split('T')[0],
     ))].sort();
 
     uniqueDays.forEach(date => {
+      const dayOrders = this.orders.filter(order =>
+        new Date(order.dueDate).toISOString().split('T')[0] === date,
+      );
+
+      const dayB2BOrders = dayOrders.filter(order => this.b2b_clientIds.has(order.userId));
+      const dayB2COrders = dayOrders.filter(order => !this.b2b_clientIds.has(order.userId));
+
+      const dayTotal = dayOrders.reduce((sum, order) => sum + order.total, 0);
+      const dayB2B = dayB2BOrders.reduce((sum, order) => sum + order.subtotal, 0);
+      const dayB2C = dayB2COrders.reduce((sum, order) => sum + order.subtotal, 0);
+      const dayDelivery = dayOrders.reduce((sum, order) => sum + (order.deliveryFee || 0), 0);
+      const daySales = dayB2B + dayB2C;
+
       dailyTotals[date] = {
-        b2b: 0,          // B2B sales without delivery
-        b2c: 0,          // B2C sales without delivery
-        subtotal: 0,     // Total sales without delivery
-        delivery: 0,     // Total delivery fees
-        total: 0,         // Grand total including delivery
+        total: dayTotal,
+        sales: daySales,
+        delivery: dayDelivery,
+        b2b: {
+          amount: dayB2B,
+          percentage: (dayB2B / daySales) * 100,
+        },
+        b2c: {
+          amount: dayB2C,
+          percentage: (dayB2C / daySales) * 100,
+        },
       };
     });
 
-    // Calculate totals for each day
-    this.orders.forEach(order => {
-      const dateKey = new Date(order.dueDate).toISOString().split('T')[0];
-      const isB2B = this.b2b_clientIds.has(order.userId);
-
-      // Calculate order subtotal (without delivery)
-      const subtotal = order.subtotal;
-
-      // Add to appropriate category
-      if (isB2B) {
-        dailyTotals[dateKey].b2b += subtotal;
-      } else {
-        dailyTotals[dateKey].b2c += subtotal;
-      }
-
-      // Add delivery fee if present
-      if (order.fulfillmentType === 'delivery' && order.deliveryFee) {
-        dailyTotals[dateKey].delivery += order.deliveryFee;
-      }
-
-      // Update totals
-      dailyTotals[dateKey].subtotal = dailyTotals[dateKey].b2b + dailyTotals[dateKey].b2c;
-      dailyTotals[dateKey].total = dailyTotals[dateKey].subtotal + dailyTotals[dateKey].delivery;
-    });
-
-    // Calculate weekly and monthly totals with the same structure
+    // Calculate weekly and monthly totals
     const weeklyTotals = this.calculatePeriodTotals(uniqueDays, dailyTotals, 'weekly');
     const monthlyTotals = this.calculatePeriodTotals(uniqueDays, dailyTotals, 'monthly');
 
@@ -156,44 +116,99 @@ class SalesReport {
     let periodKey;
 
     if (period === 'weekly') {
-      // Get week range for first and last day
       const firstDay = new Date(uniqueDays[0]);
       const lastDay = new Date(uniqueDays[uniqueDays.length - 1]);
       periodKey = `${this.getWeekRange(firstDay)}/${this.getWeekRange(lastDay)}`;
-    } else { // monthly
+    } else {
       periodKey = this.getMonthKey(new Date(uniqueDays[0]));
     }
 
-    // Initialize period totals
-    periodTotals[periodKey] = {
-      b2b: 0,
-      b2c: 0,
-      subtotal: 0,
-      delivery: 0,
-      total: 0,
-    };
+    // Initialize period totals with the same structure as daily totals
+    let totalSales = 0;
+    let totalB2B = 0;
+    let totalB2C = 0;
+    let totalDelivery = 0;
 
-    // Sum up all daily totals
     uniqueDays.forEach(date => {
       const dayTotals = dailyTotals[date];
-      periodTotals[periodKey].b2b += dayTotals.b2b;
-      periodTotals[periodKey].b2c += dayTotals.b2c;
-      periodTotals[periodKey].delivery += dayTotals.delivery;
-      periodTotals[periodKey].subtotal += dayTotals.subtotal;
-      periodTotals[periodKey].total += dayTotals.total;
+      totalSales += dayTotals.sales;
+      totalB2B += dayTotals.b2b.amount;
+      totalB2C += dayTotals.b2c.amount;
+      totalDelivery += dayTotals.delivery;
     });
+
+    periodTotals[periodKey] = {
+      total: totalSales + totalDelivery,
+      sales: totalSales,
+      delivery: totalDelivery,
+      b2b: {
+        amount: totalB2B,
+        percentage: (totalB2B / totalSales) * 100,
+      },
+      b2c: {
+        amount: totalB2C,
+        percentage: (totalB2C / totalSales) * 100,
+      },
+    };
 
     return periodTotals;
   }
 
-  calculateAverageOrderValue() {
-    const total = this.orders.reduce((sum, order) => sum + order.total, 0);
-    return total / this.orders.length;
+  generateSalesMetrics() {
+    return {
+      total: this.calculateTimeRanges(),
+      averageOrderValue: this.totalSales / this.orders.length,
+      byPaymentMethod: this.calculateSalesByPaymentMethod(),
+      byCollection: this.calculateSalesByCollection(),
+      byCustomerSegment: this.calculateSalesByCustomerSegment(),
+    };
   }
 
-  calculateRevenueByPaymentMethod() {
+  generateProductMetrics() {
+    return {
+      bestSellers: {
+        byQuantity: this.calculateBestSellersByQuantity(),
+        bySales: this.calculateBestSellersBySales(),
+      },
+      lowestSellers: {
+        byQuantity: this.calculateLowestSellersByQuantity(),
+        bySales: this.calculateLowestSellersBySales(),
+      },
+      averageItemsPerOrder: this.calculateAverageItemsPerOrder(),
+    };
+  }
+
+  generateOperationalMetrics() {
+    return {
+      fulfillment: this.calculateFulfillmentMetrics(),
+      deliveryMetrics: this.calculateDeliveryMetrics(),
+    };
+  }
+
+  generateTaxMetrics() {
+    const taxMetrics = {
+      taxableItems: 0,
+      preTaxSubtotal: 0,
+      totalTax: 0,
+      total: 0,
+    };
+
+    this.orders.forEach(order => {
+      order.orderItems.filter(item => !item.isComplimentary).forEach(item => {
+        if (item.taxPercentage > 0) {
+          taxMetrics.taxableItems += item.quantity;
+          taxMetrics.preTaxSubtotal += item.preTaxPrice * item.quantity;
+          taxMetrics.totalTax += item.taxAmount * item.quantity;
+          taxMetrics.total += item.subtotal;
+        }
+      });
+    });
+
+    return taxMetrics;
+  }
+
+  calculateSalesByPaymentMethod() {
     const paymentMethods = {};
-    let totalRevenue = 0;
 
     this.orders.forEach(order => {
       const method = order.paymentMethod;
@@ -205,21 +220,19 @@ class SalesReport {
       }
       paymentMethods[method].total += order.total;
       paymentMethods[method].orders += 1;
-      totalRevenue += order.total;
     });
 
     // Calculate percentages
     Object.keys(paymentMethods).forEach(method => {
       paymentMethods[method].percentage =
-          (paymentMethods[method].total / totalRevenue) * 100;
+          (paymentMethods[method].total / this.totalSales) * 100;
     });
 
     return paymentMethods;
   }
 
-  calculateRevenueByCollection() {
+  calculateSalesByCollection() {
     const collections = {};
-    let totalRevenue = 0;
     let totalQuantity = 0;
 
     this.orders.forEach(order => {
@@ -232,61 +245,43 @@ class SalesReport {
         }
         collections[item.collectionName].revenue += item.subtotal;
         collections[item.collectionName].quantity += item.quantity;
-        totalRevenue += item.subtotal;
         totalQuantity += item.quantity;
       });
     });
 
     // Calculate percentages
     Object.keys(collections).forEach(collection => {
-      collections[collection].averagePrice = collections[collection].revenue / collections[collection].quantity;
-
+      collections[collection].averagePrice =
+        collections[collection].revenue / collections[collection].quantity;
       collections[collection].percentageRevenue =
-          (collections[collection].revenue / totalRevenue) * 100;
+        (collections[collection].revenue / this.totalSales) * 100;
       collections[collection].percentageQuantity =
-          (collections[collection].quantity / totalQuantity) * 100;
+        (collections[collection].quantity / totalQuantity) * 100;
     });
 
     return collections;
   }
 
-  calculateRevenueByCustomerSegment() {
-    const segments = {
-      b2b: { total: 0, orders: 0, averagePrice: 0 },
-      b2c: { total: 0, orders: 0, averagePrice: 0 },
+  calculateSalesByCustomerSegment() {
+    return {
+      b2b: {
+        total: this.totalB2B,
+        orders: this.b2bOrders.length,
+        averagePrice: this.totalB2B / this.b2bOrders.length,
+        percentageSales: (this.totalB2B / this.totalSales) * 100,
+      },
+      b2c: {
+        total: this.totalB2C,
+        orders: this.b2cOrders.length,
+        averagePrice: this.totalB2C / this.b2cOrders.length,
+        percentageSales: (this.totalB2C / this.totalSales) * 100,
+      },
     };
-
-    let totalRevenue = 0;
-
-    this.orders.forEach(order => {
-      // Check if customer is B2B by checking against b2b_clientIds Set
-      const segment = this.b2b_clientIds.has(order.userId) ? 'b2b' : 'b2c';
-
-      segments[segment].total += order.total;
-      segments[segment].orders += 1;
-
-      totalRevenue += order.total;
-    });
-
-    // Calculate percentages
-    Object.keys(segments).forEach(segment => {
-      if (totalRevenue > 0) {
-        segments[segment].averagePrice = segments[segment].total / segments[segment].orders;
-        segments[segment].percentageRevenue = (segments[segment].total / totalRevenue) * 100;
-      } else {
-        segments[segment].percentageRevenue = 0;
-      }
-    });
-
-    return segments;
   }
-
   aggregateProductData() {
     const products = {};
-    let totalRevenue = 0;
     let totalQuantity = 0;
 
-    // Aggregate product data
     this.orders.forEach(order => {
       order.orderItems.filter(item => !item.isComplimentary).forEach(item => {
         if (!products[item.productId]) {
@@ -301,18 +296,14 @@ class SalesReport {
         products[item.productId].quantity += item.quantity;
         products[item.productId].revenue += item.subtotal;
         totalQuantity += item.quantity;
-        totalRevenue += item.subtotal;
       });
     });
 
-    // Calculate metrics for each product
     return Object.values(products).map(product => ({
       ...product,
       averagePrice: product.revenue / product.quantity,
-      percentageOfRevenue: Number(((product.revenue / totalRevenue) * 100).toFixed(1)),
+      percentageOfSales: Number(((product.revenue / this.totalSales) * 100).toFixed(1)),
       percentageOfQuantity: Number(((product.quantity / totalQuantity) * 100).toFixed(1)),
-      totalRevenue: totalRevenue,
-      totalQuantity: totalQuantity,
     }));
   }
 
@@ -322,7 +313,7 @@ class SalesReport {
       .slice(0, 10);
   }
 
-  calculateBestSellersByRevenue() {
+  calculateBestSellersBySales() {
     return [...this.aggregatedProducts]
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 10);
@@ -334,7 +325,7 @@ class SalesReport {
       .slice(0, 5);
   }
 
-  calculateLowestSellersByRevenue() {
+  calculateLowestSellersBySales() {
     return [...this.aggregatedProducts]
       .sort((a, b) => a.revenue - b.revenue)
       .slice(0, 5);
@@ -342,7 +333,8 @@ class SalesReport {
 
   calculateAverageItemsPerOrder() {
     const totalItems = this.orders.reduce((sum, order) =>
-      sum + order.orderItems.filter(item => !item.isComplimentary).reduce((itemSum, item) => itemSum + item.quantity, 0), 0,
+      sum + order.orderItems.filter(item => !item.isComplimentary)
+        .reduce((itemSum, item) => itemSum + item.quantity, 0), 0,
     );
     return totalItems / this.orders.length;
   }
@@ -371,11 +363,13 @@ class SalesReport {
     );
 
     const totalFees = deliveryOrders.reduce(
-      (sum, order) => sum + order.deliveryFee, 0,
+      (sum, order) => sum + (order.deliveryFee || 0),
+      0,
     );
 
     const totalCost = deliveryOrders.reduce(
-      (sum, order) => sum + order.deliveryCost, 0,
+      (sum, order) => sum + (order.deliveryCost || 0),
+      0,
     );
 
     return {
@@ -388,7 +382,6 @@ class SalesReport {
     };
   }
 
-  // Helper methods
   getWeekRange(date) {
     const current = new Date(date);
     current.setHours(0, 0, 0, 0);
