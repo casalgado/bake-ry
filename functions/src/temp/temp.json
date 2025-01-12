@@ -9,24 +9,12 @@
         },
         "changes": {
             "preparationDate": {
-                "from": {
-                    "_seconds": 1736179936,
-                    "_nanoseconds": 943000000
-                },
-                "to": {
-                    "_seconds": 1736164800,
-                    "_nanoseconds": 0
-                }
+                "from": "2025-01-06T16:12:16.943Z",
+                "to": "2025-01-06T12:00:00.000Z"
             },
             "dueDate": {
-                "from": {
-                    "_seconds": 1736179936,
-                    "_nanoseconds": 943000000
-                },
-                "to": {
-                    "_seconds": 1736164800,
-                    "_nanoseconds": 0
-                }
+                "from": "2025-01-06T16:12:16.943Z",
+                "to": "2025-01-06T12:00:00.000Z"
             },
             "orderItems": {
                 "from": [
@@ -190,7 +178,7 @@
                 "to": 67200
             }
         },
-        "createdAt": "2025-01-12T17:30:53.005Z"
+        "createdAt": "2025-01-12T17:34:35.212Z"
     },
     {
         "id": "Pg8O3FS5Tek8KY4UYSJ3",
@@ -206,7 +194,7 @@
                 "to": true
             }
         },
-        "createdAt": "2025-01-12T17:30:53.005Z"
+        "createdAt": "2025-01-12T17:34:35.213Z"
     },
     {
         "id": "LG5yt7rIle6sZ5sD8ct9",
@@ -222,7 +210,7 @@
                 "to": "pickup"
             }
         },
-        "createdAt": "2025-01-12T17:30:53.005Z"
+        "createdAt": "2025-01-12T17:34:35.213Z"
     },
     {
         "id": "oEWeZkTilyGAXQugdJW7",
@@ -238,6 +226,6 @@
                 "to": "transfer"
             }
         },
-        "createdAt": "2025-01-12T17:30:53.005Z"
+        "createdAt": "2025-01-12T17:34:35.213Z"
     }
 ]

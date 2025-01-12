@@ -3,8 +3,42 @@ const BaseModel = require('./base/BaseModel');
 
 class OrderHistoryChange {
   constructor(change = {}) {
-    this.from = change.from;
-    this.to = change.to;
+    this.from = this.formatValue(change.from);
+    this.to = this.formatValue(change.to);
+  }
+
+  // Helper to format values, including nested dates
+  formatValue(value) {
+    if (this.isFirestoreTimestamp(value)) {
+      return this.convertTimestamp(value);
+    }
+
+    // Handle arrays (like orderItems)
+    if (Array.isArray(value)) {
+      return value.map(item => this.formatValue(item));
+    }
+
+    // Handle nested objects
+    if (value && typeof value === 'object') {
+      const formatted = {};
+      for (const [key, val] of Object.entries(value)) {
+        formatted[key] = this.formatValue(val);
+      }
+      return formatted;
+    }
+
+    return value;
+  }
+
+  isFirestoreTimestamp(value) {
+    return value &&
+           typeof value === 'object' &&
+           '_seconds' in value &&
+           '_nanoseconds' in value;
+  }
+
+  convertTimestamp(timestamp) {
+    return new Date(timestamp._seconds * 1000 + timestamp._nanoseconds / 1000000);
   }
 
   // Convert to plain object for Firestore
@@ -38,7 +72,6 @@ class OrderHistory extends BaseModel {
     }, {});
   }
 
-  // Add timestamp to dateFields
   static get dateFields() {
     return [...super.dateFields, 'timestamp'];
   }
@@ -46,7 +79,6 @@ class OrderHistory extends BaseModel {
   toFirestore() {
     const data = super.toFirestore();
 
-    // Convert changes to plain objects
     const changes = Object.entries(this.changes).reduce((acc, [field, change]) => {
       acc[field] = change.toFirestore();
       return acc;
@@ -58,7 +90,6 @@ class OrderHistory extends BaseModel {
     };
   }
 
-  // Helper methods
   hasFieldChange(fieldName) {
     return fieldName in this.changes;
   }
