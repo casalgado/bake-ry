@@ -1,0 +1,243 @@
+[
+    {
+        "id": "0dxbcvUJgYjgZIA42H08",
+        "timestamp": "2025-01-12T17:26:30.867Z",
+        "editor": {
+            "userId": "es-alimento-admin",
+            "name": "system",
+            "role": "bakery_admin"
+        },
+        "changes": {
+            "preparationDate": {
+                "from": {
+                    "_seconds": 1736179936,
+                    "_nanoseconds": 943000000
+                },
+                "to": {
+                    "_seconds": 1736164800,
+                    "_nanoseconds": 0
+                }
+            },
+            "dueDate": {
+                "from": {
+                    "_seconds": 1736179936,
+                    "_nanoseconds": 943000000
+                },
+                "to": {
+                    "_seconds": 1736164800,
+                    "_nanoseconds": 0
+                }
+            },
+            "orderItems": {
+                "from": [
+                    {
+                        "id": "5jzZw98qp1vW2Txn",
+                        "productId": "4AWJJui8dLfGZKIluyJ6",
+                        "productName": "semillas",
+                        "collectionId": "eUr4L2i62L2C7ChH4Xys",
+                        "collectionName": "baguette",
+                        "quantity": 1,
+                        "basePrice": 10000,
+                        "currentPrice": 10000,
+                        "variation": {
+                            "id": "AUYTnqrC6KL7wwlF",
+                            "name": "otra",
+                            "value": 1000,
+                            "recipeId": 1,
+                            "isWholeGrain": false,
+                            "currentPrice": 10000
+                        },
+                        "recipeId": 1,
+                        "taxPercentage": 0,
+                        "isComplimentary": false,
+                        "productionBatch": 1,
+                        "status": 0,
+                        "taxAmount": 0,
+                        "preTaxPrice": 10000,
+                        "subtotal": 10000
+                    },
+                    {
+                        "id": "YYV7HIbgcwr5lnqj",
+                        "productId": "ilaR1wOHRcgXnN5ciQzq",
+                        "productName": "focaccia",
+                        "collectionId": "6pSWmUZNcTLo9Rz5EgU8",
+                        "collectionName": "panaderia tradicional",
+                        "quantity": 1,
+                        "basePrice": 18000,
+                        "currentPrice": 18000,
+                        "variation": null,
+                        "recipeId": 1,
+                        "taxPercentage": 0,
+                        "isComplimentary": false,
+                        "productionBatch": 1,
+                        "status": 0,
+                        "taxAmount": 0,
+                        "preTaxPrice": 18000,
+                        "subtotal": 18000
+                    },
+                    {
+                        "id": "rw0JUNYdUcKz3hQl",
+                        "productId": "YG35FNJWgq2ociJ9P2CN",
+                        "productName": "arandanos & chocolate",
+                        "collectionId": "WGaa0U6eXRReoq5hEibr",
+                        "collectionName": "sourdough",
+                        "quantity": 1,
+                        "basePrice": 36300,
+                        "currentPrice": 36300,
+                        "variation": {
+                            "id": "Y0FC3LAhGTXUazmn",
+                            "name": "mediano integral",
+                            "value": 650,
+                            "recipeId": 1,
+                            "isWholeGrain": true,
+                            "currentPrice": 36300
+                        },
+                        "recipeId": 1,
+                        "taxPercentage": 0,
+                        "isComplimentary": false,
+                        "productionBatch": 1,
+                        "status": 0,
+                        "taxAmount": 0,
+                        "preTaxPrice": 36300,
+                        "subtotal": 36300
+                    }
+                ],
+                "to": [
+                    {
+                        "id": "5jzZw98qp1vW2Txn",
+                        "productId": "4AWJJui8dLfGZKIluyJ6",
+                        "productName": "semillas",
+                        "collectionId": "eUr4L2i62L2C7ChH4Xys",
+                        "collectionName": "baguette",
+                        "quantity": 1,
+                        "basePrice": 10000,
+                        "currentPrice": 10000,
+                        "variation": {
+                            "id": "AUYTnqrC6KL7wwlF",
+                            "name": "otra",
+                            "value": 1000,
+                            "recipeId": 1,
+                            "isWholeGrain": false,
+                            "currentPrice": 10000
+                        },
+                        "recipeId": 1,
+                        "taxPercentage": 0,
+                        "isComplimentary": false,
+                        "productionBatch": 1,
+                        "status": 0,
+                        "taxAmount": 0,
+                        "preTaxPrice": 10000,
+                        "subtotal": 10000
+                    },
+                    {
+                        "id": "YYV7HIbgcwr5lnqj",
+                        "productId": "ilaR1wOHRcgXnN5ciQzq",
+                        "productName": "focaccia",
+                        "collectionId": "6pSWmUZNcTLo9Rz5EgU8",
+                        "collectionName": "panaderia tradicional",
+                        "quantity": 2,
+                        "basePrice": 18000,
+                        "currentPrice": 18000,
+                        "variation": null,
+                        "recipeId": 1,
+                        "taxPercentage": 0,
+                        "isComplimentary": false,
+                        "productionBatch": 1,
+                        "status": 0,
+                        "taxAmount": 0,
+                        "preTaxPrice": 18000,
+                        "subtotal": 36000
+                    },
+                    {
+                        "id": "bryd5NsdnkGqIkYF",
+                        "productId": "RqRD8iVmRmxzHT1NoNZ1",
+                        "productName": "original",
+                        "collectionId": "WGaa0U6eXRReoq5hEibr",
+                        "collectionName": "sourdough",
+                        "quantity": 1,
+                        "basePrice": 13200,
+                        "currentPrice": 13200,
+                        "variation": {
+                            "id": "UclIMjQJ08O0m61i",
+                            "name": "pequeño",
+                            "value": 500,
+                            "isWholeGrain": false
+                        },
+                        "taxPercentage": 0,
+                        "isComplimentary": false,
+                        "productionBatch": 1,
+                        "status": 0,
+                        "taxAmount": 0,
+                        "preTaxPrice": 13200,
+                        "subtotal": 13200
+                    }
+                ]
+            },
+            "nonTaxableSubtotal": {
+                "from": 64300,
+                "to": 59200
+            },
+            "subtotal": {
+                "from": 64300,
+                "to": 59200
+            },
+            "preTaxTotal": {
+                "from": 64300,
+                "to": 59200
+            },
+            "total": {
+                "from": 72300,
+                "to": 67200
+            }
+        },
+        "createdAt": "2025-01-12T17:30:53.005Z"
+    },
+    {
+        "id": "Pg8O3FS5Tek8KY4UYSJ3",
+        "timestamp": "2025-01-12T17:26:14.532Z",
+        "editor": {
+            "userId": "es-alimento-admin",
+            "name": "system",
+            "role": "bakery_admin"
+        },
+        "changes": {
+            "isPaid": {
+                "from": false,
+                "to": true
+            }
+        },
+        "createdAt": "2025-01-12T17:30:53.005Z"
+    },
+    {
+        "id": "LG5yt7rIle6sZ5sD8ct9",
+        "timestamp": "2025-01-12T17:26:13.564Z",
+        "editor": {
+            "userId": "es-alimento-admin",
+            "name": "system",
+            "role": "bakery_admin"
+        },
+        "changes": {
+            "fulfillmentType": {
+                "from": "delivery",
+                "to": "pickup"
+            }
+        },
+        "createdAt": "2025-01-12T17:30:53.005Z"
+    },
+    {
+        "id": "oEWeZkTilyGAXQugdJW7",
+        "timestamp": "2025-01-12T17:18:15.391Z",
+        "editor": {
+            "userId": "es-alimento-admin",
+            "name": "system",
+            "role": "bakery_admin"
+        },
+        "changes": {
+            "paymentMethod": {
+                "from": "bold",
+                "to": "transfer"
+            }
+        },
+        "createdAt": "2025-01-12T17:30:53.005Z"
+    }
+]

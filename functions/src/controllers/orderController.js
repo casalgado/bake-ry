@@ -44,6 +44,16 @@ const orderController = {
       baseController.handleError(res, error);
     }
   },
+
+  async getHistory(req, res) {
+    try {
+      const { id, bakeryId } = req.params;
+      const history = await orderService.getHistory(bakeryId, id);
+      baseController.handleResponse(res, history);
+    } catch (error) {
+      baseController.handleError(res, error);
+    }
+  },
 };
 
 module.exports = orderController;

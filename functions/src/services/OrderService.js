@@ -1,6 +1,7 @@
 // services/orderService.js
 const { Order } = require('../models/Order');
 const SalesReport = require('../models/SalesReport');
+const OrderHistory = require('../models/OrderHistory');
 const createBaseService = require('./base/serviceFactory');
 const { db } = require('../config/firebase');
 const { NotFoundError, BadRequestError } = require('../utils/errors');
@@ -209,11 +210,30 @@ const createOrderService = () => {
     }
   };
 
+  const getHistory = async (bakeryId, orderId) => {
+    try {
+      if (!bakeryId || !orderId) {
+        throw new BadRequestError('Both bakeryId and orderId are required');
+      }
+
+      const orderRef = baseService.getCollectionRef(bakeryId).doc(orderId);
+      const historySnapshot = await orderRef.collection('updateHistory')
+        .orderBy('timestamp', 'desc')
+        .get();
+
+      return historySnapshot.docs.map(doc => OrderHistory.fromFirestore(doc));
+    } catch (error) {
+      console.error('Error getting order history:', error);
+      throw error;
+    }
+  };
+
   return {
     ...baseService,
     create,
     patchAll,
     getSalesReport,
+    getHistory,
   };
 };
 
