@@ -1,7 +1,7 @@
 // This file is used to seed the database with a bakery user and bakery data.
 const bakery = {
-  email: 'test@bakery.com',
-  password: 'password',
+  email: 'es.alimento@gmail.com',
+  password: 'alimento',
   name: 'Es Alimento',
   role: 'bakery_admin',
   openingHours: {

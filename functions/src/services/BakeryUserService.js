@@ -11,7 +11,8 @@ const createBakeryUserService = () => {
     let userRecord = null;
 
     try {
-      userData.password = 'password';
+      console.log('userData', userData);
+      userData.password = 'aoeuaoeu';
 
       const newUser = new User({
         ...userData,

@@ -22,41 +22,6 @@ const parseSpanishName = (fullName) => {
     .toLowerCase();
   fullName = fullName.replace(/__n__/g, 'ñ').replace(/__N__/g, 'ñ');
 
-  // Explicit business name patterns
-  const businessPatterns = [
-    /^(cafe|harissa)\s/,
-    /\b(sas|foods|group|fithub)\b/,
-    /^(inversiones|manufacturas)\s/,
-    /plaza del parque/,
-    /libros y cafe$/,
-    /\b(luzar|ponki)\b/,
-  ];
-
-  // Check for business names
-  if (businessPatterns.some(pattern => pattern.test(fullName))) {
-    return {
-      firstName: capitalize(fullName),
-      lastName: '',
-    };
-  }
-
-  // Handle "sin apellido" cases
-  if (fullName.includes('sin apellido')) {
-    const namePart = fullName.replace('sin apellido', '').trim();
-    return {
-      firstName: capitalize(namePart),
-      lastName: '',
-    };
-  }
-
-  // Handle amiga/amigo cases
-  if (fullName.includes('amiga de') || fullName.includes('amigo de')) {
-    return {
-      firstName: capitalize(fullName.split(' ')[0]),
-      lastName: '',
-    };
-  }
-
   // Handle parenthetical information
   fullName = fullName.replace(/\s*\([^)]*\)/g, '');
 

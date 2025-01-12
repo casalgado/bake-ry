@@ -1,7 +1,7 @@
 const admin = require('firebase-admin');
 
-const BAKERY_ID = 'bakery-es';
-const ADMIN_USER_ID = 'admin-beto';
+const BAKERY_ID = 'es-alimento';
+const ADMIN_USER_ID = 'es-alimento-admin';
 
 admin.initializeApp({
   projectId: 'bake-ry',

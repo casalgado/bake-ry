@@ -1,17 +1,21 @@
 const { BAKERY_ID } = require('../seedConfig');
 const bakeryUserService = require('../../services/bakeryUserService');
-const clients = require('./../data/processed_imports/ClientsForNewDatabase.json');
-const clientsB2B = require('./../data/processed_imports/ClientsForNewDatabaseB2B.json');
+const clients = require('./../data/export_clientes.json');
 const { parseSpanishName } = require('../../utils/helpers.js');
 
-const b2bClientIds = new Set(
-  Object.values(clientsB2B).map(client => client.id),
-);
-
-const customers = Object.values(clients).map(e => {
+// Sample user data
+const customers = Object.values(clients).filter(e => {
+  if (!e.history) return false;
+  if (Object.values(e.history).length === 0) return false;
+  if (e.address == '' || e.phone == '') return false;
+  return true;
+}).map(e => {
   if (e.email == '' || e.email == null || e.email == undefined || e.email == ' ' || e.email == 'no lo dio') e.email = `pendiente@${e.name.split(' ').join('').toLowerCase()}.com`;
-  const category = b2bClientIds.has(e.id) ? 'B2B' : 'B2C';
-  const cleanItem = { ...e, ...parseSpanishName(e.name), createdAt: e.since, category };
+  if (e.phone == '' || e.phone == null || e.phone == undefined || e.phone == ' ') e.phone = '5555555555';
+  e.category = (Math.random() > .8) ? 'B2B' : 'B2C';
+  if (e.address == '' || e.address == ' ' || !e.address || e.address == null || e.address == 'paso por el pedido') e.address = 'pendiente';
+  const cleanItem = { ...e, ...parseSpanishName(e.name), createdAt: e.since };
+  delete cleanItem.history;
   return cleanItem;
 });
 
@@ -114,9 +118,7 @@ const staff = [
   },
 ];
 
-void staff;
-
-const users = [...customers];
+const users = [...customers.slice(300, 400), ...staff.map(e => ({ ...e, ...parseSpanishName(e.name) }))];
 
 async function seedUsers() {
   try {
