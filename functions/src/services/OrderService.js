@@ -61,6 +61,7 @@ const createOrderService = () => {
   };
 
   const patchAll = async (bakeryId, updates, editor) => {
+
     try {
       if (!Array.isArray(updates)) {
         throw new BadRequestError('Updates must be an array');
@@ -109,7 +110,7 @@ const createOrderService = () => {
                 updatedAt: new Date(),
                 lastEditedBy: {
                   userId: editor?.uid,
-                  name: editor?.name,
+                  email: editor?.email,
                   role: editor?.role,
                 },
               });
@@ -164,9 +165,9 @@ const createOrderService = () => {
               transaction.set(historyRef, {
                 timestamp: new Date(),
                 editor: {
-                  userId: editor?.uid || 'system',
-                  name: editor?.name || 'system',
-                  role: editor?.role || 'system',
+                  userId: editor?.uid,
+                  email: editor?.email,
+                  role: editor?.role,
                 },
                 changes,
               });
