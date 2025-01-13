@@ -7,5 +7,6 @@ src/config/serviceAccountKey.json
 /src/config/serviceAccountKey.json
 .env
 src/seeds/data/
+src/seeds/firestore/
 src/middleware/request_logs/
 *.csv

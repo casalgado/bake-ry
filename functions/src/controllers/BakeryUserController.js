@@ -72,11 +72,6 @@ const bakeryUserController = {
         throw new BadRequestError('Cannot change to non-bakery user role');
       }
 
-      // Validate email if it's being updated
-      if (updateData.email && updateData.email !== currentUser.email) {
-        throw new BadRequestError('Email cannot be updated');
-      }
-
       const result = await bakeryUserService.update(id, updateData, bakeryId);
       baseController.handleResponse(res, result);
     } catch (error) {
