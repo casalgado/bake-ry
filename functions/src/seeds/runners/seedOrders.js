@@ -17,7 +17,7 @@ const getWeightedQuantity = () => {
 // Constants
 const NUMBER_OF_DAYS = 100;
 const APPROX_ORDERS_PER_DAY = 4; // min 3
-const ORDER_ITEM_QUANTITY = getWeightedQuantity();
+const ORDER_ITEM_QUANTITY = () => getWeightedQuantity();
 const DELIVERY_PROBABILITY = 0.9;
 const COMMENT_PROBABILITY = 0.2;
 const DELIVERY_FEES = [6000, 7000, 8000, 9000];
@@ -114,7 +114,7 @@ function generateRandomItems(count) {
     }
     selectedProducts.add(product.id);
 
-    const quantity = ORDER_ITEM_QUANTITY;
+    const quantity = ORDER_ITEM_QUANTITY();
     const variation = product.variations?.length > 0
       ? getRandomElement(product.variations)
       : null;

@@ -256,7 +256,7 @@ const createBakeryUserService = () => {
         .orderBy('dueDate', 'desc')
         .get();
 
-      return historySnapshot.docs.map(doc => {
+      return historySnapshot.docs.filter(doc => !doc.data().isDeleted).map(doc => {
         return Order.fromFirestore(doc);
       });
     } catch (error) {

@@ -9,6 +9,18 @@ const { NotFoundError, BadRequestError } = require('../utils/errors');
 const createOrderService = () => {
   const baseService = createBaseService('orders', Order, 'bakeries/{bakeryId}');
 
+  const updateClientHistory = async (transaction, bakeryId, order) => {
+    const clientHistoryRef = db
+      .collection('bakeries')
+      .doc(bakeryId)
+      .collection('users')
+      .doc(order.userId)
+      .collection('orderHistory')
+      .doc(order.id);
+
+    transaction.set(clientHistoryRef, order.toClientHistoryObject(), { merge: true });
+  };
+
   const create = async (orderData, bakeryId) => {
     try {
       return await db.runTransaction(async (transaction) => {
@@ -60,8 +72,87 @@ const createOrderService = () => {
     }
   };
 
-  const patchAll = async (bakeryId, updates, editor) => {
+  const update = async (id, data, bakeryId, editor = null) => {
+    try {
+      const orderRef = baseService.getCollectionRef(bakeryId).doc(id);
 
+      return await db.runTransaction(async (transaction) => {
+        const doc = await transaction.get(orderRef);
+
+        if (!doc.exists) {
+          throw new NotFoundError('Order not found');
+        }
+
+        const currentOrder = Order.fromFirestore(doc);
+        const updatedOrder = new Order({
+          ...currentOrder,
+          ...data,
+          id,
+          updatedAt: new Date(),
+          lastEditedBy: {
+            userId: editor?.uid,
+            name: editor?.name,
+            role: editor?.role,
+          },
+        });
+
+        // Record changes in history
+        const changes = baseService.diffObjects(currentOrder, updatedOrder);
+        await baseService.recordHistory(transaction, orderRef, changes, currentOrder, editor);
+
+        // Update both main order and client history
+        transaction.update(orderRef, updatedOrder.toFirestore());
+        await updateClientHistory(transaction, bakeryId, updatedOrder);
+
+        return updatedOrder;
+      });
+    } catch (error) {
+      console.error('Error updating order:', error);
+      throw error;
+    }
+  };
+
+  const patch = async (id, data, bakeryId, editor = null) => {
+    try {
+      const orderRef = baseService.getCollectionRef(bakeryId).doc(id);
+
+      return await db.runTransaction(async (transaction) => {
+        const doc = await transaction.get(orderRef);
+
+        if (!doc.exists) {
+          throw new NotFoundError('Order not found');
+        }
+
+        const currentOrder = Order.fromFirestore(doc);
+        const updatedOrder = new Order({
+          ...currentOrder,
+          ...data,
+          id,
+          updatedAt: new Date(),
+          lastEditedBy: {
+            userId: editor?.uid,
+            name: editor?.name,
+            role: editor?.role,
+          },
+        });
+
+        // Record changes in history
+        const changes = baseService.diffObjects(currentOrder, updatedOrder);
+        await baseService.recordHistory(transaction, orderRef, changes, currentOrder, editor);
+
+        // Update both main order and client history
+        transaction.update(orderRef, updatedOrder.toFirestore());
+        await updateClientHistory(transaction, bakeryId, updatedOrder);
+
+        return updatedOrder;
+      });
+    } catch (error) {
+      console.error('Error patching order:', error);
+      throw error;
+    }
+  };
+
+  const patchAll = async (bakeryId, updates, editor) => {
     try {
       if (!Array.isArray(updates)) {
         throw new BadRequestError('Updates must be an array');
@@ -189,6 +280,45 @@ const createOrderService = () => {
     }
   };
 
+  const remove = async (id, bakeryId, editor = null) => {
+    try {
+      const orderRef = baseService.getCollectionRef(bakeryId).doc(id);
+
+      return await db.runTransaction(async (transaction) => {
+        const doc = await transaction.get(orderRef);
+
+        if (!doc.exists) {
+          throw new NotFoundError('Order not found');
+        }
+
+        const currentOrder = Order.fromFirestore(doc);
+        const updatedOrder = new Order({
+          ...currentOrder,
+          isDeleted: true,
+          updatedAt: new Date(),
+          lastEditedBy: {
+            userId: editor?.uid,
+            name: editor?.name,
+            role: editor?.role,
+          },
+        });
+
+        // Record changes in history
+        const changes = baseService.diffObjects(currentOrder, updatedOrder);
+        await baseService.recordHistory(transaction, orderRef, changes, currentOrder, editor);
+
+        // Update both main order and client history
+        transaction.update(orderRef, updatedOrder.toFirestore());
+        await updateClientHistory(transaction, bakeryId, updatedOrder);
+
+        return null;
+      });
+    } catch (error) {
+      console.error('Error removing order:', error);
+      throw error;
+    }
+  };
+
   const getSalesReport = async (bakeryId, query) => {
     try {
       // Get orders using the existing getAll method
@@ -201,7 +331,7 @@ const createOrderService = () => {
           ...doc.data(),
         });
       });
-      console.log('b2b_clients in service', b2b_clients);
+
       // Create a new sales report instance and generate the report
       const salesReport = new SalesReport(orders.items, b2b_clients);
       return salesReport.generateReport();
@@ -232,7 +362,10 @@ const createOrderService = () => {
   return {
     ...baseService,
     create,
+    update,
+    patch,
     patchAll,
+    remove,
     getSalesReport,
     getHistory,
   };
