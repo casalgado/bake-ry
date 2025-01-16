@@ -8,7 +8,7 @@ const validateUserData = (data) => {
   const errors = [];
 
   if (!data.email) {
-    errors.push('Email is required');
+    console.log('Email is empty');
   } else {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(data.email)) {

@@ -23,7 +23,7 @@ class User extends BaseModel {
   }) {
     super({ id, createdAt, updatedAt });
 
-    this.email = email;
+    this.email = email == '' || email == null || email == undefined ? `${Math.random().toString(36).substring(2, 6)}@pendiente.com` : email;
     this.password = password;
     this.role = role;
     this.bakeryId = bakeryId;

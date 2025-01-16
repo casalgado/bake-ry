@@ -1,5 +1,5 @@
 const createBaseController = require('./base/controllerFactory');
-const orderService = require('../services/orderService');
+const orderService = require('../services/OrderService');
 const QueryParser = require('../utils/queryParser');
 
 const validateOrderData = (data) => {
