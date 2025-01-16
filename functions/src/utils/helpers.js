@@ -6,31 +6,38 @@ const generateId = (length = 16) => {
   ).join('');
 };
 
-const parseSpanishName = (fullName) => {
+const parseSpanishName = (fullName, category) => {
   // Handle empty input
   if (!fullName) {
     return { firstName: '', lastName: '', type: 'unknown' };
   }
 
-  // Clean the input
-  fullName = fullName.replace(/ñ/g, '__n__').replace(/Ñ/g, '__N__');  // Preserve ñ/Ñ
-  fullName = fullName.normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-    .replace(/\.$/, '')  // Remove trailing period
-    .replace(/\s+/g, ' ') // Normalize multiple spaces
+  // Clean the input while preserving diacritics and ñ
+  let cleanName = fullName
+    .replace(/\.$/, '')      // Remove trailing period
+    .replace(/\s+/g, ' ')    // Normalize multiple spaces
     .trim()
     .toLowerCase();
-  fullName = fullName.replace(/__n__/g, 'ñ').replace(/__N__/g, 'ñ');
+
+  // Check for business names
+  if (category === 'B2B') {
+    return {
+      firstName: capitalize(cleanName),
+      name: capitalize(cleanName),
+      lastName: '',
+    };
+  }
 
   // Handle parenthetical information
-  fullName = fullName.replace(/\s*\([^)]*\)/g, '');
+  cleanName = cleanName.replace(/\s*\([^)]*\)/g, '');
 
   // Handle single word names
-  const parts = fullName.split(' ').filter(Boolean);
+  const parts = cleanName.split(' ').filter(Boolean);
   if (parts.length === 1) {
     return {
       firstName: capitalize(parts[0]),
       lastName: '',
+      name: capitalize(parts[0]),
     };
   }
 
@@ -38,12 +45,12 @@ const parseSpanishName = (fullName) => {
   let lastName = '';
 
   // Handle special compound names with "del/de la"
-  if (parts[0] === 'maria' && parts[1] === 'del' && parts[2]) {
+  if (parts[0] === 'maría' && parts[1] === 'del' && parts[2]) {
     firstName = `${parts[0]} ${parts[1]} ${parts[2]}`;
     lastName = parts.slice(3).join(' ');
   }
   // Handle other compound first names
-  else if (['maria', 'jose', 'juan', 'ana', 'luis', 'carlos'].includes(parts[0]) && parts[1]) {
+  else if (['maría', 'josé', 'juan', 'ana', 'luís', 'carlos'].includes(parts[0]) && parts[1]) {
     firstName = `${parts[0]} ${parts[1]}`;
     lastName = parts.slice(2).join(' ');
   }

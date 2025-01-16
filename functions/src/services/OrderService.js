@@ -96,6 +96,19 @@ const createOrderService = () => {
           },
         });
 
+        if (data.shouldUpdateClientAddress) {
+          const clientRef = db
+            .collection('bakeries')
+            .doc(bakeryId)
+            .collection('users')
+            .doc(updatedOrder.userId);
+
+          transaction.update(clientRef, {
+            address: updatedOrder.deliveryAddress,
+            updatedAt: new Date(),
+          });
+        }
+
         // Record changes in history
         const changes = baseService.diffObjects(currentOrder, updatedOrder);
         await baseService.recordHistory(transaction, orderRef, changes, currentOrder, editor);
@@ -135,6 +148,19 @@ const createOrderService = () => {
             role: editor?.role,
           },
         });
+
+        if (data.shouldUpdateClientAddress) {
+          const clientRef = db
+            .collection('bakeries')
+            .doc(bakeryId)
+            .collection('users')
+            .doc(updatedOrder.userId);
+
+          transaction.update(clientRef, {
+            address: updatedOrder.deliveryAddress,
+            updatedAt: new Date(),
+          });
+        }
 
         // Record changes in history
         const changes = baseService.diffObjects(currentOrder, updatedOrder);
