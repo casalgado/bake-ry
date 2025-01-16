@@ -22,6 +22,7 @@ bakeryRouter.use(requireBakeryAssistant);
 bakeryRouter.post('/users', bakeryUserController.create);
 bakeryRouter.get('/users', bakeryUserController.getAll);
 bakeryRouter.get('/users/:id', bakeryUserController.getById);
+bakeryRouter.get('/users/:id/history', bakeryUserController.getHistory);
 bakeryRouter.put('/users/:id', bakeryUserController.update);
 bakeryRouter.delete('/users/:id', bakeryUserController.remove);
 

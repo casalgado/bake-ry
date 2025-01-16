@@ -1,6 +1,7 @@
 // services/bakeryUserService.js
 const { admin, db } = require('../config/firebase');
 const User = require('../models/User');
+const { Order } = require ('../models/Order');
 const createBaseService = require('./base/serviceFactory');
 const { BadRequestError, NotFoundError } = require('../utils/errors');
 
@@ -243,10 +244,32 @@ const createBakeryUserService = () => {
     }
   };
 
+  const getHistory = async (bakeryId, userId) => {
+    try {
+      if (!bakeryId || !userId) {
+        throw new BadRequestError('Both bakeryId and userId are required');
+      }
+
+      const userRef = baseService.getCollectionRef(bakeryId).doc(userId);
+
+      const historySnapshot = await userRef.collection('orderHistory')
+        .orderBy('dueDate', 'desc')
+        .get();
+
+      return historySnapshot.docs.map(doc => {
+        return Order.fromFirestore(doc);
+      });
+    } catch (error) {
+      console.error('Error getting order history:', error);
+      throw error;
+    }
+  };
+
   return {
     ...baseService,
     create,
     update,
+    getHistory,
     delete: remove,
   };
 };

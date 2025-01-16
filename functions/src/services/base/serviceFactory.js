@@ -26,10 +26,14 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
     Object.keys(newData).forEach(key => {
       if (key === 'updatedAt') return;
 
-      if (JSON.stringify(oldData[key]) !== JSON.stringify(newData[key])) {
+      // Handle undefined values by converting them to null
+      const oldValue = oldData[key] === undefined ? null : oldData[key];
+      const newValue = newData[key] === undefined ? null : newData[key];
+
+      if (JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
         changes[key] = {
-          from: oldData[key],
-          to: newData[key],
+          from: oldValue,
+          to: newValue,
         };
       }
     });
