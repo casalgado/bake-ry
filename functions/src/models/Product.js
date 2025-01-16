@@ -7,7 +7,7 @@ class ProductVariation {
 
   constructor({
     id,
-    name,
+    name = '',
     value,
     basePrice,
     currentPrice,
@@ -15,7 +15,7 @@ class ProductVariation {
     isWholeGrain = false,
   }) {
     this.id = id || generateId();
-    this.name = name;
+    this.name = name.toLowerCase();
     this.value = value;
     this.basePrice = basePrice;
     this.currentPrice = currentPrice || basePrice;
@@ -57,11 +57,12 @@ class Product extends BaseModel {
     // Basic Information
     id,
     bakeryId,
-    name,
+    name = '',
     collectionId,
     collectionName,
     // Variations
     variations = [],
+    hasVariations,
     // Basic price and recipe (for products without variations)
     recipeId,
     basePrice,
@@ -83,7 +84,7 @@ class Product extends BaseModel {
 
     // Basic Information
     this.bakeryId = bakeryId;
-    this.name = name;
+    this.name = name.toLowerCase();
     this.collectionId = collectionId;
     this.collectionName = collectionName;
     this.recipeId = recipeId;

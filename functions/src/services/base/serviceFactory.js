@@ -127,7 +127,9 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
         if (perPage) dbQuery = dbQuery.limit(perPage);
       }
 
+      console.log('dbQuery', dbQuery);
       const snapshot = await dbQuery.get();
+      console.log('snapshot', snapshot);
       const documents = snapshot.docs.map(doc => ModelClass.fromFirestore(doc));
 
       return {
