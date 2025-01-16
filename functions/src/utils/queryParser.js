@@ -32,6 +32,19 @@ class QueryParser {
     };
   }
 
+  parseValue(value) {
+    // Convert string boolean values
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+
+    // Convert numbers
+    if (!isNaN(value) && value.trim() !== '') {
+      return Number(value);
+    }
+
+    return value;
+  }
+
   parseFilters(req) {
     const filters = {};
     const { date_field, start_date, end_date, ...otherFilters } = req.query;
@@ -49,7 +62,7 @@ class QueryParser {
     Object.entries(otherFilters).forEach(([key, value]) => {
       // Skip pagination and sorting params
       if (!['page', 'per_page', 'sort'].includes(key)) {
-        filters[key] = value;
+        filters[key] = this.parseValue(value);
       }
     });
 
