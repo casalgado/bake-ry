@@ -206,7 +206,7 @@ const createBakeryUserService = () => {
             changed_at: new Date(),
             changed_by: {
               userId: editor?.uid || 'system',
-              name: editor?.name || 'system',
+              email: editor?.email || 'system@system.com',
               role: editor?.role || 'system',
             },
             reason: data.categoryChangeReason || 'Manual update',

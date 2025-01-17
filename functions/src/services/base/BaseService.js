@@ -237,7 +237,7 @@ class BaseService {
           updatedAt: new Date(),
           lastEditedBy: {
             userId: editor?.uid,
-            name: editor?.name,
+            email: editor?.email,
             role: editor?.role,
           },
         });
@@ -269,7 +269,7 @@ class BaseService {
       // Store who made the changes - if no editor is provided, use 'system'
       editor: {
         userId: editor?.uid || 'system',
-        name: editor?.name || 'system',
+        email: editor?.email || 'system@system.com',
         role: editor?.role || 'system',
       },
       // Store the actual changes (will be computed by diffObjects)
@@ -328,7 +328,7 @@ class BaseService {
           updatedAt: new Date(),
           lastEditedBy: {
             userId: editor.uid,
-            name: editor.name,
+            email: editor.email,
             role: editor.role,
           },
         });

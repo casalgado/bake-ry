@@ -91,7 +91,7 @@ const createOrderService = () => {
           updatedAt: new Date(),
           lastEditedBy: {
             userId: editor?.uid,
-            name: editor?.name,
+            email: editor?.email,
             role: editor?.role,
           },
         });
@@ -144,7 +144,7 @@ const createOrderService = () => {
           updatedAt: new Date(),
           lastEditedBy: {
             userId: editor?.uid,
-            name: editor?.name,
+            email: editor?.email,
             role: editor?.role,
           },
         });
@@ -324,7 +324,7 @@ const createOrderService = () => {
           updatedAt: new Date(),
           lastEditedBy: {
             userId: editor?.uid,
-            name: editor?.name,
+            email: editor?.email,
             role: editor?.role,
           },
         });

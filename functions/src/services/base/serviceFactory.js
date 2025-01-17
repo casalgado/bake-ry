@@ -47,7 +47,7 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
       timestamp: new Date(),
       editor: {
         userId: editor?.uid || 'system',
-        name: editor?.name || 'system',
+        email: editor?.email || 'system@system.com',
         role: editor?.role || 'system',
       },
       changes,
@@ -199,7 +199,7 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
           updatedAt: new Date(),
           lastEditedBy: {
             userId: editor?.uid,
-            name: editor?.name,
+            email: editor?.email,
             role: editor?.role,
           },
         });
@@ -234,7 +234,7 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
           updatedAt: new Date(),
           lastEditedBy: {
             userId: editor?.uid,
-            name: editor?.name,
+            email: editor?.email,
             role: editor?.role,
           },
         });

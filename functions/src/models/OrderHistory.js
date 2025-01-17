@@ -56,7 +56,7 @@ class OrderHistory extends BaseModel {
     timestamp,
     editor = {
       userId: 'system',
-      name: 'system',
+      email: 'system@system.com',
       role: 'system',
     },
     changes = {},
