@@ -11,7 +11,8 @@ class SalesReport {
     // Pre-calculate common metrics
     this.totalRevenue = this.orders.reduce((sum, order) => sum + order.total, 0);
     this.totalSales = this.orders.reduce((sum, order) => sum + order.subtotal, 0);
-    this.totalDelivery = this.orders.reduce((sum, order) => sum + (order.deliveryFee || 0), 0);
+    this.totalDelivery = this.orders.reduce((sum, order) =>
+      sum + (order.fulfillmentType === 'delivery' ? (order.deliveryFee || 0) : 0), 0);
 
     // B2B and B2C calculations
     this.b2bOrders = this.orders.filter(order => this.b2b_clientIds.has(order.userId));
@@ -82,7 +83,8 @@ class SalesReport {
       const dayTotal = dayOrders.reduce((sum, order) => sum + order.total, 0);
       const dayB2B = dayB2BOrders.reduce((sum, order) => sum + order.subtotal, 0);
       const dayB2C = dayB2COrders.reduce((sum, order) => sum + order.subtotal, 0);
-      const dayDelivery = dayOrders.reduce((sum, order) => sum + (order.deliveryFee || 0), 0);
+      const dayDelivery = dayOrders.reduce((sum, order) =>
+        sum + (order.fulfillmentType === 'delivery' ? (order.deliveryFee || 0) : 0), 0);
       const daySales = dayB2B + dayB2C;
 
       dailyTotals[date] = {
