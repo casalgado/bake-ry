@@ -188,7 +188,11 @@ class Order extends BaseModel {
     this.preTaxTotal = this.subtotal - this.totalTaxAmount;
 
     // Calculate final total
-    this.total = this.subtotal + this.deliveryFee;
+    if (this.fulfillmentType === 'delivery') {
+      this.total = this.subtotal + this.deliveryFee;
+    } else {
+      this.total = this.subtotal;
+    }
   }
 
   static get dateFields() {

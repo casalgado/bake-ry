@@ -1,4 +1,5 @@
 const BaseModel = require('./base/BaseModel');
+const { parseSpanishName } = require('../utils/helpers');
 
 class User extends BaseModel {
   constructor({
@@ -29,9 +30,9 @@ class User extends BaseModel {
     this.bakeryId = bakeryId;
 
     // Clean and set names
-    this.firstName = this.formatName(firstName);
-    this.lastName = this.formatName(lastName);
-    this.name = this.formatName(name);
+    this.firstName = parseSpanishName(name).firstName;
+    this.lastName = parseSpanishName(name).lastName;
+    this.name = parseSpanishName(name).name;
 
     this.address = address;
     this.birthday = birthday;
@@ -45,65 +46,6 @@ class User extends BaseModel {
 
   static get dateFields() {
     return [...super.dateFields];
-  }
-
-  formatName(name) {
-    if (!name) return '';
-
-    // List of Spanish prepositions and articles that should not be capitalized
-    const lowerCaseWords = ['de', 'del', 'la', 'las', 'los', 'y', 'e', 'i'];
-
-    // Clean the input
-    let cleanName = name
-      .replace(/ñ/g, '__n__')
-      .replace(/Ñ/g, '__N__');  // Preserve ñ/Ñ
-
-    cleanName = cleanName
-      .normalize('NFKD')
-      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-      .replace(/\.$/, '')  // Remove trailing period
-      .replace(/\s+/g, ' ') // Normalize multiple spaces
-      .trim()
-      .toLowerCase();
-
-    cleanName = cleanName
-      .replace(/__n__/g, 'ñ')
-      .replace(/__N__/g, 'Ñ'); // Restore ñ/Ñ
-
-    // Remove parenthetical information
-    cleanName = cleanName.replace(/\s*\([^)]*\)/g, '');
-
-    // Split into words
-    const words = cleanName.split(' ');
-
-    // Capitalize words appropriately
-    const capitalizedWords = words.map((word, index) => {
-      // Special cases for lowercase words
-      const isLowerCaseWord = lowerCaseWords.includes(word);
-
-      // Always capitalize first word
-      if (index === 0) {
-        return word.charAt(0).toUpperCase() + word.slice(1);
-      }
-
-      // Handle compound prepositions (de la, de los, de las)
-      if (word === 'la' || word === 'las' || word === 'los') {
-        const previousWord = words[index - 1];
-        if (previousWord === 'de') {
-          return word;
-        }
-      }
-
-      // Keep prepositions and articles lowercase unless they're the first word
-      if (isLowerCaseWord) {
-        return word;
-      }
-
-      // Capitalize other words
-      return word.charAt(0).toUpperCase() + word.slice(1);
-    });
-
-    return capitalizedWords.join(' ');
   }
 
   formatPhone(phone) {
