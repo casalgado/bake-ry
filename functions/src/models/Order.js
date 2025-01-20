@@ -208,6 +208,7 @@ class Order extends BaseModel {
       id: this.id,
       bakeryId: this.bakeryId,
       dueDate: this.dueDate,
+      preparationDate: this.preparationDate,
       address: this.deliveryAddress,
       subtotal: this.subtotal,
       preTaxTotal: this.preTaxTotal,

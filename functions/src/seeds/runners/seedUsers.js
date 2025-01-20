@@ -29,30 +29,6 @@ const staff = [
     national_id: 'ID123456',
   },
   {
-    email: 'baker2@example.com',
-    password: 'aoeuao',
-    role: 'bakery_staff',
-    name: 'Jane Dough',
-    address: '456 Pastry Ave',
-    birthday: '1992-03-15',
-    category: 'Pastry Chef',
-    comment: 'Expert in French pastries',
-    phone: '555-0124',
-    national_id: 'ID789012',
-  },
-  {
-    email: 'manager@example.com',
-    password: 'aoeuao',
-    role: 'bakery_admin',
-    name: 'Beto',
-    address: '789 Admin Street',
-    birthday: '1985-06-20',
-    category: 'Management',
-    comment: 'General manager',
-    phone: '555-0125',
-    national_id: 'ID345678',
-  },
-  {
     email: 'delivery1@example.com',
     password: 'aoeuao',
     role: 'delivery_assistant',
@@ -68,7 +44,7 @@ const staff = [
     email: 'delivery2@example.com',
     password: 'aoeuao',
     role: 'delivery_assistant',
-    name: 'Alex Lopez',
+    name: 'Orlando Lopez',
     address: '654 Transit Way',
     birthday: '1993-08-25',
     category: 'Delivery',
@@ -92,7 +68,7 @@ const staff = [
     email: 'production1@example.com',
     password: 'aoeuao',
     role: 'production_assistant',
-    name: 'Lisa Gonzales',
+    name: 'Laura Gonzales',
     address: '147 Factory Lane',
     birthday: '1991-07-15',
     category: 'Production',
@@ -100,23 +76,9 @@ const staff = [
     phone: '555-0129',
     national_id: 'ID678901',
   },
-  {
-    email: 'production2@example.com',
-    password: 'aoeuao',
-    role: 'production_assistant',
-    name: 'Amanda Martinez',
-    address: '258 Assembly Road',
-    birthday: '1989-09-03',
-    category: 'Production',
-    comment: 'Evening shift production assistant',
-    phone: '555-0130',
-    national_id: 'ID890123',
-  },
 ];
 
-void staff;
-
-const users = [...customers];
+const users = [...customers.slice(0, 20), ...staff];
 
 async function seedUsers() {
   try {

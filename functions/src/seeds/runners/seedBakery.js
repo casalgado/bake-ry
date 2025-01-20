@@ -39,6 +39,8 @@ async function seedBakery() {
     await db.collection('users').doc(ADMIN_USER_ID).set({
       email: bakery.email,
       name: bakery.name,
+      firstName: bakery.firstName,
+      lastName: bakery.lastName,
       role: bakery.role,
       bakeryId: BAKERY_ID,
       createdAt: timestamp(),

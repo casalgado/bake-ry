@@ -64,7 +64,7 @@ const createBakeryUserService = () => {
 
           assistantsRef.doc(userRecord.uid).set({
             name: newUser.name,
-            first_name: newUser.name.split(' ')[0],
+            firstName: newUser.name.split(' ')[0],
             role: newUser.role,
             email: newUser.email,
             phone: newUser.phone,
@@ -143,7 +143,7 @@ const createBakeryUserService = () => {
             const staffRef = settingsRef.collection('staff').doc(id);
             transaction.set(staffRef, {
               name: user.name,
-              first_name: user.name.split(' ')[0],
+              firstName: user.name.split(' ')[0],
               email: user.email,
               phone: user.phone,
               role: user.role,

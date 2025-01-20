@@ -2,9 +2,11 @@
 const createBaseService = require('./base/serviceFactory');
 const { BakerySettings, ProductCategory } = require('../models/BakerySettings');
 const { NotFoundError } = require('../utils/errors');
+const User = require('../models/User');
 
 const createBakerySettingsService = () => {
   const baseService = createBaseService('settings', BakerySettings, 'bakeries/{bakeryId}');
+  const usersService = createBaseService('users', User, 'bakeries/{bakeryId}');
 
   const getById = async (id, bakeryId) => {
     try {
@@ -53,7 +55,10 @@ const createBakerySettingsService = () => {
         .doc('default')
         .collection('staff')
         .get();
-      return staff.docs.map(doc => doc.data());
+      const admins = await usersService.getRootRef().where('role', '==', 'bakery_admin').get();
+      console.log('inService admins', admins.docs.map(doc => doc.data()));
+      console.log('inService staff', staff.docs.map(doc => doc.data()));
+      return [...admins.docs.map(doc => doc.data()), ...staff.docs.map(doc => doc.data())];
     } catch (error) {
       console.error('Error getting staff list:', error);
       throw error;

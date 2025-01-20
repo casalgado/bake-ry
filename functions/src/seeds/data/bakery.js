@@ -2,7 +2,9 @@
 const bakery = {
   email: 'es.alimento@gmail.com',
   password: 'alimento',
-  name: 'Es Alimento',
+  name: 'Esteban Salgado',
+  firstName: 'Esteban',
+  lastName: 'Salgado',
   role: 'bakery_admin',
   openingHours: {
     monday: {

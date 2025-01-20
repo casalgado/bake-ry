@@ -15,8 +15,8 @@ const getWeightedQuantity = () => {
 };
 
 // Constants
-const NUMBER_OF_DAYS = 100;
-const APPROX_ORDERS_PER_DAY = 4; // min 3
+const NUMBER_OF_DAYS = 2;
+const APPROX_ORDERS_PER_DAY = 10; // min 3
 const ORDER_ITEM_QUANTITY = () => getWeightedQuantity();
 const DELIVERY_PROBABILITY = 0.9;
 const COMMENT_PROBABILITY = 0.2;
