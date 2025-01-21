@@ -116,6 +116,7 @@ class Order extends BaseModel {
 
     // Notes
     customerNotes = '',
+    deliveryNotes = '',
     internalNotes = '',
     isDeleted = false,
   } = {}) {
@@ -154,6 +155,7 @@ class Order extends BaseModel {
 
     // Notes and Flags
     this.customerNotes = customerNotes;
+    this.deliveryNotes = deliveryNotes;
     this.internalNotes = internalNotes;
     this.isDeleted = isDeleted;
   }

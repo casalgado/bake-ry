@@ -55,7 +55,7 @@ const createBakerySettingsService = () => {
         .doc('default')
         .collection('staff')
         .get();
-      const admins = await usersService.getRootRef().where('role', '==', 'bakery_admin').get();
+      const admins = await usersService.getRootRef().get();
       console.log('inService admins', admins.docs.map(doc => doc.data()));
       console.log('inService staff', staff.docs.map(doc => doc.data()));
       return [...admins.docs.map(doc => doc.data()), ...staff.docs.map(doc => doc.data())];
