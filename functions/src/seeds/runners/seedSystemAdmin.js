@@ -23,7 +23,9 @@ async function seedSystemAdmin() {
     console.log('Creating system admin user document...');
     await db.collection('users').doc(SYSTEM_ADMIN_USER_ID).set({
       email: SYSTEM_ADMIN_EMAIL,
-      name: 'System Admin',
+      name: 'Carlos Alberto',
+      firstName: 'Carlos',
+      lastName: 'Alberto',
       role: 'system_admin',
       bakeryId: BAKERY_ID,
       createdAt: timestamp(),

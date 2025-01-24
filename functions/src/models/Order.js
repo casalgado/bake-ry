@@ -220,6 +220,8 @@ class Order extends BaseModel {
       isComplimentary: this.isComplimentary,
       orderItems: this.orderItems.map(item => item.toClientHistoryObject()),
       fulfillmentType: this.fulfillmentType,
+      paymentMethod: this.paymentMethod,
+      deliveryFee: this.deliveryFee,
     };
   }
 
