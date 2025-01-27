@@ -2,7 +2,7 @@ const { db, auth, BAKERY_ID, timestamp } = require('../seedConfig');
 
 const SYSTEM_ADMIN_USER_ID = 'system-admin';
 const SYSTEM_ADMIN_EMAIL = 'dev@carsalhaz.com';
-const SYSTEM_ADMIN_PASSWORD = 'aoeuaoeu';
+const SYSTEM_ADMIN_PASSWORD = 'temporary';
 
 async function seedSystemAdmin() {
   try {
