@@ -12,7 +12,15 @@ const createBakeryUserService = () => {
     let userRecord = null;
 
     try {
-      userData.password = userData.firstName.split(' ')[0].toLowerCase();
+      userData.password = userData.name.split(' ').join('').toLowerCase();
+      console.log('before', userData.password);
+      if (!userData.password) {
+        userData.password = '';
+      }
+      while (userData.password.length < 6) {
+        userData.password = userData.password + '1';
+      }
+      console.log('after', userData.password);
 
       const newUser = new User({
         ...userData,

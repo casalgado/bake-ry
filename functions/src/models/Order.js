@@ -110,6 +110,7 @@ class Order extends BaseModel {
     deliveryAddress = null,
     deliveryInstructions = '',
     deliveryDriverId = '-',
+    driverMarkedAsPaid = false,
     deliveryFee = 0,
     deliveryCost = 0,
     numberOfBags = 1,
@@ -143,6 +144,7 @@ class Order extends BaseModel {
     this.deliveryAddress = deliveryAddress;
     this.deliveryInstructions = deliveryInstructions;
     this.deliveryDriverId = deliveryDriverId;
+    this.driverMarkedAsPaid = driverMarkedAsPaid;
     this.deliveryFee = deliveryFee;
     this.deliveryCost = deliveryCost;
     this.numberOfBags = numberOfBags;
