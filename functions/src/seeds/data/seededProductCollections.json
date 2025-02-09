@@ -1,0 +1,51 @@
+[
+  {
+    "id": "mGrXOzhG6fMGxtFDoU5m",
+    "createdAt": "2025-02-09T13:38:17.844Z",
+    "name": "sourdough",
+    "isActive": true,
+    "isDeleted": false
+  },
+  {
+    "id": "QfJWOTrd9LoSxrYT1Q9T",
+    "createdAt": "2025-02-09T13:38:17.853Z",
+    "name": "baguette",
+    "isActive": true,
+    "isDeleted": false
+  },
+  {
+    "id": "gOdXPMDOGdyjZsvrynVK",
+    "createdAt": "2025-02-09T13:38:17.862Z",
+    "name": "tortillas",
+    "isActive": true,
+    "isDeleted": false
+  },
+  {
+    "id": "uZbhXsZ8JBRhgf7T16CC",
+    "createdAt": "2025-02-09T13:38:17.869Z",
+    "name": "untables",
+    "isActive": true,
+    "isDeleted": false
+  },
+  {
+    "id": "UNHcHLuePsQkQthSIBTU",
+    "createdAt": "2025-02-09T13:38:17.876Z",
+    "name": "congelados",
+    "isActive": true,
+    "isDeleted": false
+  },
+  {
+    "id": "M0c8dSU21DU0XkldsXiQ",
+    "createdAt": "2025-02-09T13:38:17.882Z",
+    "name": "panaderia tradicional",
+    "isActive": true,
+    "isDeleted": false
+  },
+  {
+    "id": "G1s0PGo7SlN3QctJgNNT",
+    "createdAt": "2025-02-09T13:38:17.888Z",
+    "name": "cafe el diario",
+    "isActive": true,
+    "isDeleted": false
+  }
+]

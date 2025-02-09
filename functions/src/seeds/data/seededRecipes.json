@@ -1,0 +1,183 @@
+[
+  {
+    "id": "X9HOWi6C7kqk6BEG0G5F",
+    "createdAt": "2024-11-04T01:51:12.733Z",
+    "updatedAt": "2024-11-04T01:51:45.922Z",
+    "bakeryId": "es-alimento",
+    "productId": null,
+    "name": "Pan Integral Especial",
+    "description": "Pan integral con semillas y especias",
+    "version": 1,
+    "ingredients": [
+      {
+        "ingredientId": "yWtMHUzaoaatCToNO2MV",
+        "name": "Harina Integral",
+        "quantity": 500,
+        "unit": "g",
+        "costPerUnit": 14,
+        "notes": "Tamizada"
+      },
+      {
+        "ingredientId": "joAf4p2eb2gXtZipvhAD",
+        "name": "Cardamomo Molido",
+        "quantity": 5,
+        "unit": "g",
+        "costPerUnit": 120,
+        "notes": "Al gusto"
+      }
+    ],
+    "steps": [
+      "Mezclar harina integral con cardamomo",
+      "Agregar agua gradualmente mientras se amasa",
+      "Dejar reposar por 1 hora",
+      "Formar el pan y hornear a 180°C por 35 minutos"
+    ],
+    "preparationTime": 75,
+    "bakingTime": 35,
+    "isActive": true,
+    "isDeleted": false,
+    "notes": "Mantener la masa con 70% de hidratación"
+  },
+  {
+    "id": "FG75pMV3uDsPksyKzL2Z",
+    "createdAt": "2024-11-04T01:51:12.733Z",
+    "updatedAt": "2024-11-04T01:51:45.922Z",
+    "bakeryId": "es-alimento",
+    "productId": null,
+    "name": "Galletas de Arándanos",
+    "description": "Galletas suaves con arándanos deshidratados",
+    "version": 1,
+    "ingredients": [
+      {
+        "ingredientId": "e6afxdsAhxpzN11gMLIE",
+        "name": "Mantequilla Sin Sal",
+        "quantity": 150,
+        "unit": "g",
+        "costPerUnit": 18,
+        "notes": "Temperatura ambiente"
+      },
+      {
+        "ingredientId": "V1nuvGVOOsPyCRTAAtqe",
+        "name": "Arándanos Deshidratados",
+        "quantity": 100,
+        "unit": "g",
+        "costPerUnit": 45,
+        "notes": "Picados gruesamente"
+      },
+      {
+        "ingredientId": "FnRSlqxjqoz9y8BDEw2M",
+        "name": "Extracto de Vainilla",
+        "quantity": 5,
+        "unit": "ml",
+        "costPerUnit": 45,
+        "notes": "Al gusto"
+      }
+    ],
+    "steps": [
+      "Cremar mantequilla",
+      "Agregar extracto de vainilla",
+      "Incorporar harina gradualmente",
+      "Agregar arándanos",
+      "Formar galletas y hornear a 170°C por 15 minutos"
+    ],
+    "preparationTime": 30,
+    "bakingTime": 15,
+    "isActive": true,
+    "isDeleted": false,
+    "notes": "Las galletas deben quedar doradas en los bordes"
+  },
+  {
+    "id": "EK1M7m1dJAT20Nhyskma",
+    "createdAt": "2024-11-04T01:51:12.733Z",
+    "updatedAt": "2024-11-04T01:51:45.922Z",
+    "bakeryId": "es-alimento",
+    "productId": null,
+    "name": "Pan de Avena y Jengibre",
+    "description": "Pan especiado con avena y jengibre",
+    "version": 1,
+    "ingredients": [
+      {
+        "ingredientId": "YaZ5uQpqChIPKWkqMHoU",
+        "name": "Harina de Avena",
+        "quantity": 300,
+        "unit": "g",
+        "costPerUnit": 20,
+        "notes": "Tamizada"
+      },
+      {
+        "ingredientId": "cWNs3uE89Ym2gN4tvWbd",
+        "name": "Jengibre Molido",
+        "quantity": 10,
+        "unit": "g",
+        "costPerUnit": 85,
+        "notes": "Al gusto"
+      },
+      {
+        "ingredientId": "AlKw7uk8g2pwucra4upC",
+        "name": "Leche Entera",
+        "quantity": 200,
+        "unit": "ml",
+        "costPerUnit": 3,
+        "notes": "Temperatura ambiente"
+      }
+    ],
+    "steps": [
+      "Mezclar harina de avena con jengibre",
+      "Agregar leche tibia gradualmente",
+      "Amasar hasta obtener consistencia suave",
+      "Dejar leudar por 45 minutos",
+      "Hornear a 180°C por 30 minutos"
+    ],
+    "preparationTime": 60,
+    "bakingTime": 30,
+    "isActive": true,
+    "isDeleted": false,
+    "notes": "Pan especiado perfecto para el desayuno"
+  },
+  {
+    "id": "koFKIJ2LyuiPczu7NUzT",
+    "createdAt": "2024-11-04T01:51:12.733Z",
+    "updatedAt": "2024-11-04T01:51:45.922Z",
+    "bakeryId": "es-alimento",
+    "productId": null,
+    "name": "Pastel de Almendra",
+    "description": "Pastel húmedo de almendra",
+    "version": 1,
+    "ingredients": [
+      {
+        "ingredientId": "5psCqWNFhwRZhJN1yUJ6",
+        "name": "Harina de Almendra",
+        "quantity": 250,
+        "unit": "g",
+        "costPerUnit": 45,
+        "notes": "Tamizada"
+      },
+      {
+        "ingredientId": "e6afxdsAhxpzN11gMLIE",
+        "name": "Mantequilla Sin Sal",
+        "quantity": 200,
+        "unit": "g",
+        "costPerUnit": 18,
+        "notes": "Derretida"
+      },
+      {
+        "ingredientId": "FnRSlqxjqoz9y8BDEw2M",
+        "name": "Extracto de Vainilla",
+        "quantity": 10,
+        "unit": "ml",
+        "costPerUnit": 45,
+        "notes": "Al gusto"
+      }
+    ],
+    "steps": [
+      "Mezclar harina de almendra con mantequilla derretida",
+      "Agregar extracto de vainilla",
+      "Hornear a 160°C por 45 minutos"
+    ],
+    "preparationTime": 20,
+    "bakingTime": 45,
+    "isActive": true,
+    "isDeleted": false,
+    "notes": "Mantener en refrigeración"
+  }
+]
