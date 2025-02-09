@@ -18,7 +18,7 @@ class User extends BaseModel {
     category = '',
     comment = '',
     phone = '',
-    national_id = '',
+    nationalId = '',
     isActive = true,
     isDeleted = false,
   }) {
@@ -39,7 +39,7 @@ class User extends BaseModel {
     this.category = category;
     this.comment = comment;
     this.phone = this.formatPhone(phone);
-    this.national_id = national_id;
+    this.nationalId = nationalId;
     this.isActive = isActive;
     this.isDeleted = isDeleted;
   }

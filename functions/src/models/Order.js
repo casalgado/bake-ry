@@ -91,6 +91,7 @@ class Order extends BaseModel {
     userName,
     userEmail,
     userPhone,
+    userNationalId,
     orderItems = [],
 
     // Dates
@@ -102,6 +103,7 @@ class Order extends BaseModel {
     // Status and Payment
     status = 0,
     isPaid = false,
+    paymentDate = null,
     isDeliveryPaid = false,
     paymentMethod = 'transfer',
 
@@ -111,6 +113,7 @@ class Order extends BaseModel {
     deliveryInstructions = '',
     deliveryDriverId = '-',
     driverMarkedAsPaid = false,
+    deliverySequence = 1,
     deliveryFee = 0,
     deliveryCost = 0,
     numberOfBags = 1,
@@ -129,6 +132,7 @@ class Order extends BaseModel {
     this.userName = userName;
     this.userEmail = userEmail;
     this.userPhone = userPhone;
+    this.userNationalId = userNationalId;
     this.orderItems = orderItems.map(item =>
       item instanceof OrderItem ? item : new OrderItem({ ...item }),
     );
@@ -136,6 +140,7 @@ class Order extends BaseModel {
     // Status and Payment
     this.status = status;
     this.isPaid = isPaid;
+    this.paymentDate = paymentDate;
     this.isDeliveryPaid = isDeliveryPaid;
     this.paymentMethod = paymentMethod;
 
@@ -145,6 +150,7 @@ class Order extends BaseModel {
     this.deliveryInstructions = deliveryInstructions;
     this.deliveryDriverId = deliveryDriverId;
     this.driverMarkedAsPaid = driverMarkedAsPaid;
+    this.deliverySequence = deliverySequence;
     this.deliveryFee = deliveryFee;
     this.deliveryCost = deliveryCost;
     this.numberOfBags = numberOfBags;
@@ -203,6 +209,7 @@ class Order extends BaseModel {
     return [
       ...super.dateFields,
       'preparationDate',
+      'paymentDate',
       'dueDate',
     ];
   }
