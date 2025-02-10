@@ -101,7 +101,7 @@ const PRICES = {
 function generateProducts() {
   const products = [];
 
-  // 1. Generate tortas products
+  // 1. Generate tortas clasicas products
   Object.entries(PRICES['tortas clasicas']).forEach(([flavor, sizes]) => {
     const variations = Object.entries(sizes).map(([size, details]) => ({
       name: size,
@@ -112,7 +112,7 @@ function generateProducts() {
 
     products.push({
       name: flavor.toLowerCase(),
-      collectionName: 'tortas',
+      collectionName: 'tortas clasicas', // Updated from 'tortas'
       variations,
       isActive: true,
       isDeleted: false,
@@ -120,6 +120,7 @@ function generateProducts() {
     });
   });
 
+  // 2. Generate tortas especiales products
   Object.entries(PRICES['tortas especiales']).forEach(([flavor, sizes]) => {
     const variations = Object.entries(sizes).map(([size, details]) => ({
       name: size,
@@ -130,7 +131,7 @@ function generateProducts() {
 
     products.push({
       name: flavor.toLowerCase(),
-      collectionName: 'tortas',
+      collectionName: 'tortas especiales', // Updated from 'tortas'
       variations,
       isActive: true,
       isDeleted: false,
@@ -156,19 +157,16 @@ function generateProducts() {
   //     customAttributes: {},
   //   });
   // });
-
-  // 3. Generate simple products (galletas, postres)
-  ['postres'].forEach(collection => {
-    Object.entries(PRICES[collection]).forEach(([productName, details]) => {
-      products.push({
-        name: productName.toLowerCase(),
-        collectionName: collection,
-        basePrice: details.price,
-        currentPrice: details.price,
-        isActive: true,
-        isDeleted: false,
-        customAttributes: {},
-      });
+  // 3. Generate simple products (postres)
+  Object.entries(PRICES.postres).forEach(([productName, details]) => {
+    products.push({
+      name: productName.toLowerCase(),
+      collectionName: 'postres',
+      basePrice: details.price,
+      currentPrice: details.price,
+      isActive: true,
+      isDeleted: false,
+      customAttributes: {},
     });
   });
 
