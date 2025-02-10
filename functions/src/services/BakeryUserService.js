@@ -1,7 +1,7 @@
 // services/bakeryUserService.js
 const { admin, db } = require('../config/firebase');
 const User = require('../models/User');
-const { Order } = require ('../models/Order');
+const { Order } = require('../models/Order');
 const createBaseService = require('./base/serviceFactory');
 const { BadRequestError, NotFoundError } = require('../utils/errors');
 
@@ -13,8 +13,6 @@ const AUTH_REQUIRED_ROLES = [
 ];
 
 const needsAuthAccount = (role) => AUTH_REQUIRED_ROLES.includes(role);
-
-// Helper functions
 
 const generateInitialPassword = (name) => {
   let password = name.split(' ')[0].toLowerCase();
@@ -41,9 +39,9 @@ const handleRelatedCollections = async (transaction, bakeryId, userId, userData,
       transaction.set(staffRef, {
         name: userData.name,
         firstName: userData.name.split(' ')[0],
-        role: userData.role,
         email: userData.email,
         phone: userData.phone,
+        role: userData.role,
         id: userId,
       });
     }
@@ -69,8 +67,6 @@ const handleRelatedCollections = async (transaction, bakeryId, userId, userData,
 const createBakeryUserService = () => {
   const baseService = createBaseService('users', User, 'bakeries/{bakeryId}');
 
-  // services/bakeryUserService.js
-
   const create = async (userData, bakeryId) => {
     let userRecord = null;
 
@@ -95,7 +91,7 @@ const createBakeryUserService = () => {
 
         // Only create auth account for staff roles
         if (needsAuthAccount(newUser.role)) {
-        // Generate password from name
+          // Generate password from name
           const password = generateInitialPassword(newUser.name);
 
           // Create Firebase Auth user
@@ -112,7 +108,7 @@ const createBakeryUserService = () => {
 
           userId = userRecord.uid;
         } else {
-        // For customers, generate a custom ID
+          // For customers, generate a custom ID
           userId = baseService.getCollectionRef(bakeryId).doc().id;
         }
 
@@ -123,6 +119,7 @@ const createBakeryUserService = () => {
           id: userId,
         };
 
+        // Handle related collections
         await handleRelatedCollections(transaction, bakeryId, userId, userToSave);
 
         transaction.set(userRef, userToSave);
@@ -131,7 +128,7 @@ const createBakeryUserService = () => {
 
       return result;
     } catch (error) {
-    // Cleanup if Firebase Auth user was created but transaction failed
+      // Cleanup if Firebase Auth user was created but transaction failed
       if (userRecord) {
         try {
           await admin.auth().deleteUser(userRecord.uid);
@@ -143,12 +140,45 @@ const createBakeryUserService = () => {
     }
   };
 
+  const handleRoleTransition = async (
+    transaction,
+    currentUser,
+    newRole,
+    bakeryId,
+    userId,
+    wasAuthRequired,
+    willNeedAuth,
+  ) => {
+    // Case 1: Customer -> Staff (need to create auth)
+    if (!wasAuthRequired && willNeedAuth) {
+      const password = generateInitialPassword(currentUser.name);
+      const userRecord = await admin.auth().createUser({
+        email: currentUser.email,
+        password: password,
+      });
+      await admin.auth().setCustomUserClaims(userRecord.uid, {
+        role: newRole,
+        bakeryId,
+      });
+    }
+    // Case 2: Staff -> Customer (need to delete auth)
+    else if (wasAuthRequired && !willNeedAuth) {
+      await admin.auth().deleteUser(userId);
+    }
+    // Case 3: Staff -> Staff (update claims)
+    else if (wasAuthRequired && willNeedAuth) {
+      await admin.auth().setCustomUserClaims(userId, {
+        role: newRole,
+        bakeryId,
+      });
+    }
+  };
+
   const update = async (id, data, bakeryId, editor = null) => {
     try {
       const docRef = baseService.getCollectionRef(bakeryId).doc(id);
 
       return await db.runTransaction(async (transaction) => {
-      // Validate user exists
         const doc = await transaction.get(docRef);
         if (!doc.exists) {
           throw new NotFoundError('User not found');
@@ -157,6 +187,13 @@ const createBakeryUserService = () => {
         const currentUser = User.fromFirestore(doc);
         const wasAuthRequired = needsAuthAccount(currentUser.role);
         const willNeedAuth = data.role ? needsAuthAccount(data.role) : wasAuthRequired;
+
+        // Handle auth updates if needed
+        if (wasAuthRequired) {
+          if (data.email && data.email !== currentUser.email) {
+            await admin.auth().updateUser(id, { email: data.email });
+          }
+        }
 
         // Handle role transition cases
         if (data.role && data.role !== currentUser.role) {
@@ -179,7 +216,23 @@ const createBakeryUserService = () => {
           updatedAt: new Date(),
         });
 
-        // Update related collections
+        // Handle category changes if category is changing
+        if (data.category && data.category !== currentUser.category) {
+          const categoryHistoryRef = docRef.collection('category_history').doc();
+          transaction.set(categoryHistoryRef, {
+            previous_category: currentUser.category || 'none',
+            new_category: data.category,
+            changed_at: new Date(),
+            changed_by: {
+              userId: editor?.uid || 'system',
+              email: editor?.email || 'system@system.com',
+              role: editor?.role || 'system',
+            },
+            reason: data.categoryChangeReason || 'Manual update',
+          });
+        }
+
+        // Handle related collections
         await handleRelatedCollections(transaction, bakeryId, id, updatedUser);
 
         // Record changes in history
@@ -194,41 +247,6 @@ const createBakeryUserService = () => {
     } catch (error) {
       console.error('Error updating user:', error);
       throw error;
-    }
-  };
-
-  const handleRoleTransition = async (
-    transaction,
-    currentUser,
-    newRole,
-    bakeryId,
-    userId,
-    wasAuthRequired,
-    willNeedAuth,
-  ) => {
-  // Case 1: Customer -> Staff (need to create auth)
-    if (!wasAuthRequired && willNeedAuth) {
-      const password = generateInitialPassword(currentUser.name);
-      const userRecord = await admin.auth().createUser({
-        email: currentUser.email,
-        password: password,
-      });
-      await admin.auth().setCustomUserClaims(userRecord.uid, {
-        role: newRole,
-        bakeryId,
-      });
-    }
-    // Case 2: Staff -> Customer (need to delete auth)
-    else if (wasAuthRequired && !willNeedAuth) {
-    // Delay auth deletion until after transaction succeeds
-    // We'll handle this in a separate cleanup step
-    }
-    // Case 3: Staff -> Staff (update claims)
-    else if (wasAuthRequired && willNeedAuth) {
-      await admin.auth().setCustomUserClaims(userId, {
-        role: newRole,
-        bakeryId,
-      });
     }
   };
 
@@ -249,6 +267,7 @@ const createBakeryUserService = () => {
           await admin.auth().deleteUser(id);
         }
 
+        // Clean up related collections
         await handleRelatedCollections(transaction, bakeryId, id, currentUser, true);
 
         // Soft delete the main user document
