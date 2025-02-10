@@ -97,6 +97,7 @@ class Order extends BaseModel {
     // Dates
     preparationDate,
     dueDate,
+    dueTime,
     createdAt,
     updatedAt,
 
@@ -137,6 +138,7 @@ class Order extends BaseModel {
     this.orderItems = orderItems.map(item =>
       item instanceof OrderItem ? item : new OrderItem({ ...item }),
     );
+    this.dueTime = dueTime;
 
     // Status and Payment
     this.status = status;
