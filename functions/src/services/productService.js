@@ -10,24 +10,15 @@ const createProductService = () => {
   const create = async (productData, bakeryId) => {
     try {
       return await db.runTransaction(async (transaction) => {
-        // Check recipe exists and is available
-        /* Recipe Implementation TBD
-        const recipeRef = db
-          .collection(`bakeries/${bakeryId}/recipes`)
-          .doc(productData.recipeId);
 
-        const recipeDoc = await transaction.get(recipeRef);
-        if (!recipeDoc.exists) {
-          throw new NotFoundError('Recipe not found');
+        let productRef;
+        let productId;
+        if (productData.id) {
+          productRef = baseService.getCollectionRef(bakeryId).doc(productData.id);
+        } else {
+          productRef = baseService.getCollectionRef(bakeryId).doc();
+          productId = productRef.id;
         }
-
-        if (recipeDoc.data().productId) {
-          throw new BadRequestError('Recipe is already assigned to another product');
-        }
-        */
-
-        const productRef = baseService.getCollectionRef(bakeryId).doc();
-        const productId = productRef.id;
 
         const newProduct = new Product({
           ...productData,

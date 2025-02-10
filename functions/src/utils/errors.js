@@ -39,6 +39,12 @@ class BadRequestError extends AppError {
   }
 }
 
+class AuthenticationError extends AppError {
+  constructor(message = 'Authentication failed') {
+    super(message, 401);
+  }
+}
+
 module.exports = {
   AppError,
   NotFoundError,
@@ -46,4 +52,5 @@ module.exports = {
   UnauthorizedError,
   ValidationError,
   BadRequestError,
+  AuthenticationError,
 };

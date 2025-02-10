@@ -1,4 +1,4 @@
-const { BadRequestError, NotFoundError, ForbiddenError } = require('../../utils/errors');
+const { BadRequestError, NotFoundError, ForbiddenError, AuthenticationError } = require('../../utils/errors');
 const QueryParser = require('../../utils/queryParser');
 
 const createBaseController = (service, validateData = null) => {
@@ -12,6 +12,7 @@ const createBaseController = (service, validateData = null) => {
     if (error instanceof NotFoundError) return res.status(404).json({ error: error.message });
     if (error instanceof BadRequestError) return res.status(400).json({ error: error.message });
     if (error instanceof ForbiddenError) return res.status(403).json({ error: error.message });
+    if (error instanceof AuthenticationError) return res.status(401).json({ error: error.message });
 
     const status = error.status || 500;
     res.status(status).json({
@@ -109,8 +110,6 @@ const createBaseController = (service, validateData = null) => {
         if (attemptedImmutableUpdate) {
           throw new BadRequestError(`Cannot update immutable field: ${attemptedImmutableUpdate}`);
         }
-
-        validateRequestData(patchData);
 
         const result = await service.patch(id, patchData, bakeryId, req.user);
         handleResponse(res, result);

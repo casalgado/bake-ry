@@ -58,11 +58,12 @@ const createBakerySettingsService = () => {
       const admins = await usersService.getRootRef().get();
       console.log('inService admins', admins.docs.map(doc => doc.data()));
       console.log('inService staff', staff.docs.map(doc => doc.data()));
-      return [...admins.docs.map(doc => doc.data()).filter(user => user.bakeryId === bakeryId), ...staff.docs.map(doc => doc.data())];
+      return [...admins.docs.map(doc => doc.data()).filter(user => user.role !== 'system_admin' && user.bakeryId === bakeryId), ...staff.docs.map(doc => doc.data())];
     } catch (error) {
       console.error('Error getting staff list:', error);
       throw error;
     }
+
   };
 
   const getB2bClientsList = async (bakeryId) => {

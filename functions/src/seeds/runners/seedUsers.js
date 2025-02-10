@@ -2,7 +2,7 @@ const { BAKERY_ID } = require('../seedConfig');
 const bakeryUserService = require('../../services/bakeryUserService');
 const clients = require('./../data/processed_imports/ClientsForNewDatabase.json');
 const clientsB2B = require('./../data/processed_imports/ClientsForNewDatabaseB2B.json');
-const { parseSpanishName } = require('../../utils/helpers.js');
+const { parseSpanishName } = require('../../utils/helpers');
 
 const b2bClientIds = new Set(
   Object.values(clientsB2B).map(client => client.id),
@@ -78,10 +78,11 @@ const staff = [
   },
 ];
 
-const users = [...customers.slice(0, 20), ...staff];
+const users = [...customers.slice(0, 200), ...staff];
 
 async function seedUsers() {
   try {
+
     console.log('Creating bakery users...');
 
     // Store created users with their IDs for reference

@@ -12,15 +12,13 @@ const createBakeryUserService = () => {
     let userRecord = null;
 
     try {
-      userData.password = userData.name.split(' ').join('').toLowerCase();
-      console.log('before', userData.password);
+      userData.password = userData.name.split(' ')[0].toLowerCase();
       if (!userData.password) {
         userData.password = '';
       }
       while (userData.password.length < 6) {
         userData.password = userData.password + '1';
       }
-      console.log('after', userData.password);
 
       const newUser = new User({
         ...userData,
@@ -242,10 +240,49 @@ const createBakeryUserService = () => {
 
   const remove = async (id, bakeryId) => {
     try {
-      // Delete from Firebase Auth
+      // Delete from Firebase Auth first
       await admin.auth().deleteUser(id);
-      // Delete from Firestore using base service
-      return await baseService.remove(id, bakeryId);
+
+      // Then handle Firestore deletions in a transaction
+      const userRef = baseService.getCollectionRef(bakeryId).doc(id);
+
+      return await db.runTransaction(async (transaction) => {
+        // Get the current user to check role and category
+        const doc = await transaction.get(userRef);
+        if (!doc.exists) {
+          throw new NotFoundError('User not found');
+        }
+
+        const currentUser = User.fromFirestore(doc);
+
+        // Get settings ref for related collections
+        const settingsRef = db
+          .collection('bakeries')
+          .doc(bakeryId)
+          .collection('settings')
+          .doc('default');
+
+        // Clean up staff collection if user is staff
+        const assistantRoles = ['delivery_assistant', 'production_assistant', 'bakery_staff'];
+        if (assistantRoles.includes(currentUser.role)) {
+          const staffRef = settingsRef.collection('staff').doc(id);
+          transaction.delete(staffRef);
+        }
+
+        // Clean up b2b clients collection if user is B2B
+        if (currentUser.category === 'B2B') {
+          const b2bRef = settingsRef.collection('b2b_clients').doc(id);
+          transaction.delete(b2bRef);
+        }
+
+        // Soft delete the main user document
+        transaction.update(userRef, {
+          isDeleted: true,
+          updatedAt: new Date(),
+        });
+
+        return null;
+      });
     } catch (error) {
       console.error('Error deleting user:', error);
       throw error;

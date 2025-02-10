@@ -40,37 +40,17 @@ class BakerySettings extends BaseModel {
   static PAYMENT_METHODS = ['transfer', 'cash', 'card'];
   static UNIT_OPTIONS = ['kg', 'g', 'L', 'ml', 'unidades', 'docena', 'paquete'];
   static STORAGE_TEMPERATURES = ['Ambiente', 'Refrigeracion', 'Congelacion'];
-  static SUGGESTED_PRODUCT_VARIATIONS  = {
-    WEIGHT: {
-      label: 'Weight',
-      unit: 'g',
-      defaults: [
-        { name: 'pequeño', value: 550, basePrice: 16000, recipeId: '' },
-        { name: 'mediano', value: 950, basePrice: 25000, recipeId: '' },
-        { name: 'grande', value: 1700, basePrice: 34000, recipeId: '' },
-      ],
-    },
-    QUANTITY: {
-      label: 'Quantity',
-      prefix: 'x',
-      defaults: [
-        { name: 'x5', value: 5, basePrice: 9000, recipeId: '' },
-        { name: 'x6', value: 6, basePrice: 15000, recipeId: '' },
-        { name: 'x10', value: 10, basePrice: 12000, recipeId: '' },
-        { name: 'x12', value: 12, basePrice: 18000, recipeId: '' },
-        { name: 'x16', value: 16, basePrice: 20000, recipeId: '' },
-
-      ],
-    },
-  };
 
   constructor({
     id,
     bakeryId,
     ingredientCategories = [],
     theme = {},
+    features = {},
+    suggestedProductVariations = {},
     createdAt,
     updatedAt,
+
   }) {
     super({ id, createdAt, updatedAt });
 
@@ -85,8 +65,10 @@ class BakerySettings extends BaseModel {
     this.paymentMethods = BakerySettings.PAYMENT_METHODS;
     this.unitOptions = BakerySettings.UNIT_OPTIONS;
     this.storageTemperatures = BakerySettings.STORAGE_TEMPERATURES;
-    this.suggestedProductVariations = BakerySettings.SUGGESTED_PRODUCT_VARIATIONS;
+    this.suggestedProductVariations = suggestedProductVariations;
     this.theme = theme;
+    this.features = features;
+
   }
 
   getCategoryById(categoryId) {

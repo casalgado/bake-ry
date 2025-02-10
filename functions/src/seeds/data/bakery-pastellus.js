@@ -7,7 +7,6 @@ const bakery = {
   lastName: 'Ochoa',
   role: 'bakery_admin',
   openingHours: {
-
     monday: {
       isOpen: true,
       open: '09:00',
@@ -46,7 +45,7 @@ const bakery = {
   },
   socialMedia: {
     facebook: '',
-    instagram: 'https://instagram.com/es_alimento',
+    instagram: 'https://instagram.com/pastellusbq',
     tiktok: '',
     youtube: '',
     twitter: '',
