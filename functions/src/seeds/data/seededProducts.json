@@ -1,14 +1,14 @@
 [
   {
-    "id": "OoTXJ3q9S48QvdwlHMs3",
-    "createdAt": "2025-02-10T14:51:20.745Z",
+    "id": "0mzDK4WErRZJMUWw2Ucb",
+    "createdAt": "2025-02-10T17:29:46.419Z",
     "bakeryId": "pastellus",
     "name": "red velvet",
-    "collectionId": "tt3QLqtOk4Gp0rrFQ702",
+    "collectionId": "Jse4JSFnJAcbONPk3ICw",
     "collectionName": "tortas",
     "variations": [
       {
-        "id": "djDDpJdRzGFQnugo",
+        "id": "Ji5wHY9FkTJ92sYQ",
         "name": "cuarto",
         "value": 250,
         "basePrice": 38000,
@@ -16,7 +16,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "tx4YW1vlWzRzsGa7",
+        "id": "SdXs4EmcNFtSZw3e",
         "name": "media",
         "value": 500,
         "basePrice": 57000,
@@ -24,7 +24,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "UBsVaUOCO7YNFpIK",
+        "id": "IftBUBCT4zqPHm35",
         "name": "libra",
         "value": 1000,
         "basePrice": 83000,
@@ -38,15 +38,15 @@
     "customAttributes": {}
   },
   {
-    "id": "Yw2pvZaXeZ2AYDhTx6CN",
-    "createdAt": "2025-02-10T14:51:20.757Z",
+    "id": "iHQnLBSZcCWBvSy2Vdrh",
+    "createdAt": "2025-02-10T17:29:46.442Z",
     "bakeryId": "pastellus",
     "name": "zanahoria",
-    "collectionId": "tt3QLqtOk4Gp0rrFQ702",
+    "collectionId": "Jse4JSFnJAcbONPk3ICw",
     "collectionName": "tortas",
     "variations": [
       {
-        "id": "wAngnW6WaKhGFVld",
+        "id": "fNnlCr2lJ5UrKTF6",
         "name": "cuarto",
         "value": 250,
         "basePrice": 38000,
@@ -54,7 +54,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "pjOgEBSQ65GMsk45",
+        "id": "mWtIO5ERWmgmxtxp",
         "name": "media",
         "value": 500,
         "basePrice": 57000,
@@ -62,7 +62,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "e4GGCgenMVRQYWeE",
+        "id": "vnViaVfdUm1EI3aH",
         "name": "libra",
         "value": 1000,
         "basePrice": 83000,
@@ -76,15 +76,15 @@
     "customAttributes": {}
   },
   {
-    "id": "olz3XGXAwwrO48IWqThx",
-    "createdAt": "2025-02-10T14:51:20.772Z",
+    "id": "3Pgzr75TH3Rd4ZAq8yHd",
+    "createdAt": "2025-02-10T17:29:46.459Z",
     "bakeryId": "pastellus",
     "name": "ganache chocolate",
-    "collectionId": "tt3QLqtOk4Gp0rrFQ702",
+    "collectionId": "Jse4JSFnJAcbONPk3ICw",
     "collectionName": "tortas",
     "variations": [
       {
-        "id": "JfRc1bnvS91g5vSo",
+        "id": "LQ2PXerYqXg5ISNK",
         "name": "cuarto",
         "value": 250,
         "basePrice": 40000,
@@ -92,7 +92,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "oqRpGnuDuYvQ0MzL",
+        "id": "N6yHcMFia24rxXAH",
         "name": "media",
         "value": 500,
         "basePrice": 59000,
@@ -100,7 +100,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "zvM4loa4lcRxQVlI",
+        "id": "B8aS2nNC9YEr60Es",
         "name": "libra",
         "value": 1000,
         "basePrice": 85000,
@@ -114,15 +114,15 @@
     "customAttributes": {}
   },
   {
-    "id": "TiHqrs31kLf79BJ2kREj",
-    "createdAt": "2025-02-10T14:51:20.787Z",
+    "id": "mvwlAhHRC65jL1NHOKkm",
+    "createdAt": "2025-02-10T17:29:46.473Z",
     "bakeryId": "pastellus",
     "name": "perla chocolate",
-    "collectionId": "tt3QLqtOk4Gp0rrFQ702",
+    "collectionId": "Jse4JSFnJAcbONPk3ICw",
     "collectionName": "tortas",
     "variations": [
       {
-        "id": "roqXadL7chjnSk0G",
+        "id": "dQjLoOitjCLfvcVW",
         "name": "cuarto",
         "value": 250,
         "basePrice": 40000,
@@ -130,7 +130,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "pVclWBDMJiwHNYyV",
+        "id": "qquWB4awGityED3m",
         "name": "media",
         "value": 500,
         "basePrice": 59000,
@@ -138,7 +138,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "2mqFyC48CDAOFeva",
+        "id": "3dzDEzrwKQuFVfNL",
         "name": "libra",
         "value": 1000,
         "basePrice": 85000,
@@ -152,15 +152,15 @@
     "customAttributes": {}
   },
   {
-    "id": "51kndHX6yxC9Yr3c7i4l",
-    "createdAt": "2025-02-10T14:51:20.802Z",
+    "id": "JEQfp7Eje1xTYIegYe7K",
+    "createdAt": "2025-02-10T17:29:46.489Z",
     "bakeryId": "pastellus",
     "name": "arequipe",
-    "collectionId": "tt3QLqtOk4Gp0rrFQ702",
+    "collectionId": "Jse4JSFnJAcbONPk3ICw",
     "collectionName": "tortas",
     "variations": [
       {
-        "id": "lkIZhSdQYvtjtTZ9",
+        "id": "s8xS8m4ASX0qDSzi",
         "name": "cuarto",
         "value": 250,
         "basePrice": 38000,
@@ -168,7 +168,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "j7hc7m6bZ1UGBr6M",
+        "id": "NpuKQMOfd2V9caDt",
         "name": "media",
         "value": 500,
         "basePrice": 57000,
@@ -176,7 +176,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "q0KnelBMz8n4ju6G",
+        "id": "mNrl7a6kSzu5x1vE",
         "name": "libra",
         "value": 1000,
         "basePrice": 83000,
@@ -190,15 +190,15 @@
     "customAttributes": {}
   },
   {
-    "id": "93ejXhPpTPfxvgpLQer3",
-    "createdAt": "2025-02-10T14:51:20.818Z",
+    "id": "FjphzEl3TbLtDZqxiZlB",
+    "createdAt": "2025-02-10T17:29:46.503Z",
     "bakeryId": "pastellus",
     "name": "piña",
-    "collectionId": "tt3QLqtOk4Gp0rrFQ702",
+    "collectionId": "Jse4JSFnJAcbONPk3ICw",
     "collectionName": "tortas",
     "variations": [
       {
-        "id": "gG23St8MndbJJSMo",
+        "id": "XVRdyrzKgqxGVGdB",
         "name": "cuarto",
         "value": 250,
         "basePrice": 38000,
@@ -206,7 +206,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "UaHX5I9gBJ6MNuxe",
+        "id": "4q2T8EJV5no7l07W",
         "name": "media",
         "value": 500,
         "basePrice": 57000,
@@ -214,7 +214,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "w5EYptATtoTWhK6a",
+        "id": "T8fEX4ZkukxWQhJ1",
         "name": "libra",
         "value": 1000,
         "basePrice": 83000,
@@ -228,15 +228,15 @@
     "customAttributes": {}
   },
   {
-    "id": "OjrSuU5MlGWWXcUIfe3u",
-    "createdAt": "2025-02-10T14:51:20.835Z",
+    "id": "GpfxZkNgRe6yqMFAgbZF",
+    "createdAt": "2025-02-10T17:29:46.517Z",
     "bakeryId": "pastellus",
     "name": "ciruela",
-    "collectionId": "tt3QLqtOk4Gp0rrFQ702",
+    "collectionId": "Jse4JSFnJAcbONPk3ICw",
     "collectionName": "tortas",
     "variations": [
       {
-        "id": "v1mzwWuG3RNRQ4M5",
+        "id": "H7bl1yHvK8UEsRk9",
         "name": "cuarto",
         "value": 250,
         "basePrice": 38000,
@@ -244,7 +244,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "bNBfFz7cLtjZa1p1",
+        "id": "XwAhCZ1tftFBrp6t",
         "name": "media",
         "value": 500,
         "basePrice": 57000,
@@ -252,7 +252,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "1Uncf2txZPcWeXhr",
+        "id": "LNdcMnanuJG4AHSP",
         "name": "libra",
         "value": 1000,
         "basePrice": 83000,
@@ -266,15 +266,15 @@
     "customAttributes": {}
   },
   {
-    "id": "fCasfR1XvO5tl1NIlhfO",
-    "createdAt": "2025-02-10T14:51:20.847Z",
+    "id": "tvcAJwdrD2zVYBUkJNOv",
+    "createdAt": "2025-02-10T17:29:46.533Z",
     "bakeryId": "pastellus",
     "name": "limon",
-    "collectionId": "tt3QLqtOk4Gp0rrFQ702",
+    "collectionId": "Jse4JSFnJAcbONPk3ICw",
     "collectionName": "tortas",
     "variations": [
       {
-        "id": "tyHziItgBTZZVZ6g",
+        "id": "6NmtaznqHPYmqVDw",
         "name": "cuarto",
         "value": 250,
         "basePrice": 38000,
@@ -282,7 +282,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "9YOdH6OuwOnsVqXu",
+        "id": "Kavi5bbuZijAURTI",
         "name": "media",
         "value": 500,
         "basePrice": 57000,
@@ -290,7 +290,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "oJ6KPYUlvGJrKdMV",
+        "id": "FhfcF3TvUq4nSNPq",
         "name": "libra",
         "value": 1000,
         "basePrice": 83000,
@@ -304,15 +304,15 @@
     "customAttributes": {}
   },
   {
-    "id": "oJvJaNNhmBjzRaNz3yPZ",
-    "createdAt": "2025-02-10T14:51:20.863Z",
+    "id": "ZhM8AUJyZFeK205r55Ck",
+    "createdAt": "2025-02-10T17:29:46.549Z",
     "bakeryId": "pastellus",
     "name": "tradicional",
-    "collectionId": "wLxnXA7hmTXIc1U8okmU",
+    "collectionId": "qnblebcofTp8B724sbTl",
     "collectionName": "brownies",
     "variations": [
       {
-        "id": "VyarPQdT0jyP1ZRY",
+        "id": "V0XiIMZKvctwpOuy",
         "name": "x4",
         "value": 4,
         "basePrice": 16000,
@@ -320,7 +320,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "gXSBUdtDcAWYxLsQ",
+        "id": "eT9XjF34zyKd3epm",
         "name": "x6",
         "value": 6,
         "basePrice": 24000,
@@ -328,7 +328,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "vxkRhsDCpDPxD3FJ",
+        "id": "RTiySlVLSLDa6UDI",
         "name": "x12",
         "value": 12,
         "basePrice": 48000,
@@ -336,7 +336,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "Nvx363XfxFwDdkO4",
+        "id": "ygPvX6Il3SlKinIT",
         "name": "x16 mini",
         "value": 16,
         "basePrice": 64000,
@@ -350,15 +350,15 @@
     "customAttributes": {}
   },
   {
-    "id": "lYhYyFFqhseFtArRzlqt",
-    "createdAt": "2025-02-10T14:51:20.878Z",
+    "id": "0b6DiNhTvxhD6HIXUXen",
+    "createdAt": "2025-02-10T17:29:46.567Z",
     "bakeryId": "pastellus",
     "name": "blondies",
-    "collectionId": "wLxnXA7hmTXIc1U8okmU",
+    "collectionId": "qnblebcofTp8B724sbTl",
     "collectionName": "brownies",
     "variations": [
       {
-        "id": "wcg925q79H2Wbpcc",
+        "id": "qPIiwIgoNUPprK1G",
         "name": "x4",
         "value": 4,
         "basePrice": 16000,
@@ -366,7 +366,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "edlM9WnE5DMUAY5u",
+        "id": "RuobYPc2HUg3TiXL",
         "name": "x6",
         "value": 6,
         "basePrice": 24000,
@@ -374,7 +374,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "u51zageuTkagxPFS",
+        "id": "tjbhXLtiEQXU5bQB",
         "name": "x12",
         "value": 12,
         "basePrice": 48000,
@@ -382,7 +382,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "FFsvdvcxNxZeBj3J",
+        "id": "PVyVPCjzsTc7k31X",
         "name": "x16 mini",
         "value": 16,
         "basePrice": 64000,
@@ -396,15 +396,15 @@
     "customAttributes": {}
   },
   {
-    "id": "TpWD0ECHbkiD1ORQCuUU",
-    "createdAt": "2025-02-10T14:51:20.891Z",
+    "id": "izn2PjipJs8Lv7nnWAKW",
+    "createdAt": "2025-02-10T17:29:46.583Z",
     "bakeryId": "pastellus",
     "name": "milo",
-    "collectionId": "wLxnXA7hmTXIc1U8okmU",
+    "collectionId": "qnblebcofTp8B724sbTl",
     "collectionName": "brownies",
     "variations": [
       {
-        "id": "oJGvGA7W52R4pk5O",
+        "id": "EbE2NPEJANyZC96s",
         "name": "x4",
         "value": 4,
         "basePrice": 17000,
@@ -412,7 +412,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "71fMALQM1OFA7oF3",
+        "id": "lCJ151m5kXJLu0xR",
         "name": "x6",
         "value": 6,
         "basePrice": 25500,
@@ -420,7 +420,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "FvR1ulgixmtGCvHY",
+        "id": "t2hLDpNqIPHCrh8V",
         "name": "x12",
         "value": 12,
         "basePrice": 51000,
@@ -428,7 +428,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "oNbHzbMGSISQ8FFa",
+        "id": "EueEWao4nHOKCW4B",
         "name": "x16 mini",
         "value": 16,
         "basePrice": 68000,
@@ -442,15 +442,15 @@
     "customAttributes": {}
   },
   {
-    "id": "pz1Ea6Y8dN7vGS5tFyci",
-    "createdAt": "2025-02-10T14:51:20.908Z",
+    "id": "GcHc4uxyp0b2HGYCxL4q",
+    "createdAt": "2025-02-10T17:29:46.598Z",
     "bakeryId": "pastellus",
     "name": "red velvet",
-    "collectionId": "wLxnXA7hmTXIc1U8okmU",
+    "collectionId": "qnblebcofTp8B724sbTl",
     "collectionName": "brownies",
     "variations": [
       {
-        "id": "s1abHQCPyK0DUObb",
+        "id": "S36KgCyXrNM8AYsE",
         "name": "x4",
         "value": 4,
         "basePrice": 17000,
@@ -458,7 +458,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "Q3UqjdC88KmpoucA",
+        "id": "47vPVoQihRJaGiCN",
         "name": "x6",
         "value": 6,
         "basePrice": 25500,
@@ -466,7 +466,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "h51WUU12Vme8v1g0",
+        "id": "cOO13n4RnbqwrYf0",
         "name": "x12",
         "value": 12,
         "basePrice": 51000,
@@ -474,7 +474,7 @@
         "isWholeGrain": false
       },
       {
-        "id": "I1AblUjPVoK3XVqY",
+        "id": "3GrSxDF6EgFV8LtY",
         "name": "x16 mini",
         "value": 16,
         "basePrice": 68000,
@@ -488,11 +488,11 @@
     "customAttributes": {}
   },
   {
-    "id": "7zHbAkMkB2BGy86Ie77J",
-    "createdAt": "2025-02-10T14:51:20.915Z",
+    "id": "ZlUeCWEGI3OcWzIPhZnq",
+    "createdAt": "2025-02-10T17:29:46.614Z",
     "bakeryId": "pastellus",
     "name": "tradicional",
-    "collectionId": "n4fJsNwauslXd8Fc8iFn",
+    "collectionId": "wiO2WwMyj0KvRyZfW2GG",
     "collectionName": "galletas",
     "variations": [],
     "basePrice": 15000,
@@ -503,11 +503,11 @@
     "customAttributes": {}
   },
   {
-    "id": "KElezFVdooNpf06BUjAI",
-    "createdAt": "2025-02-10T14:51:20.923Z",
+    "id": "3ncZsJgAq3UKNnRcOXX5",
+    "createdAt": "2025-02-10T17:29:46.628Z",
     "bakeryId": "pastellus",
     "name": "blondies",
-    "collectionId": "n4fJsNwauslXd8Fc8iFn",
+    "collectionId": "wiO2WwMyj0KvRyZfW2GG",
     "collectionName": "galletas",
     "variations": [],
     "basePrice": 15000,
@@ -518,11 +518,11 @@
     "customAttributes": {}
   },
   {
-    "id": "2uPEMOsQTrR72LTMTGji",
-    "createdAt": "2025-02-10T14:51:20.939Z",
+    "id": "JJaINjK50NYItqiG8xgi",
+    "createdAt": "2025-02-10T17:29:46.642Z",
     "bakeryId": "pastellus",
     "name": "milo",
-    "collectionId": "n4fJsNwauslXd8Fc8iFn",
+    "collectionId": "wiO2WwMyj0KvRyZfW2GG",
     "collectionName": "galletas",
     "variations": [],
     "basePrice": 16500,
@@ -533,11 +533,11 @@
     "customAttributes": {}
   },
   {
-    "id": "svMSJcj6ch8fpqAykgxN",
-    "createdAt": "2025-02-10T14:51:20.951Z",
+    "id": "bOxuL6eSOCGkktTuuu6U",
+    "createdAt": "2025-02-10T17:29:46.658Z",
     "bakeryId": "pastellus",
     "name": "red velvet",
-    "collectionId": "n4fJsNwauslXd8Fc8iFn",
+    "collectionId": "wiO2WwMyj0KvRyZfW2GG",
     "collectionName": "galletas",
     "variations": [],
     "basePrice": 16500,
@@ -548,11 +548,11 @@
     "customAttributes": {}
   },
   {
-    "id": "XJPBbnTJXWmV2jbUABHP",
-    "createdAt": "2025-02-10T14:51:20.969Z",
+    "id": "giEfYE4jBArsGtfagFIa",
+    "createdAt": "2025-02-10T17:29:46.674Z",
     "bakeryId": "pastellus",
     "name": "chocoflan",
-    "collectionId": "UPSETki9kRRfUNktdaDr",
+    "collectionId": "0zF7BR58QfetfC8ZRWLO",
     "collectionName": "postres",
     "variations": [],
     "basePrice": 45000,
@@ -563,11 +563,11 @@
     "customAttributes": {}
   },
   {
-    "id": "KNiv3hkHMwc6YdPdH9kU",
-    "createdAt": "2025-02-10T14:51:20.985Z",
+    "id": "h9rRckGcrapU2yIuv4Hk",
+    "createdAt": "2025-02-10T17:29:46.688Z",
     "bakeryId": "pastellus",
     "name": "tres leches",
-    "collectionId": "UPSETki9kRRfUNktdaDr",
+    "collectionId": "0zF7BR58QfetfC8ZRWLO",
     "collectionName": "postres",
     "variations": [],
     "basePrice": 42000,
@@ -578,11 +578,11 @@
     "customAttributes": {}
   },
   {
-    "id": "dKbcEJRlLk8LDZY5SffI",
-    "createdAt": "2025-02-10T14:51:21.001Z",
+    "id": "P964vZXW4ul3GfNKhkhb",
+    "createdAt": "2025-02-10T17:29:46.703Z",
     "bakeryId": "pastellus",
     "name": "cheesecake",
-    "collectionId": "UPSETki9kRRfUNktdaDr",
+    "collectionId": "0zF7BR58QfetfC8ZRWLO",
     "collectionName": "postres",
     "variations": [],
     "basePrice": 48000,

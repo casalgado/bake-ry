@@ -161,40 +161,6 @@ const createBakeryUserService = () => {
     }
   };
 
-  const handleRoleTransition = async (
-    transaction,
-    currentUser,
-    newRole,
-    bakeryId,
-    userId,
-    wasAuthRequired,
-    willNeedAuth,
-  ) => {
-    // Case 1: Customer -> Staff (need to create auth)
-    if (!wasAuthRequired && willNeedAuth) {
-      const password = generateInitialPassword(currentUser.name);
-      const userRecord = await admin.auth().createUser({
-        email: currentUser.email,
-        password: password,
-      });
-      await admin.auth().setCustomUserClaims(userRecord.uid, {
-        role: newRole,
-        bakeryId,
-      });
-    }
-    // Case 2: Staff -> Customer (need to delete auth)
-    else if (wasAuthRequired && !willNeedAuth) {
-      await admin.auth().deleteUser(userId);
-    }
-    // Case 3: Staff -> Staff (update claims)
-    else if (wasAuthRequired && willNeedAuth) {
-      await admin.auth().setCustomUserClaims(userId, {
-        role: newRole,
-        bakeryId,
-      });
-    }
-  };
-
   const update = async (id, data, bakeryId, editor = null) => {
     try {
       const docRef = baseService.getCollectionRef(bakeryId).doc(id);
@@ -207,7 +173,6 @@ const createBakeryUserService = () => {
 
         const currentUser = User.fromFirestore(doc);
         const wasAuthRequired = needsAuthAccount(currentUser.role);
-        const willNeedAuth = data.role ? needsAuthAccount(data.role) : wasAuthRequired;
 
         // Handle auth updates if needed
         if (wasAuthRequired) {
@@ -216,17 +181,30 @@ const createBakeryUserService = () => {
           }
         }
 
-        // Handle role transition cases
+        // Get reference to settings document
+        const settingsRef = db
+          .collection('bakeries')
+          .doc(bakeryId)
+          .collection('settings')
+          .doc('default');
+
+        // Handle role-specific updates if role is changing
         if (data.role && data.role !== currentUser.role) {
-          await handleRoleTransition(
-            transaction,
-            currentUser,
-            data.role,
+          // Update Firebase Auth claims
+          await admin.auth().setCustomUserClaims(id, {
+            role: data.role,
             bakeryId,
-            id,
-            wasAuthRequired,
-            willNeedAuth,
-          );
+          });
+
+          const assistantRoles = ['delivery_assistant', 'production_assistant', 'bakery_staff'];
+          const wasAssistant = assistantRoles.includes(currentUser.role);
+          const willBeAssistant = assistantRoles.includes(data.role);
+
+          // Remove from staff collection if no longer an assistant
+          if (wasAssistant && !willBeAssistant) {
+            const staffRef = settingsRef.collection('staff').doc(id);
+            transaction.delete(staffRef);
+          }
         }
 
         // Create updated user object
