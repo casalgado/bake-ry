@@ -133,6 +133,58 @@ describe('Bakery User Service Tests', () => {
       expect(b2bDoc.data().address).toBe(userData.address);
     });
 
+    it('should create a B2B client without phone number', async () => {
+      const userData = createTestUserData({
+        role: 'bakery_customer',
+        category: 'B2B',
+        address: '123 Test St',
+        phone: '', // explicitly test empty phone
+      });
+
+      const result = await bakeryUserService.create(userData, testStoreId);
+
+      // Verify B2B collection entry
+      const b2bDoc = await db
+        .collection('bakeries')
+        .doc(testStoreId)
+        .collection('settings')
+        .doc('default')
+        .collection('b2b_clients')
+        .doc(result.id)
+        .get();
+
+      expect(b2bDoc.exists).toBe(true);
+      expect(b2bDoc.data().email).toBe(userData.email);
+      expect(b2bDoc.data().address).toBe(userData.address);
+      expect(b2bDoc.data().phone).toBe('');
+    });
+
+    it('should create a staff user without phone number or address', async () => {
+      const userData = createTestUserData({
+        role: 'delivery_assistant',
+        category: 'PER',
+        address: '',
+        phone: '', // explicitly test empty phone
+      });
+
+      const result = await bakeryUserService.create(userData, testStoreId);
+
+      // Verify B2B collection entry
+      const b2bDoc = await db
+        .collection('bakeries')
+        .doc(testStoreId)
+        .collection('settings')
+        .doc('default')
+        .collection('b2b_clients')
+        .doc(result.id)
+        .get();
+
+      expect(b2bDoc.exists).toBe(true);
+      expect(b2bDoc.data().email).toBe(userData.email);
+      expect(b2bDoc.data().address).toBe(userData.address);
+      expect(b2bDoc.data().phone).toBe('');
+    });
+
     it('should prevent duplicate email registration within bakery', async () => {
       const userData = createTestUserData();
       await bakeryUserService.create(userData, testStoreId);

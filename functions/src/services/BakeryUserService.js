@@ -36,14 +36,25 @@ const handleRelatedCollections = async (transaction, bakeryId, userId, userData,
     if (isDelete) {
       transaction.delete(staffRef);
     } else {
-      transaction.set(staffRef, {
+      const staffData = {
         name: userData.name,
         firstName: userData.name.split(' ')[0],
         email: userData.email,
         phone: userData.phone,
         role: userData.role,
         id: userId,
-      });
+        address: userData.address,
+      };
+
+      if (staffData.phone === undefined || staffData.phone === null || staffData.phone === '') {
+        staffData.phone = '';
+      }
+
+      if (staffData.address === undefined || staffData.address === null || staffData.address === '') {
+        staffData.address = '';
+      }
+
+      transaction.set(staffRef, staffData);
     }
   }
 
@@ -53,13 +64,23 @@ const handleRelatedCollections = async (transaction, bakeryId, userId, userData,
     if (isDelete) {
       transaction.delete(b2bRef);
     } else {
-      transaction.set(b2bRef, {
+      const b2bData = {
         name: userData.name,
         id: userId,
         email: userData.email,
         phone: userData.phone,
         address: userData.address,
-      });
+      };
+
+      if (b2bData.phone === undefined || b2bData.phone === null || b2bData.phone === '') {
+        b2bData.phone = '';
+      }
+
+      if (b2bData.address === undefined || b2bData.address === null || b2bData.address === '') {
+        b2bData.address = '';
+      }
+
+      transaction.set(b2bRef, b2bData);
     }
   }
 };
