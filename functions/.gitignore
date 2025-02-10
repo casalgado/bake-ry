@@ -6,6 +6,12 @@ config/serviceAccountKey.json
 src/config/serviceAccountKey.json
 /src/config/serviceAccountKey.json
 .env
+src/seeds/data/seededIngredients.json
+src/seeds/data/seededOrders.json
+src/seeds/data/seededProductCollections.json
+src/seeds/data/seededProducts.json
+src/seeds/data/seededRecipes.json
+src/seeds/data/seededUsers.json
 src/seeds/backup/
 src/seeds/firestore/
 src/middleware/request_logs/

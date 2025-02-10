@@ -2,7 +2,10 @@
 // productCollections.js
 const productCollections = [
   {
-    name: 'tortas',
+    name: 'tortas clasicas',
+  },
+  {
+    name: 'tortas especiales',
   },
   {
     name: 'brownies',
