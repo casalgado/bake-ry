@@ -1,6 +1,6 @@
 [
   {
-    "id": "X9HOWi6C7kqk6BEG0G5F",
+    "id": "mwpbxV9MlTdUFGAJFrGr",
     "createdAt": "2024-11-04T01:51:12.733Z",
     "updatedAt": "2024-11-04T01:51:45.922Z",
     "bakeryId": "es-alimento",
@@ -10,7 +10,7 @@
     "version": 1,
     "ingredients": [
       {
-        "ingredientId": "yWtMHUzaoaatCToNO2MV",
+        "ingredientId": "YKf7tKvWsmhgNXYegUYu",
         "name": "Harina Integral",
         "quantity": 500,
         "unit": "g",
@@ -18,7 +18,7 @@
         "notes": "Tamizada"
       },
       {
-        "ingredientId": "joAf4p2eb2gXtZipvhAD",
+        "ingredientId": "dm0V961cFKkyaBF2Oai0",
         "name": "Cardamomo Molido",
         "quantity": 5,
         "unit": "g",
@@ -39,7 +39,7 @@
     "notes": "Mantener la masa con 70% de hidratación"
   },
   {
-    "id": "FG75pMV3uDsPksyKzL2Z",
+    "id": "kUije7XXXpXUyyleM5nO",
     "createdAt": "2024-11-04T01:51:12.733Z",
     "updatedAt": "2024-11-04T01:51:45.922Z",
     "bakeryId": "es-alimento",
@@ -49,7 +49,7 @@
     "version": 1,
     "ingredients": [
       {
-        "ingredientId": "e6afxdsAhxpzN11gMLIE",
+        "ingredientId": "jZMMW81kxtzz794xvIqG",
         "name": "Mantequilla Sin Sal",
         "quantity": 150,
         "unit": "g",
@@ -57,7 +57,7 @@
         "notes": "Temperatura ambiente"
       },
       {
-        "ingredientId": "V1nuvGVOOsPyCRTAAtqe",
+        "ingredientId": "mbbLqgkG4JGnqmringTx",
         "name": "Arándanos Deshidratados",
         "quantity": 100,
         "unit": "g",
@@ -65,7 +65,7 @@
         "notes": "Picados gruesamente"
       },
       {
-        "ingredientId": "FnRSlqxjqoz9y8BDEw2M",
+        "ingredientId": "mXxjhjwBd5pflEK1MCP9",
         "name": "Extracto de Vainilla",
         "quantity": 5,
         "unit": "ml",
@@ -87,7 +87,7 @@
     "notes": "Las galletas deben quedar doradas en los bordes"
   },
   {
-    "id": "EK1M7m1dJAT20Nhyskma",
+    "id": "rI2p1hM6TmbFq5MYRSIy",
     "createdAt": "2024-11-04T01:51:12.733Z",
     "updatedAt": "2024-11-04T01:51:45.922Z",
     "bakeryId": "es-alimento",
@@ -97,7 +97,7 @@
     "version": 1,
     "ingredients": [
       {
-        "ingredientId": "YaZ5uQpqChIPKWkqMHoU",
+        "ingredientId": "a3Z81IbJSYwXph21pcBJ",
         "name": "Harina de Avena",
         "quantity": 300,
         "unit": "g",
@@ -105,7 +105,7 @@
         "notes": "Tamizada"
       },
       {
-        "ingredientId": "cWNs3uE89Ym2gN4tvWbd",
+        "ingredientId": "FjCmQZniM38ZNHfa4ajK",
         "name": "Jengibre Molido",
         "quantity": 10,
         "unit": "g",
@@ -113,7 +113,7 @@
         "notes": "Al gusto"
       },
       {
-        "ingredientId": "AlKw7uk8g2pwucra4upC",
+        "ingredientId": "A7nnTXLfjlxH8TUrPZN3",
         "name": "Leche Entera",
         "quantity": 200,
         "unit": "ml",
@@ -135,7 +135,7 @@
     "notes": "Pan especiado perfecto para el desayuno"
   },
   {
-    "id": "koFKIJ2LyuiPczu7NUzT",
+    "id": "ix2FoUUd3eFLhGAlSQuW",
     "createdAt": "2024-11-04T01:51:12.733Z",
     "updatedAt": "2024-11-04T01:51:45.922Z",
     "bakeryId": "es-alimento",
@@ -145,7 +145,7 @@
     "version": 1,
     "ingredients": [
       {
-        "ingredientId": "5psCqWNFhwRZhJN1yUJ6",
+        "ingredientId": "9MGaqDyj12RjnAJKbmvH",
         "name": "Harina de Almendra",
         "quantity": 250,
         "unit": "g",
@@ -153,7 +153,7 @@
         "notes": "Tamizada"
       },
       {
-        "ingredientId": "e6afxdsAhxpzN11gMLIE",
+        "ingredientId": "jZMMW81kxtzz794xvIqG",
         "name": "Mantequilla Sin Sal",
         "quantity": 200,
         "unit": "g",
@@ -161,7 +161,7 @@
         "notes": "Derretida"
       },
       {
-        "ingredientId": "FnRSlqxjqoz9y8BDEw2M",
+        "ingredientId": "mXxjhjwBd5pflEK1MCP9",
         "name": "Extracto de Vainilla",
         "quantity": 10,
         "unit": "ml",

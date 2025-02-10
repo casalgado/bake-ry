@@ -1,24 +1,17 @@
+
+// productCollections.js
 const productCollections = [
   {
-    name: 'sourdough',
+    name: 'tortas',
   },
   {
-    name: 'baguette',
+    name: 'brownies',
   },
   {
-    name: 'tortillas',
+    name: 'galletas',
   },
   {
-    name: 'untables',
-  },
-  {
-    name: 'congelados',
-  },
-  {
-    name: 'panaderia tradicional',
-  },
-  {
-    name: 'cafe el diario',
+    name: 'postres',
   },
 ];
 
