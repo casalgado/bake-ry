@@ -5,21 +5,76 @@ const { Order } = require ('../models/Order');
 const createBaseService = require('./base/serviceFactory');
 const { BadRequestError, NotFoundError } = require('../utils/errors');
 
+const AUTH_REQUIRED_ROLES = [
+  'bakery_staff',
+  'delivery_assistant',
+  'production_assistant',
+  'bakery_admin',
+];
+
+const needsAuthAccount = (role) => AUTH_REQUIRED_ROLES.includes(role);
+
+// Helper functions
+
+const generateInitialPassword = (name) => {
+  let password = name.split(' ')[0].toLowerCase();
+  if (!password) password = '';
+  while (password.length < 6) {
+    password = password + '1';
+  }
+  return password;
+};
+
+const handleRelatedCollections = async (transaction, bakeryId, userId, userData, isDelete = false) => {
+  const settingsRef = db
+    .collection('bakeries')
+    .doc(bakeryId)
+    .collection('settings')
+    .doc('default');
+
+  // Handle staff collection
+  if (needsAuthAccount(userData.role)) {
+    const staffRef = settingsRef.collection('staff').doc(userId);
+    if (isDelete) {
+      transaction.delete(staffRef);
+    } else {
+      transaction.set(staffRef, {
+        name: userData.name,
+        firstName: userData.name.split(' ')[0],
+        role: userData.role,
+        email: userData.email,
+        phone: userData.phone,
+        id: userId,
+      });
+    }
+  }
+
+  // Handle B2B collection
+  if (userData.category === 'B2B') {
+    const b2bRef = settingsRef.collection('b2b_clients').doc(userId);
+    if (isDelete) {
+      transaction.delete(b2bRef);
+    } else {
+      transaction.set(b2bRef, {
+        name: userData.name,
+        id: userId,
+        email: userData.email,
+        phone: userData.phone,
+        address: userData.address,
+      });
+    }
+  }
+};
+
 const createBakeryUserService = () => {
   const baseService = createBaseService('users', User, 'bakeries/{bakeryId}');
+
+  // services/bakeryUserService.js
 
   const create = async (userData, bakeryId) => {
     let userRecord = null;
 
     try {
-      userData.password = userData.name.split(' ')[0].toLowerCase();
-      if (!userData.password) {
-        userData.password = '';
-      }
-      while (userData.password.length < 6) {
-        userData.password = userData.password + '1';
-      }
-
       const newUser = new User({
         ...userData,
         bakeryId,
@@ -36,59 +91,39 @@ const createBakeryUserService = () => {
 
       // Start transaction
       const result = await db.runTransaction(async (transaction) => {
-        // 1. Create Firebase Auth user
-        userRecord = await admin.auth().createUser({
-          email: newUser.email,
-          password: newUser.password,
-        });
+        let userId;
 
-        // 2. Set custom claims with bakeryId
-        const customClaims = {
-          role: newUser.role,
-          bakeryId,
-        };
-        await admin.auth().setCustomUserClaims(userRecord.uid, customClaims);
+        // Only create auth account for staff roles
+        if (needsAuthAccount(newUser.role)) {
+        // Generate password from name
+          const password = generateInitialPassword(newUser.name);
 
-        // 3. Create Firestore document
-        const userRef = baseService.getCollectionRef(bakeryId).doc(userRecord.uid);
+          // Create Firebase Auth user
+          userRecord = await admin.auth().createUser({
+            email: newUser.email,
+            password: password,
+          });
+
+          // Set custom claims
+          await admin.auth().setCustomUserClaims(userRecord.uid, {
+            role: newUser.role,
+            bakeryId,
+          });
+
+          userId = userRecord.uid;
+        } else {
+        // For customers, generate a custom ID
+          userId = baseService.getCollectionRef(bakeryId).doc().id;
+        }
+
+        // Create Firestore document
+        const userRef = baseService.getCollectionRef(bakeryId).doc(userId);
         const userToSave = {
           ...newUser.toFirestore(),
-          id: userRecord.uid,
+          id: userId,
         };
-        delete userToSave.password;
 
-        // 4. Add user to bakery's assistant list if they are an assistant
-        if (newUser.role === 'delivery_assistant' ||
-            newUser.role === 'production_assistant' ||
-            newUser.role === 'bakery_staff') {
-          const assistantsRef = db
-            .collection('bakeries')
-            .doc(bakeryId)
-            .collection('settings')
-            .doc('default')
-            .collection('staff');
-
-          assistantsRef.doc(userRecord.uid).set({
-            name: newUser.name,
-            firstName: newUser.name.split(' ')[0],
-            role: newUser.role,
-            email: newUser.email,
-            phone: newUser.phone,
-            id: userRecord.uid,
-          });
-        }
-
-        // 5. Add user to b2b clients list if they are a b2b client
-        if (newUser.category === 'B2B') {
-          const b2bClientsRef = db.collection('bakeries').doc(bakeryId).collection('settings').doc('default').collection('b2b_clients');
-          b2bClientsRef.doc(userRecord.uid).set({
-            name: newUser.name,
-            id: userRecord.uid,
-            email: newUser.email,
-            phone: newUser.phone,
-            address: newUser.address,
-          });
-        }
+        await handleRelatedCollections(transaction, bakeryId, userId, userToSave);
 
         transaction.set(userRef, userToSave);
         return userToSave;
@@ -96,7 +131,7 @@ const createBakeryUserService = () => {
 
       return result;
     } catch (error) {
-      // Cleanup if Firebase Auth user was created but transaction failed
+    // Cleanup if Firebase Auth user was created but transaction failed
       if (userRecord) {
         try {
           await admin.auth().deleteUser(userRecord.uid);
@@ -108,26 +143,35 @@ const createBakeryUserService = () => {
     }
   };
 
-  // services/bakeryUserService.js
-
   const update = async (id, data, bakeryId, editor = null) => {
     try {
       const docRef = baseService.getCollectionRef(bakeryId).doc(id);
 
       return await db.runTransaction(async (transaction) => {
-        // Validate user exists
+      // Validate user exists
         const doc = await transaction.get(docRef);
         if (!doc.exists) {
           throw new NotFoundError('User not found');
         }
 
-        // Handle email updates in Firebase Auth if needed
-        if (data.email) {
-          await admin.auth().updateUser(id, { email: data.email });
+        const currentUser = User.fromFirestore(doc);
+        const wasAuthRequired = needsAuthAccount(currentUser.role);
+        const willNeedAuth = data.role ? needsAuthAccount(data.role) : wasAuthRequired;
+
+        // Handle role transition cases
+        if (data.role && data.role !== currentUser.role) {
+          await handleRoleTransition(
+            transaction,
+            currentUser,
+            data.role,
+            bakeryId,
+            id,
+            wasAuthRequired,
+            willNeedAuth,
+          );
         }
 
-        // Create current and updated user objects
-        const currentUser = User.fromFirestore(doc);
+        // Create updated user object
         const updatedUser = new User({
           ...currentUser,
           ...data,
@@ -135,93 +179,8 @@ const createBakeryUserService = () => {
           updatedAt: new Date(),
         });
 
-        // Helper function to handle denormalized data updates
-        const updateRelatedCollections = (user, transaction) => {
-          const settingsRef = db
-            .collection('bakeries')
-            .doc(bakeryId)
-            .collection('settings')
-            .doc('default');
-
-          // Update staff collection if user is in assistant role
-          const assistantRoles = ['delivery_assistant', 'production_assistant', 'bakery_staff'];
-          if (assistantRoles.includes(user.role)) {
-            const staffRef = settingsRef.collection('staff').doc(id);
-            transaction.set(staffRef, {
-              name: user.name,
-              firstName: user.name.split(' ')[0],
-              email: user.email,
-              phone: user.phone,
-              role: user.role,
-              id: user.id,
-            });
-          }
-
-          // Update B2B collection if user is B2B
-          if (user.category === 'B2B') {
-            const b2bRef = settingsRef.collection('b2b_clients').doc(id);
-            transaction.set(b2bRef, {
-              name: user.name,
-              id: user.id,
-              email: user.email,
-              phone: user.phone,
-              address: user.address,
-            });
-          }
-        };
-
-        // Get reference to settings document
-        const settingsRef = db
-          .collection('bakeries')
-          .doc(bakeryId)
-          .collection('settings')
-          .doc('default');
-
-        // Handle role-specific updates if role is changing
-        if (data.role && data.role !== currentUser.role) {
-          // Update Firebase Auth claims
-          await admin.auth().setCustomUserClaims(id, {
-            role: data.role,
-            bakeryId,
-          });
-
-          const assistantRoles = ['delivery_assistant', 'production_assistant', 'bakery_staff'];
-          const wasAssistant = assistantRoles.includes(currentUser.role);
-          const willBeAssistant = assistantRoles.includes(data.role);
-
-          // Remove from staff collection if no longer an assistant
-          if (wasAssistant && !willBeAssistant) {
-            const staffRef = settingsRef.collection('staff').doc(id);
-            transaction.delete(staffRef);
-          }
-        }
-
-        // Handle category changes if category is changing
-        if (data.category && data.category !== currentUser.category) {
-          // Handle removal from old category collections
-          if (currentUser.category === 'B2B') {
-            const oldB2bRef = settingsRef.collection('b2b_clients').doc(id);
-            transaction.delete(oldB2bRef);
-          }
-
-          // Record category change in history
-          const categoryHistoryRef = docRef.collection('category_history').doc();
-          transaction.set(categoryHistoryRef, {
-            previous_category: currentUser.category || 'none',
-            new_category: data.category,
-            changed_at: new Date(),
-            changed_by: {
-              userId: editor?.uid || 'system',
-              email: editor?.email || 'system@system.com',
-              role: editor?.role || 'system',
-            },
-            reason: data.categoryChangeReason || 'Manual update',
-          });
-        }
-
-        // Always update related collections with latest data
-        // This ensures denormalized data stays in sync regardless of what fields changed
-        updateRelatedCollections(updatedUser, transaction);
+        // Update related collections
+        await handleRelatedCollections(transaction, bakeryId, id, updatedUser);
 
         // Record changes in history
         const changes = baseService.diffObjects(currentUser, updatedUser);
@@ -238,16 +197,46 @@ const createBakeryUserService = () => {
     }
   };
 
+  const handleRoleTransition = async (
+    transaction,
+    currentUser,
+    newRole,
+    bakeryId,
+    userId,
+    wasAuthRequired,
+    willNeedAuth,
+  ) => {
+  // Case 1: Customer -> Staff (need to create auth)
+    if (!wasAuthRequired && willNeedAuth) {
+      const password = generateInitialPassword(currentUser.name);
+      const userRecord = await admin.auth().createUser({
+        email: currentUser.email,
+        password: password,
+      });
+      await admin.auth().setCustomUserClaims(userRecord.uid, {
+        role: newRole,
+        bakeryId,
+      });
+    }
+    // Case 2: Staff -> Customer (need to delete auth)
+    else if (wasAuthRequired && !willNeedAuth) {
+    // Delay auth deletion until after transaction succeeds
+    // We'll handle this in a separate cleanup step
+    }
+    // Case 3: Staff -> Staff (update claims)
+    else if (wasAuthRequired && willNeedAuth) {
+      await admin.auth().setCustomUserClaims(userId, {
+        role: newRole,
+        bakeryId,
+      });
+    }
+  };
+
   const remove = async (id, bakeryId) => {
     try {
-      // Delete from Firebase Auth first
-      await admin.auth().deleteUser(id);
-
-      // Then handle Firestore deletions in a transaction
       const userRef = baseService.getCollectionRef(bakeryId).doc(id);
 
       return await db.runTransaction(async (transaction) => {
-        // Get the current user to check role and category
         const doc = await transaction.get(userRef);
         if (!doc.exists) {
           throw new NotFoundError('User not found');
@@ -255,25 +244,12 @@ const createBakeryUserService = () => {
 
         const currentUser = User.fromFirestore(doc);
 
-        // Get settings ref for related collections
-        const settingsRef = db
-          .collection('bakeries')
-          .doc(bakeryId)
-          .collection('settings')
-          .doc('default');
-
-        // Clean up staff collection if user is staff
-        const assistantRoles = ['delivery_assistant', 'production_assistant', 'bakery_staff'];
-        if (assistantRoles.includes(currentUser.role)) {
-          const staffRef = settingsRef.collection('staff').doc(id);
-          transaction.delete(staffRef);
+        // Only delete auth account if user has one
+        if (needsAuthAccount(currentUser.role)) {
+          await admin.auth().deleteUser(id);
         }
 
-        // Clean up b2b clients collection if user is B2B
-        if (currentUser.category === 'B2B') {
-          const b2bRef = settingsRef.collection('b2b_clients').doc(id);
-          transaction.delete(b2bRef);
-        }
+        await handleRelatedCollections(transaction, bakeryId, id, currentUser, true);
 
         // Soft delete the main user document
         transaction.update(userRef, {
