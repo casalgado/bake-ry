@@ -68,7 +68,7 @@ describe('Admin User Service Tests', () => {
 
     it('should create a bakery admin user with bakeryId claim', async () => {
       const userData = createTestUserData({
-        role: 'company_admin',
+        role: 'bakery_admin',
         bakeryId: testStoreId,
       });
 

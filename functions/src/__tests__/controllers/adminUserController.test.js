@@ -91,7 +91,7 @@ describe('Admin User Controller', () => {
         params: { id: 'admin123' },
         body: {
           name: 'Updated Name',
-          role: 'company_admin',
+          role: 'bakery_admin',
         },
       };
 
@@ -116,7 +116,7 @@ describe('Admin User Controller', () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'Updated Name',
-          role: 'company_admin',
+          role: 'bakery_admin',
         }),
       );
     });

@@ -1,12 +1,12 @@
 const { initializeFirebase, clearFirestoreData } = require('../setup/firebase');
-const { CompanySettings } = require('../../models/BakerySettings');
+const { BakerySettings } = require('../../models/BakerySettings');
 
 // Test Data Setup Helpers
 const createTestStaffMember = (overrides = {}) => ({
   id: 'test-staff-1',
   name: 'Test Staff',
   email: 'staff@example.com',
-  role: 'company_staff',
+  role: 'bakery_staff',
   ...overrides,
 });
 
@@ -18,24 +18,24 @@ const createTestB2BClient = (overrides = {}) => ({
   ...overrides,
 });
 
-describe('Company Settings Service Tests', () => {
+describe('Bakery Settings Service Tests', () => {
   let db;
-  let companySettingsService;
+  let bakerySettingsService;
   let testStoreId;
 
   beforeAll(async () => {
     ({ db } = initializeFirebase());
-    companySettingsService = require('../../services/companySettingsService');
+    bakerySettingsService = require('../../services/bakerySettingsService');
     testStoreId = 'test-bakery';
     const b2bRef = db
-      .collection('companies')
+      .collection('bakeries')
       .doc(testStoreId)
       .collection('settings')
       .doc('default')
       .collection('b2b_clients');
 
     const staffRef = db
-      .collection('companies')
+      .collection('bakeries')
       .doc(testStoreId)
       .collection('settings')
       .doc('default')
@@ -64,7 +64,7 @@ describe('Company Settings Service Tests', () => {
 
   const setupDefaultSettings = async () => {
     const settingsRef = db
-      .collection('companies')
+      .collection('bakeries')
       .doc(testStoreId)
       .collection('settings')
       .doc('default');
@@ -83,15 +83,15 @@ describe('Company Settings Service Tests', () => {
     it('should get settings by id', async () => {
       await setupDefaultSettings();
 
-      const settings = await companySettingsService.getById('default', testStoreId);
+      const settings = await bakerySettingsService.getById('default', testStoreId);
 
-      expect(settings).toBeInstanceOf(CompanySettings);
+      expect(settings).toBeInstanceOf(BakerySettings);
       expect(settings.bakeryId).toBe(testStoreId);
     });
 
     it('should throw NotFoundError when settings do not exist', async () => {
       await expect(
-        companySettingsService.getById('default', testStoreId),
+        bakerySettingsService.getById('default', testStoreId),
       ).rejects.toThrow('Settings not found');
     });
 
@@ -102,13 +102,13 @@ describe('Company Settings Service Tests', () => {
         theme: { primaryColor: '#FF0000' },
       };
 
-      const updated = await companySettingsService.patch('default', patchData, testStoreId);
+      const updated = await bakerySettingsService.patch('default', patchData, testStoreId);
 
       expect(updated.theme.primaryColor).toBe(patchData.theme.primaryColor);
 
       // Verify in Firestore
       const doc = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('settings')
         .doc('default')
@@ -119,7 +119,7 @@ describe('Company Settings Service Tests', () => {
 
     it('should throw NotFoundError when patching non-existent settings', async () => {
       await expect(
-        companySettingsService.patch('default', { theme: {} }, testStoreId),
+        bakerySettingsService.patch('default', { theme: {} }, testStoreId),
       ).rejects.toThrow('Settings not found');
     });
   });
@@ -130,7 +130,7 @@ describe('Company Settings Service Tests', () => {
 
       // Setup test staff
       const staffRef = db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('settings')
         .doc('default')
@@ -146,24 +146,24 @@ describe('Company Settings Service Tests', () => {
       await db.collection('users').doc('admin-1').set({
         id: 'admin-1',
         email: 'admin@example.com',
-        role: 'company_admin',
+        role: 'bakery_admin',
         bakeryId: testStoreId,
       });
     });
 
     it('should get complete staff list including admins', async () => {
-      const staffList = await companySettingsService.getStaffList(testStoreId);
+      const staffList = await bakerySettingsService.getStaffList(testStoreId);
 
       expect(staffList).toHaveLength(3); // 2 staff + 1 admin
 
       // Verify staff members
-      const staffMembers = staffList.filter(staff => staff.role === 'company_staff');
+      const staffMembers = staffList.filter(staff => staff.role === 'bakery_staff');
       expect(staffMembers).toHaveLength(2);
       expect(staffMembers[0].email).toBe('staff@example.com');
       expect(staffMembers[1].email).toBe('staff2@example.com');
 
       // Verify admin
-      const adminMembers = staffList.filter(staff => staff.role === 'company_admin');
+      const adminMembers = staffList.filter(staff => staff.role === 'bakery_admin');
       expect(adminMembers).toHaveLength(1);
       expect(adminMembers[0].email).toBe('admin@example.com');
     });
@@ -175,7 +175,7 @@ describe('Company Settings Service Tests', () => {
 
       // Setup test B2B clients
       const b2bRef = db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('settings')
         .doc('default')
@@ -189,7 +189,7 @@ describe('Company Settings Service Tests', () => {
     });
 
     it('should get all B2B clients', async () => {
-      const clients = await companySettingsService.getB2bClientsList(testStoreId);
+      const clients = await bakerySettingsService.getB2bClientsList(testStoreId);
 
       expect(clients).toHaveLength(2);
       expect(clients[0].email).toBe('client@example.com');
@@ -198,19 +198,19 @@ describe('Company Settings Service Tests', () => {
 
     it('should return empty array when no B2B clients exist', async () => {
       // Create new bakery without any B2B clients
-      const emptyCompanyId = 'empty-bakery';
+      const emptyBakeryId = 'empty-bakery';
       await db
-        .collection('companies')
-        .doc(emptyCompanyId)
+        .collection('bakeries')
+        .doc(emptyBakeryId)
         .collection('settings')
         .doc('default')
         .set({
           id: 'default',
-          bakeryId: emptyCompanyId,
+          bakeryId: emptyBakeryId,
           createdAt: new Date(),
         });
 
-      const clients = await companySettingsService.getB2bClientsList(emptyCompanyId);
+      const clients = await bakerySettingsService.getB2bClientsList(emptyBakeryId);
       expect(clients).toHaveLength(0);
     });
   });

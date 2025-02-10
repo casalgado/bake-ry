@@ -16,7 +16,7 @@ function initializeFirebase() {
   // Initialize Firebase Admin if not already initialized
   if (!admin.apps.length) {
     admin.initializeApp({
-      projectId: 'tres-fuegos-en-casa',
+      projectId: 'bake-ry',
     });
   }
 

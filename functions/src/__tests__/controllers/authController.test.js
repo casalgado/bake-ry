@@ -23,9 +23,9 @@ describe('Auth Controller', () => {
         body: {
           email: 'test@example.com',
           password: 'password123',
-          role: 'company_admin',
+          role: 'bakery_admin',
           name: 'Test User',
-          bakeryId: 'company123',
+          bakeryId: 'bakery123',
         },
       };
 
@@ -54,9 +54,9 @@ describe('Auth Controller', () => {
         body: {
           email: 'invalid-email',
           password: 'password123',
-          role: 'company_admin',
+          role: 'bakery_admin',
           name: 'Test User',
-          bakeryId: 'company123',
+          bakeryId: 'bakery123',
         },
       };
 
@@ -91,7 +91,7 @@ describe('Auth Controller', () => {
         body: {
           email: 'test@example.com',
           password: 'password123',
-          role: 'company_staff',
+          role: 'bakery_staff',
           name: 'Test User',
           // Missing bakeryId
         },
@@ -101,7 +101,7 @@ describe('Auth Controller', () => {
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'CompanyId is required for non-admin users',
+        error: 'BakeryId is required for non-admin users',
       });
     });
 
@@ -110,7 +110,7 @@ describe('Auth Controller', () => {
         body: {
           email: 'test@example.com',
           password: 'password123',
-          role: 'company_admin',
+          role: 'bakery_admin',
           name: 'Test User',
         },
       };
@@ -143,8 +143,8 @@ describe('Auth Controller', () => {
       const mockUserData = {
         uid: 'user123',
         email: 'test@example.com',
-        role: 'company_admin',
-        bakeryId: 'company123',
+        role: 'bakery_admin',
+        bakeryId: 'bakery123',
       };
 
       authService.login.mockResolvedValue(mockUserData);

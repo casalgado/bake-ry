@@ -1,12 +1,12 @@
-// tests/controllers/companyUserController.test.js
-const companyUserController = require('../../controllers/bakeryUserController');
-const companyUserService = require('../../services/bakeryUserService');
+// tests/controllers/bakeryUserController.test.js
+const bakeryUserController = require('../../controllers/bakeryUserController');
+const bakeryUserService = require('../../services/bakeryUserService');
 const {  NotFoundError } = require('../../utils/errors');
 
 // Mock the service
-jest.mock('../../services/companyUserService');
+jest.mock('../../services/bakeryUserService');
 
-describe('Company User Controller', () => {
+describe('Bakery User Controller', () => {
   let res;
 
   beforeEach(() => {
@@ -18,13 +18,13 @@ describe('Company User Controller', () => {
   });
 
   describe('create', () => {
-    it('should create a company user successfully', async () => {
+    it('should create a bakery user successfully', async () => {
       const req = {
-        params: { bakeryId: 'company123' },
+        params: { bakeryId: 'bakery123' },
         body: {
           email: 'staff@example.com',
           password: 'password123',
-          role: 'company_staff',
+          role: 'bakery_staff',
           name: 'Test Staff',
           phone: '1234567890',
         },
@@ -36,13 +36,13 @@ describe('Company User Controller', () => {
         createdAt: new Date(),
       };
 
-      companyUserService.create.mockResolvedValue(mockUser);
+      bakeryUserService.create.mockResolvedValue(mockUser);
 
-      await companyUserController.create(req, res);
+      await bakeryUserController.create(req, res);
 
-      expect(companyUserService.create).toHaveBeenCalledWith(
+      expect(bakeryUserService.create).toHaveBeenCalledWith(
         req.body,
-        'company123',
+        'bakery123',
       );
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith(mockUser);
@@ -50,16 +50,16 @@ describe('Company User Controller', () => {
 
     it('should reject creation with invalid email format', async () => {
       const req = {
-        params: { bakeryId: 'company123' },
+        params: { bakeryId: 'bakery123' },
         body: {
           email: 'invalid-email',
           password: 'password123',
-          role: 'company_staff',
+          role: 'bakery_staff',
           name: 'Test Staff',
         },
       };
 
-      await companyUserController.create(req, res);
+      await bakeryUserController.create(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -69,7 +69,7 @@ describe('Company User Controller', () => {
 
     it('should reject creation with invalid role', async () => {
       const req = {
-        params: { bakeryId: 'company123' },
+        params: { bakeryId: 'bakery123' },
         body: {
           email: 'staff@example.com',
           password: 'password123',
@@ -78,11 +78,11 @@ describe('Company User Controller', () => {
         },
       };
 
-      await companyUserController.create(req, res);
+      await bakeryUserController.create(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Invalid company user role',
+        error: 'Invalid bakery user role',
       });
     });
   });
@@ -90,7 +90,7 @@ describe('Company User Controller', () => {
   describe('update', () => {
     const validUser = {
       id: 'user123',
-      role: 'company_staff',
+      role: 'bakery_staff',
       email: 'staff@example.com',
     };
 
@@ -98,7 +98,7 @@ describe('Company User Controller', () => {
       const req = {
         params: {
           id: 'user123',
-          bakeryId: 'company123',
+          bakeryId: 'bakery123',
         },
         body: {
           name: 'Updated Name',
@@ -106,18 +106,18 @@ describe('Company User Controller', () => {
         },
       };
 
-      companyUserService.getById.mockResolvedValue(validUser);
-      companyUserService.update.mockResolvedValue({
+      bakeryUserService.getById.mockResolvedValue(validUser);
+      bakeryUserService.update.mockResolvedValue({
         ...validUser,
         ...req.body,
       });
 
-      await companyUserController.update(req, res);
+      await bakeryUserController.update(req, res);
 
-      expect(companyUserService.update).toHaveBeenCalledWith(
+      expect(bakeryUserService.update).toHaveBeenCalledWith(
         'user123',
         req.body,
-        'company123',
+        'bakery123',
       );
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -131,20 +131,20 @@ describe('Company User Controller', () => {
       const req = {
         params: {
           id: 'user123',
-          bakeryId: 'company123',
+          bakeryId: 'bakery123',
         },
         body: {
           role: 'invalid_role',
         },
       };
 
-      companyUserService.getById.mockResolvedValue(validUser);
+      bakeryUserService.getById.mockResolvedValue(validUser);
 
-      await companyUserController.update(req, res);
+      await bakeryUserController.update(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Cannot change to non-company user role',
+        error: 'Cannot change to non-bakery user role',
       });
     });
 
@@ -152,18 +152,18 @@ describe('Company User Controller', () => {
       const req = {
         params: {
           id: 'nonexistent',
-          bakeryId: 'company123',
+          bakeryId: 'bakery123',
         },
         body: {
           name: 'Updated Name',
         },
       };
 
-      companyUserService.getById.mockRejectedValue(
+      bakeryUserService.getById.mockRejectedValue(
         new NotFoundError('User not found'),
       );
 
-      await companyUserController.update(req, res);
+      await bakeryUserController.update(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
@@ -177,22 +177,22 @@ describe('Company User Controller', () => {
       const req = {
         params: {
           id: 'user123',
-          bakeryId: 'company123',
+          bakeryId: 'bakery123',
         },
       };
 
-      companyUserService.getById.mockResolvedValue({
+      bakeryUserService.getById.mockResolvedValue({
         id: 'user123',
-        role: 'company_staff',
+        role: 'bakery_staff',
       });
 
-      companyUserService.remove.mockResolvedValue(null);
+      bakeryUserService.remove.mockResolvedValue(null);
 
-      await companyUserController.remove(req, res);
+      await bakeryUserController.remove(req, res);
 
-      expect(companyUserService.remove).toHaveBeenCalledWith(
+      expect(bakeryUserService.remove).toHaveBeenCalledWith(
         'user123',
-        'company123',
+        'bakery123',
       );
       expect(res.status).toHaveBeenCalledWith(204);
       expect(res.json).toHaveBeenCalledWith(null);
@@ -202,20 +202,20 @@ describe('Company User Controller', () => {
       const req = {
         params: {
           id: 'user123',
-          bakeryId: 'company123',
+          bakeryId: 'bakery123',
         },
       };
 
-      companyUserService.getById.mockResolvedValue({
+      bakeryUserService.getById.mockResolvedValue({
         id: 'user123',
         role: 'invalid_role',
       });
 
-      await companyUserController.remove(req, res);
+      await bakeryUserController.remove(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Invalid company user role',
+        error: 'Invalid bakery user role',
       });
     });
   });
@@ -225,7 +225,7 @@ describe('Company User Controller', () => {
       const req = {
         params: {
           id: 'user123',
-          bakeryId: 'company123',
+          bakeryId: 'bakery123',
         },
       };
 
@@ -236,12 +236,12 @@ describe('Company User Controller', () => {
         },
       ];
 
-      companyUserService.getHistory.mockResolvedValue(mockHistory);
+      bakeryUserService.getHistory.mockResolvedValue(mockHistory);
 
-      await companyUserController.getHistory(req, res);
+      await bakeryUserController.getHistory(req, res);
 
-      expect(companyUserService.getHistory).toHaveBeenCalledWith(
-        'company123',
+      expect(bakeryUserService.getHistory).toHaveBeenCalledWith(
+        'bakery123',
         'user123',
       );
       expect(res.json).toHaveBeenCalledWith(mockHistory);
@@ -251,15 +251,15 @@ describe('Company User Controller', () => {
       const req = {
         params: {
           id: 'user123',
-          bakeryId: 'company123',
+          bakeryId: 'bakery123',
         },
       };
 
-      companyUserService.getHistory.mockRejectedValue(
+      bakeryUserService.getHistory.mockRejectedValue(
         new Error('Failed to fetch history'),
       );
 
-      await companyUserController.getHistory(req, res);
+      await bakeryUserController.getHistory(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith(

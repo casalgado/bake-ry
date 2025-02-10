@@ -5,7 +5,7 @@ const ProductCollection = require('../../models/ProductCollection');
 const setupTestData = async (db, bakeryId) => {
   // Create test collections
   const collections = [];
-  const collectionsRef = db.collection('companies').doc(bakeryId).collection('productCollections');
+  const collectionsRef = db.collection('bakeries').doc(bakeryId).collection('productCollections');
 
   for (let i = 0; i < 5; i++) {
     const collection = new ProductCollection({
@@ -22,7 +22,7 @@ const setupTestData = async (db, bakeryId) => {
   }
 
   // Create some test products
-  const productsRef = db.collection('companies').doc(bakeryId).collection('products');
+  const productsRef = db.collection('bakeries').doc(bakeryId).collection('products');
   await productsRef.doc('active-product').set({
     name: 'Active Product',
     collectionId: 'test-collection-0',
@@ -81,7 +81,7 @@ describe('Product Collection Service Tests', () => {
 
       // Verify collection exists in Firestore
       const doc = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('productCollections')
         .doc(result.id)
@@ -122,7 +122,7 @@ describe('Product Collection Service Tests', () => {
 
       // Verify updates in Firestore
       const doc = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('productCollections')
         .doc(testCollection.id)
@@ -141,7 +141,7 @@ describe('Product Collection Service Tests', () => {
 
       // Verify collection was deleted
       const doc = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('productCollections')
         .doc(testCollection.id)
@@ -159,7 +159,7 @@ describe('Product Collection Service Tests', () => {
 
       // Verify collection still exists
       const doc = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('productCollections')
         .doc(testCollection.id)

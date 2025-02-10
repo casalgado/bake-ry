@@ -1,8 +1,8 @@
 // tests/bakery-firebase.test.js
 const { initializeFirebase, clearFirestoreData } = require('../setup/firebase');
-const Company = require('../../models/Bakery');
+const Bakery = require('../../models/Bakery');
 
-describe('Company Firestore Tests', () => {
+describe('Bakery Firestore Tests', () => {
   let db;
 
   // Set up before running any tests
@@ -22,8 +22,8 @@ describe('Company Firestore Tests', () => {
   it('should create and retrieve a bakery from Firestore', async () => {
     // Create a test bakery
 
-    const testBakery = new Company({
-      name: 'Test Company',
+    const testBakery = new Bakery({
+      name: 'Test Bakery',
       address: '123 Test St',
       phone: '1234567890',
       operatingHours: {
@@ -32,7 +32,7 @@ describe('Company Firestore Tests', () => {
     });
 
     // Save to Firestore
-    const bakeryRef = db.collection('companies').doc();
+    const bakeryRef = db.collection('bakeries').doc();
     await bakeryRef.set(testBakery.toFirestore());
 
     // Retrieve from Firestore
@@ -40,7 +40,7 @@ describe('Company Firestore Tests', () => {
     const savedData = savedDoc.data();
 
     // Verify the data
-    expect(savedData.name).toBe('Test Company');
+    expect(savedData.name).toBe('Test Bakery');
     expect(savedData.address).toBe('123 Test St');
     expect(savedData.phone).toBe('1234567890');
     expect(savedData.operatingHours.monday.isOpen).toBe(true);
@@ -48,14 +48,14 @@ describe('Company Firestore Tests', () => {
 
   it('should update bakery status in Firestore', async () => {
     // Create initial bakery
-    const testBakery = new Company({
-      name: 'Test Company',
+    const testBakery = new Bakery({
+      name: 'Test Bakery',
       isActive: true,
       isPaused: false,
     });
 
     // Save to Firestore
-    const bakeryRef = db.collection('companies').doc();
+    const bakeryRef = db.collection('bakeries').doc();
     await bakeryRef.set(testBakery.toFirestore());
 
     // Update status
@@ -70,7 +70,7 @@ describe('Company Firestore Tests', () => {
   });
 
   it('should handle non-existent bakery', async () => {
-    const nonExistentDoc = await db.collection('companies')
+    const nonExistentDoc = await db.collection('bakeries')
       .doc('non-existent-id')
       .get();
 

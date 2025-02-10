@@ -4,7 +4,7 @@ const { initializeFirebase, clearFirestoreData } = require('../setup/firebase');
 const createTestUserData = (overrides = {}) => ({
   email: 'test@example.com',
   name: 'Test User',
-  role: 'company_staff',
+  role: 'bakery_staff',
   phone: '1234567890',
   ...overrides,
 });
@@ -12,7 +12,7 @@ const createTestUserData = (overrides = {}) => ({
 const setupTestData = async (db, bakeryId) => {
   // Create settings document with default collections
   const settingsRef = db
-    .collection('companies')
+    .collection('bakeries')
     .doc(bakeryId)
     .collection('settings')
     .doc('default');
@@ -25,10 +25,10 @@ const setupTestData = async (db, bakeryId) => {
   });
 };
 
-describe('Company User Service Tests', () => {
+describe('Bakery User Service Tests', () => {
   let db;
   let admin;
-  let companyUserService;
+  let bakeryUserService;
   let testStoreId;
   let testEditor;
 
@@ -36,12 +36,12 @@ describe('Company User Service Tests', () => {
     const firebase = initializeFirebase();
     db = firebase.db;
     admin = firebase.admin;
-    companyUserService = require('../../services/bakeryUserService');
+    bakeryUserService = require('../../services/bakeryUserService');
     testStoreId = 'test-bakery';
     testEditor = {
       uid: 'test-editor',
       email: 'editor@example.com',
-      role: 'company_staff',
+      role: 'bakery_staff',
     };
 
     // Connect to Auth Emulator
@@ -73,7 +73,7 @@ describe('Company User Service Tests', () => {
     it('should create a bakery staff user with correct collections', async () => {
       const userData = createTestUserData();
 
-      const result = await companyUserService.create(userData, testStoreId);
+      const result = await bakeryUserService.create(userData, testStoreId);
 
       expect(result).toBeDefined();
       expect(result.email).toBe(userData.email);
@@ -89,7 +89,7 @@ describe('Company User Service Tests', () => {
 
       // Verify user in Firestore
       const userDoc = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('users')
         .doc(result.id)
@@ -99,7 +99,7 @@ describe('Company User Service Tests', () => {
 
       // Verify staff collection entry
       const staffDoc = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('settings')
         .doc('default')
@@ -112,16 +112,16 @@ describe('Company User Service Tests', () => {
 
     it('should create a B2B client with correct collections', async () => {
       const userData = createTestUserData({
-        role: 'company_customer',
+        role: 'bakery_customer',
         category: 'B2B',
         address: '123 Test St',
       });
 
-      const result = await companyUserService.create(userData, testStoreId);
+      const result = await bakeryUserService.create(userData, testStoreId);
 
       // Verify B2B collection entry
       const b2bDoc = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('settings')
         .doc('default')
@@ -135,11 +135,11 @@ describe('Company User Service Tests', () => {
 
     it('should prevent duplicate email registration within bakery', async () => {
       const userData = createTestUserData();
-      await companyUserService.create(userData, testStoreId);
+      await bakeryUserService.create(userData, testStoreId);
 
       await expect(
-        companyUserService.create(userData, testStoreId),
-      ).rejects.toThrow('A user with this email already exists in this company');
+        bakeryUserService.create(userData, testStoreId),
+      ).rejects.toThrow('A user with this email already exists in this bakery');
     });
   });
 
@@ -147,7 +147,7 @@ describe('Company User Service Tests', () => {
     let testUser;
 
     beforeEach(async () => {
-      testUser = await companyUserService.create(createTestUserData(), testStoreId);
+      testUser = await bakeryUserService.create(createTestUserData(), testStoreId);
     });
 
     it('should update user details and related collections', async () => {
@@ -157,7 +157,7 @@ describe('Company User Service Tests', () => {
         phone: '9876543210',
       };
 
-      const updated = await companyUserService.update(
+      const updated = await bakeryUserService.update(
         testUser.id,
         updateData,
         testStoreId,
@@ -173,7 +173,7 @@ describe('Company User Service Tests', () => {
 
       // Verify staff collection update
       const staffDoc = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('settings')
         .doc('default')
@@ -189,7 +189,7 @@ describe('Company User Service Tests', () => {
         role: 'delivery_assistant',
       };
 
-      await companyUserService.update(
+      await bakeryUserService.update(
         testUser.id,
         updateData,
         testStoreId,
@@ -202,7 +202,7 @@ describe('Company User Service Tests', () => {
 
       // Verify staff collection maintains entry
       const staffDoc = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('settings')
         .doc('default')
@@ -220,7 +220,7 @@ describe('Company User Service Tests', () => {
         categoryChangeReason: 'Customer upgraded to B2B',
       };
 
-      await companyUserService.update(
+      await bakeryUserService.update(
         testUser.id,
         updateData,
         testStoreId,
@@ -229,7 +229,7 @@ describe('Company User Service Tests', () => {
 
       // Verify B2B collection entry
       const b2bDoc = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('settings')
         .doc('default')
@@ -240,7 +240,7 @@ describe('Company User Service Tests', () => {
 
       // Verify category change history
       const historySnapshot = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('users')
         .doc(testUser.id)
@@ -258,7 +258,7 @@ describe('Company User Service Tests', () => {
     let testUser;
 
     beforeEach(async () => {
-      testUser = await companyUserService.create(createTestUserData(), testStoreId);
+      testUser = await bakeryUserService.create(createTestUserData(), testStoreId);
     });
 
     it('should delete user and clean up related collections', async () => {
@@ -267,14 +267,14 @@ describe('Company User Service Tests', () => {
       admin.auth().deleteUser = jest.fn().mockResolvedValue(undefined);
 
       try {
-        await companyUserService.delete(testUser.id, testStoreId);
+        await bakeryUserService.delete(testUser.id, testStoreId);
 
         // Verify deleteUser was called
         expect(admin.auth().deleteUser).toHaveBeenCalledWith(testUser.id);
 
         // Verify Firestore deletion (soft delete)
         const userDoc = await db
-          .collection('companies')
+          .collection('bakeries')
           .doc(testStoreId)
           .collection('users')
           .doc(testUser.id)
@@ -283,7 +283,7 @@ describe('Company User Service Tests', () => {
 
         // Verify staff collection cleanup
         const staffDoc = await db
-          .collection('companies')
+          .collection('bakeries')
           .doc(testStoreId)
           .collection('settings')
           .doc('default')
@@ -302,13 +302,13 @@ describe('Company User Service Tests', () => {
     let testUser;
 
     beforeEach(async () => {
-      testUser = await companyUserService.create(createTestUserData(), testStoreId);
+      testUser = await bakeryUserService.create(createTestUserData(), testStoreId);
     });
 
     it('should get user order history', async () => {
       // Create some test orders
       const orderHistoryRef = db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('users')
         .doc(testUser.id)
@@ -326,18 +326,18 @@ describe('Company User Service Tests', () => {
         isDeleted: true, // This one should be filtered out
       });
 
-      const history = await companyUserService.getHistory(testStoreId, testUser.id);
+      const history = await bakeryUserService.getHistory(testStoreId, testUser.id);
       expect(history).toHaveLength(1);
       expect(history[0].id).toBe('order1');
     });
 
     it('should throw error when getting history without required params', async () => {
       await expect(
-        companyUserService.getHistory(null, testUser.id),
+        bakeryUserService.getHistory(null, testUser.id),
       ).rejects.toThrow('Both bakeryId and userId are required');
 
       await expect(
-        companyUserService.getHistory(testStoreId, null),
+        bakeryUserService.getHistory(testStoreId, null),
       ).rejects.toThrow('Both bakeryId and userId are required');
     });
   });

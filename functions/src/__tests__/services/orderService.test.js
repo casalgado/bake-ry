@@ -4,7 +4,7 @@ const { Order } = require('../../models/Order');
 // Test Data Setup Helpers
 const setupTestData = async (db, bakeryId) => {
   // Create test user
-  const userRef = db.collection('companies').doc(bakeryId).collection('users').doc('test-user');
+  const userRef = db.collection('bakeries').doc(bakeryId).collection('users').doc('test-user');
   await userRef.set({
     id: 'test-user',
     name: 'Test Customer',
@@ -14,7 +14,7 @@ const setupTestData = async (db, bakeryId) => {
 
   // Create B2B client
   const b2bRef = db
-    .collection('companies')
+    .collection('bakeries')
     .doc(bakeryId)
     .collection('settings')
     .doc('default')
@@ -29,7 +29,7 @@ const setupTestData = async (db, bakeryId) => {
 
   // Create settings document
   const settingsRef = db
-    .collection('companies')
+    .collection('bakeries')
     .doc(bakeryId)
     .collection('settings')
     .doc('default');
@@ -119,7 +119,7 @@ describe('Order Service Tests', () => {
     testEditor = {
       uid: 'test-editor',
       email: 'editor@example.com',
-      role: 'company_staff',
+      role: 'bakery_staff',
     };
   });
 
@@ -127,7 +127,7 @@ describe('Order Service Tests', () => {
     console.log('=== BEFORE EACH START ===');
 
     // Force clean the orders collection specifically
-    const ordersRef = db.collection('companies').doc(testStoreId).collection('orders');
+    const ordersRef = db.collection('bakeries').doc(testStoreId).collection('orders');
     // Clean up previous test data
     await clearFirestoreData(db);
 
@@ -148,14 +148,14 @@ describe('Order Service Tests', () => {
   afterAll(async () => {
     await clearFirestoreData(db);
     const b2bRef = db
-      .collection('companies')
+      .collection('bakeries')
       .doc(testStoreId)
       .collection('settings')
       .doc('default')
       .collection('b2b_clients');
 
     const staffRef = db
-      .collection('companies')
+      .collection('bakeries')
       .doc(testStoreId)
       .collection('settings')
       .doc('default')
@@ -209,7 +209,7 @@ describe('Order Service Tests', () => {
 
       // Verify order exists in Firestore
       const doc = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('orders')
         .doc(result.id)
@@ -251,7 +251,7 @@ describe('Order Service Tests', () => {
 
       // Verify client address was updated
       const clientDoc = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('users')
         .doc('test-user')
@@ -281,7 +281,7 @@ describe('Order Service Tests', () => {
 
       // Verify history was created
       const historySnapshot = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('orders')
         .doc(testOrder.id)
@@ -300,7 +300,7 @@ describe('Order Service Tests', () => {
       await orderService.remove(testOrder.id, testStoreId, testEditor);
 
       const doc = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('orders')
         .doc(testOrder.id)
@@ -347,7 +347,7 @@ describe('Order Service Tests', () => {
     it('should generate correct sales metrics', async () => {
       console.log('=== TEST START: SALES METRICS ===');
 
-      const ordersRef = db.collection('companies').doc(testStoreId).collection('orders');
+      const ordersRef = db.collection('bakeries').doc(testStoreId).collection('orders');
       const ordersAtStart = await ordersRef.get();
       console.log('Orders at test start:', ordersAtStart.size);
 
@@ -426,7 +426,7 @@ describe('Order Service Tests', () => {
       );
 
       const clientHistoryDoc = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('users')
         .doc(testOrder.userId)

@@ -1,11 +1,11 @@
-// tests/controllers/companySettingsController.test.js
-const companySettingsController = require('../../controllers/bakerySettingsController');
-const companySettingsService = require('../../services/bakerySettingsService');
+// tests/controllers/bakerySettingsController.test.js
+const bakerySettingsController = require('../../controllers/bakerySettingsController');
+const bakerySettingsService = require('../../services/bakerySettingsService');
 const {  NotFoundError } = require('../../utils/errors');
 
-jest.mock('../../services/companySettingsService');
+jest.mock('../../services/bakerySettingsService');
 
-describe('Company Settings Controller', () => {
+describe('Bakery Settings Controller', () => {
   let res;
 
   beforeEach(() => {
@@ -32,11 +32,11 @@ describe('Company Settings Controller', () => {
         ingredientCategories: [],
       };
 
-      companySettingsService.getById.mockResolvedValue(mockSettings);
+      bakerySettingsService.getById.mockResolvedValue(mockSettings);
 
-      await companySettingsController.getById(req, res);
+      await bakerySettingsController.getById(req, res);
 
-      expect(companySettingsService.getById).toHaveBeenCalledWith(
+      expect(bakerySettingsService.getById).toHaveBeenCalledWith(
         'default',
         'bakery123',
       );
@@ -51,11 +51,11 @@ describe('Company Settings Controller', () => {
         },
       };
 
-      companySettingsService.getById.mockRejectedValue(
+      bakerySettingsService.getById.mockRejectedValue(
         new NotFoundError('Settings not found'),
       );
 
-      await companySettingsController.getById(req, res);
+      await bakerySettingsController.getById(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
@@ -83,11 +83,11 @@ describe('Company Settings Controller', () => {
         updatedAt: new Date(),
       };
 
-      companySettingsService.patch.mockResolvedValue(mockUpdated);
+      bakerySettingsService.patch.mockResolvedValue(mockUpdated);
 
-      await companySettingsController.patch(req, res);
+      await bakerySettingsController.patch(req, res);
 
-      expect(companySettingsService.patch).toHaveBeenCalledWith(
+      expect(bakerySettingsService.patch).toHaveBeenCalledWith(
         'default',
         req.body,
         'bakery123',
@@ -107,7 +107,7 @@ describe('Company Settings Controller', () => {
         },
       };
 
-      await companySettingsController.patch(req, res);
+      await bakerySettingsController.patch(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -128,20 +128,20 @@ describe('Company Settings Controller', () => {
         {
           id: 'staff1',
           name: 'Staff Member 1',
-          role: 'company_staff',
+          role: 'bakery_staff',
         },
         {
           id: 'admin1',
           name: 'Admin Member',
-          role: 'company_admin',
+          role: 'bakery_admin',
         },
       ];
 
-      companySettingsService.getStaffList.mockResolvedValue(mockStaff);
+      bakerySettingsService.getStaffList.mockResolvedValue(mockStaff);
 
-      await companySettingsController.getStaffList(req, res);
+      await bakerySettingsController.getStaffList(req, res);
 
-      expect(companySettingsService.getStaffList).toHaveBeenCalledWith('bakery123');
+      expect(bakerySettingsService.getStaffList).toHaveBeenCalledWith('bakery123');
       expect(res.json).toHaveBeenCalledWith(mockStaff);
     });
 
@@ -152,11 +152,11 @@ describe('Company Settings Controller', () => {
         },
       };
 
-      companySettingsService.getStaffList.mockRejectedValue(
+      bakerySettingsService.getStaffList.mockRejectedValue(
         new Error('Failed to fetch staff list'),
       );
 
-      await companySettingsController.getStaffList(req, res);
+      await bakerySettingsController.getStaffList(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith(
@@ -189,11 +189,11 @@ describe('Company Settings Controller', () => {
         },
       ];
 
-      companySettingsService.getB2bClientsList.mockResolvedValue(mockClients);
+      bakerySettingsService.getB2bClientsList.mockResolvedValue(mockClients);
 
-      await companySettingsController.getB2bClientsList(req, res);
+      await bakerySettingsController.getB2bClientsList(req, res);
 
-      expect(companySettingsService.getB2bClientsList).toHaveBeenCalledWith('bakery123');
+      expect(bakerySettingsService.getB2bClientsList).toHaveBeenCalledWith('bakery123');
       expect(res.json).toHaveBeenCalledWith(mockClients);
     });
 
@@ -204,11 +204,11 @@ describe('Company Settings Controller', () => {
         },
       };
 
-      companySettingsService.getB2bClientsList.mockRejectedValue(
+      bakerySettingsService.getB2bClientsList.mockRejectedValue(
         new Error('Failed to fetch B2B clients'),
       );
 
-      await companySettingsController.getB2bClientsList(req, res);
+      await bakerySettingsController.getB2bClientsList(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith(

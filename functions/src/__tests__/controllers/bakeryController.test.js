@@ -1,10 +1,10 @@
-// tests/controllers/companyController.test.js
-const companyController = require('../../controllers/bakeryController');
-const companyService = require('../../services/bakeryService');
+// tests/controllers/bakeryController.test.js
+const bakeryController = require('../../controllers/bakeryController');
+const bakeryService = require('../../services/bakeryService');
 
-jest.mock('../../services/companyService');
+jest.mock('../../services/bakeryService');
 
-describe('Company Controller', () => {
+describe('Bakery Controller', () => {
   let res;
 
   beforeEach(() => {
@@ -20,8 +20,8 @@ describe('Company Controller', () => {
       const req = {
         params: {},
         body: {
-          name: 'Test Company',
-          address: '123 Company St',
+          name: 'Test Bakery',
+          address: '123 Bakery St',
           operatingHours: {
             monday: { isOpen: true, open: '08:00', close: '17:00' },
           },
@@ -40,11 +40,11 @@ describe('Company Controller', () => {
         updatedAt: new Date(),
       };
 
-      companyService.create.mockResolvedValue(mockBakery);
+      bakeryService.create.mockResolvedValue(mockBakery);
 
-      await companyController.create(req, res);
+      await bakeryController.create(req, res);
 
-      expect(companyService.create).toHaveBeenCalledWith({
+      expect(bakeryService.create).toHaveBeenCalledWith({
         ...req.body,
         ownerId: req.user.uid,
         createdAt: expect.any(Date),
@@ -58,8 +58,8 @@ describe('Company Controller', () => {
       const req = {
         params: {},
         body: {
-          name: 'Test Company',
-          address: '123 Company St',
+          name: 'Test Bakery',
+          address: '123 Bakery St',
         },
         user: {
           uid: 'user123',
@@ -67,19 +67,19 @@ describe('Company Controller', () => {
         },
       };
 
-      await companyController.create(req, res);
+      await bakeryController.create(req, res);
 
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          error: 'User already has a company assigned and cannot create another one',
+          error: 'User already has a bakery assigned and cannot create another one',
         }),
       );
     });
   });
 
   describe('getAll', () => {
-    it('should get all companies with pagination', async () => {
+    it('should get all bakeries with pagination', async () => {
       const req = {
         query: {
           page: '1',
@@ -93,8 +93,8 @@ describe('Company Controller', () => {
 
       const mockResult = {
         items: [
-          { id: 'bakery1', name: 'Company 1' },
-          { id: 'bakery2', name: 'Company 2' },
+          { id: 'bakery1', name: 'Bakery 1' },
+          { id: 'bakery2', name: 'Bakery 2' },
         ],
         pagination: {
           page: 1,
@@ -103,11 +103,11 @@ describe('Company Controller', () => {
         },
       };
 
-      companyService.getAll.mockResolvedValue(mockResult);
+      bakeryService.getAll.mockResolvedValue(mockResult);
 
-      await companyController.getAll(req, res);
+      await bakeryController.getAll(req, res);
 
-      expect(companyService.getAll).toHaveBeenCalledWith(
+      expect(bakeryService.getAll).toHaveBeenCalledWith(
         undefined,
         expect.objectContaining({
           pagination: { page: 1, perPage: 10, offset: 0 },
@@ -131,15 +131,15 @@ describe('Company Controller', () => {
 
       const mockBakery = {
         id: 'bakery123',
-        name: 'Test Company',
-        address: '123 Company St',
+        name: 'Test Bakery',
+        address: '123 Bakery St',
       };
 
-      companyService.getById.mockResolvedValue(mockBakery);
+      bakeryService.getById.mockResolvedValue(mockBakery);
 
-      await companyController.getById(req, res);
+      await bakeryController.getById(req, res);
 
-      expect(companyService.getById).toHaveBeenCalledWith('bakery123', 'bakery123');
+      expect(bakeryService.getById).toHaveBeenCalledWith('bakery123', 'bakery123');
       expect(res.json).toHaveBeenCalledWith(mockBakery);
     });
   });
@@ -152,13 +152,13 @@ describe('Company Controller', () => {
           bakeryId: 'bakery123',
         },
         body: {
-          name: 'Updated Company Name',
+          name: 'Updated Bakery Name',
           operatingHours: {
             monday: { isOpen: true, open: '09:00', close: '18:00' },
           },
         },
         user: {
-          role: 'company_admin',
+          role: 'bakery_admin',
           uid: 'user123',
         },
       };
@@ -169,11 +169,11 @@ describe('Company Controller', () => {
         updatedAt: new Date(),
       };
 
-      companyService.patch.mockResolvedValue(mockUpdated);
+      bakeryService.patch.mockResolvedValue(mockUpdated);
 
-      await companyController.patch(req, res);
+      await bakeryController.patch(req, res);
 
-      expect(companyService.patch).toHaveBeenCalledWith(
+      expect(bakeryService.patch).toHaveBeenCalledWith(
         'bakery123',
         req.body,
         'bakery123',
@@ -196,11 +196,11 @@ describe('Company Controller', () => {
         },
       };
 
-      companyService.remove.mockResolvedValue(null);
+      bakeryService.remove.mockResolvedValue(null);
 
-      await companyController.remove(req, res);
+      await bakeryController.remove(req, res);
 
-      expect(companyService.remove).toHaveBeenCalledWith(
+      expect(bakeryService.remove).toHaveBeenCalledWith(
         'bakery123',
         'bakery123',
         req.user,

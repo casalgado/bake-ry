@@ -123,6 +123,7 @@ class Order extends BaseModel {
     deliveryNotes = '',
     internalNotes = '',
     isDeleted = false,
+    lastEditedBy = null,
   } = {}) {
     super({ id, createdAt, updatedAt, preparationDate, dueDate });
 
@@ -166,6 +167,11 @@ class Order extends BaseModel {
     this.deliveryNotes = deliveryNotes;
     this.internalNotes = internalNotes;
     this.isDeleted = isDeleted;
+    this.lastEditedBy = lastEditedBy ? {
+      userId: lastEditedBy.userId || null,
+      email: lastEditedBy.email || null,
+      role: lastEditedBy.role || null,
+    } : null;
   }
 
   calculatePricing() {
@@ -239,6 +245,7 @@ class Order extends BaseModel {
     if (this.orderItems.length > 0) {
       data.orderItems = this.orderItems.map(item => item.toPlainObject());
     }
+    data.lastEditedBy = this.lastEditedBy || null;
     return data;
   }
 

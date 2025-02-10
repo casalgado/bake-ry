@@ -50,7 +50,7 @@ describe('Auth Service Tests', () => {
         email: 'admin@test.com',
         password: 'password123',
         name: 'Test Admin',
-        role: 'company_admin',
+        role: 'bakery_admin',
       };
 
       const result = await authService.register(userData);
@@ -76,7 +76,7 @@ describe('Auth Service Tests', () => {
         email: 'duplicate@test.com',
         password: 'password123',
         name: 'Test User',
-        role: 'company_admin',
+        role: 'bakery_admin',
       };
 
       await authService.register(userData);
@@ -92,7 +92,7 @@ describe('Auth Service Tests', () => {
         email: 'login@test.com',
         password: 'password123',
         name: 'Test Login',
-        role: 'company_admin',
+        role: 'bakery_admin',
       };
 
       const registered = await authService.register(userData);
@@ -104,7 +104,7 @@ describe('Auth Service Tests', () => {
       const mockIdToken = {
         uid: registered.uid,
         email: userData.email,
-        aud: 'tres-fuegos-en-casa',
+        aud: 'bake-ry',
         bakeryId: testStoreId,
         role: userData.role,
         auth_time: Math.floor(Date.now() / 1000),
@@ -145,7 +145,7 @@ describe('Auth Service Tests', () => {
         email: 'verify@test.com',
         password: 'password123',
         name: 'Test Verify',
-        role: 'company_admin',
+        role: 'bakery_admin',
       };
 
       const registered = await authService.register(userData);
@@ -156,7 +156,7 @@ describe('Auth Service Tests', () => {
         email: userData.email,
         role: userData.role,
         bakeryId: testStoreId,
-        aud: 'tres-fuegos-en-casa',
+        aud: 'bake-ry',
         auth_time: Math.floor(Date.now() / 1000),
         iat: Math.floor(Date.now() / 1000),
         exp: Math.floor(Date.now() / 1000) + 3600,

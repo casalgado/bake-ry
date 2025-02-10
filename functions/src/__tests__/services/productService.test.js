@@ -35,7 +35,7 @@ describe('Product Service Tests', () => {
     testEditor = {
       uid: 'test-editor',
       email: 'editor@example.com',
-      role: 'company_staff',
+      role: 'bakery_staff',
     };
   });
 
@@ -59,7 +59,7 @@ describe('Product Service Tests', () => {
 
       // Verify product exists in Firestore
       const doc = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('products')
         .doc(result.id)
@@ -80,7 +80,7 @@ describe('Product Service Tests', () => {
 
       // Check the document exists with the custom ID
       const doc = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('products')
         .doc(customId)
@@ -116,7 +116,7 @@ describe('Product Service Tests', () => {
 
       // Verify in Firestore
       const doc = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('products')
         .doc(product.id)
@@ -166,7 +166,7 @@ describe('Product Service Tests', () => {
 
       // Verify variations in Firestore
       const doc = await db
-        .collection('companies')
+        .collection('bakeries')
         .doc(testStoreId)
         .collection('products')
         .doc(result.id)

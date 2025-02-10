@@ -28,7 +28,7 @@ describe('Order Controller', () => {
             { id: 'order2', data: { status: 2 } },
           ],
         },
-        user: { uid: 'user123', role: 'company_staff' },
+        user: { uid: 'user123', role: 'bakery_staff' },
       };
 
       const mockResult = {
@@ -60,7 +60,7 @@ describe('Order Controller', () => {
             { id: 'nonexistent', data: { status: 2 } },
           ],
         },
-        user: { uid: 'user123', role: 'company_staff' },
+        user: { uid: 'user123', role: 'bakery_staff' },
       };
 
       const mockResult = {
