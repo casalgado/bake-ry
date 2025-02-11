@@ -33,8 +33,8 @@ module.exports = {
 
 const admin = require('firebase-admin');
 
-const BAKERY_ID = 'es-alimento';
-const ADMIN_USER_ID = 'es-alimento-admin';
+const BAKERY_ID = 'pastellus';
+const ADMIN_USER_ID = 'pastellus-admin';
 
 const serviceAccount = require('./../config/serviceAccountKey.json');
 

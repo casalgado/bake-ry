@@ -107,6 +107,7 @@ class Order extends BaseModel {
     paymentDate = null,
     isDeliveryPaid = false,
     paymentMethod = 'transfer',
+    partialPayement = 0,
 
     // Fulfillment
     fulfillmentType = 'pickup',
@@ -146,6 +147,7 @@ class Order extends BaseModel {
     this.paymentDate = paymentDate;
     this.isDeliveryPaid = isDeliveryPaid;
     this.paymentMethod = paymentMethod;
+    this.partialPayement = partialPayement;
 
     // Fulfillment
     this.fulfillmentType = fulfillmentType;
