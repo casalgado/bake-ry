@@ -91,7 +91,7 @@ class Order extends BaseModel {
     userName,
     userEmail,
     userPhone,
-    userNationalId,
+    userNationalId = '',
     orderItems = [],
 
     // Dates
@@ -110,7 +110,7 @@ class Order extends BaseModel {
 
     // Fulfillment
     fulfillmentType = 'pickup',
-    deliveryAddress = null,
+    deliveryAddress = '',
     deliveryInstructions = '',
     deliveryDriverId = '-',
     driverMarkedAsPaid = false,
