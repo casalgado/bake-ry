@@ -195,6 +195,119 @@ describe('Bakery User Service Tests', () => {
     });
   });
 
+  // __tests__/services/bakeryUserService.test.js
+
+  describe('handleRelatedCollections', () => {
+    const mockUser = {
+      id: 'user123',
+      name: 'Test User',
+      email: 'test@example.com',
+      role: 'bakery_customer',
+    };
+
+    const mockTransaction = {
+      get: jest.fn(),
+      set: jest.fn(),
+      delete: jest.fn(),
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should delete B2B document when user category changes from B2B to something else', async () => {
+    // Mock that B2B document exists
+      mockTransaction.get.mockResolvedValueOnce({
+        exists: true,
+        data: () => ({
+          name: 'Test User',
+          id: 'user123',
+        }),
+      });
+
+      const userData = {
+        ...mockUser,
+        category: 'regular', // Changed from B2B to regular
+      };
+
+      await handleRelatedCollections(
+        mockTransaction,
+        'bakery123',
+        'user123',
+        userData,
+        false,
+      );
+
+      // Verify B2B document was checked
+      expect(mockTransaction.get).toHaveBeenCalled();
+
+      // Verify B2B document was deleted
+      expect(mockTransaction.delete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'user123',
+          parent: expect.objectContaining({
+            id: 'b2b_clients',
+          }),
+        }),
+      );
+    });
+
+    it('should not delete B2B document when it does not exist', async () => {
+    // Mock that B2B document doesn't exist
+      mockTransaction.get.mockResolvedValueOnce({
+        exists: false,
+      });
+
+      const userData = {
+        ...mockUser,
+        category: 'regular',
+      };
+
+      await handleRelatedCollections(
+        mockTransaction,
+        'bakery123',
+        'user123',
+        userData,
+        false,
+      );
+
+      // Verify B2B document was checked
+      expect(mockTransaction.get).toHaveBeenCalled();
+
+      // Verify delete was not called
+      expect(mockTransaction.delete).not.toHaveBeenCalled();
+    });
+
+    it('should create B2B document when user category changes to B2B', async () => {
+      const userData = {
+        ...mockUser,
+        category: 'B2B',
+        phone: '1234567890',
+        address: 'Test Address',
+      };
+
+      await handleRelatedCollections(
+        mockTransaction,
+        'bakery123',
+        'user123',
+        userData,
+        false,
+      );
+
+      // Verify B2B document was created/updated
+      expect(mockTransaction.set).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({
+          name: 'Test User',
+          id: 'user123',
+          email: 'test@example.com',
+          phone: '1234567890',
+          address: 'Test Address',
+        }),
+      );
+    });
+  });
+
   describe('User Updates', () => {
     let testUser;
 

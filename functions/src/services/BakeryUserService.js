@@ -23,6 +23,18 @@ const generateInitialPassword = (name) => {
   return password;
 };
 
+const userExists = async (uid) => {
+  try {
+    await admin.auth().getUser(uid);
+    return true;
+  } catch (error) {
+    if (error.code === 'auth/user-not-found') {
+      return false;
+    }
+    throw error;
+  }
+};
+
 const handleRelatedCollections = async (transaction, bakeryId, userId, userData, isDelete = false) => {
   const settingsRef = db
     .collection('bakeries')
@@ -58,9 +70,10 @@ const handleRelatedCollections = async (transaction, bakeryId, userId, userData,
     }
   }
 
-  // Handle B2B collection
+  const b2bRef = settingsRef.collection('b2b_clients').doc(userId);
+  const b2bDoc = await transaction.get(b2bRef);
+
   if (userData.category === 'B2B') {
-    const b2bRef = settingsRef.collection('b2b_clients').doc(userId);
     if (isDelete) {
       transaction.delete(b2bRef);
     } else {
@@ -82,6 +95,9 @@ const handleRelatedCollections = async (transaction, bakeryId, userId, userData,
 
       transaction.set(b2bRef, b2bData);
     }
+  } else if (b2bDoc.exists) {
+    // Delete from B2B collection if user is no longer B2B
+    transaction.delete(b2bRef);
   }
 };
 
@@ -190,6 +206,19 @@ const createBakeryUserService = () => {
 
         // Handle role-specific updates if role is changing
         if (data.role && data.role !== currentUser.role) {
+
+          const hasAuthAccount = await userExists(id);
+
+          if (!hasAuthAccount) {
+            const password = generateInitialPassword(currentUser.name);
+            // Create Firebase Auth user
+            await admin.auth().createUser({
+              uid: id,
+              email: currentUser.email,
+              password: password,
+            });
+          }
+
           // Update Firebase Auth claims
           await admin.auth().setCustomUserClaims(id, {
             role: data.role,
