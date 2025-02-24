@@ -70,10 +70,9 @@ const handleRelatedCollections = async (transaction, bakeryId, userId, userData,
     }
   }
 
-  const b2bRef = settingsRef.collection('b2b_clients').doc(userId);
-  const b2bDoc = await transaction.get(b2bRef);
-
+  // Handle B2B collection
   if (userData.category === 'B2B') {
+    const b2bRef = settingsRef.collection('b2b_clients').doc(userId);
     if (isDelete) {
       transaction.delete(b2bRef);
     } else {
@@ -95,9 +94,6 @@ const handleRelatedCollections = async (transaction, bakeryId, userId, userData,
 
       transaction.set(b2bRef, b2bData);
     }
-  } else if (b2bDoc.exists) {
-    // Delete from B2B collection if user is no longer B2B
-    transaction.delete(b2bRef);
   }
 };
 

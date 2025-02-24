@@ -258,6 +258,12 @@ class Order extends BaseModel {
     return new Order({
       ...data,
       id: doc.id,
+      total: Number(data.total),
+      subtotal: Number(data.subtotal),
+      preTaxTotal: Number(data.preTaxTotal),
+      totalTaxAmount: Number(data.totalTaxAmount),
+      taxableSubtotal: Number(data.taxableSubtotal),
+      nonTaxableSubtotal: Number(data.nonTaxableSubtotal),
       orderItems: data.orderItems?.map(item => new OrderItem(item)),
     });
   }

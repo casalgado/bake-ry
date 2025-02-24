@@ -60,7 +60,7 @@ describe('BaseModel', () => {
       expect(firestoreData.name).toBe('test');
     });
 
-    it('should remove undefined, null, and empty string values', () => {
+    it('should remove undefined, null, values', () => {
       const model = new BaseModel({
         id: '123',
         name: 'test',
@@ -73,6 +73,7 @@ describe('BaseModel', () => {
 
       expect(firestoreData).toEqual({
         name: 'test',
+        empty: '',
         createdAt: expect.any(Date),
       });
     });
