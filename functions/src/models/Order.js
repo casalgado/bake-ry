@@ -156,9 +156,9 @@ class Order extends BaseModel {
     this.deliveryDriverId = deliveryDriverId;
     this.driverMarkedAsPaid = driverMarkedAsPaid;
     this.deliverySequence = deliverySequence;
-    this.deliveryFee = deliveryFee;
-    this.deliveryCost = deliveryCost;
-    this.numberOfBags = numberOfBags;
+    this.deliveryFee = deliveryFee == '' ? 0 : deliveryFee;
+    this.deliveryCost = deliveryCost == '' ? 0 : deliveryCost;
+    this.numberOfBags = numberOfBags == '' ? 0 : numberOfBags;
 
     // Set isComplimentary based on paymentMethod
     this.isComplimentary = paymentMethod === 'complimentary';
@@ -258,12 +258,6 @@ class Order extends BaseModel {
     return new Order({
       ...data,
       id: doc.id,
-      total: Number(data.total),
-      subtotal: Number(data.subtotal),
-      preTaxTotal: Number(data.preTaxTotal),
-      totalTaxAmount: Number(data.totalTaxAmount),
-      taxableSubtotal: Number(data.taxableSubtotal),
-      nonTaxableSubtotal: Number(data.nonTaxableSubtotal),
       orderItems: data.orderItems?.map(item => new OrderItem(item)),
     });
   }
