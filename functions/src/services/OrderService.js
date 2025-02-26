@@ -349,6 +349,15 @@ const createOrderService = () => {
     try {
       // Get orders using the existing getAll method
       const orders = await baseService.getAll(bakeryId, query);
+      const products_query = await db.collection('bakeries').doc(bakeryId).collection('products').get();
+      const products = [];
+      products_query.forEach(doc => {
+        products.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+
       const b2b_clients_query = await db.collection('bakeries').doc(bakeryId).collection('settings').doc('default').collection('b2b_clients').get();
       const b2b_clients = [];
       b2b_clients_query.forEach(doc => {
@@ -358,8 +367,10 @@ const createOrderService = () => {
         });
       });
 
+      console.log(products);
+
       // Create a new sales report instance and generate the report
-      const salesReport = new SalesReport(orders.items, b2b_clients);
+      const salesReport = new SalesReport(orders.items, b2b_clients, products);
       return salesReport.generateReport();
     } catch (error) {
       console.error('Error generating sales report:', error);

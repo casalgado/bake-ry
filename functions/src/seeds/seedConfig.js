@@ -1,4 +1,4 @@
-
+/*
 const admin = require('firebase-admin');
 
 const BAKERY_ID = 'es-alimento';
@@ -28,7 +28,7 @@ module.exports = {
   auth,
   timestamp,
 };
-/*
+*/
 // PRODUCTION CONFIG
 
 const admin = require('firebase-admin');
@@ -57,5 +57,3 @@ module.exports = {
   auth,
   timestamp,
 };
-
-*/

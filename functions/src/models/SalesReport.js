@@ -3,10 +3,11 @@
 const { Order } = require('./Order');
 
 class SalesReport {
-  constructor(orders, b2b_clients) {
+  constructor(orders, b2b_clients, all_products) {
     this.orders = orders.map(order => new Order(order)).filter(order => !order.isComplimentary);
     this.complimentaryOrders = orders.map(order => new Order(order)).filter(order => order.isComplimentary);
     this.b2b_clientIds = new Set(b2b_clients.map(client => client.id));
+    this.all_products = all_products;
 
     // Pre-calculate common metrics
     this.totalRevenue = this.orders.reduce((sum, order) => sum + order.total, 0);
@@ -322,6 +323,15 @@ class SalesReport {
   }
   aggregateProductData() {
     const products = {};
+    this.all_products.forEach(product => {
+      products[product.id] = {
+        productId: product.id,
+        name: product.name,
+        collection: product.collectionName,
+        quantity: 0,
+        revenue: 0,
+      };
+    });
     let totalQuantity = 0;
 
     this.orders.forEach(order => {
@@ -364,13 +374,13 @@ class SalesReport {
   calculateLowestSellersByQuantity() {
     return [...this.aggregatedProducts]
       .sort((a, b) => a.quantity - b.quantity)
-      .slice(0, 5);
+      .slice(0, 10);
   }
 
   calculateLowestSellersBySales() {
     return [...this.aggregatedProducts]
       .sort((a, b) => a.revenue - b.revenue)
-      .slice(0, 5);
+      .slice(0, 10);
   }
 
   calculateAverageItemsPerOrder() {

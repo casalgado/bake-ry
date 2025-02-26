@@ -1,0 +1,96 @@
+{
+  "bakeries": {
+    "es-alimento": {
+      "name": "Esteban Salgado",
+      "ownerId": "es-alimento-admin",
+      "operatingHours": {
+        "monday": {
+          "isOpen": true,
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "tuesday": {
+          "isOpen": true,
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "wednesday": {
+          "isOpen": true,
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "thursday": {
+          "isOpen": true,
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "friday": {
+          "isOpen": true,
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "saturday": {
+          "isOpen": true,
+          "open": "10:00",
+          "close": "13:00"
+        },
+        "sunday": {
+          "isOpen": false,
+          "open": "",
+          "close": ""
+        }
+      },
+      "socialMedia": {
+        "facebook": "",
+        "instagram": "https://instagram.com/es_alimento",
+        "tiktok": "",
+        "youtube": "",
+        "twitter": "",
+        "pinterest": ""
+      },
+      "createdAt": {
+        "_seconds": 1740574074,
+        "_nanoseconds": 762000000
+      },
+      "updatedAt": {
+        "_seconds": 1740574074,
+        "_nanoseconds": 762000000
+      },
+      "isActive": true
+    }
+  },
+  "users": {
+    "es-alimento-admin": {
+      "email": "es.alimento@gmail.com",
+      "name": "Esteban Salgado",
+      "firstName": "Esteban",
+      "lastName": "Salgado",
+      "role": "bakery_admin",
+      "bakeryId": "es-alimento",
+      "createdAt": {
+        "_seconds": 1740574076,
+        "_nanoseconds": 118000000
+      },
+      "updatedAt": {
+        "_seconds": 1740574076,
+        "_nanoseconds": 118000000
+      }
+    },
+    "system-admin": {
+      "email": "dev@carsalhaz.com",
+      "name": "Carlos Alberto",
+      "firstName": "Carlos",
+      "lastName": "Alberto",
+      "role": "system_admin",
+      "bakeryId": "es-alimento",
+      "createdAt": {
+        "_seconds": 1740574077,
+        "_nanoseconds": 67000000
+      },
+      "updatedAt": {
+        "_seconds": 1740574077,
+        "_nanoseconds": 67000000
+      }
+    }
+  }
+}

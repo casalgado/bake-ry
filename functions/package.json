@@ -18,7 +18,8 @@
     "seed:recipes": "node src/seeds/runners/seedRecipes.js",
     "seed:products": "node src/seeds/runners/seedProducts.js",
     "seed:users": "node src/seeds/runners/seedUsers.js",
-    "seed:orders": "node src/seeds/runners/seedOrders.js"
+    "seed:orders": "node src/seeds/runners/seedOrders.js",
+    "save:backup": "node src/seeds/saveBackup.js"
   },
   "engines": {
     "node": "20"
