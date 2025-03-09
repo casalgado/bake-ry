@@ -72,6 +72,7 @@ class OrderItem {
       collectionId: this.collectionId,
       collectionName: this.collectionName,
       isComplimentary: this.isComplimentary,
+      taxPercentage: this.taxPercentage,
       quantity: this.quantity,
       currentPrice: this.currentPrice,
       variation: this.variation,
