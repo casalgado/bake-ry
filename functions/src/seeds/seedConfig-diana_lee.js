@@ -1,8 +1,8 @@
-
+/*
 const admin = require('firebase-admin');
 
-const BAKERY_ID = 'pastellus-dev';
-const ADMIN_USER_ID = 'pastellus-dev-admin';
+const BAKERY_ID = 'diana_lee-dev';
+const ADMIN_USER_ID = 'diana_lee-dev-admin';
 
 admin.initializeApp({
   projectId: 'bake-ry',
@@ -28,13 +28,13 @@ module.exports = {
   auth,
   timestamp,
 };
-/*
+/*/
 // PRODUCTION CONFIG
 
 const admin = require('firebase-admin');
 
-const BAKERY_ID = 'pastellus-dev';
-const ADMIN_USER_ID = 'pastellus-dev-admin';
+const BAKERY_ID = 'diana_lee-demo';
+const ADMIN_USER_ID = 'diana_lee-admin-demo';
 
 const serviceAccount = require('./../config/serviceAccountKey.json');
 
@@ -57,5 +57,3 @@ module.exports = {
   auth,
   timestamp,
 };
-
-*/

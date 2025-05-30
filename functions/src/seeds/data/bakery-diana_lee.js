@@ -1,0 +1,56 @@
+// This file is used to seed the database with a bakery user and bakery data.
+const bakery = {
+  email: 'diana@lee.com',
+  password: 'dianalee101',
+  name: 'Fiammeta Romano',
+  firstName: 'Fiammeta',
+  lastName: 'Romano',
+  role: 'bakery_admin',
+  openingHours: {
+    monday: {
+      isOpen: true,
+      open: '09:00',
+      close: '17:00',
+    },
+    tuesday: {
+      isOpen: true,
+      open: '09:00',
+      close: '17:00',
+    },
+    wednesday: {
+      isOpen: true,
+      open: '09:00',
+      close: '17:00',
+    },
+    thursday: {
+      isOpen: true,
+      open: '09:00',
+      close: '17:00',
+    },
+    friday: {
+      isOpen: true,
+      open: '09:00',
+      close: '17:00',
+    },
+    saturday: {
+      isOpen: true,
+      open: '10:00',
+      close: '13:00',
+    },
+    sunday: {
+      isOpen: false,
+      open: '',
+      close: '',
+    },
+  },
+  socialMedia: {
+    facebook: '',
+    instagram: 'https://instagram.com/dianaleebakehouse',
+    tiktok: '',
+    youtube: '',
+    twitter: '',
+    pinterest: '',
+  },
+};
+
+module.exports = bakery;

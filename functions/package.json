@@ -13,6 +13,7 @@
     "test:watch": "jest --watch",
     "seed:setup": "node src/seeds/runners/seedSetup.js",
     "seed:setup-pastellus": "node src/seeds/runners/seedSetup-pastellus.js",
+    "seed:setup-diana_lee": "node src/seeds/runners/seedSetup-diana_lee.js",
     "seed:bakery": "node src/seeds/runners/seedBakery.js",
     "seed:ingredients": "node src/seeds/runners/seedIngredients.js",
     "seed:recipes": "node src/seeds/runners/seedRecipes.js",
