@@ -25,10 +25,10 @@ const settings = {
       label: 'Quantity',
       prefix: 'x',
       defaults: [
-        { name: 'x4', value: 4, basePrice: 70000, recipeId: '' },   // 17,500 each
-        { name: 'x6', value: 6, basePrice: 99000, recipeId: '' },   // 16,500 each
-        { name: 'x8', value: 8, basePrice: 136000, recipeId: '' },  // 17,000 each (base reference)
-        { name: 'x12', value: 12, basePrice: 192000, recipeId: '' }, // 16,000 each
+        { name: 'x4', value: 4, basePrice: 70000, recipeId: '' },
+        { name: 'x6', value: 6, basePrice: 99000, recipeId: '' },
+        { name: 'x8', value: 8, basePrice: 136000, recipeId: '' },
+        { name: 'x12', value: 12, basePrice: 192000, recipeId: '' },
 
       ],
     },
@@ -37,6 +37,7 @@ const settings = {
     'order': {
       timeOfDay: true,
       allowPartialPayment: false,
+      defaultDate: 'delivery',
     },
   },
 };

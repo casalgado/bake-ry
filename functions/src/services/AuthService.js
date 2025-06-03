@@ -41,6 +41,7 @@ const createAuthService = () => {
       let userSnapshot;
       if (decodedToken.role === 'bakery_admin' || decodedToken.role === 'system_admin') {
         console.log('decodedToken.role1', decodedToken.role);
+        console.log('decodedToken.email', decodedToken.email);
         userSnapshot = await baseService.getRootRef()
           .where('email', '==', decodedToken.email)
           .limit(1)

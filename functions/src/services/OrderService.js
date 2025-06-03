@@ -149,6 +149,13 @@ const createOrderService = () => {
           },
         });
 
+        if (!currentOrder.isPaid && updatedOrder.isPaid) {
+          updatedOrder.paymentDate = new Date();
+        } else if (currentOrder.isPaid && !updatedOrder.isPaid) {
+          updatedOrder.paymentDate = null;}
+
+        console.log('Patching order:', updatedOrder);
+
         if (data.shouldUpdateClientAddress) {
           const clientRef = db
             .collection('bakeries')
@@ -231,6 +238,13 @@ const createOrderService = () => {
                   role: editor?.role,
                 },
               });
+
+              if (!currentOrder.isPaid && updatedOrder.isPaid) {
+                updatedOrder.paymentDate = new Date();
+              } else if (currentOrder.isPaid && !updatedOrder.isPaid) {
+                updatedOrder.paymentDate = null;}
+
+              console.log('Patching order:', updatedOrder);
 
               // Compute what changed
               let changes = baseService.diffObjects(currentOrder, updatedOrder);

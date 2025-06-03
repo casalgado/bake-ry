@@ -101,11 +101,12 @@ class Order extends BaseModel {
     dueTime,
     createdAt,
     updatedAt,
+    paymentDate = null,
 
     // Status and Payment
     status = 0,
     isPaid = false,
-    paymentDate = null,
+
     isDeliveryPaid = false,
     paymentMethod = 'transfer',
     partialPayement = 0,
@@ -128,7 +129,7 @@ class Order extends BaseModel {
     isDeleted = false,
     lastEditedBy = null,
   } = {}) {
-    super({ id, createdAt, updatedAt, preparationDate, dueDate });
+    super({ id, createdAt, updatedAt, preparationDate, dueDate, paymentDate });
 
     // Basic Information
     this.bakeryId = bakeryId;
@@ -145,7 +146,6 @@ class Order extends BaseModel {
     // Status and Payment
     this.status = status;
     this.isPaid = isPaid;
-    this.paymentDate = paymentDate;
     this.isDeliveryPaid = isDeliveryPaid;
     this.paymentMethod = paymentMethod;
     this.partialPayement = partialPayement;
@@ -256,9 +256,11 @@ class Order extends BaseModel {
 
   static fromFirestore(doc) {
     const data = super.fromFirestore(doc);
+
     return new Order({
       ...data,
       id: doc.id,
+      paymentDate: data.isPaid ? data.paymentDate : null,
       orderItems: data.orderItems?.map(item => new OrderItem(item)),
     });
   }
