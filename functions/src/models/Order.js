@@ -102,6 +102,7 @@ class Order extends BaseModel {
     createdAt,
     updatedAt,
     paymentDate = null,
+    partialPaymentDate = null,
 
     // Status and Payment
     status = 0,
@@ -109,7 +110,7 @@ class Order extends BaseModel {
 
     isDeliveryPaid = false,
     paymentMethod = 'transfer',
-    partialPayement = 0,
+    partialPaymentAmount = 0,
 
     // Fulfillment
     fulfillmentType = 'pickup',
@@ -129,7 +130,7 @@ class Order extends BaseModel {
     isDeleted = false,
     lastEditedBy = null,
   } = {}) {
-    super({ id, createdAt, updatedAt, preparationDate, dueDate, paymentDate });
+    super({ id, createdAt, updatedAt, preparationDate, dueDate, paymentDate, partialPaymentDate });
 
     // Basic Information
     this.bakeryId = bakeryId;
@@ -148,7 +149,7 @@ class Order extends BaseModel {
     this.isPaid = isPaid;
     this.isDeliveryPaid = isDeliveryPaid;
     this.paymentMethod = paymentMethod;
-    this.partialPayement = partialPayement;
+    this.partialPaymentAmount = partialPaymentAmount;
 
     // Fulfillment
     this.fulfillmentType = fulfillmentType;
@@ -221,6 +222,7 @@ class Order extends BaseModel {
       ...super.dateFields,
       'preparationDate',
       'paymentDate',
+      'partialPaymentDate',
       'dueDate',
     ];
   }
