@@ -4,6 +4,7 @@ const functions = require('firebase-functions');
 const cors = require('cors');
 
 const authRoutes = require('./routes/authRoutes');
+const whatsappRoutes = require('./routes/whatsappRoutes');
 const bakeryRoutes = require('./routes/bakeryRoutes');
 const productRoutes = require('./routes/productRoutes');
 const ingredientRoutes = require('./routes/ingredientRoutes');
@@ -35,6 +36,7 @@ app.use(requestLogger);
 
 // Public routes
 app.use('/auth', authRoutes);
+app.use('/whatsapp', whatsappRoutes);
 
 // Protected routes
 app.use('/bakeries', bakeryRoutes);
