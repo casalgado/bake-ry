@@ -1,3 +1,4 @@
+// Updated WhatsappMessage class
 const BaseModel = require('./base/BaseModel');
 
 class WhatsappMessage extends BaseModel {
@@ -19,8 +20,8 @@ class WhatsappMessage extends BaseModel {
     this.contactName = contact?.profile?.name;
     this.contactWaId = contact?.wa_id;
 
-    // Message info
     this.messageId = message?.id;
+    this.id = message?.id;
     this.from = message?.from;
     this.timestamp = message?.timestamp;
     this.messageType = message?.type;

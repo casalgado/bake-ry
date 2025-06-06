@@ -4,15 +4,16 @@ const { WhatsappMessage } = require('../models/WhatsappMessage');
 const createBaseService = require('./base/serviceFactory');
 
 const createWhatsAppService = () => {
-  const baseService = createBaseService('whatsapp_messages', WhatsappMessage);
+  const baseService = createBaseService('whatsapp_messages', WhatsappMessage, 'bakeries/{bakeryId}');
 
   const processWebhook = async (webhookData) => {
     try {
       return await db.runTransaction(async (transaction) => {
         const message = new WhatsappMessage(webhookData);
+        const bakeryId = 'es-alimento-dev';
 
         // Check if message already exists to avoid duplicates
-        const existingMessageQuery = baseService.getCollectionRef()
+        const existingMessageQuery = baseService.getCollectionRef(bakeryId)
           .where('messageId', '==', message.messageId);
 
         const existingMessages = await transaction.get(existingMessageQuery);
@@ -23,7 +24,7 @@ const createWhatsAppService = () => {
         }
 
         // Create new message record
-        const messageRef = baseService.getCollectionRef().doc();
+        const messageRef = baseService.getCollectionRef(bakeryId).doc();
         message.id = messageRef.id;
 
         transaction.set(messageRef, message.toFirestore());

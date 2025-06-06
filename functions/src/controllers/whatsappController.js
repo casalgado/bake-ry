@@ -1,8 +1,9 @@
 // controllers/whatsappController.js
 const createBaseController = require('./base/controllerFactory');
 const whatsappService = require('../services/whatsappService');
+// const { BadRequestError, UnauthorizedError } = require('../utils/errors');
 
-const VERIFY_TOKEN = 'my_custom_token';
+// const VERIFY_TOKEN = 'my_custom_token';
 
 const baseController = createBaseController(whatsappService);
 
@@ -10,21 +11,28 @@ const whatsappController = {
   ...baseController,
 
   async wphook(req, res) {
-    const mode = req.query['hub.mode'];
-    const token = req.query['hub.verify_token'];
-    const challenge = req.query['hub.challenge'];
-    console.log('Webhook request received:', { mode, token, challenge });
-    console.log('Req:', req.body);
+    try {
+      const mode = req.query['hub.mode'];
+      const token = req.query['hub.verify_token'];
+      const challenge = req.query['hub.challenge'];
 
-    if (mode && token) {
-      if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-        console.log('Webhook verified');
-        res.status(200).send(challenge);
-      } else {
-        res.sendStatus(403);
-      }
-    } else {
-      res.sendStatus(400);
+      console.log('Webhook request received:', { mode, token, challenge });
+      console.log('Req:', req.body);
+
+      const message = await whatsappService.processWebhook(req.body);
+
+      // if (!mode || !token) {
+      //   throw new BadRequestError('Missing mode or token in query');
+      // }
+
+      // if (mode !== 'subscribe' || token !== VERIFY_TOKEN) {
+      //   throw new UnauthorizedError('Token verification failed');
+      // }
+
+      console.log('Webhook verified');
+      baseController.handleResponse(res, message);
+    } catch (error) {
+      baseController.handleError(res, error);
     }
   },
 };
