@@ -6,15 +6,11 @@
   "eslint.format.enable": true,
   "editor.defaultFormatter": null,
   "[javascript]": {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[vue]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "vue"
-  ],
+  "eslint.validate": ["javascript", "javascriptreact", "vue"],
   "javascript.format.enable": false
 }
