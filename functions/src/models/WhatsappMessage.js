@@ -20,7 +20,7 @@ class WhatsappMessage extends BaseModel {
     this.contactName = contact?.profile?.name;
     this.contactWaId = contact?.wa_id;
 
-    this.messageId = message?.id;
+    // Message info
     this.id = message?.id;
     this.from = message?.from;
     this.timestamp = message?.timestamp;

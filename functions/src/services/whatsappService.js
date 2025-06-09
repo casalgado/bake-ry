@@ -12,24 +12,26 @@ const createWhatsAppService = () => {
         const message = new WhatsappMessage(webhookData);
         const bakeryId = 'es-alimento-dev';
 
-        // Check if message already exists to avoid duplicates
-        const existingMessageQuery = baseService.getCollectionRef(bakeryId)
-          .where('messageId', '==', message.messageId);
-
-        const existingMessages = await transaction.get(existingMessageQuery);
-
-        if (!existingMessages.empty) {
-          console.log(`Message ${message.messageId} already processed`);
-          return existingMessages.docs[0].data();
+        // Validate that we have a messageId
+        if (!message.id) {
+          throw new Error('No id found in webhook data');
         }
 
-        // Create new message record
-        const messageRef = baseService.getCollectionRef(bakeryId).doc();
-        message.id = messageRef.id;
+        // Use messageId as document ID
+        const messageRef = baseService.getCollectionRef(bakeryId).doc(message.id);
 
+        // Check if message already exists by trying to get the document
+        const existingMessageDoc = await transaction.get(messageRef);
+
+        if (existingMessageDoc.exists) {
+          console.log(`Message ${message.id} already processed`);
+          return existingMessageDoc.data();
+        }
+
+        // Create new message record using messageId as document ID
         transaction.set(messageRef, message.toFirestore());
 
-        console.log(`New WhatsApp message saved: ${message.messageId}`);
+        console.log(`New WhatsApp message saved with ID: ${message.id}`);
         return message;
       });
     } catch (error) {
