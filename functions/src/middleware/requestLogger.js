@@ -60,11 +60,16 @@ const requestLogger = (req, res, next) => {
       let logData;
 
       try {
-        const parsed = JSON.parse(body);
-        console.log('Response Body:', JSON.stringify(parsed, null, 2));
-        logData = parsed;
+        if (body.trim()) {
+          // Only parse if body isn't empty
+          const parsed = JSON.parse(body);
+          console.log('Response Body:', JSON.stringify(parsed, null, 2));
+          logData = parsed;
+        } else {
+          console.log('Response Body: (empty)');
+          logData = '';
+        }
       } catch (e) {
-        // If response is not JSON, store as plain text
         console.log('error', e);
         logData = body.length > 1000 ? body.substring(0, 1000) + '...' : body;
         console.log('Response Body:', logData);
@@ -101,7 +106,7 @@ const requestLogger = (req, res, next) => {
           const filename = `${req.method}_${last_part}_${Date.now()}.json`;
           fs.writeFileSync(
             path.join(logsDir, filename),
-            JSON.stringify(logEntry, null, 2)
+            JSON.stringify(logEntry, null, 2),
           );
           console.log(`Request log saved to ${filename}`);
         } catch (error) {
