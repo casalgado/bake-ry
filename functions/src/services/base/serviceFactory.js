@@ -9,7 +9,10 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
     }
 
     if (parentPath) {
-      const fullPath = `${parentPath.replace('{bakeryId}', parentId)}/${collectionName}`;
+      const fullPath = `${parentPath.replace(
+        '{bakeryId}',
+        parentId
+      )}/${collectionName}`;
       return db.collection(fullPath);
     }
 
@@ -23,7 +26,7 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
     const oldData = oldObj.toFirestore ? oldObj.toFirestore() : oldObj;
     const newData = newObj.toFirestore ? newObj.toFirestore() : newObj;
 
-    Object.keys(newData).forEach(key => {
+    Object.keys(newData).forEach((key) => {
       if (key === 'updatedAt') return;
 
       // Handle undefined values by converting them to null
@@ -41,7 +44,13 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
     return changes;
   };
 
-  const recordHistory = async (transaction, docRef, changes, currentData, editor) => {
+  const recordHistory = async (
+    transaction,
+    docRef,
+    changes,
+    currentData,
+    editor
+  ) => {
     const historyRef = docRef.collection('updateHistory').doc();
     const historyRecord = {
       timestamp: new Date(),
@@ -101,6 +110,7 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
       }
 
       if (filters) {
+        // Handle regular date range
         if (filters.dateRange) {
           const { dateField, startDate, endDate } = filters.dateRange;
 
@@ -110,6 +120,94 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
           if (endDate) {
             dbQuery = dbQuery.where(dateField, '<=', new Date(endDate));
           }
+        }
+
+        // Handle OR date range
+        if (filters.orDateRange) {
+          const { dateFields, startDate, endDate } = filters.orDateRange;
+
+          // Create separate queries for each date field
+          const queryPromises = dateFields.map(async (field) => {
+            let fieldQuery = getCollectionRef(parentId);
+
+            // Apply the same base filters
+            if (!query.includeDeleted) {
+              fieldQuery = fieldQuery.where('isDeleted', '!=', true);
+            }
+
+            // Apply date range for this field
+            if (startDate) {
+              fieldQuery = fieldQuery.where(field, '>=', new Date(startDate));
+            }
+            if (endDate) {
+              fieldQuery = fieldQuery.where(field, '<=', new Date(endDate));
+            }
+
+            // Apply other filters
+            Object.entries(filters).forEach(([key, value]) => {
+              if (
+                key !== 'dateRange' &&
+                key !== 'orDateRange' &&
+                value !== undefined
+              ) {
+                fieldQuery = fieldQuery.where(key, '==', value);
+              }
+            });
+
+            return fieldQuery.get();
+          });
+
+          // Execute all queries in parallel
+          const snapshots = await Promise.all(queryPromises);
+
+          // Merge results and remove duplicates
+          const allDocs = new Map();
+          snapshots.forEach((snapshot) => {
+            snapshot.docs.forEach((doc) => {
+              allDocs.set(doc.id, doc);
+            });
+          });
+
+          // Convert to array and sort
+          let documents = Array.from(allDocs.values()).map((doc) =>
+            ModelClass.fromFirestore(doc)
+          );
+
+          // Apply sorting
+          if (sort) {
+            documents.sort((a, b) => {
+              const aVal = a[sort.field];
+              const bVal = b[sort.field];
+              const multiplier = sort.direction === 'desc' ? -1 : 1;
+
+              if (aVal < bVal) return -1 * multiplier;
+              if (aVal > bVal) return 1 * multiplier;
+              return 0;
+            });
+          } else {
+            documents.sort(
+              (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+            );
+          }
+
+          // Apply pagination
+          if (pagination) {
+            const { perPage, offset } = pagination;
+            const start = offset || 0;
+            const end = start + (perPage || documents.length);
+            documents = documents.slice(start, end);
+          }
+
+          return {
+            items: documents,
+            pagination: pagination
+              ? {
+                  page: pagination.page,
+                  perPage: pagination.perPage,
+                  total: allDocs.size,
+                }
+              : null,
+          };
         }
 
         Object.entries(filters).forEach(([key, value]) => {
@@ -133,15 +231,19 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
 
       const snapshot = await dbQuery.get();
 
-      const documents = snapshot.docs.map(doc => ModelClass.fromFirestore(doc));
+      const documents = snapshot.docs.map((doc) =>
+        ModelClass.fromFirestore(doc)
+      );
 
       return {
         items: documents,
-        pagination: pagination ? {
-          page: pagination.page,
-          perPage: pagination.perPage,
-          total: snapshot.size,
-        } : null,
+        pagination: pagination
+          ? {
+              page: pagination.page,
+              perPage: pagination.perPage,
+              total: snapshot.size,
+            }
+          : null,
       };
     } catch (error) {
       console.error(`Error getting all ${collectionName}:`, error);

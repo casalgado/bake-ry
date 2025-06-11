@@ -47,7 +47,15 @@ class QueryParser {
 
   parseFilters(req) {
     const filters = {};
-    const { date_field, start_date, end_date, ...otherFilters } = req.query;
+    const {
+      date_field,
+      start_date,
+      end_date,
+      or_date_fields,
+      or_start_date,
+      or_end_date,
+      ...otherFilters
+    } = req.query;
 
     // Handle date range
     if (start_date || end_date) {
@@ -55,6 +63,15 @@ class QueryParser {
         dateField: date_field,
         startDate: start_date,
         endDate: end_date,
+      };
+    }
+
+    // Handle OR date range
+    if (or_date_fields && (or_start_date || or_end_date)) {
+      filters.orDateRange = {
+        dateFields: or_date_fields.split(','),
+        startDate: or_start_date,
+        endDate: or_end_date,
       };
     }
 

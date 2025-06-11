@@ -9,13 +9,13 @@ const seededUsers = require('../data/seededUsers.json');
 
 const getWeightedQuantity = () => {
   const rand = Math.random() * 100;
-  if (rand < 60) return 1;       // 60% chance for quantity of 1
-  if (rand < 90) return 2;       // 30% chance for quantity of 2
-  return 3;                      // 10% chance for quantity of 3
+  if (rand < 60) return 1; // 60% chance for quantity of 1
+  if (rand < 90) return 2; // 30% chance for quantity of 2
+  return 3; // 10% chance for quantity of 3
 };
 
 // Constants
-const NUMBER_OF_DAYS = 30;
+const NUMBER_OF_DAYS = 90;
 const APPROX_ORDERS_PER_DAY = 3; // min 3
 const ORDER_ITEM_QUANTITY = () => getWeightedQuantity();
 const DELIVERY_PROBABILITY = 0.9;
@@ -115,12 +115,15 @@ function generateRandomItems(count) {
     selectedProducts.add(product.id);
 
     const quantity = ORDER_ITEM_QUANTITY();
-    const variation = product.variations?.length > 0
-      ? getRandomElement(product.variations)
-      : null;
+    const variation =
+      product.variations?.length > 0
+        ? getRandomElement(product.variations)
+        : null;
 
     const basePrice = variation ? variation.basePrice : product.basePrice;
-    const currentPrice = variation ? variation.currentPrice || basePrice : product.currentPrice || basePrice;
+    const currentPrice = variation
+      ? variation.currentPrice || basePrice
+      : product.currentPrice || basePrice;
     const subtotal = quantity * currentPrice;
 
     orderItems.push({
@@ -132,14 +135,16 @@ function generateRandomItems(count) {
       basePrice,
       currentPrice,
       taxPercentage: product.taxPercentage,
-      variation: variation ? {
-        id: variation.id,
-        name: variation.name,
-        value: variation.value,
-        recipeId: 1,
-        isWholeGrain: variation.isWholeGrain,
-        currentPrice: variation.currentPrice || variation.basePrice,
-      } : null,
+      variation: variation
+        ? {
+            id: variation.id,
+            name: variation.name,
+            value: variation.value,
+            recipeId: 1,
+            isWholeGrain: variation.isWholeGrain,
+            currentPrice: variation.currentPrice || variation.basePrice,
+          }
+        : null,
       recipeId: 1,
       isComplimentary: false,
       status: 0,
@@ -167,7 +172,10 @@ async function generateOrders() {
       }
 
       // Generate 10-15 orders per day
-      const ordersPerDay = getRandomInt(APPROX_ORDERS_PER_DAY - 2, APPROX_ORDERS_PER_DAY + 2);
+      const ordersPerDay = getRandomInt(
+        APPROX_ORDERS_PER_DAY - 2,
+        APPROX_ORDERS_PER_DAY + 2
+      );
       for (let j = 0; j < ordersPerDay; j++) {
         const order = generateRandomOrder(date);
         orders.push(order);
@@ -185,7 +193,9 @@ async function generateOrders() {
         successCount++;
 
         // Update progress
-        process.stdout.write(`\rCreating orders... ${spinner[spinnerIndex]} (${successCount}/${orders.length})`);
+        process.stdout.write(
+          `\rCreating orders... ${spinner[spinnerIndex]} (${successCount}/${orders.length})`
+        );
         spinnerIndex = (spinnerIndex + 1) % spinner.length;
       } catch (error) {
         console.error('\nError creating order:', error);
@@ -198,7 +208,7 @@ async function generateOrders() {
     const seedDataDir = path.join(__dirname, '../data');
     fs.writeFileSync(
       path.join(seedDataDir, 'seededOrders.json'),
-      JSON.stringify(orders, null, 2),
+      JSON.stringify(orders, null, 2)
     );
 
     console.log('Orders saved to seededOrders.json');
