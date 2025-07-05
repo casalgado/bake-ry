@@ -9,6 +9,7 @@ const AUTH_REQUIRED_ROLES = [
   'bakery_staff',
   'delivery_assistant',
   'production_assistant',
+  'accounting_assistant',
   'bakery_admin',
 ];
 
@@ -221,7 +222,7 @@ const createBakeryUserService = () => {
             bakeryId,
           });
 
-          const assistantRoles = ['delivery_assistant', 'production_assistant', 'bakery_staff'];
+          const assistantRoles = ['delivery_assistant', 'production_assistant', 'bakery_staff', 'accounting_assistant'];
           const wasAssistant = assistantRoles.includes(currentUser.role);
           const willBeAssistant = assistantRoles.includes(data.role);
 

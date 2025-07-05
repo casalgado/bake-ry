@@ -2,7 +2,7 @@ const createBaseController = require('./base/controllerFactory');
 const bakeryUserService = require('../services/bakeryUserService');
 const { BadRequestError } = require('../utils/errors');
 
-const validRoles = ['bakery_staff', 'bakery_customer', 'delivery_assistant', 'production_assistant'];
+const validRoles = ['bakery_staff', 'bakery_customer', 'delivery_assistant', 'production_assistant', 'accounting_assistant', 'bakery_admin', 'system_admin'];
 
 const validateUserData = (data) => {
   const errors = [];

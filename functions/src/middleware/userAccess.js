@@ -52,7 +52,7 @@ const requireBakeryStaffOrAdmin = (req, res, next) => {
 };
 
 const requireBakeryAssistant = (req, res, next) => {
-  const allowedRoles = ['bakery_staff', 'bakery_admin', 'system_admin', 'delivery_assistant', 'production_assistant'];
+  const allowedRoles = ['bakery_staff', 'bakery_admin', 'system_admin', 'delivery_assistant', 'production_assistant', 'accounting_assistant'];
   if (!allowedRoles.includes(req.user.role)) {
     throw new ForbiddenError('Requires at least assistant role');
   }
