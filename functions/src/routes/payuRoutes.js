@@ -14,10 +14,10 @@ const bakeryRouter = express.Router({ mergeParams: true });
 bakeryRouter.use(hasBakeryAccess);
 bakeryRouter.use(requireBakeryAdmin);
 
-// Token management routes
-bakeryRouter.post('/payu/tokens', payuController.createToken);
-bakeryRouter.get('/payu/tokens', payuController.getTokens);
-bakeryRouter.delete('/payu/tokens/:cardId', payuController.deleteToken);
+// Card management routes
+bakeryRouter.post('/payu/cards', payuController.createCard);
+bakeryRouter.get('/payu/cards', payuController.getCards);
+bakeryRouter.delete('/payu/cards/:cardId', payuController.deleteCard);
 
 // Payment processing routes
 bakeryRouter.post('/payu/payments', payuController.processPayment);

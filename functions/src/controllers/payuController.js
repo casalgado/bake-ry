@@ -1,5 +1,5 @@
 const createBaseController = require('./base/controllerFactory');
-const payuTokenService = require('../services/payuTokenService');
+const payuCardService = require('../services/payuCardService');
 const payuTransactionService = require('../services/payuTransactionService');
 const { BadRequestError } = require('../utils/errors');
 
@@ -68,8 +68,8 @@ const baseController = createBaseController(payuTransactionService, validatePayu
 const payuController = {
   ...baseController,
 
-  // Create a new credit card token
-  async createToken(req, res) {
+  // Create a new credit card
+  async createCard(req, res) {
     try {
       const { bakeryId } = req.params;
       const cardData = req.body;
@@ -88,15 +88,15 @@ const payuController = {
         cardData.payerId = req.user?.uid || 'default_payer';
       }
 
-      const result = await payuTokenService.createToken(cardData, bakeryId);
+      const result = await payuCardService.createCard(cardData, bakeryId);
       baseController.handleResponse(res, result, 201);
     } catch (error) {
       baseController.handleError(res, error);
     }
   },
 
-  // Get all stored payment tokens
-  async getTokens(req, res) {
+  // Get all stored payment cards
+  async getCards(req, res) {
     try {
       const { bakeryId } = req.params;
       const QueryParser = require('../utils/queryParser');
@@ -104,15 +104,15 @@ const payuController = {
       const queryParser = new QueryParser(req);
       const query = queryParser.getQuery();
 
-      const result = await payuTokenService.getStoredTokens(bakeryId, query);
+      const result = await payuCardService.getStoredCards(bakeryId, query);
       baseController.handleResponse(res, result);
     } catch (error) {
       baseController.handleError(res, error);
     }
   },
 
-  // Delete a stored card token
-  async deleteToken(req, res) {
+  // Delete a stored card
+  async deleteCard(req, res) {
     try {
       const { cardId, bakeryId } = req.params;
 
@@ -120,7 +120,7 @@ const payuController = {
         throw new BadRequestError('Card ID is required');
       }
 
-      const result = await payuTokenService.deleteToken(cardId, bakeryId);
+      const result = await payuCardService.deleteCard(cardId, bakeryId);
       baseController.handleResponse(res, result);
     } catch (error) {
       baseController.handleError(res, error);
@@ -203,7 +203,7 @@ const payuController = {
         throw new BadRequestError('Card number is required');
       }
 
-      const cardType = payuTokenService.detectCardType(cardNumber);
+      const cardType = payuCardService.detectCardType(cardNumber);
       baseController.handleResponse(res, { cardType });
     } catch (error) {
       baseController.handleError(res, error);
