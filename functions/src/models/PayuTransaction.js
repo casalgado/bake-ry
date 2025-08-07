@@ -4,7 +4,7 @@ class PayuTransaction extends BaseModel {
   constructor({
     id,
     bakeryId,
-    
+
     // PayU Transaction Information
     payuTransactionId,
     payuOrderId,
@@ -14,55 +14,55 @@ class PayuTransaction extends BaseModel {
     payuTrazabilityCode,
     payuPaymentNetworkResponseCode,
     payuPaymentNetworkResponseErrorMessage,
-    
+
     // Token Information (if used)
-    payuTokenId,
+    tokenId,
     paymentMethod,
-    
+
     // Transaction Details
     amount,
     currency = 'COP',
     description,
     reference,
-    
+
     // Customer Information
     payerId,
     payerFullName,
     payerEmail,
     payerPhone,
     payerIdentificationNumber,
-    
+
     // Transaction Type and Context
     transactionType = 'AUTHORIZATION_AND_CAPTURE', // AUTHORIZATION, CAPTURE, AUTHORIZATION_AND_CAPTURE
     paymentContext, // 'ORDER_PAYMENT', 'SUBSCRIPTION', 'STANDALONE', etc.
     relatedOrderId, // If this payment is for an order
-    
+
     // Recurring Payment Information
     isRecurring = false,
     recurringFrequency, // 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'
     recurringStartDate,
     parentRecurringId, // If this is a recurring payment instance
-    
+
     // Status and Metadata
     status = 'PENDING', // PENDING, APPROVED, DECLINED, ERROR, CANCELLED
     isDeleted = false,
     lastEditedBy = null,
-    
+
     // Dates
     createdAt,
     updatedAt,
     processedAt,
-    
+
     // Extra PayU Data
     extraParameters = {},
     additionalInfo = {},
-    
+
   } = {}) {
     super({ id, createdAt, updatedAt });
 
     // Basic Information
     this.bakeryId = bakeryId;
-    
+
     // PayU Transaction Information
     this.payuTransactionId = payuTransactionId;
     this.payuOrderId = payuOrderId;
@@ -72,35 +72,35 @@ class PayuTransaction extends BaseModel {
     this.payuTrazabilityCode = payuTrazabilityCode;
     this.payuPaymentNetworkResponseCode = payuPaymentNetworkResponseCode;
     this.payuPaymentNetworkResponseErrorMessage = payuPaymentNetworkResponseErrorMessage;
-    
+
     // Token Information
-    this.payuTokenId = payuTokenId;
+    this.tokenId = tokenId;
     this.paymentMethod = paymentMethod;
-    
+
     // Transaction Details
     this.amount = amount;
     this.currency = currency;
     this.description = description;
     this.reference = reference;
-    
+
     // Customer Information
     this.payerId = payerId;
     this.payerFullName = payerFullName;
     this.payerEmail = payerEmail;
     this.payerPhone = payerPhone;
     this.payerIdentificationNumber = payerIdentificationNumber;
-    
+
     // Transaction Type and Context
     this.transactionType = transactionType;
     this.paymentContext = paymentContext;
     this.relatedOrderId = relatedOrderId;
-    
+
     // Recurring Payment Information
     this.isRecurring = isRecurring;
     this.recurringFrequency = recurringFrequency;
     this.recurringStartDate = this.constructor.ensureDate(recurringStartDate);
     this.parentRecurringId = parentRecurringId;
-    
+
     // Status and Metadata
     this.status = status;
     this.isDeleted = isDeleted;
@@ -110,7 +110,7 @@ class PayuTransaction extends BaseModel {
       email: lastEditedBy.email || null,
       role: lastEditedBy.role || null,
     } : null;
-    
+
     // Extra PayU Data
     this.extraParameters = extraParameters || {};
     this.additionalInfo = additionalInfo || {};

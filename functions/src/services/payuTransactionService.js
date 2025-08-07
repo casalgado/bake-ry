@@ -90,7 +90,7 @@ const createPayuTransactionService = () => {
         payuResponseCode: response.transactionResponse?.responseCode,
         payuAuthorizationCode: response.transactionResponse?.authorizationCode,
         payuTrazabilityCode: response.transactionResponse?.trazabilityCode,
-        payuTokenId: paymentData.tokenId,
+        tokenId: paymentData.tokenId,
         paymentMethod: paymentData.paymentMethod,
         amount: paymentData.amount,
         currency: paymentData.currency || 'COP',
@@ -119,7 +119,7 @@ const createPayuTransactionService = () => {
       // Create the parent recurring payment record
       const payuTransaction = new PayuTransaction({
         bakeryId,
-        payuTokenId: recurringData.tokenId,
+        tokenId: recurringData.tokenId,
         paymentMethod: recurringData.paymentMethod,
         amount: recurringData.amount,
         currency: recurringData.currency || 'COP',
@@ -152,7 +152,7 @@ const createPayuTransactionService = () => {
 
       // Create payment data based on parent
       const paymentData = {
-        tokenId: parent.payuTokenId,
+        tokenId: parent.tokenId,
         amount: parent.amount,
         currency: parent.currency,
         description: `Recurring: ${parent.description}`,

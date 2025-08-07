@@ -9,7 +9,7 @@ const validatePayuData = (data) => {
   return errors;
 };
 
-const validateTokenData = (data) => {
+const validateCardData = (data) => {
   const errors = [];
 
   if (!data.cardNumber) {
@@ -78,7 +78,7 @@ const payuController = {
         throw new BadRequestError('Card data is required');
       }
 
-      const errors = validateTokenData(cardData);
+      const errors = validateCardData(cardData);
       if (errors.length > 0) {
         return res.status(400).json({ error: errors.join('. ') });
       }
@@ -114,13 +114,13 @@ const payuController = {
   // Delete a stored card token
   async deleteToken(req, res) {
     try {
-      const { tokenId, bakeryId } = req.params;
+      const { cardId, bakeryId } = req.params;
 
-      if (!tokenId) {
-        throw new BadRequestError('Token ID is required');
+      if (!cardId) {
+        throw new BadRequestError('Card ID is required');
       }
 
-      const result = await payuTokenService.deleteToken(tokenId, bakeryId);
+      const result = await payuTokenService.deleteToken(cardId, bakeryId);
       baseController.handleResponse(res, result);
     } catch (error) {
       baseController.handleError(res, error);

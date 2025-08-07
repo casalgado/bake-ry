@@ -6,7 +6,7 @@ class PayuToken extends BaseModel {
     bakeryId,
 
     // PayU Token Information
-    payuTokenId,
+    tokenId,
     maskedNumber,
     paymentMethod,
     cardholderName,
@@ -32,7 +32,7 @@ class PayuToken extends BaseModel {
     this.bakeryId = bakeryId;
 
     // PayU Token Information
-    this.payuTokenId = payuTokenId;
+    this.tokenId = tokenId;
     this.maskedNumber = maskedNumber;
     this.paymentMethod = paymentMethod;
     this.cardholderName = cardholderName;
@@ -68,7 +68,6 @@ class PayuToken extends BaseModel {
   toClientObject() {
     return {
       id: this.id,
-      tokenId: this.payuTokenId,
       maskedNumber: this.maskedNumber,
       paymentMethod: this.paymentMethod,
       cardholderName: this.cardholderName,

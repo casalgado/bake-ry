@@ -17,7 +17,7 @@ bakeryRouter.use(requireBakeryAdmin);
 // Token management routes
 bakeryRouter.post('/payu/tokens', payuController.createToken);
 bakeryRouter.get('/payu/tokens', payuController.getTokens);
-bakeryRouter.delete('/payu/tokens/:tokenId', payuController.deleteToken);
+bakeryRouter.delete('/payu/tokens/:cardId', payuController.deleteToken);
 
 // Payment processing routes
 bakeryRouter.post('/payu/payments', payuController.processPayment);

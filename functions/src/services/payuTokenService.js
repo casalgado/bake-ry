@@ -79,7 +79,7 @@ const createPayuTokenService = () => {
         // Save token information to database
         const payuToken = new PayuToken({
           bakeryId,
-          payuTokenId: response.creditCardToken.creditCardTokenId,
+          tokenId: response.creditCardToken.creditCardTokenId,
           maskedNumber: cardData.cardNumber.slice(-4), // Just store last 4 digits
           paymentMethod: response.creditCardToken.paymentMethod,
           cardholderName: response.creditCardToken.name,
@@ -125,10 +125,10 @@ const createPayuTokenService = () => {
   };
 
   // Delete a stored token
-  const deleteToken = async (tokenId, bakeryId) => {
+  const deleteToken = async (cardId, bakeryId) => {
     try {
       // Get the token record by our database ID
-      const token = await baseService.getById(tokenId, bakeryId);
+      const token = await baseService.getById(cardId, bakeryId);
 
       if (!token || token.status !== 'ACTIVE') {
         throw new NotFoundError('Token not found or already deleted');
@@ -144,7 +144,7 @@ const createPayuTokenService = () => {
         },
         removeCreditCardToken: {
           payerId: token.payerId,
-          creditCardTokenId: token.payuTokenId, // Use the actual PayU token ID
+          creditCardTokenId: token.tokenId, // Use the actual PayU token ID
         },
       };
 
