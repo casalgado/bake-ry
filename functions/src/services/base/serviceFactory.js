@@ -11,7 +11,7 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
     if (parentPath) {
       const fullPath = `${parentPath.replace(
         '{bakeryId}',
-        parentId
+        parentId,
       )}/${collectionName}`;
       return db.collection(fullPath);
     }
@@ -49,7 +49,7 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
     docRef,
     changes,
     currentData,
-    editor
+    editor,
   ) => {
     const historyRef = docRef.collection('updateHistory').doc();
     const historyRecord = {
@@ -170,7 +170,7 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
 
           // Convert to array and sort
           let documents = Array.from(allDocs.values()).map((doc) =>
-            ModelClass.fromFirestore(doc)
+            ModelClass.fromFirestore(doc),
           );
 
           // Apply sorting
@@ -186,7 +186,7 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
             });
           } else {
             documents.sort(
-              (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+              (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
             );
           }
 
@@ -202,10 +202,10 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
             items: documents,
             pagination: pagination
               ? {
-                  page: pagination.page,
-                  perPage: pagination.perPage,
-                  total: allDocs.size,
-                }
+                page: pagination.page,
+                perPage: pagination.perPage,
+                total: allDocs.size,
+              }
               : null,
           };
         }
@@ -232,17 +232,17 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
       const snapshot = await dbQuery.get();
 
       const documents = snapshot.docs.map((doc) =>
-        ModelClass.fromFirestore(doc)
+        ModelClass.fromFirestore(doc),
       );
 
       return {
         items: documents,
         pagination: pagination
           ? {
-              page: pagination.page,
-              perPage: pagination.perPage,
-              total: snapshot.size,
-            }
+            page: pagination.page,
+            perPage: pagination.perPage,
+            total: snapshot.size,
+          }
           : null,
       };
     } catch (error) {

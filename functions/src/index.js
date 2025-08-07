@@ -13,6 +13,7 @@ const bakeryUserRoutes = require('./routes/bakeryUserRoutes');
 const bakerySettingsRoutes = require('./routes/bakerySettingsRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const productCollectionRoutes = require('./routes/productCollectionRoutes');
+const payuRoutes = require('./routes/payuRoutes');
 
 const requestLogger = require('./middleware/requestLogger');
 
@@ -47,6 +48,7 @@ app.use('/bakeries', bakeryUserRoutes);
 app.use('/bakeries', bakerySettingsRoutes);
 app.use('/bakeries', orderRoutes);
 app.use('/bakeries', productCollectionRoutes);
+app.use('/bakeries', payuRoutes);
 
 // Export the Express app as a Firebase Function
 exports.bake = functions.https.onRequest(app);
