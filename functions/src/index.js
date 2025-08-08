@@ -52,14 +52,3 @@ app.use('/bakeries', payuRoutes);
 
 // Export the Express app as a Firebase Function
 exports.bake = functions.https.onRequest(app);
-
-// Export scheduled billing functions
-const {
-  processBilling,
-  triggerBilling,
-  handlePaymentFailure,
-} = require('./functions/scheduledBilling');
-
-exports.processBilling = processBilling;
-exports.triggerBilling = triggerBilling;
-exports.handlePaymentFailure = handlePaymentFailure;
