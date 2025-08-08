@@ -134,10 +134,15 @@ const createBakeryUserService = () => {
             password: password,
           });
 
-          // Set custom claims
+          // Get subscription data for JWT claims
+          const subscription = await getBakerySubscriptionData(bakeryId);
+
+          // Set custom claims with subscription info
           await admin.auth().setCustomUserClaims(userRecord.uid, {
             role: newUser.role,
             bakeryId,
+            subscriptionStatus: subscription.status,
+            subscriptionTier: subscription.tier,
           });
 
           userId = userRecord.uid;
@@ -216,10 +221,15 @@ const createBakeryUserService = () => {
             });
           }
 
-          // Update Firebase Auth claims
+          // Get subscription data for JWT claims
+          const subscription = await getBakerySubscriptionData(bakeryId);
+
+          // Update Firebase Auth claims with subscription info
           await admin.auth().setCustomUserClaims(id, {
             role: data.role,
             bakeryId,
+            subscriptionStatus: subscription.status,
+            subscriptionTier: subscription.tier,
           });
 
           const assistantRoles = ['delivery_assistant', 'production_assistant', 'bakery_staff', 'accounting_assistant'];
@@ -330,12 +340,135 @@ const createBakeryUserService = () => {
     }
   };
 
+  // Get subscription data for a bakery
+  const getBakerySubscriptionData = async (bakeryId) => {
+    try {
+      const settingsRef = db
+        .collection('bakeries')
+        .doc(bakeryId)
+        .collection('settings')
+        .doc('default');
+
+      const settingsDoc = await settingsRef.get();
+
+      if (!settingsDoc.exists) {
+        return {
+          status: 'TRIAL',
+          tier: 'BASIC',
+        };
+      }
+
+      const settings = settingsDoc.data();
+      return {
+        status: settings.subscription?.status || 'TRIAL',
+        tier: settings.subscription?.tier || 'BASIC',
+      };
+    } catch (error) {
+      console.error('Error getting bakery subscription data:', error);
+      return {
+        status: 'TRIAL',
+        tier: 'BASIC',
+      };
+    }
+  };
+
+  // Update JWT custom claims with subscription info for a single user
+  const updateUserJWTWithSubscription = async (userId, bakeryId, subscriptionData = null) => {
+    try {
+      // Get current custom claims
+      const userRecord = await admin.auth().getUser(userId);
+      const currentClaims = userRecord.customClaims || {};
+
+      // Get subscription data if not provided
+      let subscription = subscriptionData;
+      if (!subscription) {
+        subscription = await getBakerySubscriptionData(bakeryId);
+      }
+
+      // Update custom claims with subscription info
+      const newClaims = {
+        ...currentClaims,
+        subscriptionStatus: subscription.status,
+        subscriptionTier: subscription.tier,
+      };
+
+      await admin.auth().setCustomUserClaims(userId, newClaims);
+
+      console.log(`Updated JWT for user ${userId} with subscription:`, subscription);
+
+      return newClaims;
+    } catch (error) {
+      console.error(`Error updating JWT for user ${userId}:`, error);
+      throw error;
+    }
+  };
+
+  // Refresh JWT tokens for all users in a bakery
+  const refreshAllBakeryUserTokens = async (bakeryId, subscriptionData = null) => {
+    try {
+      console.log(`Refreshing JWT tokens for all users in bakery ${bakeryId}`);
+
+      // Get subscription data if not provided
+      let subscription = subscriptionData;
+      if (!subscription) {
+        subscription = await getBakerySubscriptionData(bakeryId);
+      }
+
+      // Get all users from this bakery who have auth accounts
+      const usersSnapshot = await baseService.getCollectionRef(bakeryId)
+        .where('isDeleted', '==', false)
+        .get();
+
+      // Filter to only users that need auth accounts (staff roles)
+      const staffUsers = usersSnapshot.docs.filter(doc => {
+        const user = doc.data();
+        return AUTH_REQUIRED_ROLES.includes(user.role);
+      });
+
+      console.log(`Found ${staffUsers.length} staff users to update in bakery ${bakeryId}`);
+
+      // Update JWT claims for all staff users in parallel
+      const updatePromises = staffUsers.map(async (userDoc) => {
+        const userId = userDoc.id;
+        try {
+          await updateUserJWTWithSubscription(userId, bakeryId, subscription);
+          return { userId, success: true };
+        } catch (error) {
+          console.error(`Failed to update JWT for user ${userId}:`, error);
+          return { userId, success: false, error: error.message };
+        }
+      });
+
+      const results = await Promise.all(updatePromises);
+
+      const successful = results.filter(r => r.success).length;
+      const failed = results.filter(r => !r.success).length;
+
+      console.log(`JWT token refresh complete for bakery ${bakeryId}: ${successful} successful, ${failed} failed`);
+
+      return {
+        bakeryId,
+        subscription,
+        totalUsers: staffUsers.length,
+        successful,
+        failed,
+        results,
+      };
+    } catch (error) {
+      console.error(`Error refreshing bakery user tokens for ${bakeryId}:`, error);
+      throw error;
+    }
+  };
+
   return {
     ...baseService,
     create,
     update,
     getHistory,
     delete: remove,
+    getBakerySubscriptionData,
+    updateUserJWTWithSubscription,
+    refreshAllBakeryUserTokens,
   };
 };
 

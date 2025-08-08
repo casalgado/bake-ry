@@ -1,6 +1,7 @@
 const PayuTransaction = require('../models/PayuTransaction');
 const createBaseService = require('./base/serviceFactory');
 const { BadRequestError } = require('../utils/errors');
+const { db } = require('../config/firebase');
 
 const createPayuTransactionService = () => {
   const baseService = createBaseService('payuTransactions', PayuTransaction, 'bakeries/{bakeryId}');
@@ -283,6 +284,194 @@ const createPayuTransactionService = () => {
     }
   };
 
+  // Create subscription setup (parent recurring payment record)
+  const createSubscriptionSetup = async (subscriptionData, bakeryId) => {
+    try {
+      const { savedCardId, amount, currency = 'COP', description = 'Monthly Subscription' } = subscriptionData;
+
+      // Generate unique reference for subscription
+      const reference = `SUBSCRIPTION-${bakeryId}-${Date.now()}`;
+
+      // Create the parent recurring payment record
+      const payuTransaction = new PayuTransaction({
+        bakeryId,
+        tokenId: savedCardId,
+        amount: amount,
+        currency: currency,
+        description: description,
+        reference: reference,
+        paymentContext: 'SUBSCRIPTION',
+        isRecurring: true,
+        recurringFrequency: 'MONTHLY',
+        recurringStartDate: new Date(),
+        status: 'PENDING', // Will become ACTIVE when first payment succeeds
+        transactionType: 'AUTHORIZATION_AND_CAPTURE',
+      });
+
+      const saved = await baseService.create(payuTransaction, bakeryId);
+      console.log(`Created subscription setup for bakery ${bakeryId}:`, saved.id);
+
+      return saved.toClientObject();
+    } catch (error) {
+      console.error('Error creating subscription setup:', error);
+      throw error;
+    }
+  };
+
+  // Process monthly billing for a subscription
+  const processMonthlyBilling = async (recurringPaymentId, bakeryId) => {
+    try {
+      // Get parent recurring payment
+      const parent = await baseService.getById(recurringPaymentId, bakeryId);
+
+      if (!parent.isRecurring) {
+        throw new BadRequestError('Payment is not a recurring subscription');
+      }
+
+      if (!parent.tokenId) {
+        throw new BadRequestError('No payment method stored for subscription');
+      }
+
+      // Create payment data based on parent
+      const paymentData = {
+        tokenId: parent.tokenId,
+        amount: parent.amount,
+        currency: parent.currency,
+        description: `Monthly Billing - ${parent.description}`,
+        paymentMethod: parent.paymentMethod,
+        paymentContext: 'SUBSCRIPTION',
+        // Note: CVV is not required for stored token payments
+      };
+
+      // Process the payment using existing method
+      const result = await processPayment(paymentData, bakeryId);
+
+      // Update the result to link it to parent subscription
+      await baseService.patch(result.id, {
+        parentRecurringId: recurringPaymentId,
+        isRecurring: false, // This is an instance, not the parent
+        recurringStartDate: parent.recurringStartDate,
+      }, bakeryId);
+
+      // Update parent status based on payment result
+      if (result.status === 'APPROVED') {
+        await baseService.patch(recurringPaymentId, {
+          status: 'ACTIVE',
+          consecutiveFailures: 0,
+        }, bakeryId);
+      } else {
+        // Increment failure counter
+        const newFailureCount = (parent.consecutiveFailures || 0) + 1;
+        await baseService.patch(recurringPaymentId, {
+          consecutiveFailures: newFailureCount,
+        }, bakeryId);
+      }
+
+      console.log(`Processed monthly billing for subscription ${recurringPaymentId}: ${result.status}`);
+      return result;
+    } catch (error) {
+      console.error('Error processing monthly billing:', error);
+      throw error;
+    }
+  };
+
+  // Get all subscription payments for a recurring payment ID
+  const getSubscriptionPayments = async (recurringPaymentId, bakeryId, query = {}) => {
+    try {
+      const filter = {
+        ...query.filters,
+        parentRecurringId: recurringPaymentId,
+        paymentContext: 'SUBSCRIPTION',
+      };
+
+      const results = await baseService.getAll(bakeryId, {
+        ...query,
+        filters: filter,
+      });
+
+      return {
+        ...results,
+        items: results.items.map(transaction => transaction.toClientObject()),
+      };
+    } catch (error) {
+      console.error('Error getting subscription payments:', error);
+      throw error;
+    }
+  };
+
+  // Get all subscriptions that need billing (for scheduled function)
+  const getSubscriptionsDueForBilling = async () => {
+    try {
+      // This searches across all bakeries for recurring payments that need billing
+      const results = [];
+
+      // Get all bakeries (we need to search across all of them)
+      const bakeriesSnapshot = await db.collection('bakeries').get();
+
+      for (const bakeryDoc of bakeriesSnapshot.docs) {
+        const bakeryId = bakeryDoc.id;
+
+        try {
+          // Get all recurring payments for this bakery
+          const recurringPayments = await baseService.getAll(bakeryId, {
+            filters: {
+              isRecurring: true,
+              paymentContext: 'SUBSCRIPTION',
+            },
+          });
+
+          // Check each recurring payment to see if it needs billing
+          for (const payment of recurringPayments.items) {
+            // Check if this subscription needs billing by looking at the bakery settings
+            try {
+              const settingsRef = db
+                .collection('bakeries')
+                .doc(bakeryId)
+                .collection('settings')
+                .doc('default');
+
+              const settingsDoc = await settingsRef.get();
+
+              if (settingsDoc.exists) {
+                const settings = settingsDoc.data();
+                const subscription = settings.subscription;
+
+                if (subscription &&
+                    subscription.recurringPaymentId === payment.id &&
+                    subscription.tier !== 'ALWAYS_FREE' &&
+                    ['ACTIVE', 'TRIAL'].includes(subscription.status)) {
+
+                  // Check if billing is due using the BakerySettings logic
+                  const { BakerySettings } = require('../models/BakerySettings');
+                  const bakerySettings = new BakerySettings({ ...settings, bakeryId });
+
+                  if (bakerySettings.needsBilling()) {
+                    results.push({
+                      bakeryId,
+                      recurringPaymentId: payment.id,
+                      subscription: subscription,
+                      nextBillingDate: bakerySettings.getNextBillingDate(),
+                    });
+                  }
+                }
+              }
+            } catch (settingsError) {
+              console.error(`Error checking settings for bakery ${bakeryId}:`, settingsError);
+            }
+          }
+        } catch (bakeryError) {
+          console.error(`Error processing bakery ${bakeryId}:`, bakeryError);
+        }
+      }
+
+      console.log(`Found ${results.length} subscriptions due for billing`);
+      return results;
+    } catch (error) {
+      console.error('Error getting subscriptions due for billing:', error);
+      throw error;
+    }
+  };
+
   return {
     ...baseService,
     processPayment,
@@ -291,6 +480,11 @@ const createPayuTransactionService = () => {
     getPaymentStatus,
     getTransactions,
     getRecurringPaymentInstances,
+    // Subscription-specific methods
+    createSubscriptionSetup,
+    processMonthlyBilling,
+    getSubscriptionPayments,
+    getSubscriptionsDueForBilling,
   };
 };
 
