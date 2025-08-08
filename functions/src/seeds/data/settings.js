@@ -91,13 +91,6 @@ const settings = {
       ],
     },
   },
-  'features': {
-    'order': {
-      timeOfDay: false,
-      allowPartialPayment: true,
-      defaultDate: null,
-    },
-  },
 };
 
 module.exports = settings;
