@@ -18,7 +18,7 @@ class IngredientCategory {
 
   toPlainObject() {
     const data = { ...this };
-    Object.keys(data).forEach(key => {
+    Object.keys(data).forEach((key) => {
       if (data[key] === undefined) {
         delete data[key];
       }
@@ -40,22 +40,38 @@ class BakerySettings extends BaseModel {
   static PAYMENT_METHODS = ['transfer', 'cash', 'card'];
   static UNIT_OPTIONS = ['kg', 'g', 'L', 'ml', 'unidades', 'docena', 'paquete'];
   static STORAGE_TEMPERATURES = ['Ambiente', 'Refrigeracion', 'Congelacion'];
+  static AVAILABLE_PAYMENT_METHODS = [
+    { value: 'cash', label: 'Efectivo', displayText: 'E' },
+    { value: 'transfer', label: 'Transferencia', displayText: 'T' },
+    { value: 'card', label: 'Tarjeta', displayText: 'Dat' },
+    { value: 'davivienda', label: 'Davivienda', displayText: 'D' },
+    { value: 'bancolombia', label: 'Bancolombia', displayText: 'B' },
+    { value: 'complimentary', label: 'Regalo', displayText: 'R' },
+  ];
+  static DEFAULT_FEATURES = {
+    order: {
+      activePaymentMethods: ['cash', 'transfer', 'complimentary'],
+      allowPartialPayment: false,
+      defaultDate: 'production',
+      timeOfDay: false, // if time of day is asked for orders
+    },
+
+  };
 
   constructor({
     id,
     bakeryId,
     ingredientCategories = [],
     theme = {},
-    features = {},
+    features,
     suggestedProductVariations = {},
     createdAt,
     updatedAt,
-
   }) {
     super({ id, createdAt, updatedAt });
 
     this.bakeryId = bakeryId;
-    this.ingredientCategories = ingredientCategories.map(cat =>
+    this.ingredientCategories = ingredientCategories.map((cat) =>
       cat instanceof IngredientCategory ? cat : new IngredientCategory(cat),
     );
 
@@ -63,22 +79,25 @@ class BakerySettings extends BaseModel {
     this.orderStatuses = BakerySettings.ORDER_STATUSES;
     this.fulfillmentTypes = BakerySettings.FULFILLMENT_TYPES;
     this.paymentMethods = BakerySettings.PAYMENT_METHODS;
+    this.availablePaymentMethods = BakerySettings.AVAILABLE_PAYMENT_METHODS;
+
     this.unitOptions = BakerySettings.UNIT_OPTIONS;
     this.storageTemperatures = BakerySettings.STORAGE_TEMPERATURES;
     this.suggestedProductVariations = suggestedProductVariations;
     this.theme = theme;
-    this.features = features;
-
+    this.features = features || BakerySettings.DEFAULT_FEATURES;
   }
 
   getCategoryById(categoryId) {
-    return this.ingredientCategories.find(cat => cat.id === categoryId);
+    return this.ingredientCategories.find((cat) => cat.id === categoryId);
   }
 
   // Firestore data conversion
   toFirestore() {
     const data = super.toFirestore();
-    data.ingredientCategories = this.ingredientCategories.map(cat => cat.toPlainObject());
+    data.ingredientCategories = this.ingredientCategories.map((cat) =>
+      cat.toPlainObject(),
+    );
     return data;
   }
 
