@@ -69,7 +69,8 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
   const create = async (data, parentId = null) => {
     try {
       const collectionRef = getCollectionRef(parentId);
-      const docRef = collectionRef.doc();
+      const customId = data.id;
+      const docRef = customId ? collectionRef.doc(customId) : collectionRef.doc();
       const instanceData = {
         id: docRef.id,
         ...data,

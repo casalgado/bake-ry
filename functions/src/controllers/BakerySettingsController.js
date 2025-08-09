@@ -189,11 +189,13 @@ const handleSubscriptionAction = async (action, subscriptionData, bakeryId, user
       throw new BadRequestError('Invalid or inactive payment card');
     }
 
+    console.log('CCCC Card is valid for subscription reactivation:', card);
     // Create new subscription setup if no recurring payment ID exists
     if (!subscriptionData.recurringPaymentId) {
       try {
         const subscriptionSetup = await payuTransactionService.createSubscriptionSetup({
           savedCardId: subscriptionData.savedCardId,
+          tokenId: card.tokenId,
           amount: subscriptionData.amount || 99000,
           currency: subscriptionData.currency || 'COP',
           description: 'Monthly Subscription',

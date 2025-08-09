@@ -83,7 +83,8 @@ const createPayuTransactionService = () => {
       const response = await makePayuRequest(requestData);
 
       // Save transaction record
-      const payuTransaction = new PayuTransaction({
+      const payuTransactionData = {
+        id: response.transactionResponse?.transactionId,
         bakeryId,
         payuTransactionId: response.transactionResponse?.transactionId,
         payuOrderId: response.transactionResponse?.orderId,
@@ -104,9 +105,9 @@ const createPayuTransactionService = () => {
         processedAt: new Date(),
         extraParameters: response.transactionResponse?.extraParameters || {},
         additionalInfo: response.transactionResponse?.additionalInfo || {},
-      });
+      };
 
-      const saved = await baseService.create(payuTransaction, bakeryId);
+      const saved = await baseService.create(payuTransactionData, bakeryId);
       return saved.toClientObject();
     } catch (error) {
       console.error('Error processing payment:', error);
@@ -346,6 +347,8 @@ const createPayuTransactionService = () => {
 
       // Process the payment using existing method
       const result = await processPayment(paymentData, bakeryId);
+
+      console.log(`Processed payment for subscription ${recurringPaymentId}:`, result);
 
       // Update the result to link it to parent subscription
       await baseService.patch(result.id, {
