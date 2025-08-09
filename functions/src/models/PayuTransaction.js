@@ -14,6 +14,7 @@ class PayuTransaction extends BaseModel {
     payuTrazabilityCode,
     payuPaymentNetworkResponseCode,
     payuPaymentNetworkResponseErrorMessage,
+    cardId,
 
     // Token Information (if used)
     tokenId,
@@ -72,6 +73,7 @@ class PayuTransaction extends BaseModel {
     this.payuTrazabilityCode = payuTrazabilityCode;
     this.payuPaymentNetworkResponseCode = payuPaymentNetworkResponseCode;
     this.payuPaymentNetworkResponseErrorMessage = payuPaymentNetworkResponseErrorMessage;
+    this.cardId = cardId; // If using a saved card, this is the card ID
 
     // Token Information
     this.tokenId = tokenId;

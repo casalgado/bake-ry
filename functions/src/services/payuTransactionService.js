@@ -287,15 +287,16 @@ const createPayuTransactionService = () => {
   // Create subscription setup (parent recurring payment record)
   const createSubscriptionSetup = async (subscriptionData, bakeryId) => {
     try {
-      const { savedCardId, amount, currency = 'COP', description = 'Monthly Subscription' } = subscriptionData;
+      const { savedCardId, tokenId, amount, currency = 'COP', description = 'Monthly Subscription' } = subscriptionData;
 
       // Generate unique reference for subscription
       const reference = `SUBSCRIPTION-${bakeryId}-${Date.now()}`;
 
       // Create the parent recurring payment record
-      const payuTransaction = new PayuTransaction({
+      const payuTransactionData = {
         bakeryId,
-        tokenId: savedCardId,
+        cardId: savedCardId,
+        tokenId: tokenId,
         amount: amount,
         currency: currency,
         description: description,
@@ -306,10 +307,10 @@ const createPayuTransactionService = () => {
         recurringStartDate: new Date(),
         status: 'PENDING', // Will become ACTIVE when first payment succeeds
         transactionType: 'AUTHORIZATION_AND_CAPTURE',
-      });
+      };
 
-      const saved = await baseService.create(payuTransaction, bakeryId);
-      console.log(`Created subscription setup for bakery ${bakeryId}:`, saved.id);
+      const saved = await baseService.create(payuTransactionData, bakeryId);
+      console.log(`Created subscription setup for bakery ${bakeryId}: ${saved.id}`);
 
       return saved.toClientObject();
     } catch (error) {

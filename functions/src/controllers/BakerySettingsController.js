@@ -3,6 +3,7 @@ const bakerySettingsService = require('../services/bakerySettingsService');
 const payuTransactionService = require('../services/payuTransactionService');
 const payuCardService = require('../services/payuCardService');
 const bakeryUserService = require('../services/bakeryUserService');
+const adminUserService = require('../services/adminUserService');
 const { BadRequestError } = require('../utils/errors');
 
 const validateSettingsData = (data) => {
@@ -61,25 +62,7 @@ const handleSubscriptionUpdate = async (subscriptionData, bakeryId, user) => {
     delete subscriptionData._action;
   }
 
-  // If setting up a new subscription with a saved card
-  if (subscriptionData.savedCardId && !subscriptionData.recurringPaymentId) {
-    // Verify the card exists
-    const card = await payuCardService.getById(subscriptionData.savedCardId, bakeryId);
-    if (!card || !card.isActive()) {
-      throw new BadRequestError('Invalid or inactive payment card');
-    }
-
-    // Create subscription setup
-    const subscriptionSetup = await payuTransactionService.createSubscriptionSetup({
-      savedCardId: subscriptionData.savedCardId,
-      amount: subscriptionData.amount || 99000,
-      currency: subscriptionData.currency || 'COP',
-      description: 'Monthly Subscription',
-    }, bakeryId);
-
-    // Update subscription data with the recurring payment ID
-    subscriptionData.recurringPaymentId = subscriptionSetup.id;
-  }
+  // Note: Subscription creation is now handled explicitly via create_subscription action
 
   // If changing subscription status or tier, refresh JWT tokens for all bakery users
   const statusChanged = subscriptionData.status !== undefined;
@@ -91,9 +74,26 @@ const handleSubscriptionUpdate = async (subscriptionData, bakeryId, user) => {
     // Refresh JWT tokens in the background (don't block the response)
     setImmediate(async () => {
       try {
-        await bakeryUserService.refreshAllBakeryUserTokens(bakeryId, {
-          status: subscriptionData.status,
-          tier: subscriptionData.tier,
+        // Get current settings to ensure we have the complete subscription data
+        const currentSettings = await bakerySettingsService.getById('default', bakeryId);
+        const currentSubscription = currentSettings.subscription;
+
+        const subscriptionDataToUse = {
+          status: subscriptionData.status || currentSubscription.status,
+          tier: subscriptionData.tier || currentSubscription.tier,
+        };
+
+        // Refresh both bakery users AND admin users in parallel
+        const refreshPromises = [
+          bakeryUserService.refreshAllBakeryUserTokens(bakeryId, subscriptionDataToUse),
+          adminUserService.refreshBakeryAdminTokens(bakeryId, subscriptionDataToUse),
+        ];
+
+        const [bakeryUsersResult, adminUsersResult] = await Promise.all(refreshPromises);
+
+        console.log(`Token refresh complete for bakery ${bakeryId}:`, {
+          bakeryUsers: { successful: bakeryUsersResult.successful, failed: bakeryUsersResult.failed },
+          adminUsers: { successful: adminUsersResult.successful, failed: adminUsersResult.failed },
         });
       } catch (error) {
         console.error(`Failed to refresh user tokens for bakery ${bakeryId}:`, error);
@@ -111,10 +111,17 @@ const handleSubscriptionAction = async (action, subscriptionData, bakeryId, user
     }
 
     console.log(`Processing retry payment for subscription ${subscriptionData.recurringPaymentId}`);
-    const paymentResult = await payuTransactionService.processMonthlyBilling(
-      subscriptionData.recurringPaymentId,
-      bakeryId,
-    );
+
+    let paymentResult;
+    try {
+      paymentResult = await payuTransactionService.processMonthlyBilling(
+        subscriptionData.recurringPaymentId,
+        bakeryId,
+      );
+    } catch (payuError) {
+      console.error(`Failed to process retry payment for bakery ${bakeryId}:`, payuError);
+      throw new BadRequestError(`Failed to process payment retry: ${payuError.message || 'Payment processor error'}`);
+    }
 
     // Update subscription status based on payment result
     if (paymentResult.status === 'APPROVED') {
@@ -138,14 +145,74 @@ const handleSubscriptionAction = async (action, subscriptionData, bakeryId, user
     console.log(`Cancelled subscription for bakery ${bakeryId}`);
     break;
 
-  case 'reactivate_subscription':
+  case 'create_subscription': {
+    if (!subscriptionData.savedCardId) {
+      throw new BadRequestError('Payment method required for subscription creation');
+    }
+
+    // Verify the card exists and is active
+    const card = await payuCardService.getById(subscriptionData.savedCardId, bakeryId);
+    if (!card || !card.isActive()) {
+      throw new BadRequestError('Invalid or inactive payment card');
+    }
+
+    // Create subscription setup with error handling
+    try {
+      const subscriptionSetup = await payuTransactionService.createSubscriptionSetup({
+        savedCardId: subscriptionData.savedCardId,
+        tokenId: card.tokenId,
+        amount: subscriptionData.amount || 99000,
+        currency: subscriptionData.currency || 'COP',
+        description: 'Monthly Subscription',
+      }, bakeryId);
+
+      // Update subscription data with the recurring payment ID
+      subscriptionData.recurringPaymentId = subscriptionSetup.id;
+      subscriptionData.status = 'ACTIVE';
+      subscriptionData.consecutiveFailures = 0;
+      console.log(`Created new subscription for bakery ${bakeryId}: ${subscriptionSetup.id}`);
+    } catch (payuError) {
+      console.error(`Failed to create PayU subscription setup for bakery ${bakeryId}:`, payuError);
+      throw new BadRequestError(`Failed to set up subscription: ${payuError.message || 'Payment processor error'}`);
+    }
+    break;
+  }
+
+  case 'reactivate_subscription': {
     if (!subscriptionData.savedCardId) {
       throw new BadRequestError('Payment method required for reactivation');
     }
+
+    // Verify the card exists and is active
+    const card = await payuCardService.getById(subscriptionData.savedCardId, bakeryId);
+    if (!card || !card.isActive()) {
+      throw new BadRequestError('Invalid or inactive payment card');
+    }
+
+    // Create new subscription setup if no recurring payment ID exists
+    if (!subscriptionData.recurringPaymentId) {
+      try {
+        const subscriptionSetup = await payuTransactionService.createSubscriptionSetup({
+          savedCardId: subscriptionData.savedCardId,
+          amount: subscriptionData.amount || 99000,
+          currency: subscriptionData.currency || 'COP',
+          description: 'Monthly Subscription',
+        }, bakeryId);
+
+        // Update subscription data with the recurring payment ID
+        subscriptionData.recurringPaymentId = subscriptionSetup.id;
+        console.log(`Created subscription setup for reactivation: ${subscriptionSetup.id}`);
+      } catch (payuError) {
+        console.error(`Failed to create PayU subscription setup for reactivation, bakery ${bakeryId}:`, payuError);
+        throw new BadRequestError(`Failed to reactivate subscription: ${payuError.message || 'Payment processor error'}`);
+      }
+    }
+
     subscriptionData.status = 'ACTIVE';
     subscriptionData.consecutiveFailures = 0;
     console.log(`Reactivated subscription for bakery ${bakeryId}`);
     break;
+  }
 
   default:
     throw new BadRequestError(`Unknown subscription action: ${action}`);

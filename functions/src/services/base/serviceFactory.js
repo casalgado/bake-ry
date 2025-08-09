@@ -70,11 +70,11 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
     try {
       const collectionRef = getCollectionRef(parentId);
       const docRef = collectionRef.doc();
-
-      const instance = new ModelClass({
+      const instanceData = {
         id: docRef.id,
         ...data,
-      });
+      };
+      const instance = new ModelClass(instanceData);
 
       await docRef.set(instance.toFirestore());
       return instance;
