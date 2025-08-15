@@ -28,26 +28,6 @@ class IngredientCategory {
 }
 
 class BakerySettings extends BaseModel {
-  static ORDER_STATUSES = [
-    'Recibida',
-    'En Produccion',
-    'Preparada',
-    'En Camino',
-    'Completada',
-  ];
-
-  static FULFILLMENT_TYPES = ['delivery', 'pickup'];
-  static PAYMENT_METHODS = ['transfer', 'cash', 'card'];
-  static UNIT_OPTIONS = ['kg', 'g', 'L', 'ml', 'unidades', 'docena', 'paquete'];
-  static STORAGE_TEMPERATURES = ['Ambiente', 'Refrigeracion', 'Congelacion'];
-  static AVAILABLE_PAYMENT_METHODS = [
-    { value: 'cash', label: 'Efectivo', displayText: 'E' },
-    { value: 'transfer', label: 'Transferencia', displayText: 'T' },
-    { value: 'card', label: 'Tarjeta', displayText: 'Dat' },
-    { value: 'davivienda', label: 'Davivienda', displayText: 'D' },
-    { value: 'bancolombia', label: 'Bancolombia', displayText: 'B' },
-    { value: 'complimentary', label: 'Regalo', displayText: 'R' },
-  ];
 
   // Subscription constants
   static SUBSCRIPTION_STATUSES = ['TRIAL', 'ACTIVE', 'CANCELLED', 'SUSPENDED', 'PAYMENT_FAILED'];
@@ -83,14 +63,6 @@ class BakerySettings extends BaseModel {
       cat instanceof IngredientCategory ? cat : new IngredientCategory(cat),
     );
 
-    // Initialize other settings
-    this.orderStatuses = BakerySettings.ORDER_STATUSES;
-    this.fulfillmentTypes = BakerySettings.FULFILLMENT_TYPES;
-    this.paymentMethods = BakerySettings.PAYMENT_METHODS;
-    this.availablePaymentMethods = BakerySettings.AVAILABLE_PAYMENT_METHODS;
-
-    this.unitOptions = BakerySettings.UNIT_OPTIONS;
-    this.storageTemperatures = BakerySettings.STORAGE_TEMPERATURES;
     this.suggestedProductVariations = suggestedProductVariations;
     this.theme = theme;
     this.features = features || BakerySettings.DEFAULT_FEATURES;

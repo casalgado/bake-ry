@@ -14,12 +14,12 @@ class SystemSettings extends BaseModel {
   static UNIT_OPTIONS = ['kg', 'g', 'L', 'ml', 'unidades', 'docena', 'paquete'];
   static STORAGE_TEMPERATURES = ['Ambiente', 'Refrigeracion', 'Congelacion'];
   static AVAILABLE_PAYMENT_METHODS = [
-    { value: 'cash', label: 'Efectivo', displayText: 'E' },
-    { value: 'transfer', label: 'Transferencia', displayText: 'T' },
+    { value: 'cash', label: 'Efectivo', displayText: 'EF' },
+    { value: 'transfer', label: 'Transferencia', displayText: 'TR' },
     { value: 'card', label: 'Tarjeta', displayText: 'DF' },
-    { value: 'davivienda', label: 'Davivienda', displayText: 'D' },
-    { value: 'bancolombia', label: 'Bancolombia', displayText: 'B' },
-    { value: 'complimentary', label: 'Regalo', displayText: 'R' },
+    { value: 'davivienda', label: 'Davivienda', displayText: 'DV' },
+    { value: 'bancolombia', label: 'Bancolombia', displayText: 'BC' },
+    { value: 'complimentary', label: 'Regalo', displayText: 'RE' },
   ];
 
   constructor({
