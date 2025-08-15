@@ -5,36 +5,28 @@ const { BadRequestError } = require('../utils/errors');
 const validateSystemSettingsData = (data) => {
   const errors = [];
 
-  if (data.maintenanceMode !== undefined && typeof data.maintenanceMode !== 'boolean') {
-    errors.push('maintenanceMode must be a boolean');
+  if (data.orderStatuses !== undefined && !Array.isArray(data.orderStatuses)) {
+    errors.push('orderStatuses must be an array');
   }
 
-  if (data.allowNewRegistrations !== undefined && typeof data.allowNewRegistrations !== 'boolean') {
-    errors.push('allowNewRegistrations must be a boolean');
+  if (data.fulfillmentTypes !== undefined && !Array.isArray(data.fulfillmentTypes)) {
+    errors.push('fulfillmentTypes must be an array');
   }
 
-  if (data.systemNotification !== undefined) {
-    if (typeof data.systemNotification !== 'object') {
-      errors.push('systemNotification must be an object');
-    } else {
-      if (data.systemNotification.isActive !== undefined && typeof data.systemNotification.isActive !== 'boolean') {
-        errors.push('systemNotification.isActive must be a boolean');
-      }
-      if (data.systemNotification.type !== undefined) {
-        const validTypes = ['info', 'warning', 'error', 'success'];
-        if (!validTypes.includes(data.systemNotification.type)) {
-          errors.push(`systemNotification.type must be one of: ${validTypes.join(', ')}`);
-        }
-      }
-    }
+  if (data.paymentMethods !== undefined && !Array.isArray(data.paymentMethods)) {
+    errors.push('paymentMethods must be an array');
   }
 
-  if (data.globalFeatureFlags !== undefined && typeof data.globalFeatureFlags !== 'object') {
-    errors.push('globalFeatureFlags must be an object');
+  if (data.unitOptions !== undefined && !Array.isArray(data.unitOptions)) {
+    errors.push('unitOptions must be an array');
   }
 
-  if (data.systemLimits !== undefined && typeof data.systemLimits !== 'object') {
-    errors.push('systemLimits must be an object');
+  if (data.storageTemperatures !== undefined && !Array.isArray(data.storageTemperatures)) {
+    errors.push('storageTemperatures must be an array');
+  }
+
+  if (data.availablePaymentMethods !== undefined && !Array.isArray(data.availablePaymentMethods)) {
+    errors.push('availablePaymentMethods must be an array');
   }
 
   return errors;
