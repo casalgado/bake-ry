@@ -20,59 +20,71 @@ describe('Bakery Controller', () => {
       const req = {
         params: {},
         body: {
+          user: {
+            email: 'admin@testbakery.com',
+            password: 'password123',
+            name: 'John Doe',
+          },
+          bakery: {
+            name: 'Test Bakery',
+            address: '123 Bakery St',
+            operatingHours: {
+              monday: { isOpen: true, open: '08:00', close: '17:00' },
+            },
+          },
+          settings: {
+            theme: { primaryColor: '#ff6b35' },
+            features: { order: { timeOfDay: true } },
+          },
+        },
+      };
+
+      const mockResult = {
+        bakery: {
+          id: 'bakery123',
           name: 'Test Bakery',
           address: '123 Bakery St',
-          operatingHours: {
-            monday: { isOpen: true, open: '08:00', close: '17:00' },
-          },
+          ownerId: 'user123',
         },
         user: {
           uid: 'user123',
-          bakeryId: null,
+          email: 'admin@testbakery.com',
+          name: 'John Doe',
+          role: 'bakery_admin',
+          bakeryId: 'bakery123',
         },
       };
 
-      const mockBakery = {
-        id: 'bakery123',
-        ...req.body,
-        ownerId: req.user.uid,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      bakeryService.create.mockResolvedValue(mockBakery);
+      bakeryService.create.mockResolvedValue(mockResult);
 
       await bakeryController.create(req, res);
 
       expect(bakeryService.create).toHaveBeenCalledWith({
-        ...req.body,
-        ownerId: req.user.uid,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date),
+        userData: req.body.user,
+        bakeryData: req.body.bakery,
+        settingsData: req.body.settings,
       });
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith(mockBakery);
+      expect(res.json).toHaveBeenCalledWith(mockResult);
     });
 
-    it('should reject if user already has a bakery', async () => {
+    it('should reject if validation fails', async () => {
       const req = {
         params: {},
         body: {
-          name: 'Test Bakery',
-          address: '123 Bakery St',
-        },
-        user: {
-          uid: 'user123',
-          bakeryId: 'existing-bakery',
+          user: {
+            email: 'invalid-email',
+          },
+          bakery: {},
         },
       };
 
       await bakeryController.create(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          error: 'User already has a bakery assigned and cannot create another one',
+          error: expect.stringContaining('Invalid email format'),
         }),
       );
     });

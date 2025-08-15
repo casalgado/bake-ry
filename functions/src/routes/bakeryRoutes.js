@@ -17,15 +17,15 @@ const mapBakeryIdToId = (req, res, next) => {
 
 const router = express.Router();
 
-// Apply authentication to all routes
+// Public route for bakery creation (no authentication required)
+router.post('/', bakeryController.create);
+
+// Apply authentication to all other routes
 router.use(authenticateUser);
 
 // System admin routes
 router.get('/', requireSystemAdmin, mapBakeryIdToId, bakeryController.getAll);
 router.delete('/:bakeryId', requireSystemAdmin, mapBakeryIdToId, bakeryController.remove);
-
-// Bakery admin routes
-router.post('/', requireBakeryAdmin, mapBakeryIdToId, bakeryController.create);
 router.patch(
   '/:bakeryId',
   requireBakeryAdmin,
