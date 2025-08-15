@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npm test:*)",
       "Bash(npm run test:silent:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(curl:*)"
     ],
     "deny": []
   }

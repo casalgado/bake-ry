@@ -7,15 +7,11 @@ const {
 
 const router = express.Router();
 
-// Apply authentication to all routes
-router.use(authenticateUser);
+// GET: All authenticated users can read system settings
+router.get('/system-settings', authenticateUser, systemSettingsController.getById);
 
-// Apply system admin requirement to all routes
-router.use(requireSystemAdmin);
-
-// System settings routes (no CREATE or DELETE - only GET, PATCH, PUT)
-router.get('/system-settings', systemSettingsController.getById);
-router.patch('/system-settings', systemSettingsController.patch);
-router.put('/system-settings', systemSettingsController.update);
+// PATCH/PUT: Only system admins can modify system settings
+router.patch('/system-settings', authenticateUser, requireSystemAdmin, systemSettingsController.patch);
+router.put('/system-settings', authenticateUser, requireSystemAdmin, systemSettingsController.update);
 
 module.exports = router;

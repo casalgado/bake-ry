@@ -53,8 +53,8 @@ app.use('/bakeries', productCollectionRoutes);
 app.use('/bakeries', payuRoutes);
 
 // Admin routes (not bakery-scoped)
-app.use('/', billingRoutes);
 app.use('/', systemSettingsRoutes);
+app.use('/', billingRoutes);
 
 // Export the Express app as a Firebase Function
 exports.bake = functions.https.onRequest(app);
