@@ -96,6 +96,9 @@ const createBakeryService = () => {
         bakeryId: result.bakery.id,
       });
 
+      // 5. Create custom token for immediate login
+      const customToken = await admin.auth().createCustomToken(uid);
+
       return {
         bakery: result.bakery,
         settings: result.settings,
@@ -106,6 +109,7 @@ const createBakeryService = () => {
           role: result.user.role,
           bakeryId: result.user.bakeryId,
         },
+        customToken,
       };
     } catch (error) {
       // Cleanup Firebase Auth user if created but transaction failed
