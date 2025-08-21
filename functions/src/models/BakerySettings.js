@@ -41,6 +41,7 @@ class BakerySettings extends BaseModel {
       allowPartialPayment: false,
       defaultDate: 'production',
       timeOfDay: false, // if time of day is asked for orders
+      offlineMode: false,
     },
 
   };

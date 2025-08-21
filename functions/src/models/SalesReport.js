@@ -323,19 +323,14 @@ class SalesReport {
   }
   aggregateProductData() {
     const products = {};
-    this.all_products.forEach(product => {
-      products[product.id] = {
-        productId: product.id,
-        name: product.name,
-        collection: product.collectionName,
-        quantity: 0,
-        revenue: 0,
-      };
-    });
+    const productsWithSales = new Set();
     let totalQuantity = 0;
 
+    // First pass: collect sales data and track which products have sales
     this.orders.forEach(order => {
       order.orderItems.filter(item => !item.isComplimentary).forEach(item => {
+        productsWithSales.add(item.productId);
+
         if (!products[item.productId]) {
           products[item.productId] = {
             productId: item.productId,
@@ -350,6 +345,21 @@ class SalesReport {
         totalQuantity += item.quantity;
       });
     });
+
+    // Second pass: initialize remaining products that are active OR deleted but have sales
+    this.all_products
+      .filter(product => !product.isDeleted || productsWithSales.has(product.id))
+      .forEach(product => {
+        if (!products[product.id]) {
+          products[product.id] = {
+            productId: product.id,
+            name: product.name,
+            collection: product.collectionName,
+            quantity: 0,
+            revenue: 0,
+          };
+        }
+      });
 
     return Object.values(products).map(product => ({
       ...product,
