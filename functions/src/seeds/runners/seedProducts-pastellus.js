@@ -1,7 +1,7 @@
 const { BAKERY_ID } = require('../seedConfig-pastellus');
 const generateProducts = require('../data/products-pastellus');
 const productService = require('../../services/productService');
-const { Product } = require('../../models/Product');
+const Product = require('../../models/Product');
 const fs = require('fs');
 const path = require('path');
 

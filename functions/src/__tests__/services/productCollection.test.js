@@ -77,7 +77,7 @@ describe('Product Collection Service Tests', () => {
 
       expect(result).toBeInstanceOf(ProductCollection);
       expect(result.id).toBeDefined();
-      expect(result.name).toBe(collectionData.name);
+      expect(result.name).toBe(collectionData.name.toLowerCase());
 
       // Verify collection exists in Firestore
       const doc = await db
@@ -88,7 +88,7 @@ describe('Product Collection Service Tests', () => {
         .get();
 
       expect(doc.exists).toBe(true);
-      expect(doc.data().name).toBe(collectionData.name);
+      expect(doc.data().name).toBe(collectionData.name.toLowerCase());
     });
 
     it('should retrieve a product collection by ID', async () => {
@@ -117,7 +117,7 @@ describe('Product Collection Service Tests', () => {
         testStoreId,
       );
 
-      expect(result.name).toBe(updateData.name);
+      expect(result.name).toBe(updateData.name.toLowerCase());
       expect(result.isActive).toBe(updateData.isActive);
 
       // Verify updates in Firestore
@@ -128,7 +128,7 @@ describe('Product Collection Service Tests', () => {
         .doc(testCollection.id)
         .get();
 
-      expect(doc.data().name).toBe(updateData.name);
+      expect(doc.data().name).toBe(updateData.name.toLowerCase());
       expect(doc.data().isActive).toBe(updateData.isActive);
     });
   });

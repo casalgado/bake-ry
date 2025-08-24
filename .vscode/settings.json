@@ -12,5 +12,8 @@
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
   "eslint.validate": ["javascript", "javascriptreact", "vue"],
-  "javascript.format.enable": false
+  "javascript.format.enable": false,
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }

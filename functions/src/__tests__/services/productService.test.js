@@ -1,5 +1,6 @@
 const { initializeFirebase, clearFirestoreData } = require('../setup/firebase');
-const { Product, ProductVariation } = require('../../models/Product');
+const Product = require('../../models/Product');
+const ProductVariation = require('../../models/ProductVariation');
 
 // Test Data Setup Helpers
 const createTestProduct = (overrides = {}) => ({
@@ -13,7 +14,6 @@ const createTestProduct = (overrides = {}) => ({
       name: 'regular',
       value: 1,
       basePrice: 10000,
-      currentPrice: 10000,
     }),
   ],
   taxPercentage: 19,
@@ -27,6 +27,7 @@ describe('Product Service Tests', () => {
   let productService;
   let testStoreId;
   let testEditor;
+  console.log(testEditor);
 
   beforeAll(() => {
     ({ db } = initializeFirebase());
@@ -102,7 +103,6 @@ describe('Product Service Tests', () => {
             name: 'large',
             value: 2,
             basePrice: 15000,
-            currentPrice: 15000,
           }),
         ],
       };
@@ -140,19 +140,16 @@ describe('Product Service Tests', () => {
             name: 'small',
             value: 1,
             basePrice: 10000,
-            currentPrice: 10000,
           }),
           new ProductVariation({
             name: 'medium',
             value: 2,
             basePrice: 15000,
-            currentPrice: 15000,
           }),
           new ProductVariation({
             name: 'large',
             value: 3,
             basePrice: 20000,
-            currentPrice: 20000,
           }),
         ],
       });
@@ -184,7 +181,6 @@ describe('Product Service Tests', () => {
             name: 'updated',
             value: 1,
             basePrice: 12000,
-            currentPrice: 12000,
           }),
         ],
       };

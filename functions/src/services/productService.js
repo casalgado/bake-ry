@@ -1,6 +1,6 @@
 // services/productService.js
 const { db } = require('../config/firebase');
-const { Product } = require('../models/Product');
+const Product = require('../models/Product');
 const createBaseService = require('./base/serviceFactory');
 const { NotFoundError, BadRequestError } = require('../utils/errors');
 

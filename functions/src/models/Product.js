@@ -1,56 +1,6 @@
 // models/Product.js
 const BaseModel = require('./base/BaseModel');
-const { BadRequestError } = require('../utils/errors');
-const { generateId } = require('../utils/helpers');
-
-class ProductVariation {
-
-  constructor({
-    id,
-    name = '',
-    value,
-    basePrice,
-    currentPrice,
-    recipeId,
-    isWholeGrain = false,
-  }) {
-    this.id = id || generateId();
-    this.name = name.toLowerCase();
-    this.value = value;
-    this.basePrice = basePrice;
-    this.currentPrice = currentPrice || basePrice;
-    this.recipeId = recipeId;
-    this.isWholeGrain = isWholeGrain;
-  }
-
-  validate(category) {
-    if (!category) {
-      throw new BadRequestError('Category is required for validation');
-    }
-
-    // Validate using category's validation rules
-    category.validateVariation(this);
-  }
-
-  getDisplayValue(category) {
-    if (!category) {
-      throw new BadRequestError('Category is required for display formatting');
-    }
-
-    return category.formatVariationValue(this.value);
-  }
-
-  toPlainObject() {
-    const data = { ...this };
-    // Remove undefined values
-    Object.keys(data).forEach(key => {
-      if (data[key] === undefined) {
-        delete data[key];
-      }
-    });
-    return data;
-  }
-}
+const ProductVariation = require('./ProductVariation');
 
 class Product extends BaseModel {
   constructor({
@@ -84,17 +34,19 @@ class Product extends BaseModel {
 
     // Basic Information
     this.bakeryId = bakeryId;
-    this.name = name.toLowerCase();
+    this.name = name;
     this.collectionId = collectionId;
     this.collectionName = collectionName;
     this.recipeId = recipeId;
 
-    // Handle variations - create instances right in constructor
-    this.variations = variations.map(variation =>
-      variation instanceof ProductVariation
-        ? variation
-        : new ProductVariation(variation),
-    );
+    // Handle variations - create instances
+    this.variations = variations.map(variation => {
+      if (variation instanceof ProductVariation) {
+        return variation;
+      }
+
+      return new ProductVariation(variation);
+    });
 
     // Basic price
     this.basePrice = basePrice;
@@ -114,11 +66,13 @@ class Product extends BaseModel {
 
   // Method to update variations
   setVariations(variations) {
-    this.variations = variations.map(variation =>
-      variation instanceof ProductVariation
-        ? variation
-        : new ProductVariation(variation),
-    );
+    this.variations = variations.map(variation => {
+      if (variation instanceof ProductVariation) {
+        return variation;
+      }
+
+      return new ProductVariation(variation);
+    });
     return this.variations;
   }
 
@@ -136,8 +90,10 @@ class Product extends BaseModel {
     return new Product({
       id: doc.id,
       ...data,
-      variations: data.variations?.map(v => new ProductVariation(v)),
+      variations: data.variations?.map(v => {
+        return new ProductVariation(v);
+      }),
     });
   }
 }
-module.exports = { Product, ProductVariation };
+module.exports = Product;
