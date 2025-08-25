@@ -16,6 +16,7 @@ class ProductCollection extends BaseModel {
     // Variation templates for this collection
     variationTemplates = [],
     defaultVariationType = null, // 'WEIGHT', 'QUANTITY', 'SIZE'
+    defaultUnit = null,
 
     // Common fields
     createdAt,
@@ -30,6 +31,7 @@ class ProductCollection extends BaseModel {
     this.isActive = isActive;
     this.isDeleted = isDeleted;
     this.defaultVariationType = defaultVariationType;
+    this.defaultUnit = defaultUnit;
 
     // Handle variation templates - these are templates without pricing
     this.variationTemplates = variationTemplates.map(template => {

@@ -21,7 +21,17 @@ class ProductVariation {
     this.isWholeGrain = isWholeGrain;
     this.unit = unit;
     this.type = type;
-    this.displayOrder = displayOrder;
+
+    // Set display order with priority:
+    // 1. Use provided displayOrder if given
+    // 2. If name is 'otra', set to 999
+    // 3. If isWholeGrain, set to 2
+    // 4. Default to 1
+    this.displayOrder = displayOrder ?? (
+      name === 'otra' ? 999 :
+        isWholeGrain ? 2 :
+          1
+    );
   }
 
   validate() {

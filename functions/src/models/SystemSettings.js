@@ -19,13 +19,15 @@ class SystemSettings extends BaseModel {
     { key: 'frozen', value: 'Frozen' },
   ];
   static UNIT_OPTIONS = [
-    { symbol: 'Kg', name: 'Kilogram', type: 'weight', template: 'WEIGHT' },
-    { symbol: 'g', name: 'Gram', type: 'weight', template: 'WEIGHT' },
-    { symbol: 'L', name: 'Liter', type: 'volume', template: 'WEIGHT' },
-    { symbol: 'ml', name: 'Milliliter', type: 'volume', template: 'WEIGHT' },
-    { symbol: 'uds', name: 'Units', type: 'count', template: 'QUANTITY' },
-    { symbol: 'docena', name: 'Dozen', type: 'count', template: 'QUANTITY' },
-    { symbol: 'paquete', name: 'Package', type: 'count', template: 'QUANTITY' },
+    { symbol: 'Kg', name: 'Kilogramo', type: 'weight', template: 'WEIGHT' },
+    { symbol: 'g', name: 'Gramo', type: 'weight', template: 'WEIGHT' },
+    { symbol: 'lb', name: 'Libra', type: 'weight', template: 'WEIGHT' },
+    { symbol: 'L', name: 'Litro', type: 'volume', template: 'WEIGHT' },
+    { symbol: 'ml', name: 'Mililitro', type: 'volume', template: 'WEIGHT' },
+    { symbol: 'uds', name: 'Unidades', type: 'count', template: 'QUANTITY' },
+    { symbol: 'docena', name: 'Docena', type: 'count', template: 'QUANTITY' },
+    { symbol: 'paquete', name: 'Paquete', type: 'count', template: 'QUANTITY' },
+
   ];
 
   static AVAILABLE_PAYMENT_METHODS = [
@@ -42,10 +44,11 @@ class SystemSettings extends BaseModel {
       label: 'Weight',
       unit: 'g',
       defaults: [
-        { name: 'mini', value: 300, basePrice: 0, recipeId: '' },
-        { name: 'pequeño', value: 550, basePrice: 0, recipeId: '' },
-        { name: 'mediano', value: 950, basePrice: 0, recipeId: '' },
-        { name: 'grande', value: 1700, basePrice: 0, recipeId: '' },
+        { name: 'mini', value: 0, basePrice: 0, recipeId: '' },
+        { name: 'pequeño', value: 0, basePrice: 0, recipeId: '' },
+        { name: 'mediano', value: 0, basePrice: 0, recipeId: '' },
+        { name: 'grande', value: 0, basePrice: 0, recipeId: '' },
+        { id: 'fixed-fallback-variation', name: 'otra', value: 1, basePrice: 0, recipeId: '', displayOrder: 999 },
       ],
     },
     QUANTITY: {
@@ -59,18 +62,17 @@ class SystemSettings extends BaseModel {
         { name: 'x10', value: 10, basePrice: 0, recipeId: '' },
         { name: 'x12', value: 12, basePrice: 0, recipeId: '' },
         { name: 'x16', value: 16, basePrice: 0, recipeId: '' },
+        { id: 'fixed-fallback-variation', name: 'otra', value: 1, basePrice: 0, recipeId: '', displayOrder: 999 },
       ],
     },
     SIZE: {
       label: 'Size',
       unit: '',
       defaults: [
-        { name: 'mini', value: 1, basePrice: 0, recipeId: '' },
         { name: 'pequeño', value: 2, basePrice: 0, recipeId: '' },
         { name: 'mediano', value: 3, basePrice: 0, recipeId: '' },
         { name: 'grande', value: 4, basePrice: 0, recipeId: '' },
-        { name: 'xl', value: 5, basePrice: 0, recipeId: '' },
-
+        { id: 'fixed-fallback-variation', name: 'otra', value: 1, basePrice: 0, recipeId: '', displayOrder: 999 },
       ],
     },
   };

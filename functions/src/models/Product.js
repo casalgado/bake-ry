@@ -29,6 +29,7 @@ class Product extends BaseModel {
     updatedAt,
     // Custom Attributes
     customAttributes = {},
+    description,
   } = {}) {
     super({ id, createdAt, updatedAt });
 
@@ -38,6 +39,8 @@ class Product extends BaseModel {
     this.collectionId = collectionId;
     this.collectionName = collectionName;
     this.recipeId = recipeId;
+    this.description = description;
+    this.hasVariations = this.variations?.length > 0 || hasVariations;
 
     // Handle variations - create instances
     this.variations = variations.map(variation => {
