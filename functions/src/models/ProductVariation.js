@@ -10,28 +10,28 @@ class ProductVariation {
     recipeId,
     isWholeGrain = false,
     unit = '',
-    type = '', // 'WEIGHT', 'QUANTITY', 'SIZE'
+    type = 'SIZE', // 'WEIGHT', 'QUANTITY', 'SIZE'
     displayOrder = 0,
   }) {
     this.id = id || generateId();
-    this.name = name;
+    this.name = name.trim().toLowerCase();
     this.value = value;
     this.basePrice = basePrice;
     this.recipeId = recipeId;
     this.isWholeGrain = isWholeGrain;
     this.unit = unit;
-    this.type = type;
+    this.type = type == '' ? 'SIZE' : type;
 
     // Set display order with priority:
     // 1. Use provided displayOrder if given
     // 2. If name is 'otra', set to 999
     // 3. If isWholeGrain, set to 2
     // 4. Default to 1
-    this.displayOrder = displayOrder ?? (
+    this.displayOrder =
       name === 'otra' ? 999 :
         isWholeGrain ? 2 :
           1
-    );
+    ;
   }
 
   validate() {

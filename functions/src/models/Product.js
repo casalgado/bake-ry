@@ -35,7 +35,7 @@ class Product extends BaseModel {
 
     // Basic Information
     this.bakeryId = bakeryId;
-    this.name = name;
+    this.name = name.trim().toLowerCase();
     this.collectionId = collectionId;
     this.collectionName = collectionName;
     this.recipeId = recipeId;
