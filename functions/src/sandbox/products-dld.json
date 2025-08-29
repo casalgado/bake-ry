@@ -1,593 +1,685 @@
 {
     "items": [
-        {
-            "id": "eOcISMCwnHd3yywMr37h",
-            "createdAt": "2025-05-20T20:28:58.779Z",
-            "updatedAt": "2025-08-20T17:39:12.752Z",
-            "bakeryId": "diana_lee-demo",
-            "name": "fresa fine",
-            "collectionId": "G5wBFb1GZE1CgOTAgB8Z",
-            "collectionName": "cheesecakes",
-            "variations": [
-                {
-                    "id": "9eO9tdaa6F7fTAeH",
-                    "name": "completo",
-                    "value": 12,
-                    "basePrice": 159000,
-                    "currentPrice": 159000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "aJ0urYWGPu6ZAw1m",
-                    "name": "medio",
-                    "value": 6,
-                    "basePrice": 132000,
-                    "currentPrice": 132000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "fGqtLqkqJ9Io7VkB",
-                    "name": "tiny",
-                    "value": 2,
-                    "basePrice": 60000,
-                    "currentPrice": 60000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "bjpWXe0gSr2pfrmT",
-                    "name": "otra",
-                    "value": 1000,
-                    "basePrice": 10000,
-                    "currentPrice": 10000,
-                    "isWholeGrain": false
-                }
-            ],
-            "basePrice": 0,
-            "currentPrice": 0,
-            "taxPercentage": 0,
-            "isActive": true,
-            "isDeleted": false,
-            "customAttributes": {}
-        },
-        {
-            "id": "zKIdn4WeKUFzvazEsrj0",
-            "createdAt": "2025-05-20T20:28:59.079Z",
-            "updatedAt": "2025-08-20T17:38:46.783Z",
-            "bakeryId": "diana_lee-demo",
-            "name": "choco charm",
-            "collectionId": "G5wBFb1GZE1CgOTAgB8Z",
-            "collectionName": "cheesecakes",
-            "variations": [
-                {
-                    "id": "y4Tqr6fC5BCbrZzn",
-                    "name": "completo",
-                    "value": 12,
-                    "basePrice": 189000,
-                    "currentPrice": 189000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "TeNAFubRz0IHnSkP",
-                    "name": "medio",
-                    "value": 6,
-                    "basePrice": 123000,
-                    "currentPrice": 123000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "wIrKueWkqlmRSb2F",
-                    "name": "tiny",
-                    "value": 2,
-                    "basePrice": 52000,
-                    "currentPrice": 52000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "xrJOooTSGS0RlJK2",
-                    "name": "otra",
-                    "value": 1000,
-                    "basePrice": 10000,
-                    "currentPrice": 10000,
-                    "isWholeGrain": false
-                }
-            ],
-            "basePrice": 0,
-            "currentPrice": 0,
-            "taxPercentage": 0,
-            "isActive": true,
-            "isDeleted": false,
-            "customAttributes": {}
-        },
-        {
-            "id": "rHLH2TRHxEjBDigEzzB8",
-            "createdAt": "2025-05-20T20:28:59.387Z",
-            "updatedAt": "2025-08-20T17:39:02.848Z",
-            "bakeryId": "diana_lee-demo",
-            "name": "naranja next",
-            "collectionId": "G5wBFb1GZE1CgOTAgB8Z",
-            "collectionName": "cheesecakes",
-            "variations": [
-                {
-                    "id": "umWqH4JFss4mcIV3",
-                    "name": "completo",
-                    "value": 12,
-                    "basePrice": 185000,
-                    "currentPrice": 185000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "12CGdoOoAlwoHxAw",
-                    "name": "medio",
-                    "value": 6,
-                    "basePrice": 123000,
-                    "currentPrice": 123000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "i4J1a95E2DwZsiwx",
-                    "name": "otra",
-                    "value": 1000,
-                    "basePrice": 10000,
-                    "currentPrice": 10000,
-                    "isWholeGrain": false
-                }
-            ],
-            "basePrice": 0,
-            "currentPrice": 0,
-            "taxPercentage": 0,
-            "isActive": true,
-            "isDeleted": false,
-            "customAttributes": {}
-        },
-        {
-            "id": "QfWfABr5yEMxjIfH64Ci",
-            "createdAt": "2025-05-20T20:28:59.668Z",
-            "updatedAt": "2025-08-20T17:39:39.165Z",
-            "bakeryId": "diana_lee-demo",
-            "name": "white wish",
-            "collectionId": "G5wBFb1GZE1CgOTAgB8Z",
-            "collectionName": "cheesecakes",
-            "variations": [
-                {
-                    "id": "00zGXbSa98pUXkHw",
-                    "name": "completo",
-                    "value": 12,
-                    "basePrice": 184000,
-                    "currentPrice": 184000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "99RwH9oxl2cSdwQB",
-                    "name": "medio",
-                    "value": 6,
-                    "basePrice": 115000,
-                    "currentPrice": 115000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "hN9tEVxK3mdCkpfm",
-                    "name": "tiny",
-                    "value": 2,
-                    "basePrice": 28000,
-                    "currentPrice": 28000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "BNysXgOOb2YnZQb7",
-                    "name": "otra",
-                    "value": 1000,
-                    "basePrice": 10000,
-                    "currentPrice": 10000,
-                    "isWholeGrain": false
-                }
-            ],
-            "basePrice": 0,
-            "currentPrice": 0,
-            "taxPercentage": 0,
-            "isActive": true,
-            "isDeleted": false,
-            "customAttributes": {}
-        },
-        {
-            "id": "sYASSTQsEARkqs38Itox",
-            "createdAt": "2025-05-20T20:29:00.282Z",
-            "updatedAt": "2025-08-20T17:40:01.048Z",
-            "bakeryId": "diana_lee-demo",
-            "name": "lime lunatic",
-            "collectionId": "G5wBFb1GZE1CgOTAgB8Z",
-            "collectionName": "cheesecakes",
-            "variations": [
-                {
-                    "id": "P86vj4EeH2CUkS2G",
-                    "name": "completo",
-                    "value": 12,
-                    "basePrice": 156000,
-                    "currentPrice": 156000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "D11clOYCy5ZASrYT",
-                    "name": "otra",
-                    "value": 1000,
-                    "basePrice": 10000,
-                    "currentPrice": 10000,
-                    "isWholeGrain": false
-                }
-            ],
-            "basePrice": 0,
-            "currentPrice": 0,
-            "taxPercentage": 0,
-            "isActive": true,
-            "isDeleted": false,
-            "customAttributes": {}
-        },
-        {
-            "id": "pKTUCkcC4XN9I0gc3EIi",
-            "createdAt": "2025-05-20T20:29:01.229Z",
-            "updatedAt": "2025-08-20T17:40:14.874Z",
-            "bakeryId": "diana_lee-demo",
-            "name": "choco chastic",
-            "collectionId": "rRKnCoDADej47MszlIOK",
-            "collectionName": "cakes",
-            "variations": [
-                {
-                    "id": "2ZH34vz4h3lixfIL",
-                    "name": "completo",
-                    "value": 12,
-                    "basePrice": 195000,
-                    "currentPrice": 195000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "BVi0wIWWFpQxlBWE",
-                    "name": "medio",
-                    "value": 6,
-                    "basePrice": 135000,
-                    "currentPrice": 135000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "zHmDxjBRC2dBiDo2",
-                    "name": "tiny",
-                    "value": 2,
-                    "basePrice": 30000,
-                    "currentPrice": 30000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "RbSTByfFkWFEfoax",
-                    "name": "otra",
-                    "value": 1000,
-                    "basePrice": 10000,
-                    "currentPrice": 10000,
-                    "isWholeGrain": false
-                }
-            ],
-            "basePrice": 0,
-            "currentPrice": 0,
-            "taxPercentage": 0,
-            "isActive": true,
-            "isDeleted": false,
-            "customAttributes": {}
-        },
-        {
-            "id": "A4OrBdSGLefuI0cdCjF1",
-            "createdAt": "2025-05-20T20:29:01.536Z",
-            "updatedAt": "2025-08-20T17:40:48.354Z",
-            "bakeryId": "diana_lee-demo",
-            "name": "vanilla villain",
-            "collectionId": "rRKnCoDADej47MszlIOK",
-            "collectionName": "cakes",
-            "variations": [
-                {
-                    "id": "MCgDthGe4Z9Zu36C",
-                    "name": "completo",
-                    "value": 12,
-                    "basePrice": 198000,
-                    "currentPrice": 198000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "8BxoaYcuQAtzRpdQ",
-                    "name": "otra",
-                    "value": 1000,
-                    "basePrice": 10000,
-                    "currentPrice": 10000,
-                    "isWholeGrain": false
-                }
-            ],
-            "basePrice": 0,
-            "currentPrice": 0,
-            "taxPercentage": 0,
-            "isActive": true,
-            "isDeleted": false,
-            "customAttributes": {}
-        },
-        {
-            "id": "MOCMP1J75OEPAgmmwYZH",
-            "createdAt": "2025-05-20T20:29:01.842Z",
-            "updatedAt": "2025-08-20T17:41:44.813Z",
-            "bakeryId": "diana_lee-demo",
-            "name": "awesome arequipe",
-            "collectionId": "rRKnCoDADej47MszlIOK",
-            "collectionName": "cakes",
-            "variations": [
-                {
-                    "id": "QLnA3tGlaWBocrvk",
-                    "name": "completo",
-                    "value": 12,
-                    "basePrice": 225000,
-                    "currentPrice": 225000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "f8eOg4pZBspmK2KH",
-                    "name": "medio",
-                    "value": 6,
-                    "basePrice": 140000,
-                    "currentPrice": 140000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "aU4uGVkuyLPVbDve",
-                    "name": "tiny",
-                    "value": 2,
-                    "basePrice": 34000,
-                    "currentPrice": 34000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "FQM7nYJsIHH53cal",
-                    "name": "otra",
-                    "value": 1000,
-                    "basePrice": 10000,
-                    "currentPrice": 10000,
-                    "isWholeGrain": false
-                }
-            ],
-            "basePrice": 0,
-            "currentPrice": 0,
-            "taxPercentage": 0,
-            "isActive": true,
-            "isDeleted": false,
-            "customAttributes": {}
-        },
-        {
-            "id": "tSaOI5iCwyfHDgB4BpRd",
-            "createdAt": "2025-05-20T20:29:02.150Z",
-            "updatedAt": "2025-08-20T17:42:09.241Z",
-            "bakeryId": "diana_lee-demo",
-            "name": "manzana max",
-            "collectionId": "rRKnCoDADej47MszlIOK",
-            "collectionName": "cakes",
-            "variations": [
-                {
-                    "id": "cbdbaq7TiUkev9Yf",
-                    "name": "completo",
-                    "value": 12,
-                    "basePrice": 145000,
-                    "currentPrice": 145000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "EKibrwqRgBIL8rr7",
-                    "name": "tiny",
-                    "value": 2,
-                    "basePrice": 28000,
-                    "currentPrice": 28000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "iZUXquEwKfbi5khe",
-                    "name": "otra",
-                    "value": 1000,
-                    "basePrice": 10000,
-                    "currentPrice": 10000,
-                    "isWholeGrain": false
-                }
-            ],
-            "basePrice": 0,
-            "currentPrice": 0,
-            "taxPercentage": 0,
-            "isActive": true,
-            "isDeleted": false,
-            "customAttributes": {}
-        },
-        {
-            "id": "z6GLqeghx4vsZyc8vT76",
-            "createdAt": "2025-08-20T17:44:29.013Z",
-            "updatedAt": "2025-08-20T17:46:55.841Z",
-            "bakeryId": "diana_lee-demo",
-            "name": "caramel company",
-            "collectionId": "vhqUDK7StAO5O2loxiiT",
-            "collectionName": "cookies",
-            "variations": [
-                {
-                    "id": "9aH0KzmB5oGLbAio",
-                    "name": "x4",
-                    "value": 4,
-                    "basePrice": 20000,
-                    "currentPrice": 20000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "a19FxL5sU21fViKu",
-                    "name": "x6",
-                    "value": 6,
-                    "basePrice": 29000,
-                    "currentPrice": 29000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "7KPYjX9WD1MMTLPi",
-                    "name": "x8",
-                    "value": 8,
-                    "basePrice": 35000,
-                    "currentPrice": 35000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "xaXcDVG2Wf5OygaM",
-                    "name": "otra",
-                    "value": 1000,
-                    "basePrice": 10000,
-                    "currentPrice": 10000,
-                    "isWholeGrain": false
-                }
-            ],
-            "basePrice": 0,
-            "currentPrice": 0,
-            "taxPercentage": 0,
-            "isActive": true,
-            "isDeleted": false,
-            "customAttributes": {}
-        },
-        {
-            "id": "06PSv7IBoWvTaWcuEd2E",
-            "createdAt": "2025-08-20T17:46:17.599Z",
-            "updatedAt": "2025-08-20T17:47:19.795Z",
-            "bakeryId": "diana_lee-demo",
-            "name": "lavender luck",
-            "collectionId": "vhqUDK7StAO5O2loxiiT",
-            "collectionName": "cookies",
-            "variations": [
-                {
-                    "id": "8O5TnHg2LP3ZLAKv",
-                    "name": "x4",
-                    "value": 4,
-                    "basePrice": 19000,
-                    "currentPrice": 19000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "iCdef12aUYvYbmnT",
-                    "name": "x6",
-                    "value": 6,
-                    "basePrice": 28000,
-                    "currentPrice": 28000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "VcAAcj0KrmPHHt4C",
-                    "name": "x8",
-                    "value": 8,
-                    "basePrice": 34000,
-                    "currentPrice": 34000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "muQ4SDiI2ZjS2AA6",
-                    "name": "otra",
-                    "value": 1000,
-                    "basePrice": 10000,
-                    "currentPrice": 10000,
-                    "isWholeGrain": false
-                }
-            ],
-            "basePrice": 0,
-            "currentPrice": 0,
-            "taxPercentage": 0,
-            "isActive": true,
-            "isDeleted": false,
-            "customAttributes": {}
-        },
-        {
-            "id": "xSOLdnJ7dCbl2DJjKwve",
-            "createdAt": "2025-08-20T17:46:30.560Z",
-            "updatedAt": "2025-08-20T17:47:35.496Z",
-            "bakeryId": "diana_lee-demo",
-            "name": "choco chips",
-            "collectionId": "vhqUDK7StAO5O2loxiiT",
-            "collectionName": "cookies",
-            "variations": [
-                {
-                    "id": "niwq436fiaADInv8",
-                    "name": "x4",
-                    "value": 4,
-                    "basePrice": 19000,
-                    "currentPrice": 19000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "8uxqvvVnr3esyboW",
-                    "name": "x6",
-                    "value": 6,
-                    "basePrice": 28000,
-                    "currentPrice": 28000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "gfVp7E98jb0hvZ6i",
-                    "name": "x8",
-                    "value": 8,
-                    "basePrice": 34000,
-                    "currentPrice": 34000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "2ivZ8p4Na4hNRatR",
-                    "name": "otra",
-                    "value": 1000,
-                    "basePrice": 10000,
-                    "currentPrice": 10000,
-                    "isWholeGrain": false
-                }
-            ],
-            "basePrice": 0,
-            "currentPrice": 0,
-            "taxPercentage": 0,
-            "isActive": true,
-            "isDeleted": false,
-            "customAttributes": {}
-        },
-        {
-            "id": "5eRGWhw6gwlPucAIssIb",
-            "createdAt": "2025-08-24T22:12:23.651Z",
-            "bakeryId": "diana_lee-demo",
-            "name": "pineapple party",
-            "collectionId": "rRKnCoDADej47MszlIOK",
-            "collectionName": "cakes",
-            "variations": [
-                {
-                    "id": "tjmqvMjN3aNrpXmd",
-                    "name": "mini",
-                    "value": 0,
-                    "basePrice": 23000,
-                    "currentPrice": 23000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "1nVIWzHU0jUG54rV",
-                    "name": "pequeño",
-                    "value": 0,
-                    "basePrice": 45000,
-                    "currentPrice": 45000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "dxkPrD2HesRfq0pe",
-                    "name": "grande",
-                    "value": 0,
-                    "basePrice": 154000,
-                    "currentPrice": 154000,
-                    "isWholeGrain": false
-                },
-                {
-                    "id": "LJQsBLQLkxxipyZ0",
-                    "name": "otra",
-                    "value": 1000,
-                    "basePrice": 10000,
-                    "currentPrice": 10000,
-                    "isWholeGrain": false
-                }
-            ],
-            "basePrice": 0,
-            "currentPrice": 0,
-            "taxPercentage": 0,
-            "isActive": true,
-            "isDeleted": false,
-            "customAttributes": {}
-        }
+      {
+        "id": "eOcISMCwnHd3yywMr37h",
+        "createdAt": "2025-05-20T20:28:58.779Z",
+        "updatedAt": "2025-08-20T17:39:12.752Z",
+        "bakeryId": "diana_lee-demo",
+        "name": "fresa fine",
+        "collectionId": "G5wBFb1GZE1CgOTAgB8Z",
+        "collectionName": "cheesecakes",
+        "variations": [
+          {
+            "id": "9eO9tdaa6F7fTAeH",
+            "name": "completo",
+            "value": 12,
+            "basePrice": 159000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "aJ0urYWGPu6ZAw1m",
+            "name": "medio",
+            "value": 6,
+            "basePrice": 132000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "fGqtLqkqJ9Io7VkB",
+            "name": "tiny",
+            "value": 2,
+            "basePrice": 60000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "bjpWXe0gSr2pfrmT",
+            "name": "otra",
+            "value": 1000,
+            "basePrice": 10000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 999
+          }
+        ],
+        "basePrice": 0,
+        "currentPrice": 0,
+        "taxPercentage": 0,
+        "isActive": true,
+        "isDeleted": false,
+        "customAttributes": {}
+      },
+      {
+        "id": "zKIdn4WeKUFzvazEsrj0",
+        "createdAt": "2025-05-20T20:28:59.079Z",
+        "updatedAt": "2025-08-20T17:38:46.783Z",
+        "bakeryId": "diana_lee-demo",
+        "name": "choco charm",
+        "collectionId": "G5wBFb1GZE1CgOTAgB8Z",
+        "collectionName": "cheesecakes",
+        "variations": [
+          {
+            "id": "y4Tqr6fC5BCbrZzn",
+            "name": "completo",
+            "value": 12,
+            "basePrice": 189000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "TeNAFubRz0IHnSkP",
+            "name": "medio",
+            "value": 6,
+            "basePrice": 123000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "wIrKueWkqlmRSb2F",
+            "name": "tiny",
+            "value": 2,
+            "basePrice": 52000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "xrJOooTSGS0RlJK2",
+            "name": "otra",
+            "value": 1000,
+            "basePrice": 10000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 999
+          }
+        ],
+        "basePrice": 0,
+        "currentPrice": 0,
+        "taxPercentage": 0,
+        "isActive": true,
+        "isDeleted": false,
+        "customAttributes": {}
+      },
+      {
+        "id": "rHLH2TRHxEjBDigEzzB8",
+        "createdAt": "2025-05-20T20:28:59.387Z",
+        "updatedAt": "2025-08-20T17:39:02.848Z",
+        "bakeryId": "diana_lee-demo",
+        "name": "naranja next",
+        "collectionId": "G5wBFb1GZE1CgOTAgB8Z",
+        "collectionName": "cheesecakes",
+        "variations": [
+          {
+            "id": "umWqH4JFss4mcIV3",
+            "name": "completo",
+            "value": 12,
+            "basePrice": 185000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "12CGdoOoAlwoHxAw",
+            "name": "medio",
+            "value": 6,
+            "basePrice": 123000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "i4J1a95E2DwZsiwx",
+            "name": "otra",
+            "value": 1000,
+            "basePrice": 10000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 999
+          }
+        ],
+        "basePrice": 0,
+        "currentPrice": 0,
+        "taxPercentage": 0,
+        "isActive": true,
+        "isDeleted": false,
+        "customAttributes": {}
+      },
+      {
+        "id": "QfWfABr5yEMxjIfH64Ci",
+        "createdAt": "2025-05-20T20:28:59.668Z",
+        "updatedAt": "2025-08-20T17:39:39.165Z",
+        "bakeryId": "diana_lee-demo",
+        "name": "white wish",
+        "collectionId": "G5wBFb1GZE1CgOTAgB8Z",
+        "collectionName": "cheesecakes",
+        "variations": [
+          {
+            "id": "00zGXbSa98pUXkHw",
+            "name": "completo",
+            "value": 12,
+            "basePrice": 184000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "99RwH9oxl2cSdwQB",
+            "name": "medio",
+            "value": 6,
+            "basePrice": 115000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "hN9tEVxK3mdCkpfm",
+            "name": "tiny",
+            "value": 2,
+            "basePrice": 28000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "BNysXgOOb2YnZQb7",
+            "name": "otra",
+            "value": 1000,
+            "basePrice": 10000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 999
+          }
+        ],
+        "basePrice": 0,
+        "currentPrice": 0,
+        "taxPercentage": 0,
+        "isActive": true,
+        "isDeleted": false,
+        "customAttributes": {}
+      },
+      {
+        "id": "sYASSTQsEARkqs38Itox",
+        "createdAt": "2025-05-20T20:29:00.282Z",
+        "updatedAt": "2025-08-20T17:40:01.048Z",
+        "bakeryId": "diana_lee-demo",
+        "name": "lime lunatic",
+        "collectionId": "G5wBFb1GZE1CgOTAgB8Z",
+        "collectionName": "cheesecakes",
+        "variations": [
+          {
+            "id": "P86vj4EeH2CUkS2G",
+            "name": "completo",
+            "value": 12,
+            "basePrice": 156000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "D11clOYCy5ZASrYT",
+            "name": "otra",
+            "value": 1000,
+            "basePrice": 10000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 999
+          }
+        ],
+        "basePrice": 0,
+        "currentPrice": 0,
+        "taxPercentage": 0,
+        "isActive": true,
+        "isDeleted": false,
+        "customAttributes": {}
+      },
+      {
+        "id": "pKTUCkcC4XN9I0gc3EIi",
+        "createdAt": "2025-05-20T20:29:01.229Z",
+        "updatedAt": "2025-08-20T17:40:14.874Z",
+        "bakeryId": "diana_lee-demo",
+        "name": "choco chastic",
+        "collectionId": "rRKnCoDADej47MszlIOK",
+        "collectionName": "cakes",
+        "variations": [
+          {
+            "id": "2ZH34vz4h3lixfIL",
+            "name": "completo",
+            "value": 12,
+            "basePrice": 195000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "BVi0wIWWFpQxlBWE",
+            "name": "medio",
+            "value": 6,
+            "basePrice": 135000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "zHmDxjBRC2dBiDo2",
+            "name": "tiny",
+            "value": 2,
+            "basePrice": 30000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "RbSTByfFkWFEfoax",
+            "name": "otra",
+            "value": 1000,
+            "basePrice": 10000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 999
+          }
+        ],
+        "basePrice": 0,
+        "currentPrice": 0,
+        "taxPercentage": 0,
+        "isActive": true,
+        "isDeleted": false,
+        "customAttributes": {}
+      },
+      {
+        "id": "A4OrBdSGLefuI0cdCjF1",
+        "createdAt": "2025-05-20T20:29:01.536Z",
+        "updatedAt": "2025-08-20T17:40:48.354Z",
+        "bakeryId": "diana_lee-demo",
+        "name": "vanilla villain",
+        "collectionId": "rRKnCoDADej47MszlIOK",
+        "collectionName": "cakes",
+        "variations": [
+          {
+            "id": "MCgDthGe4Z9Zu36C",
+            "name": "completo",
+            "value": 12,
+            "basePrice": 198000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "8BxoaYcuQAtzRpdQ",
+            "name": "otra",
+            "value": 1000,
+            "basePrice": 10000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 999
+          }
+        ],
+        "basePrice": 0,
+        "currentPrice": 0,
+        "taxPercentage": 0,
+        "isActive": true,
+        "isDeleted": false,
+        "customAttributes": {}
+      },
+      {
+        "id": "MOCMP1J75OEPAgmmwYZH",
+        "createdAt": "2025-05-20T20:29:01.842Z",
+        "updatedAt": "2025-08-20T17:41:44.813Z",
+        "bakeryId": "diana_lee-demo",
+        "name": "awesome arequipe",
+        "collectionId": "rRKnCoDADej47MszlIOK",
+        "collectionName": "cakes",
+        "variations": [
+          {
+            "id": "QLnA3tGlaWBocrvk",
+            "name": "completo",
+            "value": 12,
+            "basePrice": 225000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "f8eOg4pZBspmK2KH",
+            "name": "medio",
+            "value": 6,
+            "basePrice": 140000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "aU4uGVkuyLPVbDve",
+            "name": "tiny",
+            "value": 2,
+            "basePrice": 34000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "FQM7nYJsIHH53cal",
+            "name": "otra",
+            "value": 1000,
+            "basePrice": 10000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 999
+          }
+        ],
+        "basePrice": 0,
+        "currentPrice": 0,
+        "taxPercentage": 0,
+        "isActive": true,
+        "isDeleted": false,
+        "customAttributes": {}
+      },
+      {
+        "id": "tSaOI5iCwyfHDgB4BpRd",
+        "createdAt": "2025-05-20T20:29:02.150Z",
+        "updatedAt": "2025-08-20T17:42:09.241Z",
+        "bakeryId": "diana_lee-demo",
+        "name": "manzana max",
+        "collectionId": "rRKnCoDADej47MszlIOK",
+        "collectionName": "cakes",
+        "variations": [
+          {
+            "id": "cbdbaq7TiUkev9Yf",
+            "name": "completo",
+            "value": 12,
+            "basePrice": 145000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "EKibrwqRgBIL8rr7",
+            "name": "tiny",
+            "value": 2,
+            "basePrice": 28000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "iZUXquEwKfbi5khe",
+            "name": "otra",
+            "value": 1000,
+            "basePrice": 10000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 999
+          }
+        ],
+        "basePrice": 0,
+        "currentPrice": 0,
+        "taxPercentage": 0,
+        "isActive": true,
+        "isDeleted": false,
+        "customAttributes": {}
+      },
+      {
+        "id": "z6GLqeghx4vsZyc8vT76",
+        "createdAt": "2025-08-20T17:44:29.013Z",
+        "updatedAt": "2025-08-20T17:46:55.841Z",
+        "bakeryId": "diana_lee-demo",
+        "name": "caramel company",
+        "collectionId": "vhqUDK7StAO5O2loxiiT",
+        "collectionName": "cookies",
+        "variations": [
+          {
+            "id": "9aH0KzmB5oGLbAio",
+            "name": "x4",
+            "value": 4,
+            "basePrice": 20000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "a19FxL5sU21fViKu",
+            "name": "x6",
+            "value": 6,
+            "basePrice": 29000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "7KPYjX9WD1MMTLPi",
+            "name": "x8",
+            "value": 8,
+            "basePrice": 35000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "xaXcDVG2Wf5OygaM",
+            "name": "otra",
+            "value": 1000,
+            "basePrice": 10000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 999
+          }
+        ],
+        "basePrice": 0,
+        "currentPrice": 0,
+        "taxPercentage": 0,
+        "isActive": true,
+        "isDeleted": false,
+        "customAttributes": {}
+      },
+      {
+        "id": "06PSv7IBoWvTaWcuEd2E",
+        "createdAt": "2025-08-20T17:46:17.599Z",
+        "updatedAt": "2025-08-20T17:47:19.795Z",
+        "bakeryId": "diana_lee-demo",
+        "name": "lavender luck",
+        "collectionId": "vhqUDK7StAO5O2loxiiT",
+        "collectionName": "cookies",
+        "variations": [
+          {
+            "id": "8O5TnHg2LP3ZLAKv",
+            "name": "x4",
+            "value": 4,
+            "basePrice": 19000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "iCdef12aUYvYbmnT",
+            "name": "x6",
+            "value": 6,
+            "basePrice": 28000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "VcAAcj0KrmPHHt4C",
+            "name": "x8",
+            "value": 8,
+            "basePrice": 34000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "muQ4SDiI2ZjS2AA6",
+            "name": "otra",
+            "value": 1000,
+            "basePrice": 10000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 999
+          }
+        ],
+        "basePrice": 0,
+        "currentPrice": 0,
+        "taxPercentage": 0,
+        "isActive": true,
+        "isDeleted": false,
+        "customAttributes": {}
+      },
+      {
+        "id": "xSOLdnJ7dCbl2DJjKwve",
+        "createdAt": "2025-08-20T17:46:30.560Z",
+        "updatedAt": "2025-08-20T17:47:35.496Z",
+        "bakeryId": "diana_lee-demo",
+        "name": "choco chips",
+        "collectionId": "vhqUDK7StAO5O2loxiiT",
+        "collectionName": "cookies",
+        "variations": [
+          {
+            "id": "niwq436fiaADInv8",
+            "name": "x4",
+            "value": 4,
+            "basePrice": 19000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "8uxqvvVnr3esyboW",
+            "name": "x6",
+            "value": 6,
+            "basePrice": 28000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "gfVp7E98jb0hvZ6i",
+            "name": "x8",
+            "value": 8,
+            "basePrice": 34000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "2ivZ8p4Na4hNRatR",
+            "name": "otra",
+            "value": 1000,
+            "basePrice": 10000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 999
+          }
+        ],
+        "basePrice": 0,
+        "currentPrice": 0,
+        "taxPercentage": 0,
+        "isActive": true,
+        "isDeleted": false,
+        "customAttributes": {}
+      },
+      {
+        "id": "5eRGWhw6gwlPucAIssIb",
+        "createdAt": "2025-08-24T22:12:23.651Z",
+        "bakeryId": "diana_lee-demo",
+        "name": "pineapple party",
+        "collectionId": "rRKnCoDADej47MszlIOK",
+        "collectionName": "cakes",
+        "variations": [
+          {
+            "id": "tjmqvMjN3aNrpXmd",
+            "name": "mini",
+            "value": 0,
+            "basePrice": 23000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "1nVIWzHU0jUG54rV",
+            "name": "pequeño",
+            "value": 0,
+            "basePrice": 45000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "dxkPrD2HesRfq0pe",
+            "name": "grande",
+            "value": 0,
+            "basePrice": 154000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 1
+          },
+          {
+            "id": "LJQsBLQLkxxipyZ0",
+            "name": "otra",
+            "value": 1000,
+            "basePrice": 10000,
+            "isWholeGrain": false,
+            "unit": "",
+            "type": "SIZE",
+            "displayOrder": 999
+          }
+        ],
+        "basePrice": 0,
+        "currentPrice": 0,
+        "taxPercentage": 0,
+        "isActive": true,
+        "isDeleted": false,
+        "customAttributes": {}
+      }
     ],
     "pagination": {
         "page": 1,

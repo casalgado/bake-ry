@@ -1,67 +1,211 @@
 {
-    "id": "default",
-    "createdAt": "2025-08-15T21:05:45.097Z",
-    "updatedAt": "2025-08-15T21:05:45.097Z",
-    "orderStatuses": [
-        "Recibida",
-        "En Produccion",
-        "Preparada",
-        "En Camino",
-        "Completada"
-    ],
-    "fulfillmentTypes": [
-        "delivery",
-        "pickup"
-    ],
-    "paymentMethods": [
-        "transfer",
-        "cash",
-        "card"
-    ],
-    "unitOptions": [
-        "Kg",
-        "g",
-        "L",
-        "ml",
-        "uds",
-        "docena",
-        "paquete"
-    ],
-    "storageTemperatures": [
-        "Ambiente",
-        "Refrigeracion",
-        "Congelacion"
-    ],
-    "availablePaymentMethods": [
+  "id": "default",
+  "createdAt": "2025-08-29T11:47:24.658Z",
+  "updatedAt": "2025-08-29T11:47:24.658Z",
+  "orderStatuses": [
+    "Recibida",
+    "En Produccion",
+    "Preparada",
+    "En Camino",
+    "Completada"
+  ],
+  "fulfillmentTypes": [
+    {
+      "key": "delivery",
+      "value": "Delivery"
+    },
+    {
+      "key": "pickup",
+      "value": "Pickup"
+    }
+  ],
+  "unitOptions": [
+    {
+      "symbol": "g",
+      "name": "Gramo",
+      "type": "weight",
+      "template": "WEIGHT"
+    },
+    {
+      "symbol": "lb",
+      "name": "Libra",
+      "type": "weight",
+      "template": "WEIGHT"
+    },
+    {
+      "symbol": "ml",
+      "name": "Mililitro",
+      "type": "volume",
+      "template": "WEIGHT"
+    },
+    {
+      "symbol": "uds",
+      "name": "Unidades",
+      "type": "count",
+      "template": "QUANTITY"
+    },
+    {
+      "symbol": "dz",
+      "name": "Docena",
+      "type": "count",
+      "template": "QUANTITY"
+    },
+    {
+      "symbol": "pkt",
+      "name": "Paquete",
+      "type": "count",
+      "template": "QUANTITY"
+    }
+  ],
+  "storageTemperatures": [
+    {
+      "key": "dry",
+      "value": "Dry Storage"
+    },
+    {
+      "key": "refrigerated",
+      "value": "Refrigerated"
+    },
+    {
+      "key": "frozen",
+      "value": "Frozen"
+    }
+  ],
+  "availablePaymentMethods": [
+    {
+      "value": "cash",
+      "label": "Efectivo",
+      "displayText": "EF"
+    },
+    {
+      "value": "transfer",
+      "label": "Transferencia",
+      "displayText": "TR"
+    },
+    {
+      "value": "card",
+      "label": "Tarjeta",
+      "displayText": "DF"
+    },
+    {
+      "value": "davivienda",
+      "label": "Davivienda",
+      "displayText": "DV"
+    },
+    {
+      "value": "bancolombia",
+      "label": "Bancolombia",
+      "displayText": "BC"
+    },
+    {
+      "value": "complimentary",
+      "label": "Regalo",
+      "displayText": "RE"
+    }
+  ],
+  "defaultVariationTemplates": {
+    "WEIGHT": {
+      "label": "Weight",
+      "unit": "g",
+      "defaults": [
         {
-            "value": "cash",
-            "label": "Efectivo",
-            "displayText": "EF"
+          "name": "mini",
+          "value": 50,
+          "basePrice": 0,
+          "recipeId": ""
         },
         {
-            "value": "transfer",
-            "label": "Transferencia",
-            "displayText": "TR"
+          "name": "pequeño",
+          "value": 100,
+          "basePrice": 0,
+          "recipeId": ""
         },
         {
-            "value": "card",
-            "label": "Tarjeta",
-            "displayText": "DF"
+          "name": "mediano",
+          "value": 200,
+          "basePrice": 0,
+          "recipeId": ""
         },
         {
-            "value": "davivienda",
-            "label": "Davivienda",
-            "displayText": "DV"
+          "name": "grande",
+          "value": 300,
+          "basePrice": 0,
+          "recipeId": ""
         },
         {
-            "value": "bancolombia",
-            "label": "Bancolombia",
-            "displayText": "BC"
-        },
-        {
-            "value": "complimentary",
-            "label": "Regalo",
-            "displayText": "RE"
+          "id": "fixed-fallback-variation",
+          "name": "otra",
+          "value": 50,
+          "basePrice": 0,
+          "recipeId": "",
+          "displayOrder": 999
         }
-    ]
+      ]
+    },
+    "QUANTITY": {
+      "label": "Quantity",
+      "unit": "uds",
+      "prefix": "x",
+      "defaults": [
+        {
+          "name": "x4",
+          "value": 4,
+          "basePrice": 0,
+          "recipeId": ""
+        },
+        {
+          "name": "x6",
+          "value": 6,
+          "basePrice": 0,
+          "recipeId": ""
+        },
+        {
+          "name": "x12",
+          "value": 12,
+          "basePrice": 0,
+          "recipeId": ""
+        },
+        {
+          "id": "fixed-fallback-variation",
+          "name": "otra",
+          "value": 1,
+          "basePrice": 0,
+          "recipeId": "",
+          "displayOrder": 999
+        }
+      ]
+    },
+    "SIZE": {
+      "label": "Size",
+      "unit": "",
+      "defaults": [
+        {
+          "name": "pequeño",
+          "value": 2,
+          "basePrice": 0,
+          "recipeId": ""
+        },
+        {
+          "name": "mediano",
+          "value": 4,
+          "basePrice": 0,
+          "recipeId": ""
+        },
+        {
+          "name": "grande",
+          "value": 6,
+          "basePrice": 0,
+          "recipeId": ""
+        },
+        {
+          "id": "fixed-fallback-variation",
+          "name": "otra",
+          "value": 1,
+          "basePrice": 0,
+          "recipeId": "",
+          "displayOrder": 999
+        }
+      ]
+    }
+  }
 }
