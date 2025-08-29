@@ -19,14 +19,14 @@ class SystemSettings extends BaseModel {
     { key: 'frozen', value: 'Frozen' },
   ];
   static UNIT_OPTIONS = [
-    { symbol: 'Kg', name: 'Kilogramo', type: 'weight', template: 'WEIGHT' },
+
     { symbol: 'g', name: 'Gramo', type: 'weight', template: 'WEIGHT' },
     { symbol: 'lb', name: 'Libra', type: 'weight', template: 'WEIGHT' },
-    { symbol: 'L', name: 'Litro', type: 'volume', template: 'WEIGHT' },
+
     { symbol: 'ml', name: 'Mililitro', type: 'volume', template: 'WEIGHT' },
     { symbol: 'uds', name: 'Unidades', type: 'count', template: 'QUANTITY' },
-    { symbol: 'docena', name: 'Docena', type: 'count', template: 'QUANTITY' },
-    { symbol: 'paquete', name: 'Paquete', type: 'count', template: 'QUANTITY' },
+    { symbol: 'dz', name: 'Docena', type: 'count', template: 'QUANTITY' },
+    { symbol: 'pkt', name: 'Paquete', type: 'count', template: 'QUANTITY' },
 
   ];
 

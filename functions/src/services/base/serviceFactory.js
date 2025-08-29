@@ -334,6 +334,7 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
         const updatedInstance = new ModelClass({
           ...currentData,
           isDeleted: true,
+          isActive: false,
           updatedAt: new Date(),
           lastEditedBy: {
             userId: editor?.uid,

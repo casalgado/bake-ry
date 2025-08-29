@@ -1,0 +1,1781 @@
+{
+    "items": [
+        {
+            "id": "zXHgfeYE4dqWP6XuqV34",
+            "createdAt": "2025-01-17T22:00:33.148Z",
+            "updatedAt": "2025-07-28T15:58:02.938Z",
+            "bakeryId": "es-alimento",
+            "name": "original",
+            "collectionId": "GRzDxeAWOj2HBhmlObSy",
+            "collectionName": "sourdough",
+            "variations": [
+                {
+                    "id": "etbgyQIohcngttfT",
+                    "name": "pequeño",
+                    "value": 500,
+                    "basePrice": 13200,
+                    "currentPrice": 13200,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "povaWBdDsPfBXwZx",
+                    "name": "pequeño integral",
+                    "value": 500,
+                    "basePrice": 13200,
+                    "currentPrice": 13200,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "sgbjkVZXGf1Z0Vo5",
+                    "name": "mediano",
+                    "value": 950,
+                    "basePrice": 19800,
+                    "currentPrice": 19800,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "zmXltpFs892jqfCN",
+                    "name": "mediano integral",
+                    "value": 950,
+                    "basePrice": 19800,
+                    "currentPrice": 19800,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "MJS8tBIrpFW1kCpY",
+                    "name": "grande",
+                    "value": 1700,
+                    "basePrice": 31900,
+                    "currentPrice": 31900,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "TSF255J8VYRfLgSD",
+                    "name": "grande integral",
+                    "value": 1700,
+                    "basePrice": 31900,
+                    "currentPrice": 31900,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "qrTxHkr1Ozalyukf",
+                    "name": "rectangular",
+                    "value": 0,
+                    "basePrice": 31900,
+                    "currentPrice": 31900,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "rNsshcnxE7Q0qpgO",
+                    "name": "rectangular mediano",
+                    "value": 0,
+                    "basePrice": 24800,
+                    "currentPrice": 24800,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "Vrt1Y3zKVXKCzpP1",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "tfTjV8pOp1ZDVg4ZQ99R",
+            "createdAt": "2025-01-17T22:00:33.522Z",
+            "updatedAt": "2025-07-07T15:11:11.899Z",
+            "bakeryId": "es-alimento",
+            "name": "integral",
+            "collectionId": "GRzDxeAWOj2HBhmlObSy",
+            "collectionName": "sourdough",
+            "variations": [
+                {
+                    "id": "d6tg4jZEWXcA24Y2",
+                    "name": "pequeño",
+                    "value": 500,
+                    "basePrice": 13200,
+                    "currentPrice": 13200,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "lPum5ubY3NIUtOeI",
+                    "name": "mediano",
+                    "value": 950,
+                    "basePrice": 19800,
+                    "currentPrice": 19800,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "PM5viru0haaDTWzS",
+                    "name": "grande",
+                    "value": 1700,
+                    "basePrice": 31900,
+                    "currentPrice": 31900,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "Po7LcwThZl3P6JY8",
+                    "name": "rectangular mediano",
+                    "value": 0,
+                    "basePrice": 19800,
+                    "currentPrice": 19800,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "cCbjfYMg21qUtxKk",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "xJpCPiTpzkJvpw3hGwkK",
+            "createdAt": "2025-01-17T22:00:33.720Z",
+            "updatedAt": "2025-07-28T15:57:42.102Z",
+            "bakeryId": "es-alimento",
+            "name": "zaatar",
+            "collectionId": "GRzDxeAWOj2HBhmlObSy",
+            "collectionName": "sourdough",
+            "variations": [
+                {
+                    "id": "AAMW7jaheoW3xPwh",
+                    "name": "pequeño",
+                    "value": 500,
+                    "basePrice": 14300,
+                    "currentPrice": 14300,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "ixQkxd1MFJDo3Q5i",
+                    "name": "pequeño integral",
+                    "value": 500,
+                    "basePrice": 14300,
+                    "currentPrice": 14300,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "9LTq1TqtKdXyBdej",
+                    "name": "mediano",
+                    "value": 950,
+                    "basePrice": 22000,
+                    "currentPrice": 22000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "ETtkfkO7rIqqQTNU",
+                    "name": "mediano integral",
+                    "value": 950,
+                    "basePrice": 22000,
+                    "currentPrice": 22000,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "2FvFESym9u9bLJLv",
+                    "name": "grande",
+                    "value": 1700,
+                    "basePrice": 37400,
+                    "currentPrice": 37400,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "Gu1paaAscmTiWhmm",
+                    "name": "grande integral",
+                    "value": 1700,
+                    "basePrice": 37400,
+                    "currentPrice": 37400,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "9WdkOkDuo6944eWw",
+                    "name": "rectangular mediano",
+                    "value": 0,
+                    "basePrice": 29000,
+                    "currentPrice": 29000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "uObyiMhkZlGPWQzJ",
+                    "name": " integral",
+                    "value": 0,
+                    "basePrice": 0,
+                    "currentPrice": 0,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "W1HWaNdt3RKi1Qyl",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "bmjCA3RCl0L8sv3pqoMg",
+            "createdAt": "2025-01-17T22:00:34.062Z",
+            "updatedAt": "2025-08-21T13:02:13.426Z",
+            "bakeryId": "es-alimento",
+            "name": "queso costeño",
+            "collectionId": "GRzDxeAWOj2HBhmlObSy",
+            "collectionName": "sourdough",
+            "variations": [
+                {
+                    "id": "Uy7G4GWJ3YL0zvYd",
+                    "name": "pequeño",
+                    "value": 500,
+                    "basePrice": 17600,
+                    "currentPrice": 17600,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "FrLThlTDcSVc3niD",
+                    "name": "pequeño integral",
+                    "value": 500,
+                    "basePrice": 17600,
+                    "currentPrice": 17600,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "JkeRItlJ0MyU7bdM",
+                    "name": "mediano",
+                    "value": 950,
+                    "basePrice": 27500,
+                    "currentPrice": 27500,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "7fh9YDMON98q5IxD",
+                    "name": "mediano integral",
+                    "value": 950,
+                    "basePrice": 27500,
+                    "currentPrice": 27500,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "xpMqUTW2hfoD6uNR",
+                    "name": "grande",
+                    "value": 1700,
+                    "basePrice": 42900,
+                    "currentPrice": 42900,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "VtApS60s95OJK8JW",
+                    "name": "grande integral",
+                    "value": 1700,
+                    "basePrice": 42900,
+                    "currentPrice": 42900,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "i9xuI8XT62mXeQlc",
+                    "name": "rectangular mediano",
+                    "value": 0,
+                    "basePrice": 36500,
+                    "currentPrice": 36500,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "8H0pScHwad8gWK76",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "PPeFrINLpPQaW3UlIcPx",
+            "createdAt": "2025-01-17T22:00:34.275Z",
+            "updatedAt": "2025-07-31T19:09:48.276Z",
+            "bakeryId": "es-alimento",
+            "name": "semillas",
+            "collectionId": "GRzDxeAWOj2HBhmlObSy",
+            "collectionName": "sourdough",
+            "variations": [
+                {
+                    "id": "ZBTupP8Z2mabIEKq",
+                    "name": "pequeño",
+                    "value": 500,
+                    "basePrice": 19800,
+                    "currentPrice": 19800,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "eWCXhZnTEgMxHP5u",
+                    "name": "pequeño integral",
+                    "value": 500,
+                    "basePrice": 19800,
+                    "currentPrice": 19800,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "II00xDH0FU6gkbkr",
+                    "name": "mediano",
+                    "value": 950,
+                    "basePrice": 29700,
+                    "currentPrice": 29700,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "3NHx6svnmPitsRrC",
+                    "name": "mediano integral",
+                    "value": 950,
+                    "basePrice": 29700,
+                    "currentPrice": 29700,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "MF2Ndb4SFQVGdTkF",
+                    "name": "grande",
+                    "value": 1700,
+                    "basePrice": 44000,
+                    "currentPrice": 44000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "Jtpzvt0gEOGGz795",
+                    "name": "grande integral",
+                    "value": 1700,
+                    "basePrice": 44000,
+                    "currentPrice": 44000,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "HXEQPylVyYAchb5d",
+                    "name": " integral rectangular mediano",
+                    "value": 0,
+                    "basePrice": 37500,
+                    "currentPrice": 37500,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "wG2rD8ppRN9WS3mp",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "Vpzsp0gTn7iVHP1aRIlY",
+            "createdAt": "2025-01-17T22:00:34.641Z",
+            "bakeryId": "es-alimento",
+            "name": "chocolate",
+            "collectionId": "GRzDxeAWOj2HBhmlObSy",
+            "collectionName": "sourdough",
+            "variations": [
+                {
+                    "id": "hsk4f9EDMQ4ytirA",
+                    "name": "pequeño",
+                    "value": 500,
+                    "basePrice": 31900,
+                    "currentPrice": 31900,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "fEavSqVutmXK7ric",
+                    "name": "pequeño integral",
+                    "value": 500,
+                    "basePrice": 31900,
+                    "currentPrice": 31900,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "NnmDUzCuKvkgRLUA",
+                    "name": "mediano",
+                    "value": 950,
+                    "basePrice": 42900,
+                    "currentPrice": 42900,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "amzr9iC6tqEXk5f6",
+                    "name": "mediano integral",
+                    "value": 950,
+                    "basePrice": 42900,
+                    "currentPrice": 42900,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "xm3GE22rnDc2TeQ8",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "Ii9MudUOrnpmw45lR1ql",
+            "createdAt": "2025-01-17T22:00:34.858Z",
+            "bakeryId": "es-alimento",
+            "name": "arandanos & chocolate",
+            "collectionId": "GRzDxeAWOj2HBhmlObSy",
+            "collectionName": "sourdough",
+            "variations": [
+                {
+                    "id": "STV7hyluE3HPbSIi",
+                    "name": "mediano",
+                    "value": 650,
+                    "basePrice": 36300,
+                    "currentPrice": 36300,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "8DtBnLSJELjEKuDz",
+                    "name": "mediano integral",
+                    "value": 650,
+                    "basePrice": 36300,
+                    "currentPrice": 36300,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "eevMkj71lq0S2iWe",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "l3Cz7LtuauhCl8TV94Wi",
+            "createdAt": "2025-01-17T22:00:35.199Z",
+            "bakeryId": "es-alimento",
+            "name": "original",
+            "collectionId": "jSuTNbAyUtHSVbMIcfXq",
+            "collectionName": "baguette",
+            "variations": [
+                {
+                    "id": "5Yh8E5nd9rpiBwvy",
+                    "name": "x5",
+                    "value": 5,
+                    "basePrice": 9900,
+                    "currentPrice": 9900,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "W92aY8wTrVz3Fz4v",
+                    "name": "x5 integral",
+                    "value": 5,
+                    "basePrice": 9900,
+                    "currentPrice": 9900,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "c9hiN1gkyyJhs8J2",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "EFIz1n6FpivsETcbKA4f",
+            "createdAt": "2025-01-17T22:00:35.426Z",
+            "bakeryId": "es-alimento",
+            "name": "integral",
+            "collectionId": "jSuTNbAyUtHSVbMIcfXq",
+            "collectionName": "baguette",
+            "variations": [
+                {
+                    "id": "cyuWotk6s6sN7uNF",
+                    "name": "x5",
+                    "value": 5,
+                    "basePrice": 9900,
+                    "currentPrice": 9900,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "HGIfNE5StRTMKuPG",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "FLBQgn5Ocvw1biw8W2PY",
+            "createdAt": "2025-01-17T22:00:35.768Z",
+            "bakeryId": "es-alimento",
+            "name": "zaatar",
+            "collectionId": "jSuTNbAyUtHSVbMIcfXq",
+            "collectionName": "baguette",
+            "variations": [
+                {
+                    "id": "NnAOL4xXDTkDifqO",
+                    "name": "x5",
+                    "value": 5,
+                    "basePrice": 10500,
+                    "currentPrice": 10500,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "oRU4pOaXlw2eFvxt",
+                    "name": "x5 integral",
+                    "value": 5,
+                    "basePrice": 10500,
+                    "currentPrice": 10500,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "AfdoEWU4wFlQNBX3",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "vVRDvtaMMefTnuJJHOls",
+            "createdAt": "2025-01-17T22:00:35.938Z",
+            "bakeryId": "es-alimento",
+            "name": "queso costeño",
+            "collectionId": "jSuTNbAyUtHSVbMIcfXq",
+            "collectionName": "baguette",
+            "variations": [
+                {
+                    "id": "rUDZc8SVwfHMeBdB",
+                    "name": "x5",
+                    "value": 5,
+                    "basePrice": 15400,
+                    "currentPrice": 15400,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "Nj8Ejz57HpHwsfzZ",
+                    "name": "x5 integral",
+                    "value": 5,
+                    "basePrice": 15400,
+                    "currentPrice": 15400,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "hq0Uld0JiZ6zZfXI",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "lgtAF4A3oe4RggqAbcBk",
+            "createdAt": "2025-01-17T22:00:36.126Z",
+            "bakeryId": "es-alimento",
+            "name": "semillas",
+            "collectionId": "jSuTNbAyUtHSVbMIcfXq",
+            "collectionName": "baguette",
+            "variations": [
+                {
+                    "id": "LoazBygVQLUUIWEt",
+                    "name": "x5",
+                    "value": 5,
+                    "basePrice": 16500,
+                    "currentPrice": 16500,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "EEYlzlGwGBAEoJox",
+                    "name": "x5 integral",
+                    "value": 5,
+                    "basePrice": 16500,
+                    "currentPrice": 16500,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "ZoXYfmXADddmg274",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "Ew0DaHJOkrQYdP0EpmEs",
+            "createdAt": "2025-01-17T22:00:36.321Z",
+            "bakeryId": "es-alimento",
+            "name": "chocolate",
+            "collectionId": "jSuTNbAyUtHSVbMIcfXq",
+            "collectionName": "baguette",
+            "variations": [
+                {
+                    "id": "78swO7406NAEfykX",
+                    "name": "x5",
+                    "value": 5,
+                    "basePrice": 26400,
+                    "currentPrice": 26400,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "tmNpqbfSchSPgAsN",
+                    "name": "x5 integral",
+                    "value": 5,
+                    "basePrice": 26400,
+                    "currentPrice": 26400,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "gHlP8zDjSLUR1rfE",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "0y4SMbLMP5fM8tNZbQHQ",
+            "createdAt": "2025-01-17T22:00:36.679Z",
+            "bakeryId": "es-alimento",
+            "name": "arandanos & chocolate",
+            "collectionId": "jSuTNbAyUtHSVbMIcfXq",
+            "collectionName": "baguette",
+            "variations": [
+                {
+                    "id": "xrafbme70iBUpeB7",
+                    "name": "x5",
+                    "value": 5,
+                    "basePrice": 28600,
+                    "currentPrice": 28600,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "byPMaqYF1N2Dq2fn",
+                    "name": "x5 integral",
+                    "value": 5,
+                    "basePrice": 28600,
+                    "currentPrice": 28600,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "UWXfojPnNzIPC7c2",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "7d9O8vjfwKzwMSqmBuyF",
+            "createdAt": "2025-01-17T22:00:36.862Z",
+            "bakeryId": "es-alimento",
+            "name": "original",
+            "collectionId": "plqaB0ytl2XC1vmw8kNJ",
+            "collectionName": "tortillas",
+            "variations": [
+                {
+                    "id": "13WmlXW8ttfb2BrK",
+                    "name": "x6",
+                    "value": 6,
+                    "basePrice": 9400,
+                    "currentPrice": 9400,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "Wqz20va2dWPhyPij",
+                    "name": "x6 integral",
+                    "value": 6,
+                    "basePrice": 9400,
+                    "currentPrice": 9400,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "KtXJUIZBhHdyXACh",
+                    "name": "x10",
+                    "value": 10,
+                    "basePrice": 12700,
+                    "currentPrice": 12700,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "QITDwekUTLmqKyZR",
+                    "name": "x10 integral",
+                    "value": 10,
+                    "basePrice": 12700,
+                    "currentPrice": 12700,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "KyMQxXkvYy2bkA0i",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "Peuki87zDmVuc14OqQ8j",
+            "createdAt": "2025-01-17T22:00:37.235Z",
+            "bakeryId": "es-alimento",
+            "name": "integral",
+            "collectionId": "plqaB0ytl2XC1vmw8kNJ",
+            "collectionName": "tortillas",
+            "variations": [
+                {
+                    "id": "VR2PoNcXyRGOaD3r",
+                    "name": "x6",
+                    "value": 6,
+                    "basePrice": 9400,
+                    "currentPrice": 9400,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "m7EGIYlvvqChpsuR",
+                    "name": "x10",
+                    "value": 10,
+                    "basePrice": 12700,
+                    "currentPrice": 12700,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "nsLoJuJxtYbn0VYS",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "63Q5w8JRDUtP5SSinCfN",
+            "createdAt": "2025-01-17T22:00:37.422Z",
+            "bakeryId": "es-alimento",
+            "name": "zaatar",
+            "collectionId": "plqaB0ytl2XC1vmw8kNJ",
+            "collectionName": "tortillas",
+            "variations": [
+                {
+                    "id": "3DfH8LDipdDmya6b",
+                    "name": "x6",
+                    "value": 6,
+                    "basePrice": 9900,
+                    "currentPrice": 9900,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "PmdnY63Fptphluvo",
+                    "name": "x6 integral",
+                    "value": 6,
+                    "basePrice": 9900,
+                    "currentPrice": 9900,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "E3FLdJ6N5WMo9l4o",
+                    "name": "x10",
+                    "value": 10,
+                    "basePrice": 13800,
+                    "currentPrice": 13800,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "PsfbHxLKwEwPbQZC",
+                    "name": "x10 integral",
+                    "value": 10,
+                    "basePrice": 13800,
+                    "currentPrice": 13800,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "gCKK7qD3a0epaF6H",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "WztSkoIBGSBqNe31F3rC",
+            "createdAt": "2025-01-17T22:00:37.799Z",
+            "bakeryId": "es-alimento",
+            "name": "queso costeño",
+            "collectionId": "plqaB0ytl2XC1vmw8kNJ",
+            "collectionName": "tortillas",
+            "variations": [
+                {
+                    "id": "NWYGpFJR2MOTWfku",
+                    "name": "x6",
+                    "value": 6,
+                    "basePrice": 11600,
+                    "currentPrice": 11600,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "K2AuiZpqtXveRMnW",
+                    "name": "x6 integral",
+                    "value": 6,
+                    "basePrice": 11600,
+                    "currentPrice": 11600,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "aNCjdnHWwhWieVD5",
+                    "name": "x10",
+                    "value": 10,
+                    "basePrice": 16500,
+                    "currentPrice": 16500,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "72fn6awvSRK4OBZM",
+                    "name": "x10 integral",
+                    "value": 10,
+                    "basePrice": 16500,
+                    "currentPrice": 16500,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "rceYEtm4ylLUecub",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "byIopwX9UsNEwZJczLaL",
+            "createdAt": "2025-01-17T22:00:37.982Z",
+            "bakeryId": "es-alimento",
+            "name": "semillas",
+            "collectionId": "plqaB0ytl2XC1vmw8kNJ",
+            "collectionName": "tortillas",
+            "variations": [
+                {
+                    "id": "h0yb0s8520jZGm7f",
+                    "name": "x6",
+                    "value": 6,
+                    "basePrice": 11600,
+                    "currentPrice": 11600,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "3fe3rEfvXEMYJsk2",
+                    "name": "x6 integral",
+                    "value": 6,
+                    "basePrice": 11600,
+                    "currentPrice": 11600,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "fxjTiWfujF9oJfL1",
+                    "name": "x10",
+                    "value": 10,
+                    "basePrice": 16500,
+                    "currentPrice": 16500,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "26IJb7ApzNows7vV",
+                    "name": "x10 integral",
+                    "value": 10,
+                    "basePrice": 16500,
+                    "currentPrice": 16500,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "RIU1Qx5kXUTR8wL5",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "kTdTeZt2LvMyWiBlyt6u",
+            "createdAt": "2025-01-17T22:00:38.182Z",
+            "bakeryId": "es-alimento",
+            "name": "chocolate",
+            "collectionId": "plqaB0ytl2XC1vmw8kNJ",
+            "collectionName": "tortillas",
+            "variations": [
+                {
+                    "id": "EKAWc7lwfTQNjh1y",
+                    "name": "x6",
+                    "value": 6,
+                    "basePrice": 14300,
+                    "currentPrice": 14300,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "uXv3GD5i9Vy1KZBm",
+                    "name": "x6 integral",
+                    "value": 6,
+                    "basePrice": 14300,
+                    "currentPrice": 14300,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "BQgudfTJ8NkU7Jdd",
+                    "name": "x10",
+                    "value": 10,
+                    "basePrice": 19800,
+                    "currentPrice": 19800,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "k6BLyBVTtAZg8iPE",
+                    "name": "x10 integral",
+                    "value": 10,
+                    "basePrice": 19800,
+                    "currentPrice": 19800,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "veQZHl5VdLBiZNac",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "GV4N5DadSlhPFY4Oqrgj",
+            "createdAt": "2025-01-17T22:00:38.547Z",
+            "bakeryId": "es-alimento",
+            "name": "mermelada de fresa",
+            "collectionId": "HvG0VIiluQ3ULrgp7QSN",
+            "collectionName": "untables",
+            "variations": [],
+            "basePrice": 18000,
+            "currentPrice": 18000,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "thqLmv9m8uKBMDWCJYGn",
+            "createdAt": "2025-01-17T22:00:38.720Z",
+            "bakeryId": "es-alimento",
+            "name": "cebolla caramelizada",
+            "collectionId": "HvG0VIiluQ3ULrgp7QSN",
+            "collectionName": "untables",
+            "variations": [],
+            "basePrice": 18500,
+            "currentPrice": 18500,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "xUd15R609mBYYZmpfbvc",
+            "createdAt": "2025-01-17T22:00:39.101Z",
+            "updatedAt": "2025-08-14T18:13:03.902Z",
+            "bakeryId": "es-alimento",
+            "name": "pan de molde",
+            "collectionId": "y4koQ0pzabULphKDyb7E",
+            "collectionName": "panaderia tradicional",
+            "variations": [
+                {
+                    "id": "rAMMgL8GGWdV9yFv",
+                    "name": "pan de molde",
+                    "value": 0,
+                    "basePrice": 14000,
+                    "currentPrice": 14000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "7I6br9go74e037Aj",
+                    "name": " integral",
+                    "value": 0,
+                    "basePrice": 14000,
+                    "currentPrice": 14000,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "LLfE24b2osZBIXFa",
+                    "name": "pan de molde rectangular",
+                    "value": 0,
+                    "basePrice": 18000,
+                    "currentPrice": 18000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "IjUfGuTkGL33miXi",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 14000,
+            "currentPrice": 14000,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "xM7CUWATV1XLXwQJj2Vh",
+            "createdAt": "2025-01-17T22:00:39.262Z",
+            "bakeryId": "es-alimento",
+            "name": "focaccia",
+            "collectionId": "y4koQ0pzabULphKDyb7E",
+            "collectionName": "panaderia tradicional",
+            "variations": [],
+            "basePrice": 18000,
+            "currentPrice": 18000,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "KOLOquHg3y7cAnEDRf0K",
+            "createdAt": "2025-01-17T22:00:39.661Z",
+            "updatedAt": "2025-07-31T19:15:33.232Z",
+            "bakeryId": "es-alimento",
+            "name": "pan de bono",
+            "collectionId": "5I7hEbCRGEd7yNj5X7ae",
+            "collectionName": "congelados",
+            "variations": [
+                {
+                    "id": "YutQMoOo6r5AML8w",
+                    "name": "x6",
+                    "value": 6,
+                    "basePrice": 15000,
+                    "currentPrice": 15000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "c7Chz5xvJadbaskj",
+                    "name": "x12",
+                    "value": 12,
+                    "basePrice": 28000,
+                    "currentPrice": 28000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "fIUNP0UV3xCX7rks",
+                    "name": "de chocolate x20",
+                    "value": 0,
+                    "basePrice": 20000,
+                    "currentPrice": 20000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "Ldtp8fb4gyo2UMBb",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "4raaelr9CrPrugK7V0GA",
+            "createdAt": "2025-01-17T22:00:39.858Z",
+            "bakeryId": "es-alimento",
+            "name": "deditos olaya",
+            "collectionId": "5I7hEbCRGEd7yNj5X7ae",
+            "collectionName": "congelados",
+            "variations": [
+                {
+                    "id": "uVw6aNW9lNnhpFKq",
+                    "name": "x16",
+                    "value": 16,
+                    "basePrice": 18500,
+                    "currentPrice": 18500,
+                    "isWholeGrain": false
+                }
+            ],
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "8LNSrTd7UmQuxiXXaPep",
+            "createdAt": "2025-01-17T22:00:40.207Z",
+            "bakeryId": "es-alimento",
+            "name": "beatriz",
+            "collectionId": "6XyBqTCgL8U7uavYACuq",
+            "collectionName": "cafe el diario",
+            "variations": [
+                {
+                    "id": "t3XDtkA74yoUGQZz",
+                    "name": "entero",
+                    "value": 1,
+                    "basePrice": 34500,
+                    "currentPrice": 34500,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "Xsp1A75gVLKR7nq8",
+                    "name": "1 grueso",
+                    "value": 1,
+                    "basePrice": 34500,
+                    "currentPrice": 34500,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "uYjrvs1IU4KXI7XD",
+                    "name": "2 semigrueso",
+                    "value": 1,
+                    "basePrice": 34500,
+                    "currentPrice": 34500,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "EwH9Z5TTIXMQMidb",
+                    "name": "3 medio alto",
+                    "value": 1,
+                    "basePrice": 34500,
+                    "currentPrice": 34500,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "fLZvtMCAjYvEbCm1",
+                    "name": "4 medio bajo",
+                    "value": 1,
+                    "basePrice": 34500,
+                    "currentPrice": 34500,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "lmZYyhd9UvE2ltck",
+                    "name": "5 semifino",
+                    "value": 1,
+                    "basePrice": 34500,
+                    "currentPrice": 34500,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "8IPYd2pk4Nbg9yxQ",
+                    "name": "6 fino",
+                    "value": 1,
+                    "basePrice": 34500,
+                    "currentPrice": 34500,
+                    "isWholeGrain": false
+                }
+            ],
+            "taxPercentage": 5,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "Zo91CdWhS6loNQa6bKYR",
+            "createdAt": "2025-01-17T22:00:40.401Z",
+            "bakeryId": "es-alimento",
+            "name": "margarita",
+            "collectionId": "6XyBqTCgL8U7uavYACuq",
+            "collectionName": "cafe el diario",
+            "variations": [
+                {
+                    "id": "p73jxaf3zoGo3zDc",
+                    "name": "entero",
+                    "value": 1,
+                    "basePrice": 34500,
+                    "currentPrice": 34500,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "92A8ukd4SacqtA5K",
+                    "name": "1 grueso",
+                    "value": 1,
+                    "basePrice": 34500,
+                    "currentPrice": 34500,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "DC3cMIWmQ8rCOHwA",
+                    "name": "2 semigrueso",
+                    "value": 1,
+                    "basePrice": 34500,
+                    "currentPrice": 34500,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "e7jvNn2zCB6k3sdq",
+                    "name": "3 medio alto",
+                    "value": 1,
+                    "basePrice": 34500,
+                    "currentPrice": 34500,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "Q4eCdvvIJzrmIACR",
+                    "name": "4 medio bajo",
+                    "value": 1,
+                    "basePrice": 34500,
+                    "currentPrice": 34500,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "5FeGzyryDt2khJIX",
+                    "name": "5 semifino",
+                    "value": 1,
+                    "basePrice": 34500,
+                    "currentPrice": 34500,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "vkDCv2ozG2y1t5ed",
+                    "name": "6 fino",
+                    "value": 1,
+                    "basePrice": 34500,
+                    "currentPrice": 34500,
+                    "isWholeGrain": false
+                }
+            ],
+            "taxPercentage": 5,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "HbujJ2D363iVmssCeTgs",
+            "createdAt": "2025-01-17T22:00:40.762Z",
+            "bakeryId": "es-alimento",
+            "name": "cold brew",
+            "collectionId": "6XyBqTCgL8U7uavYACuq",
+            "collectionName": "cafe el diario",
+            "variations": [
+                {
+                    "id": "8HhfhbdDaH25Qkge",
+                    "name": "x1",
+                    "value": 250,
+                    "basePrice": 6000,
+                    "currentPrice": 6000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "NVB4bjeagTICZUJ7",
+                    "name": "x4",
+                    "value": 1000,
+                    "basePrice": 20000,
+                    "currentPrice": 20000,
+                    "isWholeGrain": false
+                }
+            ],
+            "taxPercentage": 5,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "l1mbxiXTt68jWG5OVYGW",
+            "createdAt": "2025-01-17T22:37:57.784Z",
+            "bakeryId": "es-alimento",
+            "name": "pan hamburguesa",
+            "collectionId": "y4koQ0pzabULphKDyb7E",
+            "collectionName": "panaderia tradicional",
+            "variations": [
+                {
+                    "id": "TFjlidGbPB88hkI0",
+                    "name": "mantequilla",
+                    "value": 0,
+                    "basePrice": 1800,
+                    "currentPrice": 1800,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "Dw0Z9VdJ99YNs7G6",
+                    "name": "margarina",
+                    "value": 0,
+                    "basePrice": 1200,
+                    "currentPrice": 1200,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "dlplrfvhf4BEqkCi",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "VwBv2yF68VokEW7isLWa",
+            "createdAt": "2025-01-17T22:38:10.696Z",
+            "bakeryId": "es-alimento",
+            "name": "pan perro",
+            "collectionId": "y4koQ0pzabULphKDyb7E",
+            "collectionName": "panaderia tradicional",
+            "variations": [
+                {
+                    "id": "EPw4cS8KvbMZPy5b",
+                    "name": "mantequilla",
+                    "value": 0,
+                    "basePrice": 2200,
+                    "currentPrice": 2200,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "DzF5B2tDNZ6O1WJz",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "1Zxmxn2My33tJyggyYki",
+            "createdAt": "2025-01-20T16:54:05.088Z",
+            "bakeryId": "es-alimento",
+            "name": "pan de uva",
+            "collectionId": "GRzDxeAWOj2HBhmlObSy",
+            "collectionName": "sourdough",
+            "variations": [
+                {
+                    "id": "451DD2WxM2FfLcCk",
+                    "name": "pequeño",
+                    "value": 550,
+                    "basePrice": 15000,
+                    "currentPrice": 15000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "8vXv7MdfHJg6NsmB",
+                    "name": "pequeño integral",
+                    "value": 550,
+                    "basePrice": 15000,
+                    "currentPrice": 15000,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "smFG9A0NbnGbstZs",
+                    "name": "mediano",
+                    "value": 950,
+                    "basePrice": 24000,
+                    "currentPrice": 24000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "gU75VinGPnjj3XRI",
+                    "name": "mediano integral",
+                    "value": 950,
+                    "basePrice": 24000,
+                    "currentPrice": 24000,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "I55OH3ntrRC3ACrh",
+                    "name": "grande",
+                    "value": 1700,
+                    "basePrice": 38000,
+                    "currentPrice": 38000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "L3XRJISvdD3SgW1H",
+                    "name": "grande integral",
+                    "value": 1700,
+                    "basePrice": 38000,
+                    "currentPrice": 38000,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "KigxRPk25NtFI73u",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "aFfhnhTI7wvWEO4HH9cp",
+            "createdAt": "2025-03-12T15:19:34.303Z",
+            "bakeryId": "es-alimento",
+            "name": "pandebono unidad",
+            "collectionId": "5I7hEbCRGEd7yNj5X7ae",
+            "collectionName": "congelados",
+            "variations": [],
+            "basePrice": 2500,
+            "currentPrice": 2500,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "GMLApFY582TWhVGcbkiZ",
+            "createdAt": "2025-03-12T15:20:43.859Z",
+            "bakeryId": "es-alimento",
+            "name": "dedito unidad",
+            "collectionId": "5I7hEbCRGEd7yNj5X7ae",
+            "collectionName": "congelados",
+            "variations": [],
+            "basePrice": 1200,
+            "currentPrice": 1200,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "GgEMJ70AsRdlUs9jOH49",
+            "createdAt": "2025-05-08T16:50:00.966Z",
+            "bakeryId": "es-alimento",
+            "name": "domicilio",
+            "collectionId": "y4koQ0pzabULphKDyb7E",
+            "collectionName": "panaderia tradicional",
+            "variations": [],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "Vnae7TVdRK4aLMhbJdas",
+            "createdAt": "2025-08-11T15:17:34.639Z",
+            "updatedAt": "2025-08-21T15:32:02.374Z",
+            "bakeryId": "es-alimento",
+            "name": "aceitunas",
+            "collectionId": "GRzDxeAWOj2HBhmlObSy",
+            "collectionName": "sourdough",
+            "variations": [
+                {
+                    "id": "DTuKQgEumWWjv0DQ",
+                    "name": "650 gr",
+                    "value": 950,
+                    "basePrice": 38900,
+                    "currentPrice": 38900,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "f8QUkxVU65b6B5Fs",
+                    "name": "650 gr integral",
+                    "value": 950,
+                    "basePrice": 38900,
+                    "currentPrice": 38900,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "KRcGPSs6QU0Jf7IH",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "2ODIwsnyAK2a1OhXDn9L",
+            "createdAt": "2025-08-11T15:18:17.730Z",
+            "bakeryId": "es-alimento",
+            "name": "aceitunas",
+            "collectionId": "jSuTNbAyUtHSVbMIcfXq",
+            "collectionName": "baguette",
+            "variations": [
+                {
+                    "id": "SnvXEtPYP3PLJDTy",
+                    "name": "x5",
+                    "value": 550,
+                    "basePrice": 31000,
+                    "currentPrice": 31000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "l1mFHjYnpjfWp44C",
+                    "name": "x5 integral",
+                    "value": 550,
+                    "basePrice": 31000,
+                    "currentPrice": 31000,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "yDul8ul7XRL2Ksi7",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "Tm5XqtgD5B6xBKaVL9J8",
+            "createdAt": "2025-08-11T16:48:37.274Z",
+            "bakeryId": "es-alimento",
+            "name": "datiles",
+            "collectionId": "GRzDxeAWOj2HBhmlObSy",
+            "collectionName": "sourdough",
+            "variations": [
+                {
+                    "id": "bqUSaC2xixbooJQl",
+                    "name": "pequeño",
+                    "value": 550,
+                    "basePrice": 27900,
+                    "currentPrice": 27900,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "5fHul0VHjMxP5Ec5",
+                    "name": "pequeño integral",
+                    "value": 550,
+                    "basePrice": 27900,
+                    "currentPrice": 27900,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "FPOCgoyYXtN79JuB",
+                    "name": "mediano",
+                    "value": 950,
+                    "basePrice": 39900,
+                    "currentPrice": 39900,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "NlV2qoGc14ONP2iN",
+                    "name": "mediano integral",
+                    "value": 950,
+                    "basePrice": 39900,
+                    "currentPrice": 39900,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "iMb0Q3z5GO6asj9F",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "rtpLxvAB2OOSw111ZPzX",
+            "createdAt": "2025-08-11T16:49:59.577Z",
+            "updatedAt": "2025-08-11T17:06:23.930Z",
+            "bakeryId": "es-alimento",
+            "name": "datiles",
+            "collectionId": "jSuTNbAyUtHSVbMIcfXq",
+            "collectionName": "baguette",
+            "variations": [
+                {
+                    "id": "Kb0Blvp1SqtCOz66",
+                    "name": "x5",
+                    "value": 5,
+                    "basePrice": 21500,
+                    "currentPrice": 21500,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "kdRUwLmtyPwmLy5U",
+                    "name": "x5 integral",
+                    "value": 0,
+                    "basePrice": 21500,
+                    "currentPrice": 21500,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "0BiAJ6fKs6bQaqLi",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "1tTsDpBG3VQ45AModfXH",
+            "createdAt": "2025-08-21T14:53:19.612Z",
+            "bakeryId": "es-alimento",
+            "name": "deditos de chocolate",
+            "collectionId": "y4koQ0pzabULphKDyb7E",
+            "collectionName": "panaderia tradicional",
+            "variations": [],
+            "basePrice": 400,
+            "currentPrice": 400,
+            "taxPercentage": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        }
+    ],
+    "pagination": {
+        "page": 1,
+        "perPage": 5000,
+        "total": 40
+    }
+}

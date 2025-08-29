@@ -1,0 +1,1287 @@
+{
+    "items": [
+        {
+            "id": "Dy6AjX4HiJ1Fzw6NFkey",
+            "createdAt": "2025-06-03T13:08:04.385Z",
+            "updatedAt": "2025-08-21T00:20:05.634Z",
+            "bakeryId": "diana_lee",
+            "name": "guayaba",
+            "collectionId": "sm1DlsLOrOwFHrW71UF3",
+            "collectionName": "cheesecakes",
+            "variations": [
+                {
+                    "id": "2zYKZSR6c5k8VhL8",
+                    "name": "completo",
+                    "value": 12,
+                    "basePrice": 232000,
+                    "currentPrice": 232000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "6AdjkC3KLgkhsOZI",
+                    "name": "medio",
+                    "value": 6,
+                    "basePrice": 145000,
+                    "currentPrice": 145000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "7MZlRbkqzf5CcBAh",
+                    "name": "tiny",
+                    "value": 2,
+                    "basePrice": 34000,
+                    "currentPrice": 34000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "hoycgFV4aafei93O",
+                    "name": "porcion",
+                    "value": 0,
+                    "basePrice": 30000,
+                    "currentPrice": 30000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "8mD4mSyDaCAMqo1v",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "WfCUh3wwb33Cf0kk6TLN",
+            "createdAt": "2025-06-03T13:08:04.605Z",
+            "updatedAt": "2025-06-04T18:26:17.023Z",
+            "bakeryId": "diana_lee",
+            "name": "pistachio",
+            "collectionId": "sm1DlsLOrOwFHrW71UF3",
+            "collectionName": "cheesecakes",
+            "variations": [
+                {
+                    "id": "YQobxl8CfsJyQhjL",
+                    "name": "completo",
+                    "value": 12,
+                    "basePrice": 227000,
+                    "currentPrice": 227000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "wZGhMQ40bJaKT2tY",
+                    "name": "medio",
+                    "value": 6,
+                    "basePrice": 142000,
+                    "currentPrice": 142000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "RTTToano6NfgyTz3",
+                    "name": "tiny",
+                    "value": 2,
+                    "basePrice": 34000,
+                    "currentPrice": 34000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "HYL8PWMEUWdY63PD",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "sT1bkj1nrCPUkYiFCpV6",
+            "createdAt": "2025-06-03T13:08:05.038Z",
+            "updatedAt": "2025-06-04T18:26:36.337Z",
+            "bakeryId": "diana_lee",
+            "name": "naranja",
+            "collectionId": "sm1DlsLOrOwFHrW71UF3",
+            "collectionName": "cheesecakes",
+            "variations": [
+                {
+                    "id": "eOMR2FauTzXKL7qF",
+                    "name": "completo",
+                    "value": 12,
+                    "basePrice": 246000,
+                    "currentPrice": 246000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "1m0ZQRYSLIikH2pJ",
+                    "name": "medio",
+                    "value": 6,
+                    "basePrice": 153000,
+                    "currentPrice": 153000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "NX3HbwAcga9Ht5Hr",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "oZ5GH3nFO1uAHE4PI2DV",
+            "createdAt": "2025-06-03T13:08:05.323Z",
+            "updatedAt": "2025-06-04T18:26:45.256Z",
+            "bakeryId": "diana_lee",
+            "name": "plain",
+            "collectionId": "sm1DlsLOrOwFHrW71UF3",
+            "collectionName": "cheesecakes",
+            "variations": [
+                {
+                    "id": "VvFwAgAgJg4NX3XG",
+                    "name": "completo",
+                    "value": 12,
+                    "basePrice": 184000,
+                    "currentPrice": 184000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "YNLwpwmXlXlJMUf8",
+                    "name": "medio",
+                    "value": 6,
+                    "basePrice": 115000,
+                    "currentPrice": 115000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "SkLMFF0m8oQeWo7o",
+                    "name": "tiny",
+                    "value": 2,
+                    "basePrice": 28000,
+                    "currentPrice": 28000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "KiwGBqPlcDSU2f58",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "KqXZzkIWBuZz9vNDV5sW",
+            "createdAt": "2025-06-03T13:08:05.630Z",
+            "updatedAt": "2025-06-04T18:26:53.433Z",
+            "bakeryId": "diana_lee",
+            "name": "biscoff",
+            "collectionId": "sm1DlsLOrOwFHrW71UF3",
+            "collectionName": "cheesecakes",
+            "variations": [
+                {
+                    "id": "oWu32AiFeHFUrGHy",
+                    "name": "completo",
+                    "value": 12,
+                    "basePrice": 257000,
+                    "currentPrice": 257000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "TIbnsnFyy4ytzU2O",
+                    "name": "medio",
+                    "value": 6,
+                    "basePrice": 161000,
+                    "currentPrice": 161000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "xuShnefNF3zocfgl",
+                    "name": "tiny",
+                    "value": 2,
+                    "basePrice": 39000,
+                    "currentPrice": 39000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "ljZZ9zoXMQfxsR7e",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "6CdqhmN3m2MYoU6HpmpN",
+            "createdAt": "2025-06-03T13:08:05.937Z",
+            "updatedAt": "2025-06-04T18:27:04.065Z",
+            "bakeryId": "diana_lee",
+            "name": "key lime fantasy",
+            "collectionId": "sm1DlsLOrOwFHrW71UF3",
+            "collectionName": "cheesecakes",
+            "variations": [
+                {
+                    "id": "pJJkem3zFvKZoQRv",
+                    "name": "completo",
+                    "value": 12,
+                    "basePrice": 166000,
+                    "currentPrice": 166000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "8hgAJVXRETGR4CgV",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "KqdvgkHOTCvQvRPk1ubm",
+            "createdAt": "2025-06-03T13:08:06.247Z",
+            "updatedAt": "2025-06-04T18:27:13.212Z",
+            "bakeryId": "diana_lee",
+            "name": "pistachio knots",
+            "collectionId": "B9pOoSjnUKf4871pQ1Du",
+            "collectionName": "nudos y otros",
+            "variations": [
+                {
+                    "id": "z9YA4gMgoXBxM1dq",
+                    "name": "x 8",
+                    "value": 8,
+                    "basePrice": 136000,
+                    "currentPrice": 136000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "xCAFBvTrraiuFBng",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "JMeON0qKYpYsWzCwMa1R",
+            "createdAt": "2025-06-03T13:08:06.548Z",
+            "updatedAt": "2025-06-09T17:05:53.817Z",
+            "bakeryId": "diana_lee",
+            "name": "pistachio con helado",
+            "collectionId": "B9pOoSjnUKf4871pQ1Du",
+            "collectionName": "nudos y otros",
+            "variations": [
+                {
+                    "id": "ueP31Pf0wQstpsyL",
+                    "name": "litro",
+                    "value": "32 oz",
+                    "basePrice": 99000,
+                    "currentPrice": 99000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "A4ccLnE3y359T35J",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "oNGKmzgLl6nc9KIKTyPn",
+            "createdAt": "2025-06-03T13:08:06.858Z",
+            "updatedAt": "2025-08-21T00:24:24.604Z",
+            "bakeryId": "diana_lee",
+            "name": "blackout chocolate cake",
+            "collectionId": "TjKIsYdvRHGhxrkWzzOP",
+            "collectionName": "cakes",
+            "variations": [
+                {
+                    "id": "QE1DiUT6P69rDOjD",
+                    "name": "completo",
+                    "value": 12,
+                    "basePrice": 195000,
+                    "currentPrice": 195000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "z6Xh429cw1iwTRUE",
+                    "name": "medio",
+                    "value": 6,
+                    "basePrice": 135000,
+                    "currentPrice": 135000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "KBR09BAKZc3SvOnQ",
+                    "name": "tiny",
+                    "value": 2,
+                    "basePrice": 30000,
+                    "currentPrice": 30000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "8zcogo8X5RwbnopT",
+                    "name": "mini",
+                    "value": 0,
+                    "basePrice": 15000,
+                    "currentPrice": 15000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "WDcrdMaVLDsUtEg5",
+                    "name": "slice",
+                    "value": 0,
+                    "basePrice": 25000,
+                    "currentPrice": 25000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "soH1gdWZPZSWYpX6",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "6ouiQxoLMfhpYCHEbtgV",
+            "createdAt": "2025-06-03T13:08:07.165Z",
+            "updatedAt": "2025-06-04T18:28:24.101Z",
+            "bakeryId": "diana_lee",
+            "name": "orange cake with chocolate pecan streusel",
+            "collectionId": "TjKIsYdvRHGhxrkWzzOP",
+            "collectionName": "cakes",
+            "variations": [
+                {
+                    "id": "fv851U2aR6Sz7mkW",
+                    "name": "completo",
+                    "value": 12,
+                    "basePrice": 212000,
+                    "currentPrice": 212000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "MFjOaDjTb2olnMDD",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "eAHQ2L2n25NtR6SkaiYW",
+            "createdAt": "2025-06-03T13:08:07.473Z",
+            "updatedAt": "2025-06-04T18:28:32.619Z",
+            "bakeryId": "diana_lee",
+            "name": "pistachio paradise cake",
+            "collectionId": "TjKIsYdvRHGhxrkWzzOP",
+            "collectionName": "cakes",
+            "variations": [
+                {
+                    "id": "pXm59erzyvzZkm88",
+                    "name": "completo",
+                    "value": 12,
+                    "basePrice": 225000,
+                    "currentPrice": 225000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "FdpgW7080Uwte77P",
+                    "name": "medio",
+                    "value": 6,
+                    "basePrice": 140000,
+                    "currentPrice": 140000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "xegCrfEBFVoRzObr",
+                    "name": "tiny",
+                    "value": 2,
+                    "basePrice": 34000,
+                    "currentPrice": 34000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "0trtMnOmIbX6UdKg",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "nnudiFCnJAfDnpHtajrI",
+            "createdAt": "2025-06-03T13:08:07.779Z",
+            "updatedAt": "2025-06-04T18:28:41.736Z",
+            "bakeryId": "diana_lee",
+            "name": "apple crumble pie",
+            "collectionId": "TjKIsYdvRHGhxrkWzzOP",
+            "collectionName": "cakes",
+            "variations": [
+                {
+                    "id": "CFdB0xu5frp4wkmq",
+                    "name": "completo",
+                    "value": 12,
+                    "basePrice": 145000,
+                    "currentPrice": 145000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "u5mjb95SaHperwje",
+                    "name": "tiny",
+                    "value": 2,
+                    "basePrice": 28000,
+                    "currentPrice": 28000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "3Kj2e13NIfN9Eev0",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "xz5IewLJuXMXEirlEt1O",
+            "createdAt": "2025-06-03T13:08:08.087Z",
+            "updatedAt": "2025-08-22T21:49:48.064Z",
+            "bakeryId": "diana_lee",
+            "name": "7 layer vanilla pound cake with flaky salt",
+            "collectionId": "TjKIsYdvRHGhxrkWzzOP",
+            "collectionName": "cakes",
+            "variations": [
+                {
+                    "id": "9npJ68YboTKVn4LI",
+                    "name": "completo",
+                    "value": 12,
+                    "basePrice": 232000,
+                    "currentPrice": 232000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "NyFWoY4hVEFqedUN",
+                    "name": "medio",
+                    "value": 6,
+                    "basePrice": 145000,
+                    "currentPrice": 145000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "OinP7gifouCTNBaH",
+                    "name": "tiny",
+                    "value": 2,
+                    "basePrice": 35000,
+                    "currentPrice": 35000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "zpOmOY5BLKM6W7RZ",
+                    "name": "slice",
+                    "value": 0,
+                    "basePrice": 25000,
+                    "currentPrice": 25000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "JRapcM1U8kno0BeZ",
+                    "name": " integral",
+                    "value": 0,
+                    "basePrice": 0,
+                    "currentPrice": 0,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "dbX4JaWgx1KcswwD",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "srmg94JyH1ue5tkXgB4S",
+            "createdAt": "2025-06-03T13:08:08.396Z",
+            "updatedAt": "2025-06-04T18:29:00.426Z",
+            "bakeryId": "diana_lee",
+            "name": "royal lava cake",
+            "collectionId": "TjKIsYdvRHGhxrkWzzOP",
+            "collectionName": "cakes",
+            "variations": [
+                {
+                    "id": "KnP7pZxkglX7V8Oj",
+                    "name": "xl",
+                    "value": 15,
+                    "basePrice": 246000,
+                    "currentPrice": 246000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "kGAUiXVWQnE0S6K6",
+                    "name": "medio",
+                    "value": 6,
+                    "basePrice": 154000,
+                    "currentPrice": 154000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "Ovbz0rxs2QNgK1CG",
+                    "name": "tiny",
+                    "value": 2,
+                    "basePrice": 25000,
+                    "currentPrice": 25000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "hrZvwmpnBU7dK96o",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "WmWS2jH16ff0RlzymZwc",
+            "createdAt": "2025-06-03T13:08:08.701Z",
+            "updatedAt": "2025-08-24T18:04:22.733Z",
+            "bakeryId": "diana_lee",
+            "name": "velvet coconut cream cake",
+            "collectionId": "TjKIsYdvRHGhxrkWzzOP",
+            "collectionName": "cakes",
+            "variations": [
+                {
+                    "id": "oaICK7mb3nYm0IrB",
+                    "name": "completo",
+                    "value": 12,
+                    "basePrice": 246000,
+                    "currentPrice": 246000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "4sV5RNCtiCyxCjlR",
+                    "name": "medio",
+                    "value": 6,
+                    "basePrice": 154000,
+                    "currentPrice": 154000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "PplJVokK0Yovm9do",
+                    "name": "tiny",
+                    "value": 2,
+                    "basePrice": 37000,
+                    "currentPrice": 37000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "ZOZBXvN5sBtRmXQo",
+                    "name": "slice",
+                    "value": 0,
+                    "basePrice": 30000,
+                    "currentPrice": 30000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "Yxb3UeLP0pI79BMX",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "P53BlrUuEauDM0anXeYF",
+            "createdAt": "2025-06-03T13:08:08.942Z",
+            "updatedAt": "2025-06-18T13:46:02.245Z",
+            "bakeryId": "diana_lee",
+            "name": "sticky walnut caramel cake",
+            "collectionId": "TjKIsYdvRHGhxrkWzzOP",
+            "collectionName": "cakes",
+            "variations": [
+                {
+                    "id": "gu17Znqv8eGPNyJS",
+                    "name": "completo",
+                    "value": 14,
+                    "basePrice": 190000,
+                    "currentPrice": 190000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "PqWfQhGQxgmmv6m3",
+                    "name": "medio",
+                    "value": 0,
+                    "basePrice": 100000,
+                    "currentPrice": 100000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "E1abEJg74f7gfVrX",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "E9RbVJMDQ5ojHrJxsf05",
+            "createdAt": "2025-06-03T13:08:09.315Z",
+            "updatedAt": "2025-06-04T18:29:20.461Z",
+            "bakeryId": "diana_lee",
+            "name": "molten lava pistachio crumble",
+            "collectionId": "TjKIsYdvRHGhxrkWzzOP",
+            "collectionName": "cakes",
+            "variations": [
+                {
+                    "id": "DKLnuo1hNDLmL6zX",
+                    "name": "completo",
+                    "value": 12,
+                    "basePrice": 279000,
+                    "currentPrice": 279000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "XdJCueZbEtNmZALa",
+                    "name": "medio",
+                    "value": 6,
+                    "basePrice": 174000,
+                    "currentPrice": 174000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "BknOBZbwdgFttepl",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "C4aAStiWS2sq5JkmGYG4",
+            "createdAt": "2025-06-03T13:08:09.521Z",
+            "updatedAt": "2025-06-04T18:29:30.163Z",
+            "bakeryId": "diana_lee",
+            "name": "orchard cake",
+            "collectionId": "TjKIsYdvRHGhxrkWzzOP",
+            "collectionName": "cakes",
+            "variations": [
+                {
+                    "id": "6U7k2TuTAOtgLgCI",
+                    "name": "completo",
+                    "value": 12,
+                    "basePrice": 145000,
+                    "currentPrice": 145000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "gC8lrIDDD1MHaT97",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "k8LRHUVrH1zZZCuy1idz",
+            "createdAt": "2025-06-03T13:08:09.933Z",
+            "updatedAt": "2025-06-04T18:29:55.999Z",
+            "bakeryId": "diana_lee",
+            "name": "orange blossom labneh dream",
+            "collectionId": "TjKIsYdvRHGhxrkWzzOP",
+            "collectionName": "cakes",
+            "variations": [
+                {
+                    "id": "beHgj5iwRAzcW913",
+                    "name": "completo",
+                    "value": 12,
+                    "basePrice": 144000,
+                    "currentPrice": 144000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "Gd7CZbYSBnffOwMz",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "xnLV74zWVHhcGthuXJYK",
+            "createdAt": "2025-06-03T13:08:10.134Z",
+            "updatedAt": "2025-06-09T15:28:39.980Z",
+            "bakeryId": "diana_lee",
+            "name": "dubai chocolate tart",
+            "collectionId": "TjKIsYdvRHGhxrkWzzOP",
+            "collectionName": "cakes",
+            "variations": [
+                {
+                    "id": "QQh8RBkSRCbZpCs8",
+                    "name": "completo",
+                    "value": 12,
+                    "basePrice": 256000,
+                    "currentPrice": 256000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "GbckIM8aqDj88ZhO",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "UDTYDuBCdY5hSZPPeCTJ",
+            "createdAt": "2025-06-03T13:08:10.544Z",
+            "updatedAt": "2025-08-21T00:22:22.434Z",
+            "bakeryId": "diana_lee",
+            "name": "biscoff creamy cake",
+            "collectionId": "TjKIsYdvRHGhxrkWzzOP",
+            "collectionName": "cakes",
+            "variations": [
+                {
+                    "id": "V2IZa99pEWFEiCBU",
+                    "name": "completo",
+                    "value": 12,
+                    "basePrice": 243000,
+                    "currentPrice": 243000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "nhKse7GKT0TAcKcJ",
+                    "name": "medio",
+                    "value": 6,
+                    "basePrice": 152000,
+                    "currentPrice": 152000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "f8LqV7VxRWEVThop",
+                    "name": "slice",
+                    "value": 0,
+                    "basePrice": 30000,
+                    "currentPrice": 30000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "J9XabYrNdXGD6pbV",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "6HbABauAu25kw6K8f4WK",
+            "createdAt": "2025-06-03T13:08:10.749Z",
+            "updatedAt": "2025-08-24T18:03:56.537Z",
+            "bakeryId": "diana_lee",
+            "name": "grandma june chocolate cake",
+            "collectionId": "TjKIsYdvRHGhxrkWzzOP",
+            "collectionName": "cakes",
+            "variations": [
+                {
+                    "id": "GmV9BMfMIrWg6z5O",
+                    "name": "completo",
+                    "value": 12,
+                    "basePrice": 144000,
+                    "currentPrice": 144000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "XusHHWiYDtYJ2sut",
+                    "name": "medio",
+                    "value": 6,
+                    "basePrice": 92000,
+                    "currentPrice": 92000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "unFfblzHy3DKrllK",
+                    "name": "slice",
+                    "value": 0,
+                    "basePrice": 20000,
+                    "currentPrice": 20000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "jqZ1EpsbePMzhkXu",
+                    "name": " integral",
+                    "value": 0,
+                    "basePrice": 0,
+                    "currentPrice": 0,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "YnEZrDT9MMoRZELC",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "ej5aJRFuXkpHFiNclXqY",
+            "createdAt": "2025-06-03T13:08:11.163Z",
+            "updatedAt": "2025-08-22T20:05:18.744Z",
+            "bakeryId": "diana_lee",
+            "name": "grandma june vanilla cake",
+            "collectionId": "TjKIsYdvRHGhxrkWzzOP",
+            "collectionName": "cakes",
+            "variations": [
+                {
+                    "id": "DZ2hpMQtFKUuHOQ5",
+                    "name": "completo",
+                    "value": 12,
+                    "basePrice": 132000,
+                    "currentPrice": 132000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "05vB9P22Ti7kZDs5",
+                    "name": "medio",
+                    "value": 6,
+                    "basePrice": 84000,
+                    "currentPrice": 84000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "9hxjvCHEp2tVZs1u",
+                    "name": "slice",
+                    "value": 0,
+                    "basePrice": 15000,
+                    "currentPrice": 15000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "49wosrcdNkaXUpyj",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "ryFvTLU1cqkHMPv6RD2i",
+            "createdAt": "2025-06-03T13:08:11.466Z",
+            "updatedAt": "2025-06-04T18:27:22.659Z",
+            "bakeryId": "diana_lee",
+            "name": "cake de almendra",
+            "collectionId": "TjKIsYdvRHGhxrkWzzOP",
+            "collectionName": "cakes",
+            "variations": [
+                {
+                    "id": "p6XFtbVQf3wb4sXE",
+                    "name": "completo",
+                    "value": 12,
+                    "basePrice": 163000,
+                    "currentPrice": 163000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "yYPfeyq5Pad3UQMU",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "n4LaIXy8RJXLRdA2MJpJ",
+            "createdAt": "2025-06-08T03:24:19.519Z",
+            "updatedAt": "2025-06-09T21:01:21.253Z",
+            "bakeryId": "diana_lee",
+            "name": "papa hugo",
+            "collectionId": "TjKIsYdvRHGhxrkWzzOP",
+            "collectionName": "cakes",
+            "variations": [
+                {
+                    "id": "eTPtysPRTldCipao",
+                    "name": "completo",
+                    "value": 0,
+                    "basePrice": 208000,
+                    "currentPrice": 208000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "tKR0KvdZKjvqoQic",
+                    "name": " medio",
+                    "value": 0,
+                    "basePrice": 140000,
+                    "currentPrice": 140000,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "gRVpoOTEajsqrVCk",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 192000,
+            "currentPrice": 192000,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "rsXxA6EHq8LbKuKNcAFs",
+            "createdAt": "2025-06-15T13:38:58.024Z",
+            "updatedAt": "2025-06-15T13:40:53.644Z",
+            "bakeryId": "diana_lee",
+            "name": "midnight dubai",
+            "collectionId": "sm1DlsLOrOwFHrW71UF3",
+            "collectionName": "cheesecakes",
+            "variations": [
+                {
+                    "id": "fJvufYUCPHuwcww5",
+                    "name": "midnight dubai full",
+                    "value": 0,
+                    "basePrice": 300000,
+                    "currentPrice": 300000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "VyJdkrqLk82ZdZ6u",
+                    "name": "midnight dubai",
+                    "value": 0,
+                    "basePrice": 195000,
+                    "currentPrice": 195000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "V8Xu7t8IYG0vprcc",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "4rsyRp8wSktWPdjpOv1V",
+            "createdAt": "2025-07-18T11:46:00.101Z",
+            "bakeryId": "diana_lee",
+            "name": "zanahoria",
+            "collectionId": "TjKIsYdvRHGhxrkWzzOP",
+            "collectionName": "cakes",
+            "variations": [],
+            "basePrice": 180000,
+            "currentPrice": 180000,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "TDZ2xqmQczjq5LfTJih5",
+            "createdAt": "2025-08-11T12:45:40.382Z",
+            "bakeryId": "diana_lee",
+            "name": "dubai brownies",
+            "collectionId": "B9pOoSjnUKf4871pQ1Du",
+            "collectionName": "nudos y otros",
+            "variations": [],
+            "basePrice": 17000,
+            "currentPrice": 17000,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "JKoNvwksZ6iJICYFbQyb",
+            "createdAt": "2025-08-21T00:18:48.002Z",
+            "bakeryId": "diana_lee",
+            "name": "key lime cookies",
+            "collectionId": "B9pOoSjnUKf4871pQ1Du",
+            "collectionName": "nudos y otros",
+            "variations": [],
+            "basePrice": 9000,
+            "currentPrice": 9000,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "Eu1WMqwwxRgTL77KqfBA",
+            "createdAt": "2025-08-21T00:30:56.608Z",
+            "bakeryId": "diana_lee",
+            "name": "muffin orchard apple cake",
+            "collectionId": "B9pOoSjnUKf4871pQ1Du",
+            "collectionName": "nudos y otros",
+            "variations": [],
+            "basePrice": 18000,
+            "currentPrice": 18000,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "VkJ06fSy5B79zg1bzQz4",
+            "createdAt": "2025-08-21T00:31:13.558Z",
+            "bakeryId": "diana_lee",
+            "name": "muffin golden carrot cake",
+            "collectionId": "B9pOoSjnUKf4871pQ1Du",
+            "collectionName": "nudos y otros",
+            "variations": [],
+            "basePrice": 18000,
+            "currentPrice": 18000,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        },
+        {
+            "id": "waIUPh85jRDWPXBdxtgm",
+            "createdAt": "2025-08-22T18:34:44.219Z",
+            "updatedAt": "2025-08-22T20:43:02.079Z",
+            "bakeryId": "diana_lee",
+            "name": "valdiri",
+            "collectionId": "TjKIsYdvRHGhxrkWzzOP",
+            "collectionName": "cakes",
+            "variations": [
+                {
+                    "id": "nBldPgPHOEl4QZBC",
+                    "name": "tiny",
+                    "value": 0,
+                    "basePrice": 37000,
+                    "currentPrice": 37000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "HjcP0a5R2uck3jJ2",
+                    "name": "slice",
+                    "value": 0,
+                    "basePrice": 25000,
+                    "currentPrice": 25000,
+                    "isWholeGrain": false
+                },
+                {
+                    "id": "MgqZQ6NXN0tPC9VT",
+                    "name": " integral",
+                    "value": 0,
+                    "basePrice": 0,
+                    "currentPrice": 0,
+                    "isWholeGrain": true
+                },
+                {
+                    "id": "4F0hiWQBR272AV8V",
+                    "name": "otra",
+                    "value": 1000,
+                    "basePrice": 10000,
+                    "currentPrice": 10000,
+                    "isWholeGrain": false
+                }
+            ],
+            "basePrice": 0,
+            "currentPrice": 0,
+            "taxPercentage": 8,
+            "isActive": true,
+            "isDeleted": false,
+            "customAttributes": {}
+        }
+    ],
+    "pagination": {
+        "page": 1,
+        "perPage": 5000,
+        "total": 32
+    }
+}

@@ -1,0 +1,67 @@
+{
+    "id": "default",
+    "createdAt": "2025-08-15T21:05:45.097Z",
+    "updatedAt": "2025-08-15T21:05:45.097Z",
+    "orderStatuses": [
+        "Recibida",
+        "En Produccion",
+        "Preparada",
+        "En Camino",
+        "Completada"
+    ],
+    "fulfillmentTypes": [
+        "delivery",
+        "pickup"
+    ],
+    "paymentMethods": [
+        "transfer",
+        "cash",
+        "card"
+    ],
+    "unitOptions": [
+        "Kg",
+        "g",
+        "L",
+        "ml",
+        "uds",
+        "docena",
+        "paquete"
+    ],
+    "storageTemperatures": [
+        "Ambiente",
+        "Refrigeracion",
+        "Congelacion"
+    ],
+    "availablePaymentMethods": [
+        {
+            "value": "cash",
+            "label": "Efectivo",
+            "displayText": "EF"
+        },
+        {
+            "value": "transfer",
+            "label": "Transferencia",
+            "displayText": "TR"
+        },
+        {
+            "value": "card",
+            "label": "Tarjeta",
+            "displayText": "DF"
+        },
+        {
+            "value": "davivienda",
+            "label": "Davivienda",
+            "displayText": "DV"
+        },
+        {
+            "value": "bancolombia",
+            "label": "Bancolombia",
+            "displayText": "BC"
+        },
+        {
+            "value": "complimentary",
+            "label": "Regalo",
+            "displayText": "RE"
+        }
+    ]
+}

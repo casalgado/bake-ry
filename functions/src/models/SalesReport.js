@@ -363,6 +363,7 @@ class SalesReport {
 
     return Object.values(products).map(product => ({
       ...product,
+      name: this.all_products.find(p => p.id === product.productId)?.name || product.name,
       averagePrice: product.revenue / product.quantity,
       percentageOfSales: Number(((product.revenue / this.totalSales) * 100).toFixed(1)),
       percentageOfQuantity: Number(((product.quantity / totalQuantity) * 100).toFixed(1)),
