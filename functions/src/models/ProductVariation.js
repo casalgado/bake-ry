@@ -11,7 +11,7 @@ class ProductVariation {
     isWholeGrain = false,
     unit = '',
     type = 'SIZE', // 'WEIGHT', 'QUANTITY', 'SIZE'
-    displayOrder = 0,
+    displayOrder,
   }) {
     this.id = id || generateId();
     this.name = name.trim().toLowerCase();
@@ -22,16 +22,14 @@ class ProductVariation {
     this.unit = unit;
     this.type = type == '' ? 'SIZE' : type;
 
-    // Set display order with priority:
-    // 1. Use provided displayOrder if given
-    // 2. If name is 'otra', set to 999
-    // 3. If isWholeGrain, set to 2
-    // 4. Default to 1
-    this.displayOrder =
-      name === 'otra' ? 999 :
-        isWholeGrain ? 2 :
-          1
-    ;
+    this.displayOrder = this.setDisplayOrder(displayOrder, name, isWholeGrain);
+  }
+
+  setDisplayOrder(displayOrder, name, isWholeGrain) {
+    if (displayOrder !== undefined) return displayOrder;
+    if (name && name.trim().toLowerCase() === 'otra') return 999;
+    if (isWholeGrain) return 2;
+    return 1;
   }
 
   validate() {
