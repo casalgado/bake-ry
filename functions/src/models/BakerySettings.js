@@ -43,6 +43,10 @@ class BakerySettings extends BaseModel {
       timeOfDay: false, // if time of day is asked for orders
       offlineMode: false,
     },
+    reports: {
+      defaultReportFilter: 'dueDate',
+      showMultipleReports: false,
+    },
 
   };
 

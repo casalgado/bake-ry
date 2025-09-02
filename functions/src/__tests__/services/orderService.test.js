@@ -438,4 +438,191 @@ describe('Order Service Tests', () => {
       expect(clientHistoryDoc.data().deliveryFee).toBe(1);
     });
   });
+
+  describe('PaymentDate Queries with Legacy Support', () => {
+    let testOrdersWithPaymentDates;
+    let testOrdersLegacy;
+
+    beforeEach(async () => {
+      // Create orders with actual paymentDate
+      testOrdersWithPaymentDates = [];
+      for (let i = 0; i < 3; i++) {
+        const orderData = {
+          userId: 'test-user',
+          userName: 'Test Customer',
+          userEmail: 'test@example.com',
+          dueDate: new Date('2025-09-15'),
+          preparationDate: new Date('2025-09-15'),
+          paymentDate: new Date('2025-09-16'), // Set actual payment date
+          isPaid: true,
+          paymentMethod: 'transfer',
+          fulfillmentType: 'pickup',
+          orderItems: [{
+            productId: `product-${i}`,
+            productName: `Test Product ${i}`,
+            collectionId: `collection-${i}`,
+            collectionName: 'Test Collection',
+            quantity: 2,
+            basePrice: 10000,
+            currentPrice: 10000,
+            variation: { size: 'medium' },
+            recipeId: `recipe-${i}`,
+            taxPercentage: 19,
+          }],
+        };
+
+        const order = await orderService.create(orderData, testStoreId);
+        testOrdersWithPaymentDates.push(order);
+      }
+
+      // Create legacy orders (paymentDate null but isPaid true)
+      testOrdersLegacy = [];
+      for (let i = 0; i < 2; i++) {
+        const orderData = {
+          userId: 'test-user',
+          userName: 'Test Customer',
+          userEmail: 'test@example.com',
+          dueDate: new Date('2025-09-15'), // Same dueDate as paymentDate above
+          preparationDate: new Date('2025-09-15'),
+          paymentDate: null, // Legacy: no payment date set
+          isPaid: true,
+          paymentMethod: 'cash',
+          fulfillmentType: 'pickup',
+          orderItems: [{
+            productId: `legacy-product-${i}`,
+            productName: `Legacy Product ${i}`,
+            collectionId: `legacy-collection-${i}`,
+            collectionName: 'Legacy Collection',
+            quantity: 1,
+            basePrice: 5000,
+            currentPrice: 5000,
+            variation: { size: 'small' },
+            recipeId: `legacy-recipe-${i}`,
+            taxPercentage: 19,
+          }],
+        };
+
+        const order = await orderService.create(orderData, testStoreId);
+        testOrdersLegacy.push(order);
+      }
+    });
+
+    it('should return orders with actual paymentDate when querying by paymentDate', async () => {
+      const QueryParser = require('../../utils/queryParser');
+      const mockReq = {
+        query: {
+          date_field: 'paymentDate',
+          start_date: '2025-09-16T00:00:00.000Z',
+          end_date: '2025-09-16T23:59:59.999Z',
+        },
+      };
+
+      const queryParser = new QueryParser(mockReq);
+      const query = queryParser.getQuery();
+
+      const result = await orderService.getSalesReport(testStoreId, query);
+
+      expect(result.summary.totalPaidOrders).toBe(3); // Only orders with actual paymentDate
+    });
+
+    it('should return legacy orders when dueDate falls in paymentDate range', async () => {
+      const QueryParser = require('../../utils/queryParser');
+      const mockReq = {
+        query: {
+          date_field: 'paymentDate',
+          start_date: '2025-09-15T00:00:00.000Z',
+          end_date: '2025-09-15T23:59:59.999Z',
+        },
+      };
+
+      const queryParser = new QueryParser(mockReq);
+      const query = queryParser.getQuery();
+
+      const result = await orderService.getSalesReport(testStoreId, query);
+
+      expect(result.summary.totalPaidOrders).toBe(2); // Only legacy orders with dueDate in range
+    });
+
+    it('should return both actual and legacy orders when ranges overlap', async () => {
+      const QueryParser = require('../../utils/queryParser');
+      const mockReq = {
+        query: {
+          date_field: 'paymentDate',
+          start_date: '2025-09-15T00:00:00.000Z',
+          end_date: '2025-09-16T23:59:59.999Z',
+        },
+      };
+
+      const queryParser = new QueryParser(mockReq);
+      const query = queryParser.getQuery();
+
+      const result = await orderService.getSalesReport(testStoreId, query);
+
+      expect(result.summary.totalPaidOrders).toBe(5); // Both actual (3) and legacy (2) orders
+    });
+
+    it('should continue to work normally with dueDate queries', async () => {
+      const QueryParser = require('../../utils/queryParser');
+      const mockReq = {
+        query: {
+          date_field: 'dueDate',
+          start_date: '2025-09-15T00:00:00.000Z',
+          end_date: '2025-09-15T23:59:59.999Z',
+        },
+      };
+
+      const queryParser = new QueryParser(mockReq);
+      const query = queryParser.getQuery();
+
+      const result = await orderService.getSalesReport(testStoreId, query);
+
+      expect(result.summary.totalPaidOrders).toBe(5); // All orders have dueDate 2025-09-15
+    });
+
+    it('should not return unpaid orders even if dueDate matches', async () => {
+      // Create an unpaid order with dueDate in range
+      const unpaidOrderData = {
+        userId: 'test-user',
+        userName: 'Test Customer',
+        userEmail: 'test@example.com',
+        dueDate: new Date('2025-09-15'),
+        preparationDate: new Date('2025-09-15'),
+        paymentDate: null,
+        isPaid: false, // Not paid
+        paymentMethod: 'cash',
+        fulfillmentType: 'pickup',
+        orderItems: [{
+          productId: 'unpaid-product',
+          productName: 'Unpaid Product',
+          collectionId: 'unpaid-collection',
+          collectionName: 'Unpaid Collection',
+          quantity: 1,
+          basePrice: 5000,
+          currentPrice: 5000,
+          variation: { size: 'small' },
+          recipeId: 'unpaid-recipe',
+          taxPercentage: 19,
+        }],
+      };
+
+      await orderService.create(unpaidOrderData, testStoreId);
+
+      const QueryParser = require('../../utils/queryParser');
+      const mockReq = {
+        query: {
+          date_field: 'paymentDate',
+          start_date: '2025-09-15T00:00:00.000Z',
+          end_date: '2025-09-15T23:59:59.999Z',
+        },
+      };
+
+      const queryParser = new QueryParser(mockReq);
+      const query = queryParser.getQuery();
+
+      const result = await orderService.getSalesReport(testStoreId, query);
+
+      // Should still be 2 (only legacy paid orders), not including the unpaid one
+      expect(result.summary.totalPaidOrders).toBe(2);
+    });
+  }, 30000);
 });

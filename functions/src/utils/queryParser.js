@@ -59,11 +59,19 @@ class QueryParser {
 
     // Handle date range
     if (start_date || end_date) {
-      filters.dateRange = {
-        dateField: date_field,
-        startDate: start_date,
-        endDate: end_date,
-      };
+      // Special handling for paymentDate queries to support legacy data
+      if (date_field === 'paymentDate') {
+        filters.paymentDateWithFallback = {
+          startDate: start_date,
+          endDate: end_date,
+        };
+      } else {
+        filters.dateRange = {
+          dateField: date_field,
+          startDate: start_date,
+          endDate: end_date,
+        };
+      }
     }
 
     // Handle OR date range

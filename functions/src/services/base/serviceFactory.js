@@ -123,6 +123,104 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
           }
         }
 
+        // Handle paymentDate with fallback for legacy orders
+        if (filters.paymentDateWithFallback) {
+          const { startDate, endDate } = filters.paymentDateWithFallback;
+
+          // Query 1: Orders with actual paymentDate in range
+          let paidOrdersQuery = getCollectionRef(parentId);
+          if (!query.includeDeleted) {
+            paidOrdersQuery = paidOrdersQuery.where('isDeleted', '!=', true);
+          }
+          if (startDate) {
+            paidOrdersQuery = paidOrdersQuery.where('paymentDate', '>=', new Date(startDate));
+          }
+          if (endDate) {
+            paidOrdersQuery = paidOrdersQuery.where('paymentDate', '<=', new Date(endDate));
+          }
+
+          // Query 2: Legacy orders (paymentDate null, isPaid true, dueDate in range)
+          let legacyOrdersQuery = getCollectionRef(parentId);
+          if (!query.includeDeleted) {
+            legacyOrdersQuery = legacyOrdersQuery.where('isDeleted', '!=', true);
+          }
+          legacyOrdersQuery = legacyOrdersQuery.where('paymentDate', '==', null);
+          legacyOrdersQuery = legacyOrdersQuery.where('isPaid', '==', true);
+          if (startDate) {
+            legacyOrdersQuery = legacyOrdersQuery.where('dueDate', '>=', new Date(startDate));
+          }
+          if (endDate) {
+            legacyOrdersQuery = legacyOrdersQuery.where('dueDate', '<=', new Date(endDate));
+          }
+
+          // Apply other filters to both queries
+          Object.entries(filters).forEach(([key, value]) => {
+            if (
+              key !== 'paymentDateWithFallback' &&
+              value !== undefined
+            ) {
+              paidOrdersQuery = paidOrdersQuery.where(key, '==', value);
+              legacyOrdersQuery = legacyOrdersQuery.where(key, '==', value);
+            }
+          });
+
+          // Execute both queries in parallel
+          const [paidSnapshot, legacySnapshot] = await Promise.all([
+            paidOrdersQuery.get(),
+            legacyOrdersQuery.get(),
+          ]);
+
+          // Merge results and remove duplicates
+          const allDocs = new Map();
+          paidSnapshot.docs.forEach((doc) => {
+            allDocs.set(doc.id, doc);
+          });
+          legacySnapshot.docs.forEach((doc) => {
+            allDocs.set(doc.id, doc);
+          });
+
+          // Convert to array and sort
+          let documents = Array.from(allDocs.values()).map((doc) =>
+            ModelClass.fromFirestore(doc),
+          );
+
+          // Apply sorting
+          if (sort) {
+            documents.sort((a, b) => {
+              const aVal = a[sort.field];
+              const bVal = b[sort.field];
+              const multiplier = sort.direction === 'desc' ? -1 : 1;
+
+              if (aVal < bVal) return -1 * multiplier;
+              if (aVal > bVal) return 1 * multiplier;
+              return 0;
+            });
+          } else {
+            documents.sort(
+              (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+            );
+          }
+
+          // Apply pagination
+          if (pagination) {
+            const { perPage, offset } = pagination;
+            const start = offset || 0;
+            const end = start + (perPage || documents.length);
+            documents = documents.slice(start, end);
+          }
+
+          return {
+            items: documents,
+            pagination: pagination
+              ? {
+                page: pagination.page,
+                perPage: pagination.perPage,
+                total: allDocs.size,
+              }
+              : null,
+          };
+        }
+
         // Handle OR date range
         if (filters.orDateRange) {
           const { dateFields, startDate, endDate } = filters.orDateRange;
@@ -149,6 +247,7 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
               if (
                 key !== 'dateRange' &&
                 key !== 'orDateRange' &&
+                key !== 'paymentDateWithFallback' &&
                 value !== undefined
               ) {
                 fieldQuery = fieldQuery.where(key, '==', value);
@@ -212,7 +311,7 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
         }
 
         Object.entries(filters).forEach(([key, value]) => {
-          if (key !== 'dateRange' && value !== undefined) {
+          if (key !== 'dateRange' && key !== 'paymentDateWithFallback' && value !== undefined) {
             dbQuery = dbQuery.where(key, '==', value);
           }
         });
