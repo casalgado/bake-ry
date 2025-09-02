@@ -1,0 +1,93 @@
+{
+    "items": [
+        {
+            "id": "GRzDxeAWOj2HBhmlObSy",
+            "createdAt": "2025-01-17T22:00:23.644Z",
+            "name": "sourdough",
+            "description": "",
+            "displayOrder": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "defaultVariationType": null,
+            "defaultUnit": null,
+            "variationTemplates": []
+        },
+        {
+            "id": "jSuTNbAyUtHSVbMIcfXq",
+            "createdAt": "2025-01-17T22:00:23.907Z",
+            "name": "baguette",
+            "description": "",
+            "displayOrder": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "defaultVariationType": null,
+            "defaultUnit": null,
+            "variationTemplates": []
+        },
+        {
+            "id": "plqaB0ytl2XC1vmw8kNJ",
+            "createdAt": "2025-01-17T22:00:24.200Z",
+            "name": "tortillas",
+            "description": "",
+            "displayOrder": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "defaultVariationType": null,
+            "defaultUnit": null,
+            "variationTemplates": []
+        },
+        {
+            "id": "HvG0VIiluQ3ULrgp7QSN",
+            "createdAt": "2025-01-17T22:00:24.483Z",
+            "name": "untables",
+            "description": "",
+            "displayOrder": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "defaultVariationType": null,
+            "defaultUnit": null,
+            "variationTemplates": []
+        },
+        {
+            "id": "5I7hEbCRGEd7yNj5X7ae",
+            "createdAt": "2025-01-17T22:00:24.755Z",
+            "name": "congelados",
+            "description": "",
+            "displayOrder": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "defaultVariationType": null,
+            "defaultUnit": null,
+            "variationTemplates": []
+        },
+        {
+            "id": "y4koQ0pzabULphKDyb7E",
+            "createdAt": "2025-01-17T22:00:25.028Z",
+            "name": "panaderia tradicional",
+            "description": "",
+            "displayOrder": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "defaultVariationType": null,
+            "defaultUnit": null,
+            "variationTemplates": []
+        },
+        {
+            "id": "6XyBqTCgL8U7uavYACuq",
+            "createdAt": "2025-01-17T22:00:25.309Z",
+            "name": "cafe el diario",
+            "description": "",
+            "displayOrder": 0,
+            "isActive": true,
+            "isDeleted": false,
+            "defaultVariationType": null,
+            "defaultUnit": null,
+            "variationTemplates": []
+        }
+    ],
+    "pagination": {
+        "page": 1,
+        "perPage": 100,
+        "total": 7
+    }
+}

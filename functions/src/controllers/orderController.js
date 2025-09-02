@@ -35,7 +35,9 @@ const orderController = {
     try {
       const { bakeryId } = req.params;
       const queryParser = new QueryParser(req);
+      console.log('req', req.query);
       const query = queryParser.getQuery();
+      console.log('query', query);
 
       const report = await orderService.getSalesReport(bakeryId, query);
       console.log('report', report);

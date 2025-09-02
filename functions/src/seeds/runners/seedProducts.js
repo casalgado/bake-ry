@@ -1,5 +1,5 @@
 const { BAKERY_ID } = require('../seedConfig');
-const generateProducts = require('../data/products');
+const productsData = require('../data/products.json');
 const productService = require('../../services/productService');
 const Product = require('../../models/Product');
 const fs = require('fs');
@@ -10,25 +10,9 @@ async function seedProducts() {
     console.log('Creating products...');
 
     // First, ensure product collections exist by reading from file
-    let productCollections;
-    try {
-      productCollections = require('../data/seededProductCollections.json');
-    } catch (e) {
-      console.error('No seeded product collections found. Run bakery seeder first.', e);
-      throw new Error('Product collections must be seeded before products');
-    }
 
-    // Create collection ID mapping for easy reference
-    const collectionMap = productCollections.reduce((map, collection) => {
-      map[collection.name] = {
-        id: collection.id,
-        name: collection.name,
-      };
-      return map;
-    }, {});
-
-    // Get generated products
-    const products = generateProducts();
+    // Get products from JSON file
+    const products = productsData.items;
 
     // Store created products with their IDs for reference
     const createdProducts = [];
@@ -36,18 +20,9 @@ async function seedProducts() {
     // Create products through service
     for (const product of products) {
       try {
-        // Get collection info
-        const collection = collectionMap[product.collectionName];
-        if (!collection) {
-          console.error(`Collection not found for product ${product.name}`);
-          continue;
-        }
-
-        // Create new product with collection info
+        // Create new product with exact data from JSON
         const newProduct = new Product({
           ...product,
-          collectionId: collection.id,
-          collectionName: collection.name,
           bakeryId: BAKERY_ID,
         });
 

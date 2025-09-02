@@ -2,7 +2,7 @@ const { db, auth, BAKERY_ID, ADMIN_USER_ID, timestamp } = require('../seedConfig
 const bakery = require('../data/bakery');
 const settings = require('../data/settings');
 const { BakerySettings } = require('../../models/BakerySettings');
-const productCollections = require('../data/productCollections');
+const productCollectionsData = require('../data/productCollections.json');
 const productCollectionService = require('../../services/productCollectionService');
 const fs = require('fs');
 const path = require('path');
@@ -58,7 +58,7 @@ async function seedBakery() {
     console.log('Creating product collections...');
     const createdCollections = [];
 
-    for (const collection of productCollections) {
+    for (const collection of productCollectionsData.items) {
       const createdCollection = await productCollectionService.create(collection, BAKERY_ID);
       createdCollections.push({
         id: createdCollection.id,

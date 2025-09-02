@@ -4,8 +4,8 @@ const path = require('path');
 const orderService = require('../../services/orderService');
 
 // Load seeded data
-const seededProducts = require('../data/seededProducts.json');
 const seededUsers = require('../data/seededUsers.json');
+const productsData = require('../data/products.json');
 
 const getWeightedQuantity = () => {
   const rand = Math.random() * 100;
@@ -21,7 +21,7 @@ const ORDER_ITEM_QUANTITY = () => getWeightedQuantity();
 const DELIVERY_PROBABILITY = 0.9;
 const COMMENT_PROBABILITY = 0.2;
 const DELIVERY_FEES = [6000, 7000, 8000, 9000];
-const PAYMENT_METHODS = ['cash', 'transfer'];
+const PAYMENT_METHODS = ['cash', 'transfer', 'davivienda'];
 const RANDOM_COMMENTS = [
   'Entrega especial para cumpleaños',
   'Cliente frecuente',
@@ -67,9 +67,32 @@ function generateRandomOrder(date) {
   const numberOfItems = getRandomInt(1, 5);
   const orderItems = generateRandomItems(numberOfItems);
 
-  // Calculate totals
-  const subtotal = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
-  const total = subtotal + deliveryFee;
+  // Payment logic (50/50 paid/unpaid)
+  const isPaid = Math.random() < 0.5;
+
+  // Payment date logic - if paid, set to dueDate or 1-2 days after
+  let paymentDate = null;
+  if (isPaid) {
+    const daysAfter = Math.random() < 0.5 ? 0 : getRandomInt(1, 2);
+    paymentDate = new Date(date);
+    paymentDate.setDate(paymentDate.getDate() + daysAfter);
+  }
+
+  // Partial payment logic (10% of orders get 40-50% partial payment)
+  const hasPartialPayment = Math.random() < 0.1;
+  let partialPaymentAmount = 0;
+  let partialPaymentDate = null;
+
+  if (hasPartialPayment) {
+    const subtotal = orderItems.reduce((sum, item) => sum + (item.currentPrice * item.quantity), 0);
+    const total = subtotal + deliveryFee;
+    partialPaymentAmount = Math.round(total * (0.4 + Math.random() * 0.1)); // 40-50%
+
+    // Set partial payment date between order creation and payment date (or just after creation if unpaid)
+    const maxDate = paymentDate || new Date(date.getTime() + (1000 * 60 * 60 * 24 * getRandomInt(1, 3))); // 1-3 days after if unpaid
+    const minDate = new Date(date.getTime() + (1000 * 60 * 60 * getRandomInt(2, 8))); // 2-8 hours after creation
+    partialPaymentDate = new Date(minDate.getTime() + Math.random() * (maxDate.getTime() - minDate.getTime()));
+  }
 
   // Add comments randomly
   const hasComments = Math.random() < COMMENT_PROBABILITY;
@@ -78,26 +101,38 @@ function generateRandomOrder(date) {
   return {
     preparationDate: date,
     dueDate: date,
+    paymentDate,
+    partialPaymentDate,
     bakeryId: BAKERY_ID,
     userId: user.id,
     userName: user.name,
     userEmail: user.email,
     userPhone: user.phone ? user.phone.toString() : '',
+    userNationalId: '',
     orderItems,
     status: 0,
-    isPaid: Math.random() < 0.5 ? false : true,
+    isPaid,
+    isDeliveryPaid: false,
     paymentMethod: getRandomElement(PAYMENT_METHODS),
-    paymentDetails: null,
+    partialPaymentAmount,
     fulfillmentType: isDelivery ? 'delivery' : 'pickup',
     deliveryAddress: user.address,
     deliveryInstructions: '',
+    deliveryDriverId: '-',
+    driverMarkedAsPaid: false,
+    deliverySequence: 1,
     deliveryFee,
     deliveryCost,
-    subtotal,
-    total,
+    numberOfBags: 1,
     customerNotes: '',
+    deliveryNotes: '',
     internalNotes,
-    isComplimentary: false,
+    isDeleted: false,
+    lastEditedBy: {
+      userId: 'seed-system',
+      email: 'system@bakery.com',
+      role: 'system',
+    },
   };
 }
 
@@ -105,8 +140,11 @@ function generateRandomItems(count) {
   const orderItems = [];
   const selectedProducts = new Set();
 
-  while (orderItems.length < count) {
-    const product = getRandomElement(seededProducts);
+  // Limit count to available products to avoid infinite loop
+  const maxCount = Math.min(count, productsData.items.length);
+
+  while (orderItems.length < maxCount) {
+    const product = getRandomElement(productsData.items);
 
     // Avoid duplicate products
     if (selectedProducts.has(product.id)) {
@@ -124,7 +162,6 @@ function generateRandomItems(count) {
     const currentPrice = variation
       ? variation.currentPrice || basePrice
       : product.currentPrice || basePrice;
-    const subtotal = quantity * currentPrice;
 
     orderItems.push({
       productId: product.id,
@@ -137,18 +174,16 @@ function generateRandomItems(count) {
       taxPercentage: product.taxPercentage,
       variation: variation
         ? {
-            id: variation.id,
-            name: variation.name,
-            value: variation.value,
-            recipeId: 1,
-            isWholeGrain: variation.isWholeGrain,
-            currentPrice: variation.currentPrice || variation.basePrice,
-          }
+          id: variation.id,
+          name: variation.name,
+          value: variation.value,
+          isWholeGrain: variation.isWholeGrain,
+          currentPrice: variation.currentPrice || variation.basePrice,
+        }
         : null,
-      recipeId: 1,
       isComplimentary: false,
+      productionBatch: 1,
       status: 0,
-      subtotal,
     });
   }
 
@@ -174,7 +209,7 @@ async function generateOrders() {
       // Generate 10-15 orders per day
       const ordersPerDay = getRandomInt(
         APPROX_ORDERS_PER_DAY - 2,
-        APPROX_ORDERS_PER_DAY + 2
+        APPROX_ORDERS_PER_DAY + 2,
       );
       for (let j = 0; j < ordersPerDay; j++) {
         const order = generateRandomOrder(date);
@@ -194,7 +229,7 @@ async function generateOrders() {
 
         // Update progress
         process.stdout.write(
-          `\rCreating orders... ${spinner[spinnerIndex]} (${successCount}/${orders.length})`
+          `\rCreating orders... ${spinner[spinnerIndex]} (${successCount}/${orders.length})`,
         );
         spinnerIndex = (spinnerIndex + 1) % spinner.length;
       } catch (error) {
@@ -208,7 +243,7 @@ async function generateOrders() {
     const seedDataDir = path.join(__dirname, '../data');
     fs.writeFileSync(
       path.join(seedDataDir, 'seededOrders.json'),
-      JSON.stringify(orders, null, 2)
+      JSON.stringify(orders, null, 2),
     );
 
     console.log('Orders saved to seededOrders.json');
