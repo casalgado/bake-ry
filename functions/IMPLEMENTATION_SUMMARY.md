@@ -14,12 +14,19 @@ Successfully implemented dual sales report functionality that supports both `due
 When `date_field=paymentDate` is requested, the system now:
 
 1. **Query 1**: Orders with actual `paymentDate` in the specified date range
-2. **Query 2**: Legacy orders where:
-   - `paymentDate` is `null`
+2. **Query 2**: All paid orders with `dueDate` in the specified range, then client-side filter for legacy orders where:
+   - `paymentDate` is `null`, `undefined`, or missing entirely
    - `isPaid` is `true` 
    - `dueDate` falls in the paymentDate range (fallback logic)
 3. **Merge**: Combine results from both queries, removing duplicates
 4. **Process**: Apply sorting and pagination to merged results
+
+### Critical Fix Applied
+**Issue**: Firestore's `where('paymentDate', '==', null)` does NOT match documents that completely lack the `paymentDate` field.
+
+**Solution**: Changed approach to:
+- Query all paid orders in the dueDate range
+- Filter client-side using `if (!data.paymentDate)` to catch both `null` values AND missing fields
 
 ### Files Modified
 
@@ -57,6 +64,7 @@ When `date_field=paymentDate` is requested, the system now:
 Added comprehensive test suite covering:
 - ✅ Orders with actual `paymentDate` 
 - ✅ Legacy orders with `paymentDate: null` but `isPaid: true`
+- ✅ Orders that completely lack the `paymentDate` field (critical edge case)
 - ✅ Mixed scenarios with overlapping date ranges
 - ✅ Exclusion of unpaid orders even if `dueDate` matches
 - ✅ Continued normal operation of `dueDate` queries

@@ -624,5 +624,90 @@ describe('Order Service Tests', () => {
       // Should still be 2 (only legacy paid orders), not including the unpaid one
       expect(result.summary.totalPaidOrders).toBe(2);
     });
+
+    it('should handle orders that completely lack paymentDate field', async () => {
+      // Create an order by directly writing to Firestore without paymentDate field
+      const orderWithoutPaymentDateField = {
+        id: 'missing-payment-date',
+        bakeryId: testStoreId,
+        userId: 'test-user',
+        userName: 'Test Customer',
+        userEmail: 'test@example.com',
+        dueDate: new Date('2025-09-15'),
+        preparationDate: new Date('2025-09-15'),
+        // Intentionally NOT setting paymentDate field at all
+        isPaid: true,
+        paymentMethod: 'cash',
+        fulfillmentType: 'pickup',
+        isDeleted: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        orderItems: [{
+          id: 'missing-payment-item',
+          productId: 'missing-payment-product',
+          productName: 'Missing Payment Product',
+          collectionId: 'missing-payment-collection',
+          collectionName: 'Missing Payment Collection',
+          quantity: 1,
+          basePrice: 3000,
+          currentPrice: 3000,
+          variation: { size: 'small' },
+          recipeId: 'missing-payment-recipe',
+          taxPercentage: 19,
+          taxAmount: 478,
+          preTaxPrice: 2522,
+          subtotal: 3000,
+          isComplimentary: false,
+          productionBatch: 1,
+          status: 0,
+        }],
+        taxableSubtotal: 3000,
+        nonTaxableSubtotal: 0,
+        subtotal: 3000,
+        totalTaxAmount: 478,
+        preTaxTotal: 2522,
+        total: 3000,
+        isComplimentary: false,
+        status: 1,
+        partialPaymentAmount: 0,
+        isDeliveryPaid: false,
+        deliveryAddress: '',
+        deliveryInstructions: '',
+        deliveryDriverId: '-',
+        driverMarkedAsPaid: false,
+        deliverySequence: 1,
+        deliveryFee: 0,
+        deliveryCost: 0,
+        numberOfBags: 1,
+        customerNotes: '',
+        deliveryNotes: '',
+        internalNotes: '',
+      };
+
+      // Write directly to Firestore without going through Order model
+      await db
+        .collection('bakeries')
+        .doc(testStoreId)
+        .collection('orders')
+        .doc('missing-payment-date')
+        .set(orderWithoutPaymentDateField);
+
+      const QueryParser = require('../../utils/queryParser');
+      const mockReq = {
+        query: {
+          date_field: 'paymentDate',
+          start_date: '2025-09-15T00:00:00.000Z',
+          end_date: '2025-09-15T23:59:59.999Z',
+        },
+      };
+
+      const queryParser = new QueryParser(mockReq);
+      const query = queryParser.getQuery();
+
+      const result = await orderService.getSalesReport(testStoreId, query);
+
+      // Should be 3 now: 2 legacy orders + 1 order with missing paymentDate field
+      expect(result.summary.totalPaidOrders).toBe(3);
+    });
   }, 30000);
 });

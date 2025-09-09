@@ -139,12 +139,11 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
             paidOrdersQuery = paidOrdersQuery.where('paymentDate', '<=', new Date(endDate));
           }
 
-          // Query 2: Legacy orders (paymentDate null, isPaid true, dueDate in range)
+          // Query 2: Legacy orders - get ALL paid orders in dueDate range, filter client-side
           let legacyOrdersQuery = getCollectionRef(parentId);
           if (!query.includeDeleted) {
             legacyOrdersQuery = legacyOrdersQuery.where('isDeleted', '!=', true);
           }
-          legacyOrdersQuery = legacyOrdersQuery.where('paymentDate', '==', null);
           legacyOrdersQuery = legacyOrdersQuery.where('isPaid', '==', true);
           if (startDate) {
             legacyOrdersQuery = legacyOrdersQuery.where('dueDate', '>=', new Date(startDate));
@@ -172,11 +171,19 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
 
           // Merge results and remove duplicates
           const allDocs = new Map();
+
+          // Add orders with actual paymentDate
           paidSnapshot.docs.forEach((doc) => {
             allDocs.set(doc.id, doc);
           });
+
+          // Add legacy orders (paymentDate null or missing) - filter client-side
           legacySnapshot.docs.forEach((doc) => {
-            allDocs.set(doc.id, doc);
+            const data = doc.data();
+            // Only include if paymentDate is null, undefined, or missing
+            if (!data.paymentDate) {
+              allDocs.set(doc.id, doc);
+            }
           });
 
           // Convert to array and sort
