@@ -4,15 +4,16 @@ const { generateId } = require('../utils/helpers');
  * @typedef {Object} DimensionOption
  * @property {string} name - Display name of the option (e.g., "Small", "Medium", "Large")
  * @property {number} value - Numeric value (e.g., weight in grams, quantity)
- * @property {string} [unit] - Unit of measurement (e.g., "g", "kg", "pcs")
  * @property {boolean} [isWholeGrain] - Whether this option is whole grain
  * @property {number} [displayOrder] - Order for display/sorting (calculated if not provided)
  */
 
 /**
  * @typedef {Object} Dimension
+ * @property {string} id - Unique identifier for this dimension (to support multiple same-type dimensions)
  * @property {string} type - Dimension type (WEIGHT, QUANTITY, SIZE, FLAVOR, etc.)
  * @property {string} label - Human-readable label for UI display
+ * @property {string} [unit] - Unit of measurement for all options in this dimension (e.g., "g", "kg", "pcs")
  * @property {DimensionOption[]} options - Array of available options for this dimension
  * @property {number} [displayOrder] - Order for display/sorting
  */
@@ -22,17 +23,24 @@ const { generateId } = require('../utils/helpers');
  * @property {string} id - Unique identifier for the combination
  * @property {string[]} selection - Array of selected option names, one from each dimension
  * @property {string} name - Display name for the combination (auto-generated if not provided)
- * @property {number} basePrice - Selling price for this combination
+ * @property {number} [basePrice] - Selling price for this combination
  * @property {number} [costPrice] - Cost price for this combination
  * @property {boolean} [isActive] - Whether this combination is available (default: true)
  * @property {boolean} [isWholeGrain] - Whether this combination is whole grain (auto-calculated)
  */
 
 class VariationGroups {
+  /**
+   * Create a VariationGroups instance
+   * @param {Object} options
+   * @param {Dimension[]} [options.dimensions=[]] - Array of dimension definitions
+   * @param {Combination[]} [options.combinations=[]] - Array of price combinations
+   */
   constructor({ dimensions = [], combinations = [] } = {}) {
-    // Ensure dimensions have displayOrder
+    // Ensure dimensions have id, displayOrder, and proper option handling
     this.dimensions = dimensions.map((dim, index) => ({
       ...dim,
+      id: dim.id || generateId(),
       displayOrder: dim.displayOrder !== undefined ? dim.displayOrder : index,
       options: dim.options?.map((opt, optIndex) => ({
         ...opt,
@@ -93,42 +101,49 @@ class VariationGroups {
    * @param {string} type - Dimension type (WEIGHT, QUANTITY, SIZE, etc.)
    * @param {string} label - Display label for the dimension
    * @param {Array} options - Array of options for this dimension
-   * @param {number} displayOrder - Display order for the dimension
+   * @param {string} [unit] - Unit of measurement for this dimension
+   * @param {number} [displayOrder] - Display order for the dimension
+   * @param {string} [id] - Dimension ID (generated if not provided)
+   * @returns {string} - The dimension ID
    */
-  addDimension(type, label, options = [], displayOrder) {
+  addDimension(type, label, options = [], unit, displayOrder, id) {
     const processedOptions = options.map((opt, index) => ({
       ...opt,
       displayOrder: opt.displayOrder !== undefined ? opt.displayOrder : this.calculateDisplayOrder(opt),
       isWholeGrain: opt.isWholeGrain || false,
     }));
 
-    const existingIndex = this.dimensions.findIndex(d => d.type === type);
+    const dimensionId = id || generateId();
     const dimDisplayOrder = displayOrder !== undefined ? displayOrder : this.dimensions.length;
 
+    // Check if dimension with this ID already exists
+    const existingIndex = this.dimensions.findIndex(d => d.id === dimensionId);
+
+    const dimensionData = {
+      id: dimensionId,
+      type,
+      label,
+      unit,
+      options: processedOptions,
+      displayOrder: dimDisplayOrder,
+    };
+
     if (existingIndex !== -1) {
-      this.dimensions[existingIndex] = {
-        type,
-        label,
-        options: processedOptions,
-        displayOrder: dimDisplayOrder,
-      };
+      this.dimensions[existingIndex] = dimensionData;
     } else {
-      this.dimensions.push({
-        type,
-        label,
-        options: processedOptions,
-        displayOrder: dimDisplayOrder,
-      });
+      this.dimensions.push(dimensionData);
     }
+
+    return dimensionId;
   }
 
   /**
    * Add option to existing dimension
-   * @param {string} type - Dimension type
-   * @param {Object} option - Option to add {name, value, unit?, isWholeGrain?, displayOrder?, etc.}
+   * @param {string} dimensionId - Dimension ID
+   * @param {Object} option - Option to add {name, value, isWholeGrain?, displayOrder?, etc.}
    */
-  addOptionToDimension(type, option) {
-    const dimension = this.dimensions.find(d => d.type === type);
+  addOptionToDimension(dimensionId, option) {
+    const dimension = this.dimensions.find(d => d.id === dimensionId);
     if (dimension) {
       const processedOption = {
         ...option,
@@ -238,8 +253,10 @@ class VariationGroups {
       // Create dimension if it doesn't exist
       if (!dimensionsMap[dimensionKey]) {
         dimensionsMap[dimensionKey] = {
+          id: generateId(),
           type: v.type,
           label: v.type,
+          unit: v.unit || '',
           options: [],
           displayOrder: dimensionDisplayOrders[v.type] || Object.keys(dimensionsMap).length,
         };
@@ -251,7 +268,6 @@ class VariationGroups {
         dimensionsMap[dimensionKey].options.push({
           name: v.name,
           value: v.value,
-          unit: v.unit || '',
           isWholeGrain: v.isWholeGrain || false,
           displayOrder: v.displayOrder !== undefined ? v.displayOrder : (v.isWholeGrain ? 2 : 1),
         });
@@ -262,8 +278,8 @@ class VariationGroups {
         id: v.id,
         selection: [v.name],
         name: v.name,
-        basePrice: v.basePrice || 0,
-        costPrice: v.costPrice || 0,
+        basePrice: v.basePrice,
+        costPrice: v.costPrice,
         isActive: true,
         isWholeGrain: v.isWholeGrain || false,
       });
@@ -294,44 +310,19 @@ class VariationGroups {
   }
 
   /**
-   * Convert to flat array for Firestore (backward compatibility)
-   * @returns {Array} - Flat array of variations
-   */
-  toFirestoreArray() {
-    // Convert combinations back to flat ProductVariation-like objects
-    const flat = [];
-
-    this.combinations.forEach(combo => {
-      // For single-dimension selections, create a simple variation
-      if (combo.selection.length === 1) {
-        const dimensionType = this.getDimensionForOption(combo.selection[0])?.type || 'SIZE';
-        const dimensionOption = this.getOptionFromDimensions(combo.selection[0]);
-
-        flat.push({
-          id: combo.id,
-          name: combo.selection[0],
-          value: dimensionOption?.value || 0,
-          basePrice: combo.basePrice,
-          costPrice: combo.costPrice,
-          type: dimensionType,
-          unit: dimensionOption?.unit || '',
-          isWholeGrain: combo.isWholeGrain || dimensionOption?.isWholeGrain || false,
-          displayOrder: dimensionOption?.displayOrder || this.calculateDisplayOrder(dimensionOption || {}),
-        });
-      }
-    });
-
-    // Sort by displayOrder
-    return flat.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
-  }
-
-  /**
    * Helper to find which dimension contains an option
    */
   getDimensionForOption(optionName) {
     return this.dimensions.find(dim =>
       dim.options.some(opt => opt.name === optionName),
     );
+  }
+
+  /**
+   * Helper to find dimension by ID
+   */
+  getDimensionById(dimensionId) {
+    return this.dimensions.find(dim => dim.id === dimensionId);
   }
 
   /**
@@ -416,10 +407,24 @@ class VariationGroups {
 
   /**
    * Get sorted options for a dimension
-   * @param {string} dimensionType - The dimension type
+   * @param {string} dimensionId - The dimension ID
    * @returns {Array} - Sorted options or empty array
    */
-  getSortedOptions(dimensionType) {
+  getSortedOptions(dimensionId) {
+    const dimension = this.dimensions.find(d => d.id === dimensionId);
+    if (!dimension) return [];
+
+    return [...dimension.options].sort((a, b) =>
+      (a.displayOrder || 0) - (b.displayOrder || 0),
+    );
+  }
+
+  /**
+   * Get sorted options for a dimension by type (legacy support)
+   * @param {string} dimensionType - The dimension type
+   * @returns {Array} - Sorted options or empty array (from first matching dimension)
+   */
+  getSortedOptionsByType(dimensionType) {
     const dimension = this.dimensions.find(d => d.type === dimensionType);
     if (!dimension) return [];
 
@@ -438,11 +443,11 @@ class VariationGroups {
 
   /**
    * Update display order for a dimension
-   * @param {string} dimensionType - The dimension type
+   * @param {string} dimensionId - The dimension ID
    * @param {number} displayOrder - New display order
    */
-  setDimensionDisplayOrder(dimensionType, displayOrder) {
-    const dimension = this.dimensions.find(d => d.type === dimensionType);
+  setDimensionDisplayOrder(dimensionId, displayOrder) {
+    const dimension = this.dimensions.find(d => d.id === dimensionId);
     if (dimension) {
       dimension.displayOrder = displayOrder;
     }
@@ -450,12 +455,12 @@ class VariationGroups {
 
   /**
    * Update display order for an option
-   * @param {string} dimensionType - The dimension type
+   * @param {string} dimensionId - The dimension ID
    * @param {string} optionName - The option name
    * @param {number} displayOrder - New display order
    */
-  setOptionDisplayOrder(dimensionType, optionName, displayOrder) {
-    const dimension = this.dimensions.find(d => d.type === dimensionType);
+  setOptionDisplayOrder(dimensionId, optionName, displayOrder) {
+    const dimension = this.dimensions.find(d => d.id === dimensionId);
     if (dimension) {
       const option = dimension.options.find(opt => opt.name === optionName);
       if (option) {
@@ -466,5 +471,68 @@ class VariationGroups {
     }
   }
 }
+
+/*
+Example Firestore Document Structure:
+
+{
+  "createdAt": "2024-01-15T10:30:00Z",
+  "updatedAt": "2024-01-15T10:30:00Z",
+
+  "dimensions": [
+    {
+      "id": "dim_abc123",
+      "type": "WEIGHT",
+      "label": "Cake Weight",
+      "unit": "g",
+      "displayOrder": 0,
+      "options": [
+        {
+          "name": "small",
+          "value": 500,
+          "isWholeGrain": false,
+          "displayOrder": 1
+        },
+        {
+          "name": "large",
+          "value": 1000,
+          "isWholeGrain": false,
+          "displayOrder": 2
+        }
+      ]
+    },
+    {
+      "id": "dim_def456",
+      "type": "FLAVOR",
+      "label": "Flavor",
+      "displayOrder": 1,
+      "options": [
+        {"name": "chocolate", "value": 1, "displayOrder": 1},
+        {"name": "vanilla", "value": 1, "displayOrder": 2}
+      ]
+    }
+  ],
+  "combinations": [
+    {
+      "id": "combo_xyz789",
+      "selection": ["small", "chocolate"],
+      "name": "small + chocolate",
+      "basePrice": 150,
+      "costPrice": 80,
+      "isActive": true,
+      "isWholeGrain": false
+    },
+    {
+      "id": "combo_abc987",
+      "selection": ["large", "vanilla"],
+      "name": "large + vanilla",
+      "basePrice": 250,
+      "costPrice": 120,
+      "isActive": true,
+      "isWholeGrain": false
+    }
+  ]
+}
+*/
 
 module.exports = VariationGroups;
