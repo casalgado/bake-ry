@@ -13,6 +13,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run test:silent` - Run tests without output
 - `npm run test:watch` - Run tests in watch mode
 
+**Important:** Always ask for user permission before running any test commands.
+
 ### Deployment
 - `npm run deploy` - Deploy functions to Firebase
 

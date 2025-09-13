@@ -39,13 +39,19 @@ class BakerySettings extends BaseModel {
     order: {
       activePaymentMethods: ['cash', 'transfer', 'complimentary'],
       allowPartialPayment: false,
-      defaultDate: 'production',
+      defaultDate: 'production', // options are production or delivery
       timeOfDay: false, // if time of day is asked for orders
       offlineMode: false,
     },
     reports: {
       defaultReportFilter: 'dueDate',
       showMultipleReports: false,
+    },
+    users: {
+      collectLegalName: false,
+    },
+    products: {
+      useProductCost: false,
     },
 
   };
@@ -70,7 +76,7 @@ class BakerySettings extends BaseModel {
 
     this.suggestedProductVariations = suggestedProductVariations;
     this.theme = theme;
-    this.features = features || BakerySettings.DEFAULT_FEATURES;
+    this.features = this.mergeWithDefaults(features, BakerySettings.DEFAULT_FEATURES);
 
     // Initialize subscription
     this.subscription = this.initializeSubscription(subscription);
@@ -78,6 +84,22 @@ class BakerySettings extends BaseModel {
 
   getCategoryById(categoryId) {
     return this.ingredientCategories.find((cat) => cat.id === categoryId);
+  }
+
+  mergeWithDefaults(userFeatures, defaults) {
+    if (!userFeatures) return { ...defaults };
+
+    const merged = { ...defaults };
+
+    for (const [key, value] of Object.entries(userFeatures)) {
+      if (value && typeof value === 'object' && !Array.isArray(value) && defaults[key] && typeof defaults[key] === 'object' && !Array.isArray(defaults[key])) {
+        merged[key] = { ...defaults[key], ...value };
+      } else {
+        merged[key] = value;
+      }
+    }
+
+    return merged;
   }
 
   // Initialize subscription object with defaults

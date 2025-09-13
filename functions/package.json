@@ -20,7 +20,8 @@
     "seed:products": "node src/seeds/runners/seedProducts.js",
     "seed:users": "node src/seeds/runners/seedUsers.js",
     "seed:orders": "node src/seeds/runners/seedOrders.js",
-    "save:backup": "node src/seeds/saveBackup.js"
+    "save:backup": "node src/seeds/saveBackup.js",
+    "sync:models": "node scripts/syncModels.js"
   },
   "engines": {
     "node": "20"
@@ -47,3 +48,4 @@
   },
   "private": true
 }
+

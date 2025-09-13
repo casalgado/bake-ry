@@ -9,8 +9,7 @@ class User extends BaseModel {
     role,
     bakeryId,
     name,
-    firstName,
-    lastName,
+    legalName = '',
     createdAt,
     updatedAt,
     address = '',
@@ -33,6 +32,7 @@ class User extends BaseModel {
     this.firstName = parseSpanishName(name).firstName;
     this.lastName = parseSpanishName(name).lastName;
     this.name = parseSpanishName(name).name;
+    this.legalName = legalName.toLowerCase().trim();
 
     this.address = address;
     this.birthday = birthday;

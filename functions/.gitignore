@@ -16,3 +16,5 @@ src/seeds/backup/
 src/seeds/firestore/
 src/middleware/request_logs/
 *.csv
+zsandbox/
+zdocs/

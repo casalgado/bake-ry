@@ -92,6 +92,8 @@ class Order extends BaseModel {
     userName,
     userEmail,
     userPhone,
+    userCategory = '',
+    userLegalName = '',
     userNationalId = '',
     orderItems = [],
 
@@ -138,6 +140,9 @@ class Order extends BaseModel {
     this.userName = userName;
     this.userEmail = userEmail;
     this.userPhone = userPhone;
+    this.userLegalName = userLegalName;
+    this.userCategory = userCategory;
+
     this.userNationalId = userNationalId;
     this.orderItems = orderItems.map(item =>
       item instanceof OrderItem ? item : new OrderItem({ ...item }),
