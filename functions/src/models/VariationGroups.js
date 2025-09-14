@@ -470,6 +470,98 @@ class VariationGroups {
       }
     }
   }
+
+  /**
+   * Check if a dimension has wholegrain options
+   * @param {string} dimensionId - The dimension ID
+   * @returns {boolean} - True if dimension has wholegrain options
+   */
+  dimensionHasWholeGrainOptions(dimensionId) {
+    const dimension = this.getDimensionById(dimensionId);
+    return dimension ? dimension.options.some(opt => opt.isWholeGrain) : false;
+  }
+
+  /**
+   * Create a wholegrain version of an option
+   * @param {Object} regularOption - The regular option to create wholegrain version from
+   * @returns {Object} - The wholegrain option
+   */
+  createWholeGrainOption(regularOption) {
+    return {
+      name: `${regularOption.name} integral`,
+      value: regularOption.value,
+      displayOrder: regularOption.displayOrder || 0,
+      isWholeGrain: true,
+    };
+  }
+
+  /**
+   * Add wholegrain options for all regular options in a dimension
+   * @param {string} dimensionId - The dimension ID
+   */
+  addWholeGrainOptionsForDimension(dimensionId) {
+    const dimension = this.getDimensionById(dimensionId);
+    if (!dimension) return;
+
+    const regularOptions = dimension.options.filter(opt => !opt.isWholeGrain);
+    const wholeGrainOptions = regularOptions.map(opt => this.createWholeGrainOption(opt));
+
+    // Add wholegrain options to dimension
+    wholeGrainOptions.forEach(wholeGrainOption => {
+      this.addOptionToDimension(dimensionId, wholeGrainOption);
+    });
+  }
+
+  /**
+   * Remove wholegrain options from a dimension
+   * @param {string} dimensionId - The dimension ID
+   */
+  removeWholeGrainOptionsFromDimension(dimensionId) {
+    const dimension = this.getDimensionById(dimensionId);
+    if (!dimension) return;
+
+    // Remove all wholegrain options from this dimension
+    dimension.options = dimension.options.filter(opt => !opt.isWholeGrain);
+  }
+
+  /**
+   * Update combinations to mark them as wholegrain if they contain wholegrain options
+   */
+  updateCombinationsWholeGrainStatus() {
+    this.combinations.forEach(combination => {
+      // Check if any selected option is wholegrain
+      combination.isWholeGrain = combination.selection.some(optName => {
+        const option = this.getOptionFromDimensions(optName);
+        return option?.isWholeGrain || false;
+      });
+    });
+  }
+
+  /**
+   * Generate combinations and automatically set wholegrain status
+   * @returns {Array} - Array of combination objects with wholegrain status
+   */
+  generateCombinationsWithWholeGrainStatus() {
+    const allCombos = this.generateAllCombinations();
+
+    return allCombos.map(selection => {
+      // Check if any selected option is wholegrain
+      const isWholeGrain = selection.some(optName => {
+        const option = this.getOptionFromDimensions(optName);
+        return option?.isWholeGrain || false;
+      });
+
+      return {
+        id: generateId(),
+        selection,
+        name: this.generateCombinationName(selection),
+        basePrice: 0,
+        costPrice: 0,
+        isActive: true,
+        isWholeGrain,
+      };
+    });
+  }
 }
 
 /*
