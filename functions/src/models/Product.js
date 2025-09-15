@@ -1,6 +1,6 @@
 // models/Product.js
 const BaseModel = require('./base/BaseModel');
-const ProductVariation = require('./ProductVariation');
+const VariationGroups = require('./VariationGroups');
 
 class Product extends BaseModel {
   constructor({
@@ -40,16 +40,11 @@ class Product extends BaseModel {
     this.collectionName = collectionName;
     this.recipeId = recipeId;
     this.description = description;
-    this.hasVariations = this.variations?.length > 0 || hasVariations;
 
     // Handle variations - create instances
-    this.variations = variations.map(variation => {
-      if (variation instanceof ProductVariation) {
-        return variation;
-      }
+    this.variations = Array.isArray(variations) ? VariationGroups.fromLegacyVariations(variations) : variations;
 
-      return new ProductVariation(variation);
-    });
+    this.hasVariations = this.variations?.combinations?.length > 0 || hasVariations;
 
     // Basic price
     this.basePrice = basePrice;
@@ -67,24 +62,25 @@ class Product extends BaseModel {
     this.customAttributes = customAttributes;
   }
 
-  // Method to update variations
-  setVariations(variations) {
-    this.variations = variations.map(variation => {
-      if (variation instanceof ProductVariation) {
-        return variation;
-      }
-
-      return new ProductVariation(variation);
-    });
-    return this.variations;
-  }
-
   // Override toFirestore to handle variations
   toFirestore() {
     const data = super.toFirestore();
-    if (this.variations.length > 0) {
-      data.variations = this.variations.map(v => v.toPlainObject());
+
+    // Handle variations based on type
+    if (this.variations) {
+      if (this.variations instanceof VariationGroups) {
+        // VariationGroups instance - convert to plain object
+        data.variations = this.variations.toPlainObject();
+      } else if (typeof this.variations === 'object' && !Array.isArray(this.variations)) {
+        // Already a plain object (from new products) - pass through
+        data.variations = this.variations;
+      } else if (Array.isArray(this.variations)) {
+        // Legacy array format - shouldn't happen after constructor conversion
+        // but include for safety
+        data.variations = this.variations;
+      }
     }
+
     return data;
   }
 
@@ -93,9 +89,6 @@ class Product extends BaseModel {
     return new Product({
       id: doc.id,
       ...data,
-      variations: data.variations?.map(v => {
-        return new ProductVariation(v);
-      }),
     });
   }
 }

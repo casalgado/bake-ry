@@ -11,12 +11,37 @@ function ensureDirectoryExists(dirPath) {
   }
 }
 
-function copyFile(source, target) {
+function transformToES6(content) {
+  // Transform require statements to import statements
+  content = content.replace(
+    /const\s+{\s*([^}]+)\s*}\s*=\s*require\(['"`]([^'"`]+)['"`]\);?/g,
+    'import { $1 } from \'$2.js\';',
+  );
+
+  content = content.replace(
+    /const\s+(\w+)\s*=\s*require\(['"`]([^'"`]+)['"`]\);?/g,
+    'import $1 from \'$2.js\';',
+  );
+
+  // Transform module.exports to export default
+  content = content.replace(/module\.exports\s*=\s*(\w+);?/, 'export default $1;');
+
+  return content;
+}
+
+function copyAndTransformFile(source, target) {
   const targetDir = path.dirname(target);
   ensureDirectoryExists(targetDir);
 
-  fs.copyFileSync(source, target);
-  console.log(`Synced: ${path.relative(sourceDir, source)} -> ${target}`);
+  // Read the source file
+  let content = fs.readFileSync(source, 'utf8');
+
+  // Transform CommonJS to ES6
+  content = transformToES6(content);
+
+  // Write the transformed content to target
+  fs.writeFileSync(target, content, 'utf8');
+  console.log(`Synced and transformed: ${path.relative(sourceDir, source)} -> ${target}`);
 }
 
 function syncDirectory(source, target) {
@@ -33,7 +58,7 @@ function syncDirectory(source, target) {
     if (stat.isDirectory()) {
       syncDirectory(sourcePath, targetPath);
     } else if (stat.isFile() && item.endsWith('.js')) {
-      copyFile(sourcePath, targetPath);
+      copyAndTransformFile(sourcePath, targetPath);
     }
   }
 }

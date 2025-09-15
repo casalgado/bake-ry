@@ -472,6 +472,178 @@ class VariationGroups {
   }
 
   /**
+   * Normalize display orders for options in a dimension to sequential values
+   * @param {string} dimensionId - The dimension ID
+   */
+  normalizeOptionDisplayOrders(dimensionId) {
+    const dimension = this.dimensions.find(d => d.id === dimensionId);
+    if (!dimension) return;
+
+    // Assign sequential display orders based on current array order
+    // Do NOT sort - just update display orders to match current positions
+    dimension.options.forEach((option, index) => {
+      option.displayOrder = index + 1;
+    });
+  }
+
+  /**
+   * Normalize display orders for all dimensions to sequential values
+   */
+  normalizeDimensionDisplayOrders() {
+    // Assign sequential display orders based on current array order
+    // Do NOT sort - just update display orders to match current positions
+    this.dimensions.forEach((dimension, index) => {
+      dimension.displayOrder = index + 1;
+    });
+  }
+
+  /**
+   * Move an option to a new position within a dimension
+   * @param {string} dimensionId - The dimension ID
+   * @param {number} fromIndex - Current index of the option
+   * @param {number} toIndex - Target index for the option
+   */
+  moveOption(dimensionId, fromIndex, toIndex) {
+    const dimension = this.dimensions.find(d => d.id === dimensionId);
+    if (!dimension) return;
+
+    const options = dimension.options;
+    if (fromIndex < 0 || fromIndex >= options.length) {
+      return;
+    }
+
+    // Clamp toIndex to valid range
+    toIndex = Math.max(0, Math.min(toIndex, options.length - 1));
+
+    // If moving to the same position, do nothing
+    if (fromIndex === toIndex) return;
+
+    // Remove option from current position
+    const [movedOption] = options.splice(fromIndex, 1);
+
+    // Insert at new position
+    // When moving up (fromIndex > toIndex): insert at toIndex
+    // When moving down (fromIndex < toIndex): after removal, everything shifts left,
+    // but we still want the item at the original toIndex position, so insert at toIndex
+    options.splice(toIndex, 0, movedOption);
+
+    // Normalize display orders
+    this.normalizeOptionDisplayOrders(dimensionId);
+  }
+
+  /**
+   * Move an option to a specific position (1-based) within a dimension
+   * @param {string} dimensionId - The dimension ID
+   * @param {string} optionName - The option name to move
+   * @param {number} newPosition - New position (1-based)
+   */
+  moveOptionToPosition(dimensionId, optionName, newPosition) {
+    const dimension = this.dimensions.find(d => d.id === dimensionId);
+    if (!dimension) return;
+
+    const fromIndex = dimension.options.findIndex(opt => opt.name === optionName);
+    if (fromIndex === -1) return;
+
+    // Convert 1-based position to 0-based index
+    const toIndex = Math.max(0, Math.min(newPosition - 1, dimension.options.length - 1));
+
+    this.moveOption(dimensionId, fromIndex, toIndex);
+  }
+
+  /**
+   * Move an option up or down within a dimension
+   * @param {string} dimensionId - The dimension ID
+   * @param {string} optionName - The option name to move
+   * @param {string} direction - 'up' or 'down'
+   */
+  moveOptionUpDown(dimensionId, optionName, direction) {
+    const dimension = this.dimensions.find(d => d.id === dimensionId);
+    if (!dimension) return;
+
+    const fromIndex = dimension.options.findIndex(opt => opt.name === optionName);
+    if (fromIndex === -1) return;
+
+    const toIndex = direction === 'up' ? fromIndex - 1 : fromIndex + 1;
+
+    // Check bounds
+    if (toIndex < 0 || toIndex >= dimension.options.length) return;
+
+    // For adjacent swaps, optimize by just swapping the items
+    const options = dimension.options;
+    [options[fromIndex], options[toIndex]] = [options[toIndex], options[fromIndex]];
+
+    // Update display orders for the swapped items
+    const tempOrder = options[fromIndex].displayOrder;
+    options[fromIndex].displayOrder = options[toIndex].displayOrder;
+    options[toIndex].displayOrder = tempOrder;
+  }
+
+  /**
+   * Move a dimension to a new position
+   * @param {number} fromIndex - Current index of the dimension
+   * @param {number} toIndex - Target index for the dimension
+   */
+  moveDimension(fromIndex, toIndex) {
+    if (fromIndex < 0 || fromIndex >= this.dimensions.length) {
+      return;
+    }
+
+    // Clamp toIndex to valid range
+    toIndex = Math.max(0, Math.min(toIndex, this.dimensions.length - 1));
+
+    // If moving to the same position, do nothing
+    if (fromIndex === toIndex) return;
+
+    // Remove dimension from current position
+    const [movedDimension] = this.dimensions.splice(fromIndex, 1);
+
+    // Insert at new position (no adjustment needed)
+    this.dimensions.splice(toIndex, 0, movedDimension);
+
+    // Normalize display orders
+    this.normalizeDimensionDisplayOrders();
+  }
+
+  /**
+   * Move a dimension to a specific position (1-based)
+   * @param {string} dimensionId - The dimension ID to move
+   * @param {number} newPosition - New position (1-based)
+   */
+  moveDimensionToPosition(dimensionId, newPosition) {
+    const fromIndex = this.dimensions.findIndex(d => d.id === dimensionId);
+    if (fromIndex === -1) return;
+
+    // Convert 1-based position to 0-based index
+    const toIndex = Math.max(0, Math.min(newPosition - 1, this.dimensions.length - 1));
+
+    this.moveDimension(fromIndex, toIndex);
+  }
+
+  /**
+   * Move a dimension up or down
+   * @param {string} dimensionId - The dimension ID to move
+   * @param {string} direction - 'up' or 'down'
+   */
+  moveDimensionUpDown(dimensionId, direction) {
+    const fromIndex = this.dimensions.findIndex(d => d.id === dimensionId);
+    if (fromIndex === -1) return;
+
+    const toIndex = direction === 'up' ? fromIndex - 1 : fromIndex + 1;
+
+    // Check bounds
+    if (toIndex < 0 || toIndex >= this.dimensions.length) return;
+
+    // For adjacent swaps, optimize by just swapping the items
+    [this.dimensions[fromIndex], this.dimensions[toIndex]] =
+      [this.dimensions[toIndex], this.dimensions[fromIndex]];
+
+    // Update display orders for the swapped dimensions
+    const tempOrder = this.dimensions[fromIndex].displayOrder;
+    this.dimensions[fromIndex].displayOrder = this.dimensions[toIndex].displayOrder;
+    this.dimensions[toIndex].displayOrder = tempOrder;
+  }
+
+  /**
    * Check if a dimension has wholegrain options
    * @param {string} dimensionId - The dimension ID
    * @returns {boolean} - True if dimension has wholegrain options
