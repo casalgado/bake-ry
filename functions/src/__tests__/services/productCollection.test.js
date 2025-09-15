@@ -77,7 +77,7 @@ describe('Product Collection Service Tests', () => {
 
       expect(result).toBeInstanceOf(ProductCollection);
       expect(result.id).toBeDefined();
-      expect(result.name).toBe(collectionData.name.toLowerCase());
+      expect(result.name).toBe(collectionData.name);
 
       // Verify collection exists in Firestore
       const doc = await db
@@ -117,7 +117,7 @@ describe('Product Collection Service Tests', () => {
         testStoreId,
       );
 
-      expect(result.name).toBe(updateData.name.toLowerCase());
+      expect(result.name).toBe(updateData.name);
       expect(result.isActive).toBe(updateData.isActive);
 
       // Verify updates in Firestore

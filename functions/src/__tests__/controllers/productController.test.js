@@ -65,7 +65,7 @@ describe('Product Controller', () => {
       });
     });
 
-    it('should handle validation errors - missing collection', async () => {
+    it('should create product without collectionId', async () => {
       const req = {
         params: { bakeryId: 'bakery123' },
         body: {
@@ -76,10 +76,8 @@ describe('Product Controller', () => {
 
       await productController.create(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        error: 'Product collection is required',
-      });
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalled();
     });
   });
 
@@ -209,7 +207,10 @@ describe('Product Controller', () => {
       expect(res.json).toHaveBeenCalledWith(mockUpdated);
     });
 
-    it('should handle validation errors during update', async () => {
+    it('should update product without collection validation', async () => {
+      const mockUpdated = { id: 'product123', name: 'Updated Product' };
+      productService.update.mockResolvedValue(mockUpdated);
+
       const req = {
         params: {
           bakeryId: 'bakery123',
@@ -217,16 +218,14 @@ describe('Product Controller', () => {
         },
         body: {
           name: 'Updated Product',
-          collection: '', // Invalid - empty collection
+          collection: '', // Empty collection is allowed
         },
       };
 
       await productController.update(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        error: 'Product collection is required',
-      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(mockUpdated);
     });
   });
 

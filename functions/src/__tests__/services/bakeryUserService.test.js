@@ -85,6 +85,8 @@ describe('Bakery User Service Tests', () => {
       expect(authUser.customClaims).toEqual({
         role: userData.role,
         bakeryId: testStoreId,
+        subscriptionStatus: 'TRIAL',
+        subscriptionTier: 'BASIC',
       });
 
       // Verify user in Firestore

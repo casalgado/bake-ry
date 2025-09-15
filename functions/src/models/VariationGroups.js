@@ -1,4 +1,5 @@
 const { generateId } = require('../utils/helpers');
+const Combination = require('./Combination');
 
 /**
  * @typedef {Object} DimensionOption
@@ -19,14 +20,8 @@ const { generateId } = require('../utils/helpers');
  */
 
 /**
- * @typedef {Object} Combination
- * @property {string} id - Unique identifier for the combination
- * @property {string[]} selection - Array of selected option names, one from each dimension
- * @property {string} name - Display name for the combination (auto-generated if not provided)
- * @property {number} [basePrice] - Selling price for this combination
- * @property {number} [costPrice] - Cost price for this combination
- * @property {boolean} [isActive] - Whether this combination is available (default: true)
- * @property {boolean} [isWholeGrain] - Whether this combination is whole grain (auto-calculated)
+ * Note: Combinations are now handled by the Combination class from './Combination.js'
+ * This class works with Combination instances for proper type safety and consistency.
  */
 
 class VariationGroups {
@@ -34,7 +29,7 @@ class VariationGroups {
    * Create a VariationGroups instance
    * @param {Object} options
    * @param {Dimension[]} [options.dimensions=[]] - Array of dimension definitions
-   * @param {Combination[]} [options.combinations=[]] - Array of price combinations
+   * @param {Combination[]|Object[]} [options.combinations=[]] - Array of Combination instances or plain objects
    */
   constructor({ dimensions = [], combinations = [] } = {}) {
     // Ensure dimensions have id, displayOrder, and proper option handling
@@ -49,11 +44,17 @@ class VariationGroups {
       })) || [],
     }));
 
-    this.combinations = combinations.map(combo => ({
-      ...combo,
-      id: combo.id || generateId(),
-      isWholeGrain: combo.isWholeGrain || false,
-    }));
+    // Convert combinations to Combination instances if they aren't already
+    this.combinations = combinations.map(combo => {
+      if (combo instanceof Combination) {
+        return combo;
+      }
+      return new Combination({
+        ...combo,
+        id: combo.id || generateId(),
+        isWholeGrain: combo.isWholeGrain || false,
+      });
+    });
   }
 
   /**
@@ -214,15 +215,17 @@ class VariationGroups {
       });
     }
 
-    this.combinations.push({
+    const combination = new Combination({
       id: combinationId,
       selection,
       name,
       basePrice: priceData.basePrice || 0,
-      costPrice: priceData.costPrice || 0,
+      currentPrice: priceData.basePrice || 0,
       isActive: priceData.isActive !== undefined ? priceData.isActive : true,
       isWholeGrain,
     });
+
+    this.combinations.push(combination);
 
     return combinationId;
   }
@@ -273,16 +276,16 @@ class VariationGroups {
         });
       }
 
-      // Create combination for this single variation
-      combinations.push({
+      // Create combination for this single variation using Combination class
+      combinations.push(new Combination({
         id: v.id,
         selection: [v.name],
         name: v.name,
         basePrice: v.basePrice,
-        costPrice: v.costPrice,
+        currentPrice: v.basePrice,
         isActive: true,
         isWholeGrain: v.isWholeGrain || false,
-      });
+      }));
     });
 
     // Sort options within each dimension by displayOrder
@@ -305,8 +308,29 @@ class VariationGroups {
   toPlainObject() {
     return {
       dimensions: this.dimensions,
-      combinations: this.combinations,
+      combinations: this.combinations.map(combo => combo.toFirestore()),
     };
+  }
+
+  /**
+   * Convert to flat array format (legacy support)
+   * @returns {Array} - Flat array of all options from all dimensions
+   */
+  toFirestoreArray() {
+    const flatArray = [];
+
+    this.dimensions.forEach(dimension => {
+      dimension.options.forEach(option => {
+        flatArray.push({
+          ...option,
+          type: dimension.type,
+          unit: dimension.unit || '',
+        });
+      });
+    });
+
+    // Sort by displayOrder
+    return flatArray.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
   }
 
   /**
@@ -711,7 +735,7 @@ class VariationGroups {
 
   /**
    * Generate combinations and automatically set wholegrain status
-   * @returns {Array} - Array of combination objects with wholegrain status
+   * @returns {Array} - Array of Combination instances with wholegrain status
    */
   generateCombinationsWithWholeGrainStatus() {
     const allCombos = this.generateAllCombinations();
@@ -723,15 +747,15 @@ class VariationGroups {
         return option?.isWholeGrain || false;
       });
 
-      return {
+      return new Combination({
         id: generateId(),
         selection,
         name: this.generateCombinationName(selection),
         basePrice: 0,
-        costPrice: 0,
+        currentPrice: 0,
         isActive: true,
         isWholeGrain,
-      };
+      });
     });
   }
 }

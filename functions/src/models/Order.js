@@ -1,4 +1,5 @@
 const BaseModel = require('./base/BaseModel');
+const Combination = require('./Combination');
 const { generateId } = require('../utils/helpers');
 
 class OrderItem {
@@ -12,6 +13,7 @@ class OrderItem {
     basePrice,
     currentPrice,
     variation,
+    combination,
     recipeId,
     taxPercentage = 0,
     isComplimentary = false,
@@ -26,12 +28,20 @@ class OrderItem {
     this.quantity = quantity;
     this.basePrice = basePrice;
     this.currentPrice = currentPrice;
-    this.variation = variation;
     this.recipeId = recipeId;
     this.taxPercentage = Number(Number(taxPercentage).toFixed(1));
     this.isComplimentary = isComplimentary;
     this.productionBatch = productionBatch;
     this.status = status;
+
+    // Auto-migration: Convert old variation to new combination
+    if (variation && !combination) {
+      this.combination = Combination.fromLegacyVariation(variation, currentPrice);
+      this.variation = variation; // Keep for historical reference
+    } else if (combination) {
+      this.combination = new Combination(combination);
+      this.variation = variation; // May be null for new orders
+    }
 
     // Calculate derived values
     this.taxAmount = this.calculateTaxAmount();
@@ -55,8 +65,27 @@ class OrderItem {
     return this.quantity * this.currentPrice;
   }
 
+  // Helper to get display name from combination or variation
+  getVariationName() {
+    if (this.combination) {
+      return this.combination.getDisplayName();
+    }
+    return this.variation?.name || '';
+  }
+
+  // Get the effective price from combination or fallback to currentPrice
+  getEffectivePrice() {
+    return this.combination ? this.combination.currentPrice : this.currentPrice;
+  }
+
   toPlainObject() {
     const data = { ...this };
+
+    // Serialize combination if it exists
+    if (this.combination) {
+      data.combination = this.combination.toFirestore();
+    }
+
     Object.keys(data).forEach(key => {
       if (data[key] === undefined) {
         delete data[key];
@@ -76,6 +105,7 @@ class OrderItem {
       quantity: this.quantity,
       currentPrice: this.currentPrice,
       variation: this.variation,
+      combination: this.combination ? this.combination.toFirestore() : null,
       taxAmount: this.taxAmount,
       preTaxPrice: this.preTaxPrice,
       subtotal: this.subtotal,

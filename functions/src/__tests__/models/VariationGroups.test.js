@@ -91,34 +91,36 @@ describe('VariationGroups', () => {
       expect(vg.dimensions[0].options[1].isWholeGrain).toBe(true);
     });
 
-    it('should update existing dimension', () => {
+    it('should add multiple dimensions with same type', () => {
       vg.addDimension('SIZE', 'Size', [{ name: 'small', value: 500 }]);
       vg.addDimension('SIZE', 'Updated Size', [{ name: 'large', value: 1000 }]);
 
-      expect(vg.dimensions).toHaveLength(1);
-      expect(vg.dimensions[0].label).toBe('Updated Size');
-      expect(vg.dimensions[0].options[0].name).toBe('large');
+      expect(vg.dimensions).toHaveLength(2);
+      expect(vg.dimensions[0].label).toBe('Size');
+      expect(vg.dimensions[1].label).toBe('Updated Size');
     });
 
     it('should respect custom displayOrder', () => {
-      vg.addDimension('SIZE', 'Size', [], 10);
+      vg.addDimension('SIZE', 'Size', [], undefined, 10);
       expect(vg.dimensions[0].displayOrder).toBe(10);
     });
   });
 
   describe('addOptionToDimension', () => {
     let vg;
+    let sizeDimensionId;
 
     beforeEach(() => {
       vg = new VariationGroups({
-        dimensions: [{ type: 'SIZE', label: 'Size', options: [] }],
+        dimensions: [{ id: 'size-dim', type: 'SIZE', label: 'Size', options: [] }],
       });
+      sizeDimensionId = vg.dimensions[0].id;
     });
 
     it('should add option with calculated displayOrder', () => {
-      vg.addOptionToDimension('SIZE', { name: 'small', value: 500 });
-      vg.addOptionToDimension('SIZE', { name: 'small wholegrain', value: 500, isWholeGrain: true });
-      vg.addOptionToDimension('SIZE', { name: 'otra', value: 1000 });
+      vg.addOptionToDimension(sizeDimensionId, { name: 'small', value: 500 });
+      vg.addOptionToDimension(sizeDimensionId, { name: 'small wholegrain', value: 500, isWholeGrain: true });
+      vg.addOptionToDimension(sizeDimensionId, { name: 'otra', value: 1000 });
 
       const options = vg.dimensions[0].options;
       expect(options).toHaveLength(3);
@@ -128,9 +130,9 @@ describe('VariationGroups', () => {
     });
 
     it('should sort options by displayOrder after adding', () => {
-      vg.addOptionToDimension('SIZE', { name: 'otra', value: 1000 });
-      vg.addOptionToDimension('SIZE', { name: 'small', value: 500 });
-      vg.addOptionToDimension('SIZE', { name: 'small wholegrain', value: 500, isWholeGrain: true });
+      vg.addOptionToDimension(sizeDimensionId, { name: 'otra', value: 1000 });
+      vg.addOptionToDimension(sizeDimensionId, { name: 'small', value: 500 });
+      vg.addOptionToDimension(sizeDimensionId, { name: 'small wholegrain', value: 500, isWholeGrain: true });
 
       const options = vg.dimensions[0].options;
       expect(options[0].name).toBe('small'); // displayOrder: 1
@@ -301,11 +303,14 @@ describe('VariationGroups', () => {
 
   describe('helper methods', () => {
     let vg;
+    let sizeDimensionId;
+    let flavorDimensionId;
 
     beforeEach(() => {
       vg = new VariationGroups({
         dimensions: [
           {
+            id: 'size-dim',
             type: 'SIZE',
             label: 'Size',
             displayOrder: 2,
@@ -316,6 +321,7 @@ describe('VariationGroups', () => {
             ],
           },
           {
+            id: 'flavor-dim',
             type: 'FLAVOR',
             label: 'Flavor',
             displayOrder: 1,
@@ -327,6 +333,8 @@ describe('VariationGroups', () => {
           { selection: ['medium'], basePrice: 150, isWholeGrain: true },
         ],
       });
+      sizeDimensionId = vg.dimensions.find(d => d.type === 'SIZE').id;
+      flavorDimensionId = vg.dimensions.find(d => d.type === 'FLAVOR').id;
     });
 
     it('getSortedDimensions should return dimensions sorted by displayOrder', () => {
@@ -336,7 +344,7 @@ describe('VariationGroups', () => {
     });
 
     it('getSortedOptions should return options sorted by displayOrder', () => {
-      const sorted = vg.getSortedOptions('SIZE');
+      const sorted = vg.getSortedOptions(sizeDimensionId);
       expect(sorted[0].name).toBe('small');
       expect(sorted[1].name).toBe('medium');
       expect(sorted[2].name).toBe('otra');
@@ -349,13 +357,15 @@ describe('VariationGroups', () => {
     });
 
     it('setDimensionDisplayOrder should update dimension order', () => {
-      vg.setDimensionDisplayOrder('SIZE', 0);
-      expect(vg.dimensions[0].displayOrder).toBe(0);
+      vg.setDimensionDisplayOrder(sizeDimensionId, 0);
+      const sizeDim = vg.dimensions.find(d => d.id === sizeDimensionId);
+      expect(sizeDim.displayOrder).toBe(0);
     });
 
     it('setOptionDisplayOrder should update and resort options', () => {
-      vg.setOptionDisplayOrder('SIZE', 'otra', 2);
-      const options = vg.dimensions[0].options;
+      vg.setOptionDisplayOrder(sizeDimensionId, 'otra', 2);
+      const sizeDim = vg.dimensions.find(d => d.id === sizeDimensionId);
+      const options = sizeDim.options;
       expect(options[0].name).toBe('small');
       expect(options[1].name).toBe('otra');
       expect(options[2].name).toBe('medium');
