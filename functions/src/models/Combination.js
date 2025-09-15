@@ -1,9 +1,8 @@
-const BaseModel = require('./base/BaseModel');
 const { generateId } = require('../utils/helpers');
 
-class Combination extends BaseModel {
+class Combination {
   constructor(data = {}) {
-    super(data);
+    this.id = data.id;
     this.selection = data.selection || [];
     this.name = data.name || '';
     this.basePrice = data.basePrice || 0;
@@ -38,10 +37,25 @@ class Combination extends BaseModel {
     return this.selection.length === 1;
   }
 
+  toPlainObject() {
+    const obj = {
+      id: this.id,
+      selection: this.selection.filter(item => item !== undefined && item !== null),
+      name: this.name,
+      basePrice: this.basePrice,
+      currentPrice: this.currentPrice,
+      isWholeGrain: this.isWholeGrain,
+      isActive: this.isActive,
+    };
+
+    // Exclude createdAt and updatedAt for combinations
+
+    return obj;
+  }
+
   toFirestore() {
-    const data = super.toFirestore();
     return {
-      ...data,
+      id: this.id,
       selection: this.selection.filter(item => item !== undefined && item !== null),
       name: this.name,
       basePrice: this.basePrice,

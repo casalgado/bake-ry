@@ -77,6 +77,16 @@ class OrderItem {
     return this.variation?.name || '';
   }
 
+  getItemTotal() {
+    if (this.isComplimentary) return 0;
+
+    const price = this.combination ?
+      this.combination.currentPrice :
+      this.currentPrice;
+
+    return price * this.quantity;
+  }
+
   // Get the effective price from combination or fallback to currentPrice
   getEffectivePrice() {
     return this.combination ? this.combination.currentPrice : this.currentPrice;

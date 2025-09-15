@@ -308,7 +308,9 @@ class VariationGroups {
   toPlainObject() {
     return {
       dimensions: this.dimensions,
-      combinations: this.combinations.map(combo => combo.toFirestore()),
+      combinations: this.combinations.map(combo =>
+        combo instanceof Combination ? combo.toPlainObject() : combo,
+      ),
     };
   }
 
