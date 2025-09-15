@@ -41,6 +41,10 @@ class OrderItem {
     } else if (combination) {
       this.combination = new Combination(combination);
       this.variation = variation; // May be null for new orders
+    } else {
+      // Handle case where variation is null/undefined and no combination exists
+      this.variation = null; // Explicitly set to null instead of leaving undefined
+      this.combination = null;
     }
 
     // Calculate derived values

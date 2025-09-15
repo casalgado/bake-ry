@@ -1,19 +1,8 @@
 const { BAKERY_ID } = require('../seedConfig');
 const bakeryUserService = require('../../services/bakeryUserService');
-const clients = require('./../data/processed_imports/ClientsForNewDatabase.json');
-const clientsB2B = require('./../data/processed_imports/ClientsForNewDatabaseB2B.json');
-const { parseSpanishName } = require('../../utils/helpers');
+const realUsersData = require('../../../zsandbox/users.ea.json');
 
-const b2bClientIds = new Set(
-  Object.values(clientsB2B).map(client => client.id),
-);
-
-const customers = Object.values(clients).map(e => {
-  if (e.email == '' || e.email == null || e.email == undefined || e.email == ' ' || e.email == 'no lo dio') e.email = `pendiente@${e.name.split(' ').join('').toLowerCase()}.com`;
-  const category = b2bClientIds.has(e.id) ? 'B2B' : 'B2C';
-  const cleanItem = { ...e, ...parseSpanishName(e.name), createdAt: e.since, category };
-  return cleanItem;
-});
+const customers = realUsersData.items;
 
 const staff = [
   {
@@ -78,7 +67,7 @@ const staff = [
   },
 ];
 
-const users = [...customers.slice(0, 200), ...staff];
+const users = [...customers, ...staff];
 
 async function seedUsers() {
   try {
@@ -100,6 +89,8 @@ async function seedUsers() {
           category: userData.category == 'B2C' || userData.category == 'B2B' ? userData.category : 'PER',
           role: userData.role || 'bakery_customer',
           isActive: true,
+          // Preserve existing ID from real data
+          id: userData.id,
         },
         BAKERY_ID,
         );
@@ -111,7 +102,7 @@ async function seedUsers() {
           ...createdUser,
         });
       } catch (error) {
-        console.error(`Error creating user ${userData.email}:`, error);
+        console.error(`\nError creating user ${userData.email}:`, error.message);
         continue;
       }
     }

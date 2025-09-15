@@ -1,4 +1,5 @@
 const BaseModel = require('./base/BaseModel');
+const { generateId } = require('../utils/helpers');
 
 class Combination extends BaseModel {
   constructor(data = {}) {
@@ -13,13 +14,13 @@ class Combination extends BaseModel {
 
   static fromLegacyVariation(variation, currentPrice = null) {
     // Handle legacy variations that might not have a proper name
-    const name = variation.name || Object.keys(variation)[0] || 'unknown';
+    const name = variation.name || Object.keys(variation).find(key => key !== 'id' && variation[key]) || 'unknown';
     return new Combination({
-      id: variation.id,
+      id: variation.id || generateId(),
       selection: [name].filter(Boolean), // Filter out undefined/null values
       name: name,
-      basePrice: variation.basePrice,
-      currentPrice: currentPrice || variation.currentPrice || variation.basePrice,
+      basePrice: variation.basePrice || 0,
+      currentPrice: currentPrice || variation.currentPrice || variation.basePrice || 0,
       isWholeGrain: variation.isWholeGrain || false,
       isActive: true,
     });
