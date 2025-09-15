@@ -1,4 +1,4 @@
-const { generateId } = require('../utils/helpers');
+const { generateId, capitalize } = require('../utils/helpers');
 const Combination = require('./Combination');
 
 /**
@@ -39,6 +39,7 @@ class VariationGroups {
       displayOrder: dim.displayOrder !== undefined ? dim.displayOrder : index,
       options: dim.options?.map((opt, optIndex) => ({
         ...opt,
+        name: capitalize(opt.name),
         displayOrder: opt.displayOrder !== undefined ? opt.displayOrder : this.calculateDisplayOrder(opt),
         isWholeGrain: opt.isWholeGrain || false,
       })) || [],
@@ -110,6 +111,7 @@ class VariationGroups {
   addDimension(type, label, options = [], unit, displayOrder, id) {
     const processedOptions = options.map((opt, index) => ({
       ...opt,
+      name: capitalize(opt.name),
       displayOrder: opt.displayOrder !== undefined ? opt.displayOrder : this.calculateDisplayOrder(opt),
       isWholeGrain: opt.isWholeGrain || false,
     }));
@@ -148,6 +150,7 @@ class VariationGroups {
     if (dimension) {
       const processedOption = {
         ...option,
+        name: capitalize(option.name),
         displayOrder: option.displayOrder !== undefined ? option.displayOrder : this.calculateDisplayOrder(option),
         isWholeGrain: option.isWholeGrain || false,
       };
@@ -269,7 +272,7 @@ class VariationGroups {
       const existingOption = dimensionsMap[dimensionKey].options.find(opt => opt.name === v.name);
       if (!existingOption) {
         dimensionsMap[dimensionKey].options.push({
-          name: v.name,
+          name: capitalize(v.name),
           value: v.value,
           isWholeGrain: v.isWholeGrain || false,
           displayOrder: v.displayOrder !== undefined ? v.displayOrder : (v.isWholeGrain ? 2 : 1),
@@ -686,7 +689,7 @@ class VariationGroups {
    */
   createWholeGrainOption(regularOption) {
     return {
-      name: `${regularOption.name} integral`,
+      name: capitalize(`${regularOption.name} integral`),
       value: regularOption.value,
       displayOrder: regularOption.displayOrder || 0,
       isWholeGrain: true,

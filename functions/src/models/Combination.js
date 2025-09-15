@@ -1,10 +1,10 @@
-const { generateId } = require('../utils/helpers');
+const { generateId, capitalize } = require('../utils/helpers');
 
 class Combination {
   constructor(data = {}) {
     this.id = data.id;
-    this.selection = data.selection || [];
-    this.name = data.name || '';
+    this.selection = (data.selection || []).map(item => capitalize(item));
+    this.name = capitalize(data.name) || '';
     this.basePrice = data.basePrice || 0;
     this.currentPrice = data.currentPrice || this.basePrice;
     this.isWholeGrain = data.isWholeGrain || false;
@@ -16,8 +16,8 @@ class Combination {
     const name = variation.name || Object.keys(variation).find(key => key !== 'id' && variation[key]) || 'unknown';
     return new Combination({
       id: variation.id || generateId(),
-      selection: [name].filter(Boolean), // Filter out undefined/null values
-      name: name,
+      selection: [capitalize(name)].filter(Boolean), // Filter out undefined/null values
+      name: capitalize(name),
       basePrice: variation.basePrice || 0,
       currentPrice: currentPrice || variation.currentPrice || variation.basePrice || 0,
       isWholeGrain: variation.isWholeGrain || false,
