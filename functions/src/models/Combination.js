@@ -7,6 +7,7 @@ class Combination {
     this.name = capitalize(data.name) || '';
     this.basePrice = data.basePrice || 0;
     this.currentPrice = data.currentPrice || this.basePrice;
+    this.costPrice = data.costPrice || 0;
     this.isWholeGrain = data.isWholeGrain || false;
     this.isActive = data.isActive !== undefined ? data.isActive : true;
   }
@@ -20,6 +21,7 @@ class Combination {
       name: capitalize(name),
       basePrice: variation.basePrice || 0,
       currentPrice: currentPrice || variation.currentPrice || variation.basePrice || 0,
+      costPrice: variation.costPrice || 0,
       isWholeGrain: variation.isWholeGrain || false,
       isActive: true,
     });
@@ -44,11 +46,10 @@ class Combination {
       name: this.name,
       basePrice: this.basePrice,
       currentPrice: this.currentPrice,
+      costPrice: this.costPrice,
       isWholeGrain: this.isWholeGrain,
       isActive: this.isActive,
     };
-
-    // Exclude createdAt and updatedAt for combinations
 
     return obj;
   }
@@ -60,6 +61,7 @@ class Combination {
       name: this.name,
       basePrice: this.basePrice,
       currentPrice: this.currentPrice,
+      costPrice: this.costPrice,
       isWholeGrain: this.isWholeGrain,
       isActive: this.isActive,
     };
