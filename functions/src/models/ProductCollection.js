@@ -18,6 +18,9 @@ class ProductCollection extends BaseModel {
     defaultVariationType = null, // 'WEIGHT', 'QUANTITY', 'SIZE'
     defaultUnit = null,
 
+    // Dimension templates for this collection (new variations system)
+    dimensionTemplates = { dimensions: [] },
+
     // Common fields
     createdAt,
     updatedAt,
@@ -33,6 +36,9 @@ class ProductCollection extends BaseModel {
     this.defaultVariationType = defaultVariationType;
     this.defaultUnit = defaultUnit;
 
+    // Handle dimension templates (new variations system)
+    this.dimensionTemplates = dimensionTemplates || { dimensions: [] };
+
     // Handle variation templates - these are templates without pricing
     this.variationTemplates = variationTemplates.map(template => {
       // Ensure we don't store pricing in collection templates
@@ -45,6 +51,16 @@ class ProductCollection extends BaseModel {
   // Get variation templates for product creation
   getVariationTemplates() {
     return this.variationTemplates.map(template => template.toPlainObject());
+  }
+
+  // Get dimension templates for product creation
+  getDimensionTemplates() {
+    return this.dimensionTemplates;
+  }
+
+  // Update dimension templates
+  updateDimensionTemplates(dimensionTemplates) {
+    this.dimensionTemplates = dimensionTemplates || { dimensions: [] };
   }
 
   // Add a variation template to this collection
@@ -91,13 +107,16 @@ class ProductCollection extends BaseModel {
     return updatedTemplate;
   }
 
-  // Override toFirestore to handle variation templates
+  // Override toFirestore to handle variation templates and dimension templates
   toFirestore() {
     const data = super.toFirestore();
     if (this.variationTemplates.length > 0) {
       data.variationTemplates = this.variationTemplates.map(template =>
         template.toPlainObject(),
       );
+    }
+    if (this.dimensionTemplates && this.dimensionTemplates.dimensions.length > 0) {
+      data.dimensionTemplates = this.dimensionTemplates;
     }
     return data;
   }
@@ -108,6 +127,7 @@ class ProductCollection extends BaseModel {
       id: doc.id,
       ...data,
       variationTemplates: data.variationTemplates || [],
+      dimensionTemplates: data.dimensionTemplates || { dimensions: [] },
     });
   }
 
