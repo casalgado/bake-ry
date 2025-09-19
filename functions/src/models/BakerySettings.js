@@ -47,13 +47,6 @@ class BakerySettings extends BaseModel {
       defaultReportFilter: 'dueDate',
       showMultipleReports: false,
     },
-    users: {
-      collectLegalName: false,
-    },
-    products: {
-      useProductCost: false,
-    },
-
   };
 
   constructor({

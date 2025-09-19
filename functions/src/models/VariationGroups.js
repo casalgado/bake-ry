@@ -254,14 +254,14 @@ class VariationGroups {
     const dimensionDisplayOrders = {};
 
     flatVariations.forEach(v => {
-      const dimensionKey = v.type;
+      const dimensionKey = v.type || 'SIZE';
 
       // Create dimension if it doesn't exist
       if (!dimensionsMap[dimensionKey]) {
         dimensionsMap[dimensionKey] = {
           id: generateId(),
-          type: v.type,
-          label: v.type,
+          type: v.type || 'SIZE',
+          label: v.type || 'Tamaño',
           unit: v.unit || '',
           options: [],
           displayOrder: dimensionDisplayOrders[v.type] || Object.keys(dimensionsMap).length,
