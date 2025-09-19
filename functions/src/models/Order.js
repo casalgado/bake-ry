@@ -36,7 +36,7 @@ class OrderItem {
 
     // Auto-migration: Convert old variation to new combination
     if (variation && !combination) {
-      this.combination = Combination.fromLegacyVariation(variation, currentPrice);
+      this.combination = Combination.fromLegacyVariation(variation, currentPrice, basePrice);
       this.variation = variation; // Keep for historical reference
     } else if (combination) {
       this.combination = new Combination(combination);

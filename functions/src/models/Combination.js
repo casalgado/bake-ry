@@ -12,14 +12,14 @@ class Combination {
     this.isActive = data.isActive !== undefined ? data.isActive : true;
   }
 
-  static fromLegacyVariation(variation, currentPrice = null) {
+  static fromLegacyVariation(variation, currentPrice = null, basePrice = null) {
     // Handle legacy variations that might not have a proper name
     const name = variation.name || Object.keys(variation).find(key => key !== 'id' && variation[key]) || 'unknown';
     return new Combination({
       id: variation.id || generateId(),
       selection: [capitalize(name)].filter(Boolean), // Filter out undefined/null values
       name: capitalize(name),
-      basePrice: variation.basePrice || 0,
+      basePrice: basePrice || variation.basePrice || 0,
       currentPrice: currentPrice || variation.currentPrice || variation.basePrice || 0,
       costPrice: variation.costPrice || 0,
       isWholeGrain: variation.isWholeGrain || false,
