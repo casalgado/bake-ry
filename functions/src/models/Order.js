@@ -212,7 +212,8 @@ class Order extends BaseModel {
     this.numberOfBags = numberOfBags == '' ? 0 : numberOfBags;
 
     // Set isComplimentary based on paymentMethod
-    this.isComplimentary = paymentMethod === 'complimentary';
+    this.isComplimentary = paymentMethod === 'complimentary' || paymentMethod === 'quote';
+    this.isQuote = paymentMethod === 'quote';
 
     // Calculate all pricing components
     this.calculatePricing();
@@ -230,7 +231,7 @@ class Order extends BaseModel {
   }
 
   calculatePricing() {
-    if (this.isComplimentary) {
+    if (this.isComplimentary && !this.isQuote) {
       this.taxableSubtotal = 0;
       this.nonTaxableSubtotal = 0;
       this.subtotal = 0;

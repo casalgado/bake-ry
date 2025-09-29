@@ -101,6 +101,11 @@
       "value": "complimentary",
       "label": "Regalo",
       "displayText": "RE"
+    },
+    {
+      "value": "quote",
+      "label": "Cotización",
+      "displayText": "CO"
     }
   ],
   "defaultVariationTemplates": {

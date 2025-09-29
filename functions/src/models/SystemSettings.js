@@ -37,6 +37,7 @@ class SystemSettings extends BaseModel {
     { value: 'davivienda', label: 'Davivienda', displayText: 'DV' },
     { value: 'bancolombia', label: 'Bancolombia', displayText: 'BC' },
     { value: 'complimentary', label: 'Regalo', displayText: 'RE' },
+    { value: 'quote', label: 'Cotización', displayText: 'CO' },
   ];
 
   static DEFAULT_VARIATION_TEMPLATES = {
