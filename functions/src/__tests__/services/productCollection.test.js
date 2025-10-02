@@ -88,7 +88,7 @@ describe('Product Collection Service Tests', () => {
         .get();
 
       expect(doc.exists).toBe(true);
-      expect(doc.data().name).toBe(collectionData.name.toLowerCase());
+      expect(doc.data().name).toBe(collectionData.name);
     });
 
     it('should retrieve a product collection by ID', async () => {
@@ -128,7 +128,7 @@ describe('Product Collection Service Tests', () => {
         .doc(testCollection.id)
         .get();
 
-      expect(doc.data().name).toBe(updateData.name.toLowerCase());
+      expect(doc.data().name).toBe(updateData.name);
       expect(doc.data().isActive).toBe(updateData.isActive);
     });
   });

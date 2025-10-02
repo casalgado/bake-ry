@@ -171,20 +171,20 @@ describe('Bakery User Service Tests', () => {
 
       const result = await bakeryUserService.create(userData, testStoreId);
 
-      // Verify B2B collection entry
-      const b2bDoc = await db
+      // Verify staff collection entry (not b2b_clients for staff roles)
+      const staffDoc = await db
         .collection('bakeries')
         .doc(testStoreId)
         .collection('settings')
         .doc('default')
-        .collection('b2b_clients')
+        .collection('staff')
         .doc(result.id)
         .get();
 
-      expect(b2bDoc.exists).toBe(true);
-      expect(b2bDoc.data().email).toBe(userData.email);
-      expect(b2bDoc.data().address).toBe(userData.address);
-      expect(b2bDoc.data().phone).toBe('');
+      expect(staffDoc.exists).toBe(true);
+      expect(staffDoc.data().email).toBe(userData.email);
+      expect(staffDoc.data().address).toBe(userData.address);
+      expect(staffDoc.data().phone).toBe('');
     });
 
     it('should prevent duplicate email registration within bakery', async () => {

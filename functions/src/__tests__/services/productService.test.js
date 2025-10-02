@@ -56,7 +56,7 @@ describe('Product Service Tests', () => {
       expect(result).toBeInstanceOf(Product);
       expect(result.id).toBeDefined();
       expect(result.name).toBe(productData.name); // Now matches lowercase
-      expect(result.variations).toHaveLength(1);
+      expect(result.variations.combinations).toHaveLength(1);
 
       // Verify product exists in Firestore
       const doc = await db
@@ -111,8 +111,8 @@ describe('Product Service Tests', () => {
 
       expect(updated.name).toBe(updateData.name);
       expect(updated.basePrice).toBe(updateData.basePrice);
-      expect(updated.variations).toHaveLength(1);
-      expect(updated.variations[0].name).toBe('large');
+      expect(updated.variations.combinations).toHaveLength(1);
+      expect(updated.variations.combinations[0].name).toBe('Large');
 
       // Verify in Firestore
       const doc = await db
@@ -156,10 +156,10 @@ describe('Product Service Tests', () => {
 
       const result = await productService.create(productData, testStoreId);
 
-      expect(result.variations).toHaveLength(3);
-      expect(result.variations[0].name).toBe('small');
-      expect(result.variations[1].name).toBe('medium');
-      expect(result.variations[2].name).toBe('large');
+      expect(result.variations.combinations).toHaveLength(3);
+      expect(result.variations.combinations[0].name).toBe('Small');
+      expect(result.variations.combinations[1].name).toBe('Medium');
+      expect(result.variations.combinations[2].name).toBe('Large');
 
       // Verify variations in Firestore
       const doc = await db
@@ -169,7 +169,7 @@ describe('Product Service Tests', () => {
         .doc(result.id)
         .get();
 
-      expect(doc.data().variations).toHaveLength(3);
+      expect(doc.data().variations.combinations).toHaveLength(3);
     });
 
     it('should update product variations', async () => {
@@ -187,9 +187,9 @@ describe('Product Service Tests', () => {
 
       const updated = await productService.update(product.id, updateData, testStoreId);
 
-      expect(updated.variations).toHaveLength(1);
-      expect(updated.variations[0].name).toBe('updated');
-      expect(updated.variations[0].basePrice).toBe(12000);
+      expect(updated.variations.combinations).toHaveLength(1);
+      expect(updated.variations.combinations[0].name).toBe('Updated');
+      expect(updated.variations.combinations[0].basePrice).toBe(12000);
     });
   });
 
