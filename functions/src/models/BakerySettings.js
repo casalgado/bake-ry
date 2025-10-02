@@ -49,12 +49,24 @@ class BakerySettings extends BaseModel {
     },
   };
 
+  static DEFAULT_BRANDING = {
+    logos: {
+      original: '',
+      small: '',
+      medium: '',
+      large: '',
+    },
+    primaryColor: '',
+    secondaryColor: '',
+  };
+
   constructor({
     id,
     bakeryId,
     ingredientCategories = [],
     theme = {},
     features,
+    branding,
     suggestedProductVariations = {},
     subscription = null,
     createdAt,
@@ -70,6 +82,7 @@ class BakerySettings extends BaseModel {
     this.suggestedProductVariations = suggestedProductVariations;
     this.theme = theme;
     this.features = this.mergeWithDefaults(features, BakerySettings.DEFAULT_FEATURES);
+    this.branding = this.mergeWithDefaults(branding, BakerySettings.DEFAULT_BRANDING);
 
     // Initialize subscription
     this.subscription = this.initializeSubscription(subscription);

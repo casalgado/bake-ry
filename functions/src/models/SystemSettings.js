@@ -36,8 +36,8 @@ class SystemSettings extends BaseModel {
     { value: 'card', label: 'Tarjeta', displayText: 'DF' },
     { value: 'davivienda', label: 'Davivienda', displayText: 'DV' },
     { value: 'bancolombia', label: 'Bancolombia', displayText: 'BC' },
-    { value: 'complimentary', label: 'Regalo', displayText: 'RE' },
     { value: 'quote', label: 'Cotización', displayText: 'CO' },
+    { value: 'complimentary', label: 'Regalo', displayText: 'RE' },
   ];
 
   static DEFAULT_VARIATION_TEMPLATES = {
@@ -77,32 +77,26 @@ class SystemSettings extends BaseModel {
 
   constructor({
     id = 'default',
-    orderStatuses = SystemSettings.ORDER_STATUSES,
-    fulfillmentTypes = SystemSettings.FULFILLMENT_TYPES,
-    paymentMethods = SystemSettings.PAYMENT_METHODS,
-    unitOptions = SystemSettings.UNIT_OPTIONS,
-    storageTemperatures = SystemSettings.STORAGE_TEMPERATURES,
-    availablePaymentMethods = SystemSettings.AVAILABLE_PAYMENT_METHODS,
-    defaultVariationTemplates = SystemSettings.DEFAULT_VARIATION_TEMPLATES,
     createdAt,
     updatedAt,
   }) {
     super({ id, createdAt, updatedAt });
 
-    this.orderStatuses = orderStatuses;
-    this.fulfillmentTypes = fulfillmentTypes;
-    this.paymentMethods = paymentMethods;
-    this.unitOptions = unitOptions;
-    this.storageTemperatures = storageTemperatures;
-    this.availablePaymentMethods = availablePaymentMethods;
-    this.defaultVariationTemplates = defaultVariationTemplates;
+    // Always use static constants as source of truth
+    this.orderStatuses = SystemSettings.ORDER_STATUSES;
+    this.fulfillmentTypes = SystemSettings.FULFILLMENT_TYPES;
+    this.unitOptions = SystemSettings.UNIT_OPTIONS;
+    this.storageTemperatures = SystemSettings.STORAGE_TEMPERATURES;
+    this.availablePaymentMethods = SystemSettings.AVAILABLE_PAYMENT_METHODS;
+    this.defaultVariationTemplates = SystemSettings.DEFAULT_VARIATION_TEMPLATES;
   }
 
   static fromFirestore(doc) {
     const data = doc.data();
     return new SystemSettings({
       id: doc.id,
-      ...data,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
     });
   }
 }
