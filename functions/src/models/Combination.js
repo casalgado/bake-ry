@@ -3,7 +3,9 @@ const { generateId, capitalize } = require('../utils/helpers');
 class Combination {
   constructor(data = {}) {
     this.id = data.id || generateId();
-    this.selection = (data.selection || []).map(item => capitalize(item));
+    this.selection = (data.selection || [])
+      .filter(item => item !== null && item !== undefined)
+      .map(item => capitalize(item));
     this.name = capitalize(data.name) || '';
     this.basePrice = data.basePrice || 0;
     this.currentPrice = data.currentPrice || this.basePrice;
