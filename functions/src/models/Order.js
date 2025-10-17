@@ -7,6 +7,7 @@ class OrderItem {
     id,
     productId,
     productName,
+    productDescription,
     collectionId,
     collectionName,
     quantity,
@@ -23,6 +24,7 @@ class OrderItem {
     this.id = id || generateId();
     this.productId = productId;
     this.productName = productName;
+    this.productDescription = productDescription || '';
     this.collectionId = collectionId;
     this.collectionName = collectionName;
     this.quantity = quantity;
@@ -112,6 +114,7 @@ class OrderItem {
     return {
       productId: this.productId,
       productName: this.productName,
+      productDescription: this.productDescription,
       collectionId: this.collectionId,
       collectionName: this.collectionName,
       isComplimentary: this.isComplimentary,
@@ -175,6 +178,9 @@ class Order extends BaseModel {
     internalNotes = '',
     isDeleted = false,
     lastEditedBy = null,
+
+    // Invoice Customizations
+    invoiceCustomizations = {},
   } = {}) {
     super({ id, createdAt, updatedAt, preparationDate, dueDate, paymentDate, partialPaymentDate });
 
@@ -217,6 +223,13 @@ class Order extends BaseModel {
 
     // Calculate all pricing components
     this.calculatePricing();
+
+    // Invoice Customizations
+    this.invoiceCustomizations = invoiceCustomizations || {
+      termsAndConditions: '',
+      notes: '',
+      customTitle: '',
+    };
 
     // Notes and Flags
     this.customerNotes = customerNotes;
@@ -303,6 +316,7 @@ class Order extends BaseModel {
       data.orderItems = this.orderItems.map(item => item.toPlainObject());
     }
     data.lastEditedBy = this.lastEditedBy || null;
+    data.invoiceCustomizations = this.invoiceCustomizations;
     return data;
   }
 

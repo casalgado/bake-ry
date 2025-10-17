@@ -18,6 +18,8 @@ class Bakery extends BaseModel {
     description,
     website,
     socialMedia = {},
+    legalName,
+    nationalId,
 
     // Location & Delivery
     deliveryFee,
@@ -44,6 +46,8 @@ class Bakery extends BaseModel {
     this.description = description;
     this.website = website;
     this.socialMedia = socialMedia;
+    this.legalName = legalName;
+    this.nationalId = nationalId;
 
     // Location & Delivery
     this.deliveryFee = deliveryFee;

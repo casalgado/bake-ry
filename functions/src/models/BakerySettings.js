@@ -47,6 +47,11 @@ class BakerySettings extends BaseModel {
       defaultReportFilter: 'dueDate',
       showMultipleReports: false,
     },
+    invoicing: {
+      defaultTermsAndConditions: '',
+      showProductDescriptions: true,
+      showTermsAndConditions: true,
+    },
   };
 
   static DEFAULT_BRANDING = {
