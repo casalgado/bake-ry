@@ -126,5 +126,35 @@ describe('BakerySettings - Feature Management', () => {
       expect(settings.features.order.timeOfDay).toBe(false); // New default
       expect(settings.features.reports).toEqual(BakerySettings.DEFAULT_FEATURES.reports); // Entire new section
     });
+
+    it('should include default invoicing settings', () => {
+      const settings = new BakerySettings({
+        bakeryId: 'test',
+      });
+
+      expect(settings.features.invoicing).toEqual({
+        defaultTermsAndConditions: '',
+        showProductDescriptions: true,
+        showTermsAndConditions: true,
+      });
+    });
+
+    it('should merge custom invoicing settings with defaults', () => {
+      const existingFeatures = {
+        invoicing: {
+          defaultTermsAndConditions: 'Custom terms text',
+          showProductDescriptions: false,
+        },
+      };
+
+      const settings = new BakerySettings({
+        bakeryId: 'test',
+        features: existingFeatures,
+      });
+
+      expect(settings.features.invoicing.defaultTermsAndConditions).toBe('Custom terms text');
+      expect(settings.features.invoicing.showProductDescriptions).toBe(false);
+      expect(settings.features.invoicing.showTermsAndConditions).toBe(true); // Default value
+    });
   });
 });

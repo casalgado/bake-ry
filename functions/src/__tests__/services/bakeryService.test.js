@@ -46,6 +46,26 @@ describe('Bakery Firestore Tests', () => {
     expect(savedData.operatingHours.monday.isOpen).toBe(true);
   });
 
+  it('should store and retrieve legalName and nationalId', async () => {
+    const testBakery = new Bakery({
+      name: 'Test Bakery',
+      legalName: 'Test Bakery LLC',
+      nationalId: '123-45-6789',
+    });
+
+    // Save to Firestore
+    const bakeryRef = db.collection('bakeries').doc();
+    await bakeryRef.set(testBakery.toFirestore());
+
+    // Retrieve from Firestore
+    const savedDoc = await bakeryRef.get();
+    const savedData = savedDoc.data();
+
+    // Verify the new fields
+    expect(savedData.legalName).toBe('Test Bakery LLC');
+    expect(savedData.nationalId).toBe('123-45-6789');
+  });
+
   it('should update bakery status in Firestore', async () => {
     // Create initial bakery
     const testBakery = new Bakery({

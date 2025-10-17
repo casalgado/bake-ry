@@ -224,11 +224,12 @@ class Order extends BaseModel {
     // Calculate all pricing components
     this.calculatePricing();
 
-    // Invoice Customizations
-    this.invoiceCustomizations = invoiceCustomizations || {
+    // Invoice Customizations - merge with defaults
+    this.invoiceCustomizations = {
       termsAndConditions: '',
       notes: '',
       customTitle: '',
+      ...(invoiceCustomizations || {}),
     };
 
     // Notes and Flags

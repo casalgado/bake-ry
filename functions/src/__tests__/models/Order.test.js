@@ -2,6 +2,31 @@
 const { Order, OrderItem } = require('../../models/Order');
 
 describe('OrderItem', () => {
+  describe('constructor', () => {
+    it('should initialize with productDescription', () => {
+      const item = new OrderItem({
+        productId: '1',
+        productName: 'Test Product',
+        productDescription: 'A delicious test product',
+        quantity: 1,
+        currentPrice: 1000,
+      });
+
+      expect(item.productDescription).toBe('A delicious test product');
+    });
+
+    it('should default productDescription to empty string if not provided', () => {
+      const item = new OrderItem({
+        productId: '1',
+        productName: 'Test Product',
+        quantity: 1,
+        currentPrice: 1000,
+      });
+
+      expect(item.productDescription).toBe('');
+    });
+  });
+
   describe('calculations', () => {
     it('should calculate tax amount correctly', () => {
       const item = new OrderItem({
@@ -85,6 +110,35 @@ describe('Order', () => {
       });
 
       expect(order.orderItems[0]).toBeInstanceOf(OrderItem);
+    });
+
+    it('should initialize with default invoice customizations', () => {
+      const order = new Order({
+        bakeryId: '123',
+        userId: 'user123',
+      });
+
+      expect(order.invoiceCustomizations).toEqual({
+        termsAndConditions: '',
+        notes: '',
+        customTitle: '',
+      });
+    });
+
+    it('should accept custom invoice customizations', () => {
+      const order = new Order({
+        bakeryId: '123',
+        userId: 'user123',
+        invoiceCustomizations: {
+          termsAndConditions: 'Custom terms',
+          notes: 'Special notes',
+          customTitle: 'Invoice Title',
+        },
+      });
+
+      expect(order.invoiceCustomizations.termsAndConditions).toBe('Custom terms');
+      expect(order.invoiceCustomizations.notes).toBe('Special notes');
+      expect(order.invoiceCustomizations.customTitle).toBe('Invoice Title');
     });
   });
 
@@ -170,6 +224,39 @@ describe('Order', () => {
           productName: 'Test Product',
         }),
       );
+    });
+
+    it('should include invoiceCustomizations in Firestore data', () => {
+      const order = new Order({
+        bakeryId: '123',
+        invoiceCustomizations: {
+          termsAndConditions: 'Test terms',
+          notes: 'Test notes',
+          customTitle: 'Test title',
+        },
+      });
+
+      const firestoreData = order.toFirestore();
+      expect(firestoreData.invoiceCustomizations).toEqual({
+        termsAndConditions: 'Test terms',
+        notes: 'Test notes',
+        customTitle: 'Test title',
+      });
+    });
+
+    it('should include productDescription in order item plain objects', () => {
+      const order = new Order({
+        orderItems: [{
+          productId: '1',
+          productName: 'Test Product',
+          productDescription: 'Test description',
+          quantity: 1,
+          currentPrice: 1000,
+        }],
+      });
+
+      const firestoreData = order.toFirestore();
+      expect(firestoreData.orderItems[0].productDescription).toBe('Test description');
     });
   });
 
