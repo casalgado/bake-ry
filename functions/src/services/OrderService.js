@@ -1,6 +1,7 @@
 // services/orderService.js
 const { Order } = require('../models/Order');
 const SalesReport = require('../models/SalesReport');
+const ProductReport = require('../models/ProductReport');
 const OrderHistory = require('../models/OrderHistory');
 const createBaseService = require('./base/serviceFactory');
 const { db } = require('../config/firebase');
@@ -392,6 +393,57 @@ const createOrderService = () => {
     }
   };
 
+  const getProductReport = async (bakeryId, query) => {
+    try {
+      // Extract report-specific options before querying orders
+      const options = {
+        categories: query.filters.categories?.split(',') || null,
+        period: query.filters.period || null,
+        metrics: query.filters.metrics || 'both',
+        segment: query.filters.segment || 'none',
+        dateField: query.filters.date_field || 'dueDate',
+      };
+
+      // Remove report-specific filters from query so they don't get applied to Firestore
+      const orderQuery = {
+        ...query,
+        filters: { ...query.filters },
+      };
+      delete orderQuery.filters.categories;
+      delete orderQuery.filters.period;
+      delete orderQuery.filters.metrics;
+      delete orderQuery.filters.segment;
+
+      // Default to current year if no date range provided
+      if (!orderQuery.filters.dateRange && !orderQuery.filters.paymentDateWithFallback) {
+        const now = new Date();
+        const startOfYear = new Date(now.getFullYear(), 0, 1);
+        orderQuery.filters.dateRange = {
+          dateField: options.dateField,
+          startDate: startOfYear.toISOString().split('T')[0],
+          endDate: now.toISOString().split('T')[0],
+        };
+        options.defaultDateRangeApplied = true;
+      }
+
+      const orders = await baseService.getAll(bakeryId, orderQuery);
+
+      const [products_query, b2b_clients_query] = await Promise.all([
+        db.collection('bakeries').doc(bakeryId).collection('products').get(),
+        db.collection('bakeries').doc(bakeryId).collection('settings').doc('default').collection('b2b_clients').get(),
+      ]);
+
+      const products = products_query.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const b2b_clients = b2b_clients_query.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      const productReport = new ProductReport(orders.items, b2b_clients, products, options);
+      return productReport.generateReport();
+    } catch (error) {
+      console.error('Error generating product report:', error);
+      throw error;
+    }
+  };
+
   const getHistory = async (bakeryId, orderId) => {
     try {
       if (!bakeryId || !orderId) {
@@ -418,6 +470,7 @@ const createOrderService = () => {
     patchAll,
     remove,
     getSalesReport,
+    getProductReport,
     getHistory,
   };
 };

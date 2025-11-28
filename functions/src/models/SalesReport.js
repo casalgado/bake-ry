@@ -26,6 +26,7 @@ class SalesReport {
 
     // Pre-calculate product aggregations
     this.aggregatedProducts = this.aggregateProductData();
+    this.segmentedProducts = this.aggregateProductDataBySegment();
   }
 
   generateReport() {
@@ -212,6 +213,8 @@ class SalesReport {
       bestSellers: {
         byQuantity: this.calculateBestSellersByQuantity(),
         bySales: this.calculateBestSellersBySales(),
+        b2b: this.calculateBestSellersB2B(),
+        b2c: this.calculateBestSellersB2C(),
       },
       lowestSellers: {
         byQuantity: this.calculateLowestSellersByQuantity(),
@@ -370,6 +373,66 @@ class SalesReport {
     }));
   }
 
+  aggregateProductDataBySegment() {
+    const b2bProducts = {};
+    const b2cProducts = {};
+    let totalB2BQuantity = 0;
+    let totalB2CQuantity = 0;
+
+    // Aggregate B2B products
+    this.b2bOrders.forEach(order => {
+      order.orderItems.filter(item => !item.isComplimentary).forEach(item => {
+        if (!b2bProducts[item.productId]) {
+          b2bProducts[item.productId] = {
+            productId: item.productId,
+            name: item.productName,
+            collection: item.collectionName,
+            quantity: 0,
+            revenue: 0,
+          };
+        }
+        b2bProducts[item.productId].quantity += item.quantity;
+        b2bProducts[item.productId].revenue += item.subtotal;
+        totalB2BQuantity += item.quantity;
+      });
+    });
+
+    // Aggregate B2C products
+    this.b2cOrders.forEach(order => {
+      order.orderItems.filter(item => !item.isComplimentary).forEach(item => {
+        if (!b2cProducts[item.productId]) {
+          b2cProducts[item.productId] = {
+            productId: item.productId,
+            name: item.productName,
+            collection: item.collectionName,
+            quantity: 0,
+            revenue: 0,
+          };
+        }
+        b2cProducts[item.productId].quantity += item.quantity;
+        b2cProducts[item.productId].revenue += item.subtotal;
+        totalB2CQuantity += item.quantity;
+      });
+    });
+
+    return {
+      b2b: Object.values(b2bProducts).map(product => ({
+        ...product,
+        name: this.all_products.find(p => p.id === product.productId)?.name || product.name,
+        averagePrice: product.revenue / product.quantity,
+        percentageOfSales: Number(((product.revenue / this.totalB2BSales) * 100).toFixed(1)),
+        percentageOfQuantity: Number(((product.quantity / totalB2BQuantity) * 100).toFixed(1)),
+      })),
+      b2c: Object.values(b2cProducts).map(product => ({
+        ...product,
+        name: this.all_products.find(p => p.id === product.productId)?.name || product.name,
+        averagePrice: product.revenue / product.quantity,
+        percentageOfSales: Number(((product.revenue / this.totalB2CSales) * 100).toFixed(1)),
+        percentageOfQuantity: Number(((product.quantity / totalB2CQuantity) * 100).toFixed(1)),
+      })),
+    };
+  }
+
   calculateBestSellersByQuantity() {
     return [...this.aggregatedProducts]
       .sort((a, b) => b.quantity - a.quantity)
@@ -391,6 +454,18 @@ class SalesReport {
   calculateLowestSellersBySales() {
     return [...this.aggregatedProducts]
       .sort((a, b) => a.revenue - b.revenue)
+      .slice(0, 10);
+  }
+
+  calculateBestSellersB2B() {
+    return [...this.segmentedProducts.b2b]
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 10);
+  }
+
+  calculateBestSellersB2C() {
+    return [...this.segmentedProducts.b2c]
+      .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 10);
   }
 
