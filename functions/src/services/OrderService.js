@@ -362,8 +362,14 @@ const createOrderService = () => {
 
   const getSalesReport = async (bakeryId, query) => {
     try {
+      // Override pagination for reports - fetch all orders
+      const reportQuery = {
+        ...query,
+        pagination: { ...query.pagination, perPage: 10000, offset: 0 },
+      };
+
       // Get orders using the existing getAll method
-      const orders = await baseService.getAll(bakeryId, query);
+      const orders = await baseService.getAll(bakeryId, reportQuery);
       const products_query = await db.collection('bakeries').doc(bakeryId).collection('products').get();
       const products = [];
       products_query.forEach(doc => {
@@ -405,8 +411,10 @@ const createOrderService = () => {
       };
 
       // Remove report-specific filters from query so they don't get applied to Firestore
+      // Override pagination for reports - fetch all orders
       const orderQuery = {
         ...query,
+        pagination: { ...query.pagination, perPage: 10000, offset: 0 },
         filters: { ...query.filters },
       };
       delete orderQuery.filters.categories;

@@ -352,6 +352,139 @@ describe('Bakery User Service Tests', () => {
     });
   });
 
+  describe('Phone Uniqueness', () => {
+    it('should prevent creating a user with duplicate phone number', async () => {
+      const userData1 = createTestUserData({
+        email: 'user1@example.com',
+        phone: '5551234567',
+      });
+      const userData2 = createTestUserData({
+        email: 'user2@example.com',
+        phone: '5551234567', // same phone
+      });
+
+      await bakeryUserService.create(userData1, testStoreId);
+
+      await expect(
+        bakeryUserService.create(userData2, testStoreId),
+      ).rejects.toThrow('Ya existe un usuario con este número de teléfono');
+    });
+
+    it('should allow creating multiple users without phone numbers', async () => {
+      const userData1 = createTestUserData({
+        email: 'user1@example.com',
+        phone: '',
+      });
+      const userData2 = createTestUserData({
+        email: 'user2@example.com',
+        phone: '',
+      });
+      const userData3 = createTestUserData({
+        email: 'user3@example.com',
+        phone: null,
+      });
+
+      const result1 = await bakeryUserService.create(userData1, testStoreId);
+      const result2 = await bakeryUserService.create(userData2, testStoreId);
+      const result3 = await bakeryUserService.create(userData3, testStoreId);
+
+      expect(result1).toBeDefined();
+      expect(result2).toBeDefined();
+      expect(result3).toBeDefined();
+    });
+
+    it('should prevent updating a user to a phone number already in use', async () => {
+      const userData1 = createTestUserData({
+        email: 'user1@example.com',
+        phone: '5551111111',
+      });
+      const userData2 = createTestUserData({
+        email: 'user2@example.com',
+        phone: '5552222222',
+      });
+
+      await bakeryUserService.create(userData1, testStoreId);
+      const user2 = await bakeryUserService.create(userData2, testStoreId);
+
+      await expect(
+        bakeryUserService.update(user2.id, { phone: '5551111111' }, testStoreId, testEditor),
+      ).rejects.toThrow('Ya existe un usuario con este número de teléfono');
+    });
+
+    it('should allow updating a user to keep their own phone number', async () => {
+      const userData = createTestUserData({
+        email: 'user@example.com',
+        phone: '5551234567',
+      });
+
+      const user = await bakeryUserService.create(userData, testStoreId);
+
+      // Update other fields but keep the same phone
+      const updated = await bakeryUserService.update(
+        user.id,
+        { name: 'New Name', phone: '5551234567' },
+        testStoreId,
+        testEditor,
+      );
+
+      expect(updated.name).toBe('New Name');
+      expect(updated.phone).toBe('5551234567');
+    });
+
+    it('should allow reusing phone number from a soft-deleted user', async () => {
+      const userData = createTestUserData({
+        email: 'user1@example.com',
+        phone: '5551234567',
+      });
+
+      const user1 = await bakeryUserService.create(userData, testStoreId);
+
+      // Mock deleteUser for auth cleanup
+      const originalDeleteUser = admin.auth().deleteUser;
+      admin.auth().deleteUser = jest.fn().mockResolvedValue(undefined);
+
+      try {
+        await bakeryUserService.delete(user1.id, testStoreId);
+
+        // Now create a new user with the same phone
+        const userData2 = createTestUserData({
+          email: 'user2@example.com',
+          phone: '5551234567', // same phone as deleted user
+        });
+
+        const user2 = await bakeryUserService.create(userData2, testStoreId);
+        expect(user2).toBeDefined();
+        expect(user2.phone).toBe('5551234567');
+      } finally {
+        admin.auth().deleteUser = originalDeleteUser;
+      }
+    });
+
+    it('should allow updating to empty phone even if other users have empty phones', async () => {
+      const userData1 = createTestUserData({
+        email: 'user1@example.com',
+        phone: '',
+      });
+      const userData2 = createTestUserData({
+        email: 'user2@example.com',
+        phone: '5551234567',
+      });
+
+      await bakeryUserService.create(userData1, testStoreId);
+      const user2 = await bakeryUserService.create(userData2, testStoreId);
+
+      // Should be able to clear phone number
+      const updated = await bakeryUserService.update(
+        user2.id,
+        { phone: '' },
+        testStoreId,
+        testEditor,
+      );
+
+      expect(updated.phone).toBe('');
+    });
+  });
+
   describe('History Operations', () => {
     let testUser;
 

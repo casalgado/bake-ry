@@ -15,6 +15,10 @@ const AUTH_REQUIRED_ROLES = [
 
 const needsAuthAccount = (role) => AUTH_REQUIRED_ROLES.includes(role);
 
+const hasPhoneValue = (phone) => {
+  return phone !== null && phone !== undefined && phone !== '';
+};
+
 const generateInitialPassword = (name) => {
   let password = name.split(' ')[0].toLowerCase();
   if (!password) password = '';
@@ -119,6 +123,18 @@ const createBakeryUserService = () => {
         throw new BadRequestError('A user with this email already exists in this bakery');
       }
 
+      // Check for existing phone in this bakery (only if phone is provided)
+      if (hasPhoneValue(newUser.phone)) {
+        const existingPhone = await baseService.getCollectionRef(bakeryId)
+          .where('phone', '==', newUser.phone)
+          .where('isDeleted', '==', false)
+          .get();
+
+        if (!existingPhone.empty) {
+          throw new BadRequestError('Ya existe un usuario con este número de teléfono');
+        }
+      }
+
       // Start transaction
       const result = await db.runTransaction(async (transaction) => {
         let userId;
@@ -190,6 +206,20 @@ const createBakeryUserService = () => {
         }
 
         const currentUser = User.fromFirestore(doc);
+
+        // Check for phone uniqueness if phone is being changed
+        if (hasPhoneValue(data.phone) && data.phone !== currentUser.phone) {
+          const existingPhone = await baseService.getCollectionRef(bakeryId)
+            .where('phone', '==', data.phone)
+            .where('isDeleted', '==', false)
+            .get();
+
+          const phoneInUse = existingPhone.docs.some(doc => doc.id !== id);
+          if (phoneInUse) {
+            throw new BadRequestError('Ya existe un usuario con este número de teléfono');
+          }
+        }
+
         const wasAuthRequired = needsAuthAccount(currentUser.role);
 
         // Handle auth updates if needed
