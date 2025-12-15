@@ -13,6 +13,7 @@ class OrderItem {
     quantity,
     basePrice,
     currentPrice,
+    costPrice = 0,
     variation,
     combination,
     recipeId,
@@ -30,6 +31,7 @@ class OrderItem {
     this.quantity = quantity;
     this.basePrice = basePrice;
     this.currentPrice = currentPrice;
+    this.costPrice = costPrice;
     this.recipeId = recipeId;
     this.taxPercentage = Number(Number(taxPercentage).toFixed(1));
     this.isComplimentary = isComplimentary;

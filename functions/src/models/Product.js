@@ -16,6 +16,7 @@ class Product extends BaseModel {
     // Basic price and recipe (for products without variations)
     recipeId,
     basePrice,
+    costPrice,
     currentPrice,
     taxPercentage = 0,
 
@@ -48,6 +49,7 @@ class Product extends BaseModel {
 
     // Basic price
     this.basePrice = basePrice;
+    this.costPrice = costPrice;
     this.currentPrice = currentPrice || basePrice;
     this.taxPercentage = Number(Number(taxPercentage).toFixed(1));
 
