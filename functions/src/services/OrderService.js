@@ -470,6 +470,226 @@ const createOrderService = () => {
     }
   };
 
+  const getIncomeStatement = async (bakeryId, query) => {
+    try {
+      // Determine date filter type
+      const bakerySettingsRef = db.collection('bakeries').doc(bakeryId).collection('settings').doc('default');
+      const bakerySettingsDoc = await bakerySettingsRef.get();
+      const bakerySettings = bakerySettingsDoc.exists ? bakerySettingsDoc.data() : {};
+      const dateFilterType = query.filters?.dateFilterType || bakerySettings.features?.reports?.defaultReportFilter || 'dueDate';
+      const groupBy = query.filters?.groupBy || 'total';
+
+      // Parse dates - use current year if not provided
+      let startDate, endDate;
+      if (query.filters?.dateRange?.startDate && query.filters?.dateRange?.endDate) {
+        startDate = new Date(query.filters.dateRange.startDate);
+        endDate = new Date(query.filters.dateRange.endDate);
+      } else {
+        // Default to current year
+        const now = new Date();
+        startDate = new Date(now.getFullYear(), 0, 1);
+        endDate = new Date(now.getFullYear(), 11, 31);
+      }
+      endDate.setHours(23, 59, 59, 999);
+
+      // Build query for paid orders
+      let ordersQuery = baseService.getCollectionRef(bakeryId)
+        .where('isPaid', '==', true);
+
+      // Filter by date field
+      const dateField = dateFilterType === 'paymentDate' ? 'paymentDate' : 'dueDate';
+      ordersQuery = ordersQuery
+        .where(dateField, '>=', startDate)
+        .where(dateField, '<=', endDate);
+
+      const ordersSnapshot = await ordersQuery.get();
+      const orders = [];
+
+      ordersSnapshot.forEach(doc => {
+        orders.push(Order.fromFirestore(doc));
+      });
+
+      // Fetch products for waterfall cost lookup
+      const productsSnapshot = await db.collection('bakeries').doc(bakeryId).collection('products').get();
+      const products = {};
+      productsSnapshot.forEach(doc => {
+        products[doc.id] = doc.data();
+      });
+
+      // Group orders by month if needed
+      const monthlyGroups = {};
+      const excludedProductsMap = new Map();
+
+      orders.forEach(order => {
+        const dateToUse = dateFilterType === 'paymentDate' ? order.paymentDate : order.dueDate;
+        const monthKey = new Date(dateToUse).toISOString().slice(0, 7);
+
+        if (!monthlyGroups[monthKey]) {
+          monthlyGroups[monthKey] = [];
+        }
+        monthlyGroups[monthKey].push(order);
+      });
+
+      // Function to calculate period metrics
+      const calculatePeriodMetrics = (periodOrders) => {
+        const revenue = {
+          productSales: 0,
+          deliveryFees: 0,
+          taxesCollected: 0,
+          totalRevenue: 0,
+        };
+        const costs = {
+          cogs: 0,
+          deliveryCosts: 0,
+          totalCosts: 0,
+        };
+        const coverage = {
+          itemsWithCost: 0,
+          totalItems: 0,
+          uniqueProductsWithCost: new Set(),
+          uniqueProductsTotal: new Set(),
+        };
+
+        periodOrders.forEach(order => {
+          // Add taxes and delivery fees
+          revenue.taxesCollected += order.totalTaxAmount || 0;
+          revenue.deliveryFees += order.deliveryFee || 0;
+          costs.deliveryCosts += order.deliveryCost || 0;
+
+          // Process each order item
+          order.orderItems?.forEach(item => {
+            if (item.isComplimentary) return;
+
+            // Track total items
+            coverage.totalItems++;
+            coverage.uniqueProductsTotal.add(item.productId);
+
+            // Add product sales revenue
+            revenue.productSales += (item.currentPrice * item.quantity) || 0;
+
+            // Cost price waterfall: orderItem → combination (current product) → combination (order snapshot) → product → null
+            let costPrice = item.costPrice;
+
+            // If no historical cost, try to find matching combination in current product
+            if (!costPrice && item.combination) {
+              const product = products[item.productId];
+              if (product?.variations?.combinations) {
+                // Find combination by matching the selection or name
+                const matchingCombination = product.variations.combinations.find(
+                  combo => combo.id === item.combination.id || combo.name === item.combination.name,
+                );
+                if (matchingCombination?.costPrice) {
+                  costPrice = matchingCombination.costPrice;
+                }
+              }
+            }
+
+            // Fallback to order snapshot combination cost
+            if (!costPrice) {
+              costPrice = item.combination?.costPrice;
+            }
+
+            // Final fallback to product base cost
+            if (!costPrice) {
+              costPrice = products[item.productId]?.costPrice;
+            }
+
+            if (costPrice) {
+              costs.cogs += (costPrice * item.quantity);
+              coverage.itemsWithCost++;
+              coverage.uniqueProductsWithCost.add(item.productId);
+            } else {
+              // Track excluded product
+              if (!excludedProductsMap.has(item.productId)) {
+                excludedProductsMap.set(item.productId, {
+                  id: item.productId,
+                  name: item.productName,
+                  reason: 'Sin costo definido',
+                  orderCount: 0,
+                  totalQuantity: 0,
+                });
+              }
+              const product = excludedProductsMap.get(item.productId);
+              product.orderCount++;
+              product.totalQuantity += item.quantity;
+            }
+          });
+        });
+
+        // Calculate derived values
+        revenue.totalRevenue = revenue.productSales + revenue.deliveryFees + revenue.taxesCollected;
+        costs.totalCosts = costs.cogs + costs.deliveryCosts;
+        const grossProfit = {
+          amount: revenue.totalRevenue - costs.totalCosts,
+          marginPercent: revenue.totalRevenue > 0
+            ? parseFloat(((revenue.totalRevenue - costs.totalCosts) / revenue.totalRevenue * 100).toFixed(1))
+            : 0,
+        };
+        const coveragePercent = coverage.totalItems > 0
+          ? (coverage.itemsWithCost / coverage.totalItems * 100).toFixed(0)
+          : 0;
+
+        return {
+          revenue,
+          costs,
+          grossProfit,
+          coverage: {
+            itemsWithCost: coverage.itemsWithCost,
+            totalItems: coverage.totalItems,
+            percentCovered: parseInt(coveragePercent),
+            uniqueProductsWithCost: coverage.uniqueProductsWithCost.size,
+            uniqueProductsTotal: coverage.uniqueProductsTotal.size,
+          },
+        };
+      };
+
+      // Build response based on groupBy parameter
+      if (groupBy === 'month') {
+        const periods = [];
+        const monthLabels = {
+          '01': 'Enero', '02': 'Febrero', '03': 'Marzo', '04': 'Abril',
+          '05': 'Mayo', '06': 'Junio', '07': 'Julio', '08': 'Agosto',
+          '09': 'Septiembre', '10': 'Octubre', '11': 'Noviembre', '12': 'Diciembre',
+        };
+
+        // Sort months chronologically
+        const sortedMonths = Object.keys(monthlyGroups).sort();
+
+        sortedMonths.forEach(month => {
+          const [year, monthNum] = month.split('-');
+          const metrics = calculatePeriodMetrics(monthlyGroups[month]);
+          periods.push({
+            month,
+            label: `${monthLabels[monthNum]} ${year}`,
+            ...metrics,
+          });
+        });
+
+        // Calculate totals
+        const allOrders = Object.values(monthlyGroups).flat();
+        const totals = calculatePeriodMetrics(allOrders);
+
+        return {
+          periods,
+          totals,
+          excludedProducts: Array.from(excludedProductsMap.values()),
+        };
+      } else {
+        // Return total aggregation
+        const allOrders = Object.values(monthlyGroups).flat();
+        const metrics = calculatePeriodMetrics(allOrders);
+
+        return {
+          ...metrics,
+          excludedProducts: Array.from(excludedProductsMap.values()),
+        };
+      }
+    } catch (error) {
+      console.error('Error generating income statement:', error);
+      throw error;
+    }
+  };
+
   return {
     ...baseService,
     create,
@@ -480,6 +700,7 @@ const createOrderService = () => {
     getSalesReport,
     getProductReport,
     getHistory,
+    getIncomeStatement,
   };
 };
 

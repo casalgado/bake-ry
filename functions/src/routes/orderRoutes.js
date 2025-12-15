@@ -18,6 +18,7 @@ bakeryRouter.post('/orders', orderController.create);
 bakeryRouter.get('/orders', orderController.getAll);
 bakeryRouter.get('/orders/sales_report', orderController.getSalesReport);
 bakeryRouter.get('/orders/product_report', orderController.getProductReport);
+bakeryRouter.get('/orders/income_statement', orderController.getIncomeStatement);
 bakeryRouter.get('/orders/:id', orderController.getById);
 bakeryRouter.get('/orders/:id/history', orderController.getHistory);
 bakeryRouter.patch('/orders/bulk-update', orderController.patchAll);

@@ -69,6 +69,19 @@ const orderController = {
       baseController.handleError(res, error);
     }
   },
+
+  async getIncomeStatement(req, res) {
+    try {
+      const { bakeryId } = req.params;
+      const queryParser = new QueryParser(req);
+      const query = queryParser.getQuery();
+
+      const report = await orderService.getIncomeStatement(bakeryId, query);
+      baseController.handleResponse(res, report);
+    } catch (error) {
+      baseController.handleError(res, error);
+    }
+  },
 };
 
 module.exports = orderController;
