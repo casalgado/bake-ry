@@ -492,9 +492,9 @@ const createOrderService = () => {
       }
       endDate.setHours(23, 59, 59, 999);
 
-      // Build query for paid orders
+      // Build query for orders
       let ordersQuery = baseService.getCollectionRef(bakeryId)
-        .where('isPaid', '==', true);
+        .where('isDeleted', '==', false);
 
       // Filter by date field
       const dateField = dateFilterType === 'paymentDate' ? 'paymentDate' : 'dueDate';
