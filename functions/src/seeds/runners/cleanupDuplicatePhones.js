@@ -8,8 +8,8 @@
  */
 
 const { db, BAKERY_ID } = require('../seedConfig-diana_lee');
-const bakeryUserService = require('../../services/BakeryUserService');
-const orderService = require('../../services/OrderService');
+const bakeryUserService = require('../../services/bakeryUserService');
+const orderService = require('../../services/orderService');
 
 // Configuration for cleanup actions
 const CLEANUP_ACTIONS = [

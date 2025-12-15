@@ -7,8 +7,8 @@
  */
 
 const { db, BAKERY_ID, timestamp } = require('../seedConfig-diana_lee');
-const bakeryUserService = require('../../services/BakeryUserService');
-const orderService = require('../../services/OrderService');
+const bakeryUserService = require('../../services/bakeryUserService');
+const orderService = require('../../services/orderService');
 
 const testUsers = [
   // Scenario 1: Same person, one has 0 orders (like Fanny Sales)

@@ -617,7 +617,9 @@ const createOrderService = () => {
         });
 
         // Calculate derived values
-        revenue.totalRevenue = revenue.productSales + revenue.deliveryFees + revenue.taxesCollected;
+        // Note: taxesCollected is tracked for reporting but NOT added to totalRevenue
+        // because taxes are already included in the currentPrice that customers pay
+        revenue.totalRevenue = revenue.productSales + revenue.deliveryFees;
         costs.totalCosts = costs.cogs + costs.deliveryCosts;
         const grossProfit = {
           amount: revenue.totalRevenue - costs.totalCosts,
