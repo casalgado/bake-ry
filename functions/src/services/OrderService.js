@@ -476,7 +476,7 @@ const createOrderService = () => {
       const bakerySettingsRef = db.collection('bakeries').doc(bakeryId).collection('settings').doc('default');
       const bakerySettingsDoc = await bakerySettingsRef.get();
       const bakerySettings = bakerySettingsDoc.exists ? bakerySettingsDoc.data() : {};
-      const dateFilterType = query.filters?.dateFilterType || bakerySettings.features?.reports?.defaultReportFilter || 'dueDate';
+      const dateFilterType = query.filters?.date_field || bakerySettings.features?.reports?.defaultReportFilter || 'dueDate';
       const groupBy = query.filters?.groupBy || 'total';
 
       // Parse dates - use current year if not provided
@@ -492,7 +492,7 @@ const createOrderService = () => {
       }
       endDate.setHours(23, 59, 59, 999);
 
-      // Build query for orders
+      // Build query for orders, removed is paid filter to include all orders
       let ordersQuery = baseService.getCollectionRef(bakeryId)
         .where('isDeleted', '==', false);
 
@@ -506,7 +506,11 @@ const createOrderService = () => {
       const orders = [];
 
       ordersSnapshot.forEach(doc => {
-        orders.push(Order.fromFirestore(doc));
+        const order = Order.fromFirestore(doc);
+        // Exclude complimentary orders from income statement
+        if (!order.isComplimentary) {
+          orders.push(order);
+        }
       });
 
       // Fetch products for waterfall cost lookup
@@ -551,10 +555,12 @@ const createOrderService = () => {
         };
 
         periodOrders.forEach(order => {
-          // Add taxes and delivery fees
+          // Add taxes and delivery fees (only for delivery orders)
           revenue.taxesCollected += order.totalTaxAmount || 0;
-          revenue.deliveryFees += order.deliveryFee || 0;
-          costs.deliveryCosts += order.deliveryCost || 0;
+          if (order.fulfillmentType === 'delivery') {
+            revenue.deliveryFees += order.deliveryFee || 0;
+            costs.deliveryCosts += order.deliveryCost || 0;
+          }
 
           // Process each order item
           order.orderItems?.forEach(item => {
