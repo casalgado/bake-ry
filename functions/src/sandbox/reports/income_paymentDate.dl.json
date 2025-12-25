@@ -1,0 +1,510 @@
+{
+  "periods": [
+    {
+      "month": "2025-01",
+      "label": "Enero 2025",
+      "revenue": {
+        "productSales": 5478000,
+        "deliveryFees": 100000,
+        "taxesCollected": 405775,
+        "totalRevenue": 5578000
+      },
+      "costs": { "cogs": 325000, "deliveryCosts": 0, "totalCosts": 325000 },
+      "grossProfit": { "amount": 5253000, "marginPercent": 94.2 },
+      "coverage": {
+        "itemsWithCost": 3,
+        "totalItems": 28,
+        "percentCovered": 11,
+        "uniqueProductsWithCost": 1,
+        "uniqueProductsTotal": 14
+      }
+    },
+    {
+      "month": "2025-02",
+      "label": "Febrero 2025",
+      "revenue": {
+        "productSales": 9378000,
+        "deliveryFees": 50000,
+        "taxesCollected": 694663,
+        "totalRevenue": 9428000
+      },
+      "costs": { "cogs": 285900, "deliveryCosts": 0, "totalCosts": 285900 },
+      "grossProfit": { "amount": 9142100, "marginPercent": 97 },
+      "coverage": {
+        "itemsWithCost": 4,
+        "totalItems": 59,
+        "percentCovered": 7,
+        "uniqueProductsWithCost": 1,
+        "uniqueProductsTotal": 17
+      }
+    },
+    {
+      "month": "2025-03",
+      "label": "Marzo 2025",
+      "revenue": {
+        "productSales": 10557000,
+        "deliveryFees": 0,
+        "taxesCollected": 782006,
+        "totalRevenue": 10557000
+      },
+      "costs": { "cogs": 318700, "deliveryCosts": 0, "totalCosts": 318700 },
+      "grossProfit": { "amount": 10238300, "marginPercent": 97 },
+      "coverage": {
+        "itemsWithCost": 5,
+        "totalItems": 87,
+        "percentCovered": 6,
+        "uniqueProductsWithCost": 1,
+        "uniqueProductsTotal": 14
+      }
+    },
+    {
+      "month": "2025-04",
+      "label": "Abril 2025",
+      "revenue": {
+        "productSales": 14456000,
+        "deliveryFees": 0,
+        "taxesCollected": 1070809,
+        "totalRevenue": 14456000
+      },
+      "costs": { "cogs": 549700, "deliveryCosts": 0, "totalCosts": 549700 },
+      "grossProfit": { "amount": 13906300, "marginPercent": 96.2 },
+      "coverage": {
+        "itemsWithCost": 5,
+        "totalItems": 99,
+        "percentCovered": 5,
+        "uniqueProductsWithCost": 1,
+        "uniqueProductsTotal": 21
+      }
+    },
+    {
+      "month": "2025-05",
+      "label": "Mayo 2025",
+      "revenue": {
+        "productSales": 22876000,
+        "deliveryFees": 223000,
+        "taxesCollected": 1694510,
+        "totalRevenue": 23099000
+      },
+      "costs": { "cogs": 432000, "deliveryCosts": 0, "totalCosts": 432000 },
+      "grossProfit": { "amount": 22667000, "marginPercent": 98.1 },
+      "coverage": {
+        "itemsWithCost": 5,
+        "totalItems": 130,
+        "percentCovered": 4,
+        "uniqueProductsWithCost": 1,
+        "uniqueProductsTotal": 22
+      }
+    },
+    {
+      "month": "2025-06",
+      "label": "Junio 2025",
+      "revenue": {
+        "productSales": 15142001,
+        "deliveryFees": 494000,
+        "taxesCollected": 1022808,
+        "totalRevenue": 15636001
+      },
+      "costs": { "cogs": 222000, "deliveryCosts": 0, "totalCosts": 222000 },
+      "grossProfit": { "amount": 15414001, "marginPercent": 98.6 },
+      "coverage": {
+        "itemsWithCost": 4,
+        "totalItems": 97,
+        "percentCovered": 4,
+        "uniqueProductsWithCost": 1,
+        "uniqueProductsTotal": 23
+      }
+    },
+    {
+      "month": "2025-07",
+      "label": "Julio 2025",
+      "revenue": {
+        "productSales": 12336980,
+        "deliveryFees": 439000,
+        "taxesCollected": 913849,
+        "totalRevenue": 12775980
+      },
+      "costs": { "cogs": 127400, "deliveryCosts": 0, "totalCosts": 127400 },
+      "grossProfit": { "amount": 12648580, "marginPercent": 99 },
+      "coverage": {
+        "itemsWithCost": 3,
+        "totalItems": 83,
+        "percentCovered": 4,
+        "uniqueProductsWithCost": 1,
+        "uniqueProductsTotal": 23
+      }
+    },
+    {
+      "month": "2025-08",
+      "label": "Agosto 2025",
+      "revenue": {
+        "productSales": 24572000,
+        "deliveryFees": 510000,
+        "taxesCollected": 1820131,
+        "totalRevenue": 25082000
+      },
+      "costs": { "cogs": 989200, "deliveryCosts": 0, "totalCosts": 989200 },
+      "grossProfit": { "amount": 24092800, "marginPercent": 96.1 },
+      "coverage": {
+        "itemsWithCost": 48,
+        "totalItems": 586,
+        "percentCovered": 8,
+        "uniqueProductsWithCost": 1,
+        "uniqueProductsTotal": 24
+      }
+    },
+    {
+      "month": "2025-09",
+      "label": "Septiembre 2025",
+      "revenue": {
+        "productSales": 18112000,
+        "deliveryFees": 600000,
+        "taxesCollected": 1341550,
+        "totalRevenue": 18712000
+      },
+      "costs": { "cogs": 357800, "deliveryCosts": 0, "totalCosts": 357800 },
+      "grossProfit": { "amount": 18354200, "marginPercent": 98.1 },
+      "coverage": {
+        "itemsWithCost": 5,
+        "totalItems": 162,
+        "percentCovered": 3,
+        "uniqueProductsWithCost": 1,
+        "uniqueProductsTotal": 21
+      }
+    },
+    {
+      "month": "2025-10",
+      "label": "Octubre 2025",
+      "revenue": {
+        "productSales": 9967000,
+        "deliveryFees": 490000,
+        "taxesCollected": 738281,
+        "totalRevenue": 10457000
+      },
+      "costs": { "cogs": 178900, "deliveryCosts": 0, "totalCosts": 178900 },
+      "grossProfit": { "amount": 10278100, "marginPercent": 98.3 },
+      "coverage": {
+        "itemsWithCost": 3,
+        "totalItems": 77,
+        "percentCovered": 4,
+        "uniqueProductsWithCost": 1,
+        "uniqueProductsTotal": 26
+      }
+    },
+    {
+      "month": "2025-11",
+      "label": "Noviembre 2025",
+      "revenue": {
+        "productSales": 17674800,
+        "deliveryFees": 555000,
+        "taxesCollected": 1309239,
+        "totalRevenue": 18229800
+      },
+      "costs": { "cogs": 302300, "deliveryCosts": 0, "totalCosts": 302300 },
+      "grossProfit": { "amount": 17927500, "marginPercent": 98.3 },
+      "coverage": {
+        "itemsWithCost": 5,
+        "totalItems": 129,
+        "percentCovered": 4,
+        "uniqueProductsWithCost": 1,
+        "uniqueProductsTotal": 25
+      }
+    },
+    {
+      "month": "2025-12",
+      "label": "Diciembre 2025",
+      "revenue": {
+        "productSales": 15278000,
+        "deliveryFees": 364000,
+        "taxesCollected": 1131683,
+        "totalRevenue": 15642000
+      },
+      "costs": { "cogs": 163600, "deliveryCosts": 0, "totalCosts": 163600 },
+      "grossProfit": { "amount": 15478400, "marginPercent": 99 },
+      "coverage": {
+        "itemsWithCost": 1,
+        "totalItems": 93,
+        "percentCovered": 1,
+        "uniqueProductsWithCost": 1,
+        "uniqueProductsTotal": 29
+      }
+    }
+  ],
+  "totals": {
+    "revenue": {
+      "productSales": 175827781,
+      "deliveryFees": 3825000,
+      "taxesCollected": 12925304,
+      "totalRevenue": 179652781
+    },
+    "costs": { "cogs": 4252500, "deliveryCosts": 0, "totalCosts": 4252500 },
+    "grossProfit": { "amount": 175400281, "marginPercent": 97.6 },
+    "coverage": {
+      "itemsWithCost": 91,
+      "totalItems": 1630,
+      "percentCovered": 6,
+      "uniqueProductsWithCost": 2,
+      "uniqueProductsTotal": 39
+    }
+  },
+  "excludedProducts": [
+    {
+      "id": "eAHQ2L2n25NtR6SkaiYW",
+      "name": "pistachio paradise cake",
+      "reason": "Sin costo definido",
+      "orderCount": 196,
+      "totalQuantity": 206
+    },
+    {
+      "id": "KqdvgkHOTCvQvRPk1ubm",
+      "name": "pistachio knots",
+      "reason": "Sin costo definido",
+      "orderCount": 32,
+      "totalQuantity": 32
+    },
+    {
+      "id": "oNGKmzgLl6nc9KIKTyPn",
+      "name": "blackout chocolate cake",
+      "reason": "Sin costo definido",
+      "orderCount": 212,
+      "totalQuantity": 220
+    },
+    {
+      "id": "nnudiFCnJAfDnpHtajrI",
+      "name": "apple crumble pie",
+      "reason": "Sin costo definido",
+      "orderCount": 50,
+      "totalQuantity": 68
+    },
+    {
+      "id": "k8LRHUVrH1zZZCuy1idz",
+      "name": "orange blossom labneh dream",
+      "reason": "Sin costo definido",
+      "orderCount": 22,
+      "totalQuantity": 24
+    },
+    {
+      "id": "JMeON0qKYpYsWzCwMa1R",
+      "name": "pistachio con helado",
+      "reason": "Sin costo definido",
+      "orderCount": 86,
+      "totalQuantity": 100
+    },
+    {
+      "id": "WfCUh3wwb33Cf0kk6TLN",
+      "name": "pistachio",
+      "reason": "Sin costo definido",
+      "orderCount": 194,
+      "totalQuantity": 202
+    },
+    {
+      "id": "6CdqhmN3m2MYoU6HpmpN",
+      "name": "key lime fantasy",
+      "reason": "Sin costo definido",
+      "orderCount": 146,
+      "totalQuantity": 148
+    },
+    {
+      "id": "oZ5GH3nFO1uAHE4PI2DV",
+      "name": "plain",
+      "reason": "Sin costo definido",
+      "orderCount": 18,
+      "totalQuantity": 24
+    },
+    {
+      "id": "P53BlrUuEauDM0anXeYF",
+      "name": "sticky walnut caramel cake",
+      "reason": "Sin costo definido",
+      "orderCount": 52,
+      "totalQuantity": 74
+    },
+    {
+      "id": "xz5IewLJuXMXEirlEt1O",
+      "name": "7 layer vanilla pound cake with flaky salt",
+      "reason": "Sin costo definido",
+      "orderCount": 216,
+      "totalQuantity": 244
+    },
+    {
+      "id": "6ouiQxoLMfhpYCHEbtgV",
+      "name": "orange cake with chocolate pecan streusel",
+      "reason": "Sin costo definido",
+      "orderCount": 14,
+      "totalQuantity": 14
+    },
+    {
+      "id": "srmg94JyH1ue5tkXgB4S",
+      "name": "royal lava cake",
+      "reason": "Sin costo definido",
+      "orderCount": 102,
+      "totalQuantity": 110
+    },
+    {
+      "id": "sT1bkj1nrCPUkYiFCpV6",
+      "name": "naranja",
+      "reason": "Sin costo definido",
+      "orderCount": 28,
+      "totalQuantity": 30
+    },
+    {
+      "id": "xnLV74zWVHhcGthuXJYK",
+      "name": "dubai chocolate tart",
+      "reason": "Sin costo definido",
+      "orderCount": 142,
+      "totalQuantity": 158
+    },
+    {
+      "id": "WmWS2jH16ff0RlzymZwc",
+      "name": "velvet coconut cream cake",
+      "reason": "Sin costo definido",
+      "orderCount": 318,
+      "totalQuantity": 352
+    },
+    {
+      "id": "JKoNvwksZ6iJICYFbQyb",
+      "name": "key lime cookies",
+      "reason": "Sin costo definido",
+      "orderCount": 76,
+      "totalQuantity": 114
+    },
+    {
+      "id": "E9RbVJMDQ5ojHrJxsf05",
+      "name": "molten lava pistachio crumble",
+      "reason": "Sin costo definido",
+      "orderCount": 78,
+      "totalQuantity": 92
+    },
+    {
+      "id": "ryFvTLU1cqkHMPv6RD2i",
+      "name": "cake de almendra",
+      "reason": "Sin costo definido",
+      "orderCount": 12,
+      "totalQuantity": 12
+    },
+    {
+      "id": "ej5aJRFuXkpHFiNclXqY",
+      "name": "grandma june vanilla cake",
+      "reason": "Sin costo definido",
+      "orderCount": 136,
+      "totalQuantity": 168
+    },
+    {
+      "id": "KqXZzkIWBuZz9vNDV5sW",
+      "name": "biscoff",
+      "reason": "Sin costo definido",
+      "orderCount": 64,
+      "totalQuantity": 76
+    },
+    {
+      "id": "UDTYDuBCdY5hSZPPeCTJ",
+      "name": "biscoff creamy cake",
+      "reason": "Sin costo definido",
+      "orderCount": 96,
+      "totalQuantity": 110
+    },
+    {
+      "id": "6HbABauAu25kw6K8f4WK",
+      "name": "grandma june chocolate cake",
+      "reason": "Sin costo definido",
+      "orderCount": 56,
+      "totalQuantity": 58
+    },
+    {
+      "id": "n4LaIXy8RJXLRdA2MJpJ",
+      "name": "papa hugo",
+      "reason": "Sin costo definido",
+      "orderCount": 18,
+      "totalQuantity": 18
+    },
+    {
+      "id": "rsXxA6EHq8LbKuKNcAFs",
+      "name": "midnight dubai",
+      "reason": "Sin costo definido",
+      "orderCount": 38,
+      "totalQuantity": 44
+    },
+    {
+      "id": "4rsyRp8wSktWPdjpOv1V",
+      "name": "zanahoria",
+      "reason": "Sin costo definido",
+      "orderCount": 8,
+      "totalQuantity": 8
+    },
+    {
+      "id": "TDZ2xqmQczjq5LfTJih5",
+      "name": "dubai brownies",
+      "reason": "Sin costo definido",
+      "orderCount": 384,
+      "totalQuantity": 1064
+    },
+    {
+      "id": "Eu1WMqwwxRgTL77KqfBA",
+      "name": "muffin orchard apple cake",
+      "reason": "Sin costo definido",
+      "orderCount": 42,
+      "totalQuantity": 56
+    },
+    {
+      "id": "VkJ06fSy5B79zg1bzQz4",
+      "name": "muffin golden carrot cake",
+      "reason": "Sin costo definido",
+      "orderCount": 52,
+      "totalQuantity": 52
+    },
+    {
+      "id": "waIUPh85jRDWPXBdxtgm",
+      "name": "valdiri",
+      "reason": "Sin costo definido",
+      "orderCount": 86,
+      "totalQuantity": 88
+    },
+    {
+      "id": "C4aAStiWS2sq5JkmGYG4",
+      "name": "orchard cake",
+      "reason": "Sin costo definido",
+      "orderCount": 22,
+      "totalQuantity": 22
+    },
+    {
+      "id": "bhI3jI5vW9eZUokZgFAO",
+      "name": "miel de panela",
+      "reason": "Sin costo definido",
+      "orderCount": 16,
+      "totalQuantity": 52
+    },
+    {
+      "id": "LROO7KuA0GMiQARjvYj9",
+      "name": "spooky cupcakes",
+      "reason": "Sin costo definido",
+      "orderCount": 2,
+      "totalQuantity": 60
+    },
+    {
+      "id": "KoKSU9NPE3siRz5H1v8T",
+      "name": "lemon bars",
+      "reason": "Sin costo definido",
+      "orderCount": 46,
+      "totalQuantity": 230
+    },
+    {
+      "id": "AtHNvjhnfdHSFfQEK1L2",
+      "name": "pistachio keto",
+      "reason": "Sin costo definido",
+      "orderCount": 6,
+      "totalQuantity": 8
+    },
+    {
+      "id": "KBFnIpLdBDSCEYi9NXFX",
+      "name": "mont blanc keto",
+      "reason": "Sin costo definido",
+      "orderCount": 2,
+      "totalQuantity": 2
+    },
+    {
+      "id": "sVODoQ5abf6mUN1ewhZU",
+      "name": "cheesecake caramelo salado",
+      "reason": "Sin costo definido",
+      "orderCount": 10,
+      "totalQuantity": 10
+    }
+  ]
+}

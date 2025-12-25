@@ -1,0 +1,851 @@
+{
+  "summary": {
+    "dateRange": {
+      "start": "2025-08-01T12:00:00.000Z",
+      "end": "2025-08-30T12:00:00.000Z",
+      "totalDays": 30
+    },
+    "totalPaidOrders": 373,
+    "totalRevenue": 25199000,
+    "totalSales": 24689000,
+    "totalDelivery": 510000,
+    "totalB2B": 0,
+    "totalB2C": 24689000,
+    "percentageB2B": 0,
+    "percentageB2C": 100,
+    "totalComplimentaryOrders": 0,
+    "currency": "COP"
+  },
+  "salesMetrics": {
+    "total": {
+      "daily": {
+        "2025-08-01": {
+          "total": 140000,
+          "sales": 140000,
+          "delivery": 0,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 140000, "percentage": 100 }
+        },
+        "2025-08-02": {
+          "total": 570000,
+          "sales": 545000,
+          "delivery": 25000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 545000, "percentage": 100 }
+        },
+        "2025-08-03": {
+          "total": 545000,
+          "sales": 525000,
+          "delivery": 20000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 525000, "percentage": 100 }
+        },
+        "2025-08-04": {
+          "total": 334000,
+          "sales": 314000,
+          "delivery": 20000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 314000, "percentage": 100 }
+        },
+        "2025-08-05": {
+          "total": 497000,
+          "sales": 467000,
+          "delivery": 30000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 467000, "percentage": 100 }
+        },
+        "2025-08-06": {
+          "total": 349000,
+          "sales": 329000,
+          "delivery": 20000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 329000, "percentage": 100 }
+        },
+        "2025-08-07": {
+          "total": 250000,
+          "sales": 240000,
+          "delivery": 10000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 240000, "percentage": 100 }
+        },
+        "2025-08-08": {
+          "total": 553000,
+          "sales": 543000,
+          "delivery": 10000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 543000, "percentage": 100 }
+        },
+        "2025-08-10": {
+          "total": 205000,
+          "sales": 195000,
+          "delivery": 10000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 195000, "percentage": 100 }
+        },
+        "2025-08-11": {
+          "total": 208000,
+          "sales": 208000,
+          "delivery": 0,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 208000, "percentage": 100 }
+        },
+        "2025-08-12": {
+          "total": 488000,
+          "sales": 478000,
+          "delivery": 10000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 478000, "percentage": 100 }
+        },
+        "2025-08-14": {
+          "total": 491000,
+          "sales": 481000,
+          "delivery": 10000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 481000, "percentage": 100 }
+        },
+        "2025-08-15": {
+          "total": 154000,
+          "sales": 154000,
+          "delivery": 0,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 154000, "percentage": 100 }
+        },
+        "2025-08-16": {
+          "total": 484000,
+          "sales": 474000,
+          "delivery": 10000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 474000, "percentage": 100 }
+        },
+        "2025-08-19": {
+          "total": 768000,
+          "sales": 748000,
+          "delivery": 20000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 748000, "percentage": 100 }
+        },
+        "2025-08-20": {
+          "total": 256000,
+          "sales": 256000,
+          "delivery": 0,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 256000, "percentage": 100 }
+        },
+        "2025-08-21": {
+          "total": 2991000,
+          "sales": 2951000,
+          "delivery": 40000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 2951000, "percentage": 100 }
+        },
+        "2025-08-22": {
+          "total": 3687000,
+          "sales": 3667000,
+          "delivery": 20000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 3667000, "percentage": 100 }
+        },
+        "2025-08-23": {
+          "total": 5572000,
+          "sales": 5517000,
+          "delivery": 55000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 5517000, "percentage": 100 }
+        },
+        "2025-08-24": {
+          "total": 4035000,
+          "sales": 4035000,
+          "delivery": 0,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 4035000, "percentage": 100 }
+        },
+        "2025-08-25": {
+          "total": 752000,
+          "sales": 702000,
+          "delivery": 50000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 702000, "percentage": 100 }
+        },
+        "2025-08-26": {
+          "total": 170000,
+          "sales": 125000,
+          "delivery": 45000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 125000, "percentage": 100 }
+        },
+        "2025-08-27": {
+          "total": 791000,
+          "sales": 746000,
+          "delivery": 45000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 746000, "percentage": 100 }
+        },
+        "2025-08-29": {
+          "total": 282000,
+          "sales": 252000,
+          "delivery": 30000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 252000, "percentage": 100 }
+        },
+        "2025-08-30": {
+          "total": 627000,
+          "sales": 597000,
+          "delivery": 30000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 597000, "percentage": 100 }
+        }
+      },
+      "weekly": {
+        "2025-07-28/2025-08-03": {
+          "total": 1255000,
+          "sales": 1210000,
+          "delivery": 45000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 1210000, "percentage": 100 },
+          "days": 3
+        },
+        "2025-08-04/2025-08-10": {
+          "total": 2188000,
+          "sales": 2088000,
+          "delivery": 100000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 2088000, "percentage": 100 },
+          "days": 6
+        },
+        "2025-08-11/2025-08-17": {
+          "total": 1825000,
+          "sales": 1795000,
+          "delivery": 30000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 1795000, "percentage": 100 },
+          "days": 5
+        },
+        "2025-08-18/2025-08-24": {
+          "total": 17309000,
+          "sales": 17174000,
+          "delivery": 135000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 17174000, "percentage": 100 },
+          "days": 6
+        },
+        "2025-08-25/2025-08-31": {
+          "total": 2622000,
+          "sales": 2422000,
+          "delivery": 200000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 2422000, "percentage": 100 },
+          "days": 5
+        }
+      },
+      "monthly": {
+        "2025-08": {
+          "total": 25199000,
+          "sales": 24689000,
+          "delivery": 510000,
+          "b2b": { "amount": 0, "percentage": 0 },
+          "b2c": { "amount": 24689000, "percentage": 100 },
+          "days": 25
+        }
+      }
+    },
+    "averageOrderValue": 67557.64075067024,
+    "averageOrderSales": 66190.34852546916,
+    "byPaymentMethod": {
+      "bancolombia": {
+        "total": 11390000,
+        "orders": 88,
+        "percentage": 45.20020635739513
+      },
+      "davivienda": {
+        "total": 463000,
+        "orders": 4,
+        "percentage": 1.837374498988055
+      },
+      "transfer": {
+        "total": 751000,
+        "orders": 5,
+        "percentage": 2.980276995118854
+      },
+      "card": {
+        "total": 12595000,
+        "orders": 276,
+        "percentage": 49.98214214849796
+      }
+    },
+    "byCollection": {
+      "cakes": {
+        "revenue": 13690000,
+        "quantity": 292,
+        "averagePrice": 46883.561643835616,
+        "percentageRevenue": 55.449795455466,
+        "percentageQuantity": 41.12676056338028
+      },
+      "cheesecakes": {
+        "revenue": 5887000,
+        "quantity": 120,
+        "averagePrice": 49058.333333333336,
+        "percentageRevenue": 23.84462716189396,
+        "percentageQuantity": 16.901408450704224
+      },
+      "nudos y otros": {
+        "revenue": 5112000,
+        "quantity": 298,
+        "averagePrice": 17154.362416107382,
+        "percentageRevenue": 20.70557738264004,
+        "percentageQuantity": 41.971830985915496
+      }
+    },
+    "byCustomerSegment": {
+      "b2b": {
+        "total": 0,
+        "orders": 0,
+        "averagePrice": null,
+        "percentageSales": 0
+      },
+      "b2c": {
+        "total": 24689000,
+        "orders": 373,
+        "averagePrice": 66190.34852546916,
+        "percentageSales": 100
+      }
+    }
+  },
+  "productMetrics": {
+    "bestSellers": {
+      "byQuantity": [
+        {
+          "productId": "TDZ2xqmQczjq5LfTJih5",
+          "name": "dubai brownies",
+          "collection": "nudos y otros",
+          "quantity": 191,
+          "revenue": 3304000,
+          "averagePrice": 17298.429319371728,
+          "percentageOfSales": 13.4,
+          "percentageOfQuantity": 26.9
+        },
+        {
+          "productId": "WmWS2jH16ff0RlzymZwc",
+          "name": "velvet coconut cream cake",
+          "collection": "cakes",
+          "quantity": 77,
+          "revenue": 3162000,
+          "averagePrice": 41064.93506493507,
+          "percentageOfSales": 12.8,
+          "percentageOfQuantity": 10.8
+        },
+        {
+          "productId": "Dy6AjX4HiJ1Fzw6NFkey",
+          "name": "guayaba",
+          "collection": "cheesecakes",
+          "quantity": 49,
+          "revenue": 1968000,
+          "averagePrice": 40163.26530612245,
+          "percentageOfSales": 8,
+          "percentageOfQuantity": 6.9
+        },
+        {
+          "productId": "JKoNvwksZ6iJICYFbQyb",
+          "name": "key lime cookies",
+          "collection": "nudos y otros",
+          "quantity": 49,
+          "revenue": 441000,
+          "averagePrice": 9000,
+          "percentageOfSales": 1.8,
+          "percentageOfQuantity": 6.9
+        },
+        {
+          "productId": "WfCUh3wwb33Cf0kk6TLN",
+          "name": "pistachio",
+          "collection": "cheesecakes",
+          "quantity": 44,
+          "revenue": 1448000,
+          "averagePrice": 32909.09090909091,
+          "percentageOfSales": 5.9,
+          "percentageOfQuantity": 6.2
+        },
+        {
+          "productId": "xz5IewLJuXMXEirlEt1O",
+          "name": "7 layer vanilla pound cake with flaky salt",
+          "collection": "cakes",
+          "quantity": 42,
+          "revenue": 2138000,
+          "averagePrice": 50904.76190476191,
+          "percentageOfSales": 8.7,
+          "percentageOfQuantity": 5.9
+        },
+        {
+          "productId": "oNGKmzgLl6nc9KIKTyPn",
+          "name": "blackout chocolate cake",
+          "collection": "cakes",
+          "quantity": 41,
+          "revenue": 1375000,
+          "averagePrice": 33536.58536585366,
+          "percentageOfSales": 5.6,
+          "percentageOfQuantity": 5.8
+        },
+        {
+          "productId": "ej5aJRFuXkpHFiNclXqY",
+          "name": "grandma june vanilla cake",
+          "collection": "cakes",
+          "quantity": 36,
+          "revenue": 951000,
+          "averagePrice": 26416.666666666668,
+          "percentageOfSales": 3.9,
+          "percentageOfQuantity": 5.1
+        },
+        {
+          "productId": "waIUPh85jRDWPXBdxtgm",
+          "name": "choco guava",
+          "collection": "cakes",
+          "quantity": 30,
+          "revenue": 990000,
+          "averagePrice": 33000,
+          "percentageOfSales": 4,
+          "percentageOfQuantity": 4.2
+        },
+        {
+          "productId": "Eu1WMqwwxRgTL77KqfBA",
+          "name": "muffin orchard apple cake",
+          "collection": "nudos y otros",
+          "quantity": 28,
+          "revenue": 504000,
+          "averagePrice": 18000,
+          "percentageOfSales": 2,
+          "percentageOfQuantity": 3.9
+        }
+      ],
+      "bySales": [
+        {
+          "productId": "TDZ2xqmQczjq5LfTJih5",
+          "name": "dubai brownies",
+          "collection": "nudos y otros",
+          "quantity": 191,
+          "revenue": 3304000,
+          "averagePrice": 17298.429319371728,
+          "percentageOfSales": 13.4,
+          "percentageOfQuantity": 26.9
+        },
+        {
+          "productId": "WmWS2jH16ff0RlzymZwc",
+          "name": "velvet coconut cream cake",
+          "collection": "cakes",
+          "quantity": 77,
+          "revenue": 3162000,
+          "averagePrice": 41064.93506493507,
+          "percentageOfSales": 12.8,
+          "percentageOfQuantity": 10.8
+        },
+        {
+          "productId": "xz5IewLJuXMXEirlEt1O",
+          "name": "7 layer vanilla pound cake with flaky salt",
+          "collection": "cakes",
+          "quantity": 42,
+          "revenue": 2138000,
+          "averagePrice": 50904.76190476191,
+          "percentageOfSales": 8.7,
+          "percentageOfQuantity": 5.9
+        },
+        {
+          "productId": "Dy6AjX4HiJ1Fzw6NFkey",
+          "name": "guayaba",
+          "collection": "cheesecakes",
+          "quantity": 49,
+          "revenue": 1968000,
+          "averagePrice": 40163.26530612245,
+          "percentageOfSales": 8,
+          "percentageOfQuantity": 6.9
+        },
+        {
+          "productId": "WfCUh3wwb33Cf0kk6TLN",
+          "name": "pistachio",
+          "collection": "cheesecakes",
+          "quantity": 44,
+          "revenue": 1448000,
+          "averagePrice": 32909.09090909091,
+          "percentageOfSales": 5.9,
+          "percentageOfQuantity": 6.2
+        },
+        {
+          "productId": "rsXxA6EHq8LbKuKNcAFs",
+          "name": "midnight dubai",
+          "collection": "cheesecakes",
+          "quantity": 11,
+          "revenue": 1395000,
+          "averagePrice": 126818.18181818182,
+          "percentageOfSales": 5.7,
+          "percentageOfQuantity": 1.5
+        },
+        {
+          "productId": "oNGKmzgLl6nc9KIKTyPn",
+          "name": "blackout chocolate cake",
+          "collection": "cakes",
+          "quantity": 41,
+          "revenue": 1375000,
+          "averagePrice": 33536.58536585366,
+          "percentageOfSales": 5.6,
+          "percentageOfQuantity": 5.8
+        },
+        {
+          "productId": "eAHQ2L2n25NtR6SkaiYW",
+          "name": "pistachio paradise cake",
+          "collection": "cakes",
+          "quantity": 24,
+          "revenue": 1113000,
+          "averagePrice": 46375,
+          "percentageOfSales": 4.5,
+          "percentageOfQuantity": 3.4
+        },
+        {
+          "productId": "waIUPh85jRDWPXBdxtgm",
+          "name": "choco guava",
+          "collection": "cakes",
+          "quantity": 30,
+          "revenue": 990000,
+          "averagePrice": 33000,
+          "percentageOfSales": 4,
+          "percentageOfQuantity": 4.2
+        },
+        {
+          "productId": "UDTYDuBCdY5hSZPPeCTJ",
+          "name": "biscoff creamy cake",
+          "collection": "cakes",
+          "quantity": 14,
+          "revenue": 973000,
+          "averagePrice": 69500,
+          "percentageOfSales": 3.9,
+          "percentageOfQuantity": 2
+        }
+      ],
+      "b2b": [],
+      "b2c": [
+        {
+          "productId": "TDZ2xqmQczjq5LfTJih5",
+          "name": "dubai brownies",
+          "collection": "nudos y otros",
+          "quantity": 191,
+          "revenue": 3304000,
+          "averagePrice": 17298.429319371728,
+          "percentageOfSales": 13.4,
+          "percentageOfQuantity": 26.9
+        },
+        {
+          "productId": "WmWS2jH16ff0RlzymZwc",
+          "name": "velvet coconut cream cake",
+          "collection": "cakes",
+          "quantity": 77,
+          "revenue": 3162000,
+          "averagePrice": 41064.93506493507,
+          "percentageOfSales": 12.8,
+          "percentageOfQuantity": 10.8
+        },
+        {
+          "productId": "xz5IewLJuXMXEirlEt1O",
+          "name": "7 layer vanilla pound cake with flaky salt",
+          "collection": "cakes",
+          "quantity": 42,
+          "revenue": 2138000,
+          "averagePrice": 50904.76190476191,
+          "percentageOfSales": 8.7,
+          "percentageOfQuantity": 5.9
+        },
+        {
+          "productId": "Dy6AjX4HiJ1Fzw6NFkey",
+          "name": "guayaba",
+          "collection": "cheesecakes",
+          "quantity": 49,
+          "revenue": 1968000,
+          "averagePrice": 40163.26530612245,
+          "percentageOfSales": 8,
+          "percentageOfQuantity": 6.9
+        },
+        {
+          "productId": "WfCUh3wwb33Cf0kk6TLN",
+          "name": "pistachio",
+          "collection": "cheesecakes",
+          "quantity": 44,
+          "revenue": 1448000,
+          "averagePrice": 32909.09090909091,
+          "percentageOfSales": 5.9,
+          "percentageOfQuantity": 6.2
+        },
+        {
+          "productId": "rsXxA6EHq8LbKuKNcAFs",
+          "name": "midnight dubai",
+          "collection": "cheesecakes",
+          "quantity": 11,
+          "revenue": 1395000,
+          "averagePrice": 126818.18181818182,
+          "percentageOfSales": 5.7,
+          "percentageOfQuantity": 1.5
+        },
+        {
+          "productId": "oNGKmzgLl6nc9KIKTyPn",
+          "name": "blackout chocolate cake",
+          "collection": "cakes",
+          "quantity": 41,
+          "revenue": 1375000,
+          "averagePrice": 33536.58536585366,
+          "percentageOfSales": 5.6,
+          "percentageOfQuantity": 5.8
+        },
+        {
+          "productId": "eAHQ2L2n25NtR6SkaiYW",
+          "name": "pistachio paradise cake",
+          "collection": "cakes",
+          "quantity": 24,
+          "revenue": 1113000,
+          "averagePrice": 46375,
+          "percentageOfSales": 4.5,
+          "percentageOfQuantity": 3.4
+        },
+        {
+          "productId": "waIUPh85jRDWPXBdxtgm",
+          "name": "choco guava",
+          "collection": "cakes",
+          "quantity": 30,
+          "revenue": 990000,
+          "averagePrice": 33000,
+          "percentageOfSales": 4,
+          "percentageOfQuantity": 4.2
+        },
+        {
+          "productId": "UDTYDuBCdY5hSZPPeCTJ",
+          "name": "biscoff creamy cake",
+          "collection": "cakes",
+          "quantity": 14,
+          "revenue": 973000,
+          "averagePrice": 69500,
+          "percentageOfSales": 3.9,
+          "percentageOfQuantity": 2
+        }
+      ]
+    },
+    "lowestSellers": {
+      "byQuantity": [
+        {
+          "productId": "4rsyRp8wSktWPdjpOv1V",
+          "name": "zanahoria",
+          "collection": "cakes",
+          "quantity": 0,
+          "revenue": 0,
+          "averagePrice": null,
+          "percentageOfSales": 0,
+          "percentageOfQuantity": 0
+        },
+        {
+          "productId": "6ouiQxoLMfhpYCHEbtgV",
+          "name": "orange cake with chocolate pecan streusel",
+          "collection": "cakes",
+          "quantity": 0,
+          "revenue": 0,
+          "averagePrice": null,
+          "percentageOfSales": 0,
+          "percentageOfQuantity": 0
+        },
+        {
+          "productId": "AtHNvjhnfdHSFfQEK1L2",
+          "name": "pistachio keto",
+          "collection": "sugare free",
+          "quantity": 0,
+          "revenue": 0,
+          "averagePrice": null,
+          "percentageOfSales": 0,
+          "percentageOfQuantity": 0
+        },
+        {
+          "productId": "KBFnIpLdBDSCEYi9NXFX",
+          "name": "mont blanc keto",
+          "collection": "sugare free",
+          "quantity": 0,
+          "revenue": 0,
+          "averagePrice": null,
+          "percentageOfSales": 0,
+          "percentageOfQuantity": 0
+        },
+        {
+          "productId": "KoKSU9NPE3siRz5H1v8T",
+          "name": "lemon bars",
+          "collection": "nudos y otros",
+          "quantity": 0,
+          "revenue": 0,
+          "averagePrice": null,
+          "percentageOfSales": 0,
+          "percentageOfQuantity": 0
+        },
+        {
+          "productId": "KqdvgkHOTCvQvRPk1ubm",
+          "name": "pistachio knots",
+          "collection": "nudos y otros",
+          "quantity": 0,
+          "revenue": 0,
+          "averagePrice": null,
+          "percentageOfSales": 0,
+          "percentageOfQuantity": 0
+        },
+        {
+          "productId": "LROO7KuA0GMiQARjvYj9",
+          "name": "spooky cupcakes",
+          "collection": "nudos y otros",
+          "quantity": 0,
+          "revenue": 0,
+          "averagePrice": null,
+          "percentageOfSales": 0,
+          "percentageOfQuantity": 0
+        },
+        {
+          "productId": "MXIX140Jr0StV2FG1sTw",
+          "name": "avellana",
+          "collection": "sugare free",
+          "quantity": 0,
+          "revenue": 0,
+          "averagePrice": null,
+          "percentageOfSales": 0,
+          "percentageOfQuantity": 0
+        },
+        {
+          "productId": "P53BlrUuEauDM0anXeYF",
+          "name": "sticky walnut caramel cake",
+          "collection": "cakes",
+          "quantity": 0,
+          "revenue": 0,
+          "averagePrice": null,
+          "percentageOfSales": 0,
+          "percentageOfQuantity": 0
+        },
+        {
+          "productId": "bhI3jI5vW9eZUokZgFAO",
+          "name": "miel de panela",
+          "collection": "cakes",
+          "quantity": 0,
+          "revenue": 0,
+          "averagePrice": null,
+          "percentageOfSales": 0,
+          "percentageOfQuantity": 0
+        }
+      ],
+      "bySales": [
+        {
+          "productId": "4rsyRp8wSktWPdjpOv1V",
+          "name": "zanahoria",
+          "collection": "cakes",
+          "quantity": 0,
+          "revenue": 0,
+          "averagePrice": null,
+          "percentageOfSales": 0,
+          "percentageOfQuantity": 0
+        },
+        {
+          "productId": "6ouiQxoLMfhpYCHEbtgV",
+          "name": "orange cake with chocolate pecan streusel",
+          "collection": "cakes",
+          "quantity": 0,
+          "revenue": 0,
+          "averagePrice": null,
+          "percentageOfSales": 0,
+          "percentageOfQuantity": 0
+        },
+        {
+          "productId": "AtHNvjhnfdHSFfQEK1L2",
+          "name": "pistachio keto",
+          "collection": "sugare free",
+          "quantity": 0,
+          "revenue": 0,
+          "averagePrice": null,
+          "percentageOfSales": 0,
+          "percentageOfQuantity": 0
+        },
+        {
+          "productId": "KBFnIpLdBDSCEYi9NXFX",
+          "name": "mont blanc keto",
+          "collection": "sugare free",
+          "quantity": 0,
+          "revenue": 0,
+          "averagePrice": null,
+          "percentageOfSales": 0,
+          "percentageOfQuantity": 0
+        },
+        {
+          "productId": "KoKSU9NPE3siRz5H1v8T",
+          "name": "lemon bars",
+          "collection": "nudos y otros",
+          "quantity": 0,
+          "revenue": 0,
+          "averagePrice": null,
+          "percentageOfSales": 0,
+          "percentageOfQuantity": 0
+        },
+        {
+          "productId": "KqdvgkHOTCvQvRPk1ubm",
+          "name": "pistachio knots",
+          "collection": "nudos y otros",
+          "quantity": 0,
+          "revenue": 0,
+          "averagePrice": null,
+          "percentageOfSales": 0,
+          "percentageOfQuantity": 0
+        },
+        {
+          "productId": "LROO7KuA0GMiQARjvYj9",
+          "name": "spooky cupcakes",
+          "collection": "nudos y otros",
+          "quantity": 0,
+          "revenue": 0,
+          "averagePrice": null,
+          "percentageOfSales": 0,
+          "percentageOfQuantity": 0
+        },
+        {
+          "productId": "MXIX140Jr0StV2FG1sTw",
+          "name": "avellana",
+          "collection": "sugare free",
+          "quantity": 0,
+          "revenue": 0,
+          "averagePrice": null,
+          "percentageOfSales": 0,
+          "percentageOfQuantity": 0
+        },
+        {
+          "productId": "P53BlrUuEauDM0anXeYF",
+          "name": "sticky walnut caramel cake",
+          "collection": "cakes",
+          "quantity": 0,
+          "revenue": 0,
+          "averagePrice": null,
+          "percentageOfSales": 0,
+          "percentageOfQuantity": 0
+        },
+        {
+          "productId": "bhI3jI5vW9eZUokZgFAO",
+          "name": "miel de panela",
+          "collection": "cakes",
+          "quantity": 0,
+          "revenue": 0,
+          "averagePrice": null,
+          "percentageOfSales": 0,
+          "percentageOfQuantity": 0
+        }
+      ]
+    },
+    "averageItemsPerOrder": 1.903485254691689
+  },
+  "operationalMetrics": {
+    "fulfillment": {
+      "delivery": { "orders": 45, "percentage": 12.064343163538874 },
+      "pickup": { "orders": 328, "percentage": 87.93565683646113 }
+    },
+    "deliveryMetrics": {
+      "totalFees": 510000,
+      "averageFee": 11333.333333333334,
+      "totalCost": 0,
+      "averageCost": 0,
+      "deliveryRevenue": 510000,
+      "totalOrders": 45
+    }
+  },
+  "taxMetrics": {
+    "taxableItems": 710,
+    "preTaxSubtotal": 22860203,
+    "totalTax": 1828797,
+    "total": 24689000
+  }
+}

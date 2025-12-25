@@ -472,18 +472,29 @@ const createOrderService = () => {
 
   const getIncomeStatement = async (bakeryId, query) => {
     try {
-      // Determine date filter type
-      const bakerySettingsRef = db.collection('bakeries').doc(bakeryId).collection('settings').doc('default');
-      const bakerySettingsDoc = await bakerySettingsRef.get();
-      const bakerySettings = bakerySettingsDoc.exists ? bakerySettingsDoc.data() : {};
-      const dateFilterType = query.filters?.date_field || bakerySettings.features?.reports?.defaultReportFilter || 'dueDate';
+      // Determine date filter type from parsed filters
+      // The QueryParser converts date_field parameter into different filter structures:
+      // - dueDate -> query.filters.dateRange.dateField
+      // - paymentDate -> query.filters.paymentDateWithFallback
+      let dateFilterType = 'dueDate'; // default
+
+      if (query.filters?.paymentDateWithFallback) {
+        dateFilterType = 'paymentDate';
+      } else if (query.filters?.dateRange?.dateField) {
+        dateFilterType = query.filters.dateRange.dateField;
+      }
+
       const groupBy = query.filters?.groupBy || 'total';
 
       // Parse dates - use current year if not provided
       let startDate, endDate;
-      if (query.filters?.dateRange?.startDate && query.filters?.dateRange?.endDate) {
-        startDate = new Date(query.filters.dateRange.startDate);
-        endDate = new Date(query.filters.dateRange.endDate);
+      const dateRangeFilter = dateFilterType === 'paymentDate'
+        ? query.filters?.paymentDateWithFallback
+        : query.filters?.dateRange;
+
+      if (dateRangeFilter?.startDate && dateRangeFilter?.endDate) {
+        startDate = new Date(dateRangeFilter.startDate);
+        endDate = new Date(dateRangeFilter.endDate);
       } else {
         // Default to current year
         const now = new Date();
@@ -627,11 +638,31 @@ const createOrderService = () => {
         // because taxes are already included in the currentPrice that customers pay
         revenue.totalRevenue = revenue.productSales + revenue.deliveryFees;
         costs.totalCosts = costs.cogs + costs.deliveryCosts;
+
+        // Calculate profit broken down by products, delivery, and total
+        const productProfit = revenue.productSales - costs.cogs;
+        const deliveryProfit = revenue.deliveryFees - costs.deliveryCosts;
+        const totalProfit = revenue.totalRevenue - costs.totalCosts;
+
         const grossProfit = {
-          amount: revenue.totalRevenue - costs.totalCosts,
-          marginPercent: revenue.totalRevenue > 0
-            ? parseFloat(((revenue.totalRevenue - costs.totalCosts) / revenue.totalRevenue * 100).toFixed(1))
-            : 0,
+          products: {
+            amount: productProfit,
+            marginPercent: revenue.productSales > 0
+              ? parseFloat(((productProfit) / revenue.productSales * 100).toFixed(1))
+              : 0,
+          },
+          delivery: {
+            amount: deliveryProfit,
+            marginPercent: revenue.deliveryFees > 0
+              ? parseFloat(((deliveryProfit) / revenue.deliveryFees * 100).toFixed(1))
+              : 0,
+          },
+          total: {
+            amount: totalProfit,
+            marginPercent: revenue.totalRevenue > 0
+              ? parseFloat(((totalProfit) / revenue.totalRevenue * 100).toFixed(1))
+              : 0,
+          },
         };
         const coveragePercent = coverage.totalItems > 0
           ? (coverage.itemsWithCost / coverage.totalItems * 100).toFixed(0)

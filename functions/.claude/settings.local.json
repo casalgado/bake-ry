@@ -55,7 +55,8 @@
       "Bash(BAKERY=\"diana_lee\":*)",
       "Bash(__NEW_LINE__ echo \"=== Step 1: Get source user''s history ===\")",
       "Bash(\"$BASE/bakeries/$BAKERY/orders\")",
-      "Bash(__NEW_LINE__ echo \"=== Step 7: Verify migration ===\")"
+      "Bash(__NEW_LINE__ echo \"=== Step 7: Verify migration ===\")",
+      "Bash(ls:*)"
     ],
     "deny": []
   }
