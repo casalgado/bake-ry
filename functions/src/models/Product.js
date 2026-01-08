@@ -31,6 +31,7 @@ class Product extends BaseModel {
     // Custom Attributes
     customAttributes = {},
     description,
+    accountingCode,
   } = {}) {
     super({ id, createdAt, updatedAt });
 
@@ -41,6 +42,7 @@ class Product extends BaseModel {
     this.collectionName = collectionName;
     this.recipeId = recipeId;
     this.description = description;
+    this.accountingCode = accountingCode;
 
     // Handle variations - create instances
     this.variations = Array.isArray(variations) ? VariationGroups.fromLegacyVariations(variations) : variations;
