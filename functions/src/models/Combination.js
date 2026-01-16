@@ -12,6 +12,7 @@ class Combination {
     this.costPrice = data.costPrice || 0;
     this.isWholeGrain = data.isWholeGrain || false;
     this.isActive = data.isActive !== undefined ? data.isActive : true;
+    this.accountingCode = data.accountingCode || '';
   }
 
   static fromLegacyVariation(variation, currentPrice = null, basePrice = null) {
@@ -26,6 +27,7 @@ class Combination {
       costPrice: variation.costPrice || 0,
       isWholeGrain: variation.isWholeGrain || false,
       isActive: true,
+      accountingCode: variation.accountingCode || '',
     });
   }
 
@@ -51,6 +53,7 @@ class Combination {
       costPrice: this.costPrice,
       isWholeGrain: this.isWholeGrain,
       isActive: this.isActive,
+      accountingCode: this.accountingCode,
     };
 
     return obj;
@@ -66,6 +69,7 @@ class Combination {
       costPrice: this.costPrice,
       isWholeGrain: this.isWholeGrain,
       isActive: this.isActive,
+      accountingCode: this.accountingCode,
     };
   }
 }
