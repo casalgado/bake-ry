@@ -64,7 +64,7 @@ class SystemSettings extends BaseModel {
       ],
     },
     SIZE: {
-      label: 'Size',
+      label: 'Forma / Tamaño',
       unit: '',
       defaults: [
         { name: 'Pequeño', value: 2, basePrice: 0, recipeId: '' },
