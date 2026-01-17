@@ -21,6 +21,7 @@ class OrderItem {
     isComplimentary = false,
     productionBatch = 1,
     status = 0,
+    taxMode = 'inclusive',
   }) {
     this.id = id || generateId();
     this.productId = productId;
@@ -37,6 +38,7 @@ class OrderItem {
     this.isComplimentary = isComplimentary;
     this.productionBatch = productionBatch;
     this.status = status;
+    this.taxMode = taxMode;
 
     // Auto-migration: Convert old variation to new combination
     if (variation && !combination) {
@@ -59,17 +61,26 @@ class OrderItem {
 
   calculateTaxAmount() {
     if (this.isComplimentary) return 0;
-    return this.taxPercentage ?
-      Math.round((this.currentPrice * this.taxPercentage) / (100 + this.taxPercentage)) : 0;
+    if (!this.taxPercentage) return 0;
+    if (this.taxMode === 'exclusive') {
+      return Math.round((this.currentPrice * this.taxPercentage) / 100);
+    }
+    return Math.round((this.currentPrice * this.taxPercentage) / (100 + this.taxPercentage));
   }
 
   calculatePreTaxPrice() {
     if (this.isComplimentary) return 0;
+    if (this.taxMode === 'exclusive') {
+      return this.currentPrice;
+    }
     return this.currentPrice - this.taxAmount;
   }
 
   calculateSubtotal() {
     if (this.isComplimentary) return 0;
+    if (this.taxMode === 'exclusive') {
+      return this.quantity * (this.currentPrice + this.taxAmount);
+    }
     return this.quantity * this.currentPrice;
   }
 
@@ -121,6 +132,7 @@ class OrderItem {
       collectionName: this.collectionName,
       isComplimentary: this.isComplimentary,
       taxPercentage: this.taxPercentage,
+      taxMode: this.taxMode,
       quantity: this.quantity,
       currentPrice: this.currentPrice,
       variation: this.variation,
@@ -183,6 +195,9 @@ class Order extends BaseModel {
 
     // Invoice Customizations
     invoiceCustomizations = {},
+
+    // Tax Mode
+    taxMode = 'inclusive',
   } = {}) {
     super({ id, createdAt, updatedAt, preparationDate, dueDate, paymentDate, partialPaymentDate });
 
@@ -196,8 +211,9 @@ class Order extends BaseModel {
     this.userCategory = userCategory;
 
     this.userNationalId = userNationalId;
+    this.taxMode = taxMode;
     this.orderItems = orderItems.map(item =>
-      item instanceof OrderItem ? item : new OrderItem({ ...item }),
+      item instanceof OrderItem ? item : new OrderItem({ ...item, taxMode }),
     );
     this.dueTime = dueTime;
 
@@ -304,6 +320,7 @@ class Order extends BaseModel {
       preTaxTotal: this.preTaxTotal,
       totalTaxAmount: this.totalTaxAmount,
       total: this.total,
+      taxMode: this.taxMode,
       isDeleted: this.isDeleted,
       isComplimentary: this.isComplimentary,
       orderItems: this.orderItems.map(item => item.toClientHistoryObject()),

@@ -51,6 +51,7 @@ class BakerySettings extends BaseModel {
       defaultTermsAndConditions: '',
       showProductDescriptions: true,
       showTermsAndConditions: true,
+      taxMode: 'inclusive',
     },
   };
 
