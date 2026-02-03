@@ -102,10 +102,158 @@ const createProductService = () => {
     }
   };
 
+  /**
+   * Bulk update multiple products in a single transaction
+   * @param {string} bakeryId - Bakery ID
+   * @param {Array} updates - Array of { id, data } objects
+   * @param {Object} editor - User performing the update
+   * @returns {Object} { success: [], failed: [] }
+   */
+  const patchAll = async (bakeryId, updates, editor) => {
+    try {
+      if (!Array.isArray(updates)) {
+        throw new BadRequestError('Updates must be an array');
+      }
+
+      if (updates.length === 0) {
+        return { success: [], failed: [] };
+      }
+
+      const results = {
+        success: [],
+        failed: [],
+      };
+
+      // Process in batches of 500 (Firestore limit)
+      const batchSize = 500;
+      const batches = [];
+
+      for (let i = 0; i < updates.length; i += batchSize) {
+        const batchUpdates = updates.slice(i, i + batchSize);
+        batches.push(batchUpdates);
+      }
+
+      // Process each batch
+      for (const batchUpdates of batches) {
+        await db.runTransaction(async (transaction) => {
+          // Process reads sequentially
+          const updateOperations = [];
+
+          for (const update of batchUpdates) {
+            try {
+              const { id, data } = update || {};
+
+              // Validate update structure
+              if (!id) {
+                updateOperations.push({
+                  success: false,
+                  id: id || 'unknown',
+                  error: 'Missing product ID',
+                });
+                continue;
+              }
+
+              if (!data || typeof data !== 'object') {
+                updateOperations.push({
+                  success: false,
+                  id,
+                  error: 'Missing or invalid update data',
+                });
+                continue;
+              }
+
+              const productRef = baseService.getCollectionRef(bakeryId).doc(id);
+              const productDoc = await transaction.get(productRef);
+
+              if (!productDoc.exists) {
+                updateOperations.push({
+                  success: false,
+                  id,
+                  error: 'Product not found',
+                });
+                continue;
+              }
+
+              const currentProduct = Product.fromFirestore(productDoc);
+
+              // Create updated instance
+              const updatedProduct = new Product({
+                ...currentProduct,
+                ...data,
+                updatedAt: new Date(),
+                lastEditedBy: {
+                  userId: editor?.uid,
+                  email: editor?.email,
+                  role: editor?.role,
+                },
+              });
+
+              // Compute what changed
+              const changes = baseService.diffObjects(currentProduct, updatedProduct);
+
+              updateOperations.push({
+                success: true,
+                productRef,
+                updatedProduct,
+                changes,
+                id,
+              });
+            } catch (error) {
+              updateOperations.push({
+                success: false,
+                id: update.id,
+                error: error.message,
+              });
+            }
+          }
+
+          // Process writes
+          for (const operation of updateOperations) {
+            if (!operation.success) {
+              results.failed.push({
+                id: operation.id,
+                error: operation.error,
+              });
+              continue;
+            }
+
+            const { productRef, updatedProduct, changes, id } = operation;
+
+            // Update product and history only if changes are present
+            if (Object.keys(changes).length > 0) {
+              const historyRef = productRef.collection('updateHistory').doc();
+              transaction.set(historyRef, {
+                timestamp: new Date(),
+                editor: {
+                  userId: editor?.uid,
+                  email: editor?.email,
+                  role: editor?.role,
+                },
+                changes,
+              });
+              transaction.update(productRef, updatedProduct.toFirestore());
+            }
+
+            results.success.push({
+              id,
+              changes,
+            });
+          }
+        });
+      }
+
+      return results;
+    } catch (error) {
+      console.error('Error in patchAll:', error);
+      throw error;
+    }
+  };
+
   return {
     ...baseService,
     create,
     update,
+    patchAll,
   };
 };
 

@@ -7,6 +7,27 @@ const validateProductData = (productData) => {
   return errors;
 };
 
-const productController = createBaseController(productService, validateProductData);
+const baseController = createBaseController(productService, validateProductData);
+
+const productController = {
+  ...baseController,
+
+  async patchAll(req, res) {
+    try {
+      const { bakeryId } = req.params;
+      const updates = req.body.updates;
+
+      const results = await productService.patchAll(
+        bakeryId,
+        updates,
+        req.user,
+      );
+
+      baseController.handleResponse(res, results);
+    } catch (error) {
+      baseController.handleError(res, error);
+    }
+  },
+};
 
 module.exports = productController;

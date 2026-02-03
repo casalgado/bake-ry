@@ -18,6 +18,7 @@ bakeryRouter.get('/products/:id', productController.getById);
 
 // Staff/Admin only routes
 bakeryRouter.post('/products', requireBakeryAssistant, productController.create);
+bakeryRouter.patch('/products/bulk-update', requireBakeryAssistant, productController.patchAll);
 bakeryRouter.put('/products/:id', requireBakeryAssistant, productController.update);
 bakeryRouter.delete('/products/:id', requireBakeryAssistant, productController.remove);
 
