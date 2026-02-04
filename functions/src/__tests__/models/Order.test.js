@@ -27,6 +27,89 @@ describe('OrderItem', () => {
     });
   });
 
+  describe('discount fields', () => {
+    it('should set referencePrice from basePrice when basePrice > 0', () => {
+      const item = new OrderItem({
+        productId: '1',
+        productName: 'Test Product',
+        quantity: 1,
+        basePrice: 1200,
+        currentPrice: 1000,
+      });
+
+      expect(item.referencePrice).toBe(1200);
+    });
+
+    it('should set referencePrice from passed referencePrice when basePrice is 0', () => {
+      const item = new OrderItem({
+        productId: '1',
+        productName: 'Test Product',
+        quantity: 1,
+        basePrice: 0,
+        currentPrice: 1000,
+        referencePrice: 1100,
+      });
+
+      expect(item.referencePrice).toBe(1100);
+    });
+
+    it('should fallback referencePrice to currentPrice when no basePrice or referencePrice', () => {
+      const item = new OrderItem({
+        productId: '1',
+        productName: 'Test Product',
+        quantity: 1,
+        currentPrice: 1000,
+      });
+
+      expect(item.referencePrice).toBe(1000);
+    });
+
+    it('should initialize discountType and discountValue with defaults', () => {
+      const item = new OrderItem({
+        productId: '1',
+        productName: 'Test Product',
+        quantity: 1,
+        currentPrice: 1000,
+      });
+
+      expect(item.discountType).toBeNull();
+      expect(item.discountValue).toBe(0);
+    });
+
+    it('should accept discountType and discountValue', () => {
+      const item = new OrderItem({
+        productId: '1',
+        productName: 'Test Product',
+        quantity: 1,
+        basePrice: 1200,
+        currentPrice: 1000,
+        discountType: 'percentage',
+        discountValue: 10,
+      });
+
+      expect(item.discountType).toBe('percentage');
+      expect(item.discountValue).toBe(10);
+    });
+
+    it('should include discount fields in toClientHistoryObject', () => {
+      const item = new OrderItem({
+        productId: '1',
+        productName: 'Test Product',
+        quantity: 1,
+        basePrice: 1200,
+        currentPrice: 1000,
+        discountType: 'fixed',
+        discountValue: 200,
+      });
+
+      const historyObject = item.toClientHistoryObject();
+
+      expect(historyObject.referencePrice).toBe(1200);
+      expect(historyObject.discountType).toBe('fixed');
+      expect(historyObject.discountValue).toBe(200);
+    });
+  });
+
   describe('calculations', () => {
     it('should calculate tax amount correctly', () => {
       const item = new OrderItem({
@@ -286,6 +369,465 @@ describe('Order', () => {
         }),
       );
       expect(historyObject.orderItems).toHaveLength(1);
+    });
+
+    it('should include order discount fields', () => {
+      const order = new Order({
+        id: '123',
+        bakeryId: 'bakery123',
+        orderItems: [{
+          productId: '1',
+          productName: 'Test Product',
+          quantity: 1,
+          currentPrice: 1000,
+        }],
+        orderDiscountType: 'percentage',
+        orderDiscountValue: 10,
+      });
+
+      const historyObject = order.toClientHistoryObject();
+
+      expect(historyObject.orderDiscountType).toBe('percentage');
+      expect(historyObject.orderDiscountValue).toBe(10);
+      expect(historyObject.orderDiscountAmount).toBe(100);
+    });
+  });
+
+  describe('order-level discounts', () => {
+    describe('calculateOrderDiscountAmount', () => {
+      it('should return 0 when no discount type', () => {
+        const order = new Order({
+          orderItems: [{
+            productId: '1',
+            productName: 'Test Product',
+            quantity: 1,
+            currentPrice: 1000,
+          }],
+        });
+
+        expect(order.orderDiscountAmount).toBe(0);
+      });
+
+      it('should return 0 when no discount value', () => {
+        const order = new Order({
+          orderItems: [{
+            productId: '1',
+            productName: 'Test Product',
+            quantity: 1,
+            currentPrice: 1000,
+          }],
+          orderDiscountType: 'percentage',
+          orderDiscountValue: 0,
+        });
+
+        expect(order.orderDiscountAmount).toBe(0);
+      });
+
+      it('should calculate percentage discount correctly', () => {
+        const order = new Order({
+          orderItems: [{
+            productId: '1',
+            productName: 'Test Product',
+            quantity: 1,
+            currentPrice: 1000,
+          }],
+          orderDiscountType: 'percentage',
+          orderDiscountValue: 10,
+        });
+
+        // 10% of 1000 = 100
+        expect(order.orderDiscountAmount).toBe(100);
+      });
+
+      it('should calculate fixed discount correctly', () => {
+        const order = new Order({
+          orderItems: [{
+            productId: '1',
+            productName: 'Test Product',
+            quantity: 1,
+            currentPrice: 1000,
+          }],
+          orderDiscountType: 'fixed',
+          orderDiscountValue: 250,
+        });
+
+        expect(order.orderDiscountAmount).toBe(250);
+      });
+
+      it('should cap fixed discount at subtotal', () => {
+        const order = new Order({
+          orderItems: [{
+            productId: '1',
+            productName: 'Test Product',
+            quantity: 1,
+            currentPrice: 1000,
+          }],
+          orderDiscountType: 'fixed',
+          orderDiscountValue: 2000, // More than subtotal
+        });
+
+        expect(order.orderDiscountAmount).toBe(1000); // Capped at subtotal
+      });
+
+      it('should return 0 for invalid discount type', () => {
+        const order = new Order({
+          orderItems: [{
+            productId: '1',
+            productName: 'Test Product',
+            quantity: 1,
+            currentPrice: 1000,
+          }],
+          orderDiscountType: 'invalid',
+          orderDiscountValue: 100,
+        });
+
+        expect(order.orderDiscountAmount).toBe(0);
+      });
+    });
+
+    describe('total calculation with discount', () => {
+      it('should subtract percentage discount from total', () => {
+        const order = new Order({
+          orderItems: [{
+            productId: '1',
+            productName: 'Test Product',
+            quantity: 2,
+            currentPrice: 1000,
+          }],
+          orderDiscountType: 'percentage',
+          orderDiscountValue: 10,
+          fulfillmentType: 'pickup',
+        });
+
+        // Subtotal: 2000, Discount: 200, Total: 1800
+        expect(order.subtotal).toBe(2000);
+        expect(order.orderDiscountAmount).toBe(200);
+        expect(order.total).toBe(1800);
+      });
+
+      it('should subtract fixed discount from total', () => {
+        const order = new Order({
+          orderItems: [{
+            productId: '1',
+            productName: 'Test Product',
+            quantity: 2,
+            currentPrice: 1000,
+          }],
+          orderDiscountType: 'fixed',
+          orderDiscountValue: 500,
+          fulfillmentType: 'pickup',
+        });
+
+        // Subtotal: 2000, Discount: 500, Total: 1500
+        expect(order.subtotal).toBe(2000);
+        expect(order.orderDiscountAmount).toBe(500);
+        expect(order.total).toBe(1500);
+      });
+
+      it('should apply discount before adding delivery fee', () => {
+        const order = new Order({
+          orderItems: [{
+            productId: '1',
+            productName: 'Test Product',
+            quantity: 2,
+            currentPrice: 1000,
+          }],
+          orderDiscountType: 'percentage',
+          orderDiscountValue: 10,
+          fulfillmentType: 'delivery',
+          deliveryFee: 300,
+        });
+
+        // Subtotal: 2000, Discount: 200, Discounted: 1800, + Delivery: 2100
+        expect(order.subtotal).toBe(2000);
+        expect(order.orderDiscountAmount).toBe(200);
+        expect(order.total).toBe(2100);
+      });
+
+      it('should handle 100% discount', () => {
+        const order = new Order({
+          orderItems: [{
+            productId: '1',
+            productName: 'Test Product',
+            quantity: 1,
+            currentPrice: 1000,
+          }],
+          orderDiscountType: 'percentage',
+          orderDiscountValue: 100,
+          fulfillmentType: 'pickup',
+        });
+
+        expect(order.orderDiscountAmount).toBe(1000);
+        expect(order.total).toBe(0);
+      });
+    });
+
+    describe('tax adjustment with discount', () => {
+      it('should proportionally reduce tax when order discount applied', () => {
+        const order = new Order({
+          orderItems: [{
+            productId: '1',
+            productName: 'Test Product',
+            quantity: 1,
+            currentPrice: 1000,
+            taxPercentage: 19,
+          }],
+          orderDiscountType: 'percentage',
+          orderDiscountValue: 10,
+        });
+
+        // Item tax: 160 (1000 * 19 / 119)
+        // Discount ratio: 100/1000 = 0.1
+        // Adjusted tax: 160 * 0.9 = 144
+        expect(order.totalTaxAmount).toBe(144);
+      });
+
+      it('should proportionally reduce preTaxTotal when order discount applied', () => {
+        const order = new Order({
+          orderItems: [{
+            productId: '1',
+            productName: 'Test Product',
+            quantity: 1,
+            currentPrice: 1000,
+            taxPercentage: 19,
+          }],
+          orderDiscountType: 'percentage',
+          orderDiscountValue: 10,
+        });
+
+        // Item preTax: 840 (1000 - 160)
+        // Discount ratio: 0.1
+        // Adjusted preTax: 840 * 0.9 = 756
+        expect(order.preTaxTotal).toBe(756);
+      });
+
+      it('should not adjust tax when no discount', () => {
+        const order = new Order({
+          orderItems: [{
+            productId: '1',
+            productName: 'Test Product',
+            quantity: 1,
+            currentPrice: 1000,
+            taxPercentage: 19,
+          }],
+        });
+
+        expect(order.totalTaxAmount).toBe(160);
+        expect(order.preTaxTotal).toBe(840);
+      });
+    });
+
+    describe('complimentary orders with discount fields', () => {
+      it('should set orderDiscountAmount to 0 for complimentary orders', () => {
+        const order = new Order({
+          orderItems: [{
+            productId: '1',
+            productName: 'Test Product',
+            quantity: 1,
+            currentPrice: 1000,
+          }],
+          paymentMethod: 'complimentary',
+          orderDiscountType: 'percentage',
+          orderDiscountValue: 10,
+        });
+
+        expect(order.orderDiscountAmount).toBe(0);
+        expect(order.total).toBe(0);
+      });
+    });
+  });
+
+  describe('item reordering', () => {
+    describe('getSortedOrderItems', () => {
+      it('should return items sorted by displayOrder', () => {
+        const order = new Order({
+          orderItems: [
+            { productId: '1', productName: 'Product A', quantity: 1, currentPrice: 100, displayOrder: 2 },
+            { productId: '2', productName: 'Product B', quantity: 1, currentPrice: 100, displayOrder: 0 },
+            { productId: '3', productName: 'Product C', quantity: 1, currentPrice: 100, displayOrder: 1 },
+          ],
+        });
+
+        const sorted = order.getSortedOrderItems();
+
+        expect(sorted[0].productName).toBe('Product B');
+        expect(sorted[1].productName).toBe('Product C');
+        expect(sorted[2].productName).toBe('Product A');
+      });
+
+      it('should not modify original array', () => {
+        const order = new Order({
+          orderItems: [
+            { productId: '1', productName: 'Product A', quantity: 1, currentPrice: 100, displayOrder: 1 },
+            { productId: '2', productName: 'Product B', quantity: 1, currentPrice: 100, displayOrder: 0 },
+          ],
+        });
+
+        order.getSortedOrderItems();
+
+        expect(order.orderItems[0].productName).toBe('Product A');
+      });
+    });
+
+    describe('normalizeItemDisplayOrders', () => {
+      it('should reassign sequential displayOrder values', () => {
+        const order = new Order({
+          orderItems: [
+            { productId: '1', productName: 'Product A', quantity: 1, currentPrice: 100, displayOrder: 5 },
+            { productId: '2', productName: 'Product B', quantity: 1, currentPrice: 100, displayOrder: 2 },
+            { productId: '3', productName: 'Product C', quantity: 1, currentPrice: 100, displayOrder: 10 },
+          ],
+        });
+
+        order.normalizeItemDisplayOrders();
+
+        // After normalization, sorted by original displayOrder, then reassigned 0,1,2
+        const itemB = order.orderItems.find(i => i.productName === 'Product B');
+        const itemA = order.orderItems.find(i => i.productName === 'Product A');
+        const itemC = order.orderItems.find(i => i.productName === 'Product C');
+
+        expect(itemB.displayOrder).toBe(0);
+        expect(itemA.displayOrder).toBe(1);
+        expect(itemC.displayOrder).toBe(2);
+      });
+    });
+
+    describe('reorderItem', () => {
+      let order;
+
+      beforeEach(() => {
+        order = new Order({
+          orderItems: [
+            { productId: '1', productName: 'Product A', quantity: 1, currentPrice: 100, displayOrder: 0 },
+            { productId: '2', productName: 'Product B', quantity: 1, currentPrice: 100, displayOrder: 1 },
+            { productId: '3', productName: 'Product C', quantity: 1, currentPrice: 100, displayOrder: 2 },
+          ],
+        });
+      });
+
+      it('should move item up', () => {
+        const itemB = order.orderItems.find(i => i.productName === 'Product B');
+        const result = order.reorderItem(itemB.id, 'up');
+
+        expect(result).toBe(true);
+        expect(itemB.displayOrder).toBe(0);
+
+        const itemA = order.orderItems.find(i => i.productName === 'Product A');
+        expect(itemA.displayOrder).toBe(1);
+      });
+
+      it('should move item down', () => {
+        const itemB = order.orderItems.find(i => i.productName === 'Product B');
+        const result = order.reorderItem(itemB.id, 'down');
+
+        expect(result).toBe(true);
+        expect(itemB.displayOrder).toBe(2);
+
+        const itemC = order.orderItems.find(i => i.productName === 'Product C');
+        expect(itemC.displayOrder).toBe(1);
+      });
+
+      it('should return false when moving first item up', () => {
+        const itemA = order.orderItems.find(i => i.productName === 'Product A');
+        const result = order.reorderItem(itemA.id, 'up');
+
+        expect(result).toBe(false);
+        expect(itemA.displayOrder).toBe(0);
+      });
+
+      it('should return false when moving last item down', () => {
+        const itemC = order.orderItems.find(i => i.productName === 'Product C');
+        const result = order.reorderItem(itemC.id, 'down');
+
+        expect(result).toBe(false);
+        expect(itemC.displayOrder).toBe(2);
+      });
+
+      it('should return false for non-existent item', () => {
+        const result = order.reorderItem('non-existent-id', 'up');
+        expect(result).toBe(false);
+      });
+
+      it('should auto-normalize legacy data with same displayOrder', () => {
+        const legacyOrder = new Order({
+          orderItems: [
+            { productId: '1', productName: 'Product A', quantity: 1, currentPrice: 100, displayOrder: 0 },
+            { productId: '2', productName: 'Product B', quantity: 1, currentPrice: 100, displayOrder: 0 },
+            { productId: '3', productName: 'Product C', quantity: 1, currentPrice: 100, displayOrder: 0 },
+          ],
+        });
+
+        const itemB = legacyOrder.orderItems.find(i => i.productName === 'Product B');
+        legacyOrder.reorderItem(itemB.id, 'up');
+
+        // Should have normalized first, then performed the swap
+        const orders = legacyOrder.orderItems.map(i => i.displayOrder);
+        expect(new Set(orders).size).toBe(3); // All unique
+      });
+    });
+
+    describe('moveItemToPosition', () => {
+      let order;
+
+      beforeEach(() => {
+        order = new Order({
+          orderItems: [
+            { productId: '1', productName: 'Product A', quantity: 1, currentPrice: 100, displayOrder: 0 },
+            { productId: '2', productName: 'Product B', quantity: 1, currentPrice: 100, displayOrder: 1 },
+            { productId: '3', productName: 'Product C', quantity: 1, currentPrice: 100, displayOrder: 2 },
+          ],
+        });
+      });
+
+      it('should move item to specific position (1-indexed)', () => {
+        const itemA = order.orderItems.find(i => i.productName === 'Product A');
+        const result = order.moveItemToPosition(itemA.id, 3); // Move to last position
+
+        expect(result).toBe(true);
+
+        const sorted = order.getSortedOrderItems();
+        expect(sorted[0].productName).toBe('Product B');
+        expect(sorted[1].productName).toBe('Product C');
+        expect(sorted[2].productName).toBe('Product A');
+      });
+
+      it('should move item from end to beginning', () => {
+        const itemC = order.orderItems.find(i => i.productName === 'Product C');
+        const result = order.moveItemToPosition(itemC.id, 1);
+
+        expect(result).toBe(true);
+
+        const sorted = order.getSortedOrderItems();
+        expect(sorted[0].productName).toBe('Product C');
+        expect(sorted[1].productName).toBe('Product A');
+        expect(sorted[2].productName).toBe('Product B');
+      });
+
+      it('should return false for invalid position (too low)', () => {
+        const itemA = order.orderItems.find(i => i.productName === 'Product A');
+        const result = order.moveItemToPosition(itemA.id, 0);
+
+        expect(result).toBe(false);
+      });
+
+      it('should return false for invalid position (too high)', () => {
+        const itemA = order.orderItems.find(i => i.productName === 'Product A');
+        const result = order.moveItemToPosition(itemA.id, 5);
+
+        expect(result).toBe(false);
+      });
+
+      it('should return false when moving to same position', () => {
+        const itemB = order.orderItems.find(i => i.productName === 'Product B');
+        const result = order.moveItemToPosition(itemB.id, 2); // Already at position 2
+
+        expect(result).toBe(false);
+      });
+
+      it('should return false for non-existent item', () => {
+        const result = order.moveItemToPosition('non-existent-id', 1);
+        expect(result).toBe(false);
+      });
     });
   });
 });
