@@ -310,67 +310,99 @@ class Order extends BaseModel {
 
   calculatePricing() {
     if (this.isComplimentary && !this.isQuote) {
-      this.taxableSubtotal = 0;
-      this.nonTaxableSubtotal = 0;
+      this.preTaxSubtotal = 0;
+      this.postTaxSubtotal = 0;
       this.subtotal = 0;
       this.totalTaxAmount = 0;
       this.preTaxTotal = 0;
       this.orderDiscountAmount = 0;
       this.total = 0;
+      this.taxBreakdown = [];
       return;
     }
 
-    // Calculate subtotals
-    this.taxableSubtotal = this.orderItems
-      .filter(item => item.taxPercentage > 0)
+    // preTaxSubtotal: always pre-tax regardless of tax mode
+    this.preTaxSubtotal = this.orderItems
+      .reduce((sum, item) => sum + (item.preTaxPrice * item.quantity), 0);
+
+    // postTaxSubtotal: what the customer pays for items (includes tax)
+    this.postTaxSubtotal = this.orderItems
       .reduce((sum, item) => sum + item.subtotal, 0);
 
-    this.nonTaxableSubtotal = this.orderItems
-      .filter(item => !item.taxPercentage)
-      .reduce((sum, item) => sum + item.subtotal, 0);
+    // Backward compatibility alias
+    this.subtotal = this.postTaxSubtotal;
 
-    this.subtotal = this.taxableSubtotal + this.nonTaxableSubtotal;
+    // Total tax from items (before order discount)
+    const itemsTotalTaxAmount = this.postTaxSubtotal - this.preTaxSubtotal;
 
-    // Calculate tax amounts from items (before order discount)
-    const itemsTotalTaxAmount = this.orderItems
-      .reduce((sum, item) => sum + (item.taxAmount * item.quantity), 0);
-
-    // Calculate pre-tax total from items (before order discount)
-    const itemsPreTaxTotal = this.subtotal - itemsTotalTaxAmount;
-
-    // Calculate order-level discount amount (applies to subtotal, not delivery)
+    // Calculate order-level discount amount
     this.orderDiscountAmount = this.calculateOrderDiscountAmount();
 
+    // Discount base depends on tax mode:
+    // exclusive: discount applies to preTaxSubtotal (menu prices, tax not yet added)
+    // inclusive: discount applies to postTaxSubtotal (menu prices, tax already inside)
+    const discountBase = this.taxMode === 'exclusive'
+      ? this.preTaxSubtotal
+      : this.postTaxSubtotal;
+
     // Apply order discount proportionally to tax and pre-tax
-    // totalTaxAmount and preTaxTotal store the ACTUAL values after discount
-    if (this.orderDiscountAmount > 0 && this.subtotal > 0) {
-      const discountRatio = this.orderDiscountAmount / this.subtotal;
+    const discountRatio = (this.orderDiscountAmount > 0 && discountBase > 0)
+      ? this.orderDiscountAmount / discountBase
+      : 0;
+
+    if (discountRatio > 0) {
       this.totalTaxAmount = Math.round(itemsTotalTaxAmount * (1 - discountRatio));
-      this.preTaxTotal = Math.round(itemsPreTaxTotal * (1 - discountRatio));
+      this.preTaxTotal = Math.round(this.preTaxSubtotal * (1 - discountRatio));
     } else {
       this.totalTaxAmount = itemsTotalTaxAmount;
-      this.preTaxTotal = itemsPreTaxTotal;
+      this.preTaxTotal = this.preTaxSubtotal;
     }
 
-    // Calculate final total: subtotal - order discount + delivery fee
-    const discountedSubtotal = this.subtotal - this.orderDiscountAmount;
-    if (this.fulfillmentType === 'delivery') {
-      this.total = discountedSubtotal + this.deliveryFee;
+    // Tax breakdown grouped by tax rate (discount-adjusted)
+    const taxGroups = {};
+    this.orderItems.filter(item => !item.isComplimentary && item.taxPercentage > 0).forEach(item => {
+      if (!taxGroups[item.taxPercentage]) {
+        taxGroups[item.taxPercentage] = { taxPercentage: item.taxPercentage, quantity: 0, baseAmount: 0, taxAmount: 0 };
+      }
+      taxGroups[item.taxPercentage].quantity += item.quantity;
+      taxGroups[item.taxPercentage].baseAmount += item.preTaxPrice * item.quantity;
+      taxGroups[item.taxPercentage].taxAmount += item.taxAmount * item.quantity;
+    });
+
+    if (discountRatio > 0) {
+      Object.values(taxGroups).forEach(group => {
+        group.baseAmount = Math.round(group.baseAmount * (1 - discountRatio));
+        group.taxAmount = Math.round(group.taxAmount * (1 - discountRatio));
+      });
+    }
+
+    this.taxBreakdown = Object.values(taxGroups);
+
+    // Calculate final total
+    if (this.taxMode === 'exclusive') {
+      const discountedTotal = this.preTaxTotal + this.totalTaxAmount;
+      this.total = this.fulfillmentType === 'delivery'
+        ? discountedTotal + this.deliveryFee
+        : discountedTotal;
     } else {
-      this.total = discountedSubtotal;
+      const discountedTotal = this.postTaxSubtotal - this.orderDiscountAmount;
+      this.total = this.fulfillmentType === 'delivery'
+        ? discountedTotal + this.deliveryFee
+        : discountedTotal;
     }
   }
 
   calculateOrderDiscountAmount() {
-    if (!this.orderDiscountType || !this.orderDiscountValue) {
-      return 0;
-    }
+    if (!this.orderDiscountType || !this.orderDiscountValue) return 0;
+
+    const discountBase = this.taxMode === 'exclusive'
+      ? this.preTaxSubtotal
+      : this.postTaxSubtotal;
 
     if (this.orderDiscountType === 'percentage') {
-      return Math.round((this.subtotal * this.orderDiscountValue) / 100);
+      return Math.round((discountBase * this.orderDiscountValue) / 100);
     } else if (this.orderDiscountType === 'fixed') {
-      // Fixed discount cannot exceed subtotal
-      return Math.min(this.orderDiscountValue, this.subtotal);
+      return Math.min(this.orderDiscountValue, discountBase);
     }
 
     return 0;
@@ -459,6 +491,8 @@ class Order extends BaseModel {
       dueDate: this.dueDate,
       preparationDate: this.preparationDate,
       address: this.deliveryAddress,
+      preTaxSubtotal: this.preTaxSubtotal,
+      postTaxSubtotal: this.postTaxSubtotal,
       subtotal: this.subtotal,
       preTaxTotal: this.preTaxTotal,
       totalTaxAmount: this.totalTaxAmount,
@@ -473,6 +507,7 @@ class Order extends BaseModel {
       fulfillmentType: this.fulfillmentType,
       paymentMethod: this.paymentMethod,
       deliveryFee: this.deliveryFee,
+      taxBreakdown: this.taxBreakdown,
     };
   }
 

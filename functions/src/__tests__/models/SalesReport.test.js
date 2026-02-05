@@ -1007,39 +1007,48 @@ describe('SalesReport', () => {
   });
 
   describe('generateTaxMetrics', () => {
-    it('should include all tax metrics', () => {
+    it('should return array grouped by tax rate with correct shape', () => {
       const report = new SalesReport(mockOrders, mockB2BClients, mockProducts);
       const taxMetrics = report.generateTaxMetrics();
 
-      expect(taxMetrics).toHaveProperty('taxableItems');
-      expect(taxMetrics).toHaveProperty('preTaxSubtotal');
-      expect(taxMetrics).toHaveProperty('totalTax');
-      expect(taxMetrics).toHaveProperty('total');
+      expect(Array.isArray(taxMetrics)).toBe(true);
+      expect(taxMetrics).toHaveLength(1);
+      expect(taxMetrics[0]).toHaveProperty('taxPercentage');
+      expect(taxMetrics[0]).toHaveProperty('quantity');
+      expect(taxMetrics[0]).toHaveProperty('baseAmount');
+      expect(taxMetrics[0]).toHaveProperty('taxAmount');
     });
 
-    it('should count only items with tax > 0', () => {
+    it('should aggregate taxable items by rate correctly', () => {
       const report = new SalesReport(mockOrders, mockB2BClients, mockProducts);
       const taxMetrics = report.generateTaxMetrics();
 
-      // Items with 19% tax: order-1 prod-1 (3), order-2 prod-1 (2), order-3 prod-3 (1), order-4 prod-1 (1), order-4 prod-5 (2)
-      expect(taxMetrics.taxableItems).toBe(9);
+      // All taxable items are 19%: order-1 prod-1 (3), order-2 prod-1 (2), order-3 prod-3 (1), order-4 prod-1 (1), order-4 prod-5 (2)
+      expect(taxMetrics[0]).toEqual({
+        taxPercentage: 19,
+        quantity: 9,
+        baseAmount: 72267,
+        taxAmount: 13733,
+      });
     });
 
-    it('should not include complimentary items in tax calculations', () => {
+    it('should not include complimentary orders in tax calculations', () => {
       const report = new SalesReport(mockOrders, mockB2BClients, mockProducts);
       const taxMetrics = report.generateTaxMetrics();
 
-      // Complimentary order has 10 cupcakes, should not be included
-      expect(taxMetrics.taxableItems).not.toContain(10);
+      // Complimentary order (order-5) is filtered out, only 9 taxable items from paid orders
+      expect(taxMetrics[0].quantity).toBe(9);
     });
 
-    it('should calculate tax totals correctly', () => {
-      const report = new SalesReport(mockOrders, mockB2BClients, mockProducts);
+    it('should return empty array when no taxable items', () => {
+      const noTaxOrders = mockOrders.map(order => ({
+        ...order,
+        orderItems: order.orderItems.map(item => ({ ...item, taxPercentage: 0 })),
+      }));
+      const report = new SalesReport(noTaxOrders, mockB2BClients, mockProducts);
       const taxMetrics = report.generateTaxMetrics();
 
-      expect(taxMetrics.totalTax).toBeGreaterThan(0);
-      expect(taxMetrics.preTaxSubtotal).toBeGreaterThan(0);
-      expect(taxMetrics.total).toBe(taxMetrics.preTaxSubtotal + taxMetrics.totalTax);
+      expect(taxMetrics).toEqual([]);
     });
   });
 

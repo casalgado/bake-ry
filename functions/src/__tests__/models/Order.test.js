@@ -251,14 +251,23 @@ describe('Order', () => {
       });
     });
 
-    it('should calculate taxable and non-taxable subtotals correctly', () => {
-      expect(order.taxableSubtotal).toBe(2000); // 2 * 1000
-      expect(order.nonTaxableSubtotal).toBe(500); // 1 * 500
+    it('should calculate preTaxSubtotal and postTaxSubtotal correctly', () => {
+      // preTaxSubtotal: (840 * 2) + (500 * 1) = 2180
+      expect(order.preTaxSubtotal).toBe(2180);
+      // postTaxSubtotal: (1000 * 2) + (500 * 1) = 2500
+      expect(order.postTaxSubtotal).toBe(2500);
     });
 
     it('should calculate total tax amount correctly', () => {
       // (1000 * 19/119) * 2 ≈ 319.33 rounded
       expect(order.totalTaxAmount).toBe(320);
+    });
+
+    it('should calculate taxBreakdown with only taxable items', () => {
+      // Only Product 1 (19%) is taxable, Product 2 (0%) is excluded
+      expect(order.taxBreakdown).toEqual([
+        { taxPercentage: 19, quantity: 2, baseAmount: 1680, taxAmount: 320 },
+      ]);
     });
 
     it('should calculate pre-tax total correctly', () => {
@@ -281,11 +290,12 @@ describe('Order', () => {
       order.isComplimentary = true;
       order.calculatePricing();
 
-      expect(order.taxableSubtotal).toBe(0);
-      expect(order.nonTaxableSubtotal).toBe(0);
+      expect(order.preTaxSubtotal).toBe(0);
+      expect(order.postTaxSubtotal).toBe(0);
       expect(order.totalTaxAmount).toBe(0);
       expect(order.preTaxTotal).toBe(0);
       expect(order.total).toBe(0);
+      expect(order.taxBreakdown).toEqual([]);
     });
   });
 
@@ -390,6 +400,7 @@ describe('Order', () => {
       expect(historyObject.orderDiscountType).toBe('percentage');
       expect(historyObject.orderDiscountValue).toBe(10);
       expect(historyObject.orderDiscountAmount).toBe(100);
+      expect(historyObject.taxBreakdown).toEqual([]);
     });
   });
 
@@ -406,6 +417,7 @@ describe('Order', () => {
         });
 
         expect(order.orderDiscountAmount).toBe(0);
+        expect(order.taxBreakdown).toEqual([]);
       });
 
       it('should return 0 when no discount value', () => {
@@ -580,6 +592,9 @@ describe('Order', () => {
         // Discount ratio: 100/1000 = 0.1
         // Adjusted tax: 160 * 0.9 = 144
         expect(order.totalTaxAmount).toBe(144);
+        expect(order.taxBreakdown).toEqual([
+          { taxPercentage: 19, quantity: 1, baseAmount: 756, taxAmount: 144 },
+        ]);
       });
 
       it('should proportionally reduce preTaxTotal when order discount applied', () => {
@@ -599,6 +614,9 @@ describe('Order', () => {
         // Discount ratio: 0.1
         // Adjusted preTax: 840 * 0.9 = 756
         expect(order.preTaxTotal).toBe(756);
+        expect(order.taxBreakdown).toEqual([
+          { taxPercentage: 19, quantity: 1, baseAmount: 756, taxAmount: 144 },
+        ]);
       });
 
       it('should not adjust tax when no discount', () => {
@@ -614,6 +632,276 @@ describe('Order', () => {
 
         expect(order.totalTaxAmount).toBe(160);
         expect(order.preTaxTotal).toBe(840);
+        expect(order.taxBreakdown).toEqual([
+          { taxPercentage: 19, quantity: 1, baseAmount: 840, taxAmount: 160 },
+        ]);
+      });
+    });
+
+    describe('exclusive tax mode with order discount', () => {
+      it('should apply discount to preTaxSubtotal and compute correct total', () => {
+        // Exclusive: currentPrice is pre-tax (1,000,000), tax 19% added on top
+        const order = new Order({
+          orderItems: [{
+            productId: '1',
+            productName: 'Bulk Order',
+            quantity: 1,
+            currentPrice: 1000000,
+            taxPercentage: 19,
+          }],
+          taxMode: 'exclusive',
+          orderDiscountType: 'fixed',
+          orderDiscountValue: 200000,
+          fulfillmentType: 'pickup',
+        });
+
+        // preTaxSubtotal = 1,000,000
+        expect(order.preTaxSubtotal).toBe(1000000);
+        // postTaxSubtotal = 1,000,000 + 190,000 = 1,190,000
+        expect(order.postTaxSubtotal).toBe(1190000);
+        // discountBase = preTaxSubtotal = 1,000,000 (exclusive)
+        // discountAmount = min(200,000, 1,000,000) = 200,000
+        expect(order.orderDiscountAmount).toBe(200000);
+        // discountRatio = 200,000 / 1,000,000 = 0.20
+        // preTaxTotal = round(1,000,000 * 0.80) = 800,000
+        expect(order.preTaxTotal).toBe(800000);
+        // totalTaxAmount = round(190,000 * 0.80) = 152,000
+        expect(order.totalTaxAmount).toBe(152000);
+        // total = 800,000 + 152,000 = 952,000
+        expect(order.total).toBe(952000);
+        expect(order.taxBreakdown).toEqual([
+          { taxPercentage: 19, quantity: 1, baseAmount: 800000, taxAmount: 152000 },
+        ]);
+      });
+    });
+
+    describe('inclusive tax mode with order discount', () => {
+      it('should apply discount to postTaxSubtotal and compute correct total', () => {
+        // Inclusive: currentPrice includes tax (1,000,000 total for items)
+        const order = new Order({
+          orderItems: [{
+            productId: '1',
+            productName: 'Bulk Order',
+            quantity: 1,
+            currentPrice: 1000000,
+            taxPercentage: 19,
+          }],
+          taxMode: 'inclusive',
+          orderDiscountType: 'fixed',
+          orderDiscountValue: 200000,
+          fulfillmentType: 'pickup',
+        });
+
+        // postTaxSubtotal = 1,000,000
+        expect(order.postTaxSubtotal).toBe(1000000);
+        // preTaxSubtotal: taxAmount = round(1,000,000 * 19/119) = 159,664
+        // preTaxPrice = 1,000,000 - 159,664 = 840,336
+        expect(order.preTaxSubtotal).toBe(840336);
+        // discountBase = postTaxSubtotal = 1,000,000 (inclusive)
+        expect(order.orderDiscountAmount).toBe(200000);
+        // discountRatio = 200,000 / 1,000,000 = 0.20
+        // preTaxTotal = round(840,336 * 0.80) = 672,269
+        expect(order.preTaxTotal).toBe(672269);
+        // totalTaxAmount = round(159,664 * 0.80) = 127,731
+        expect(order.totalTaxAmount).toBe(127731);
+        // total = 1,000,000 - 200,000 = 800,000
+        expect(order.total).toBe(800000);
+        expect(order.taxBreakdown).toEqual([
+          { taxPercentage: 19, quantity: 1, baseAmount: 672269, taxAmount: 127731 },
+        ]);
+      });
+    });
+
+    describe('mixed tax/no-tax items with discount', () => {
+      it('exclusive mode: should discount from preTaxSubtotal with mixed tax items', () => {
+        const order = new Order({
+          orderItems: [
+            { productId: '1', productName: 'Taxed Item', quantity: 1, currentPrice: 500000, taxPercentage: 19 },
+            { productId: '2', productName: 'No Tax Item', quantity: 1, currentPrice: 300000, taxPercentage: 0 },
+          ],
+          taxMode: 'exclusive',
+          orderDiscountType: 'fixed',
+          orderDiscountValue: 200000,
+          fulfillmentType: 'pickup',
+        });
+
+        expect(order.preTaxSubtotal).toBe(800000);
+        expect(order.postTaxSubtotal).toBe(895000);
+        expect(order.orderDiscountAmount).toBe(200000);
+        expect(order.preTaxTotal).toBe(600000);
+        expect(order.totalTaxAmount).toBe(71250);
+        expect(order.total).toBe(671250);
+        expect(order.taxBreakdown).toEqual([
+          { taxPercentage: 19, quantity: 1, baseAmount: 375000, taxAmount: 71250 },
+        ]);
+      });
+
+      it('inclusive mode: should discount from postTaxSubtotal with mixed tax items', () => {
+        const order = new Order({
+          orderItems: [
+            { productId: '1', productName: 'Taxed Item', quantity: 1, currentPrice: 500000, taxPercentage: 19 },
+            { productId: '2', productName: 'No Tax Item', quantity: 1, currentPrice: 300000, taxPercentage: 0 },
+          ],
+          taxMode: 'inclusive',
+          orderDiscountType: 'fixed',
+          orderDiscountValue: 200000,
+          fulfillmentType: 'pickup',
+        });
+
+        expect(order.preTaxSubtotal).toBe(720168);
+        expect(order.postTaxSubtotal).toBe(800000);
+        expect(order.orderDiscountAmount).toBe(200000);
+        expect(order.preTaxTotal).toBe(540126);
+        expect(order.totalTaxAmount).toBe(59874);
+        expect(order.total).toBe(600000);
+        expect(order.taxBreakdown).toEqual([
+          { taxPercentage: 19, quantity: 1, baseAmount: 315126, taxAmount: 59874 },
+        ]);
+      });
+    });
+
+    describe('different tax rates with percentage discount', () => {
+      it('exclusive mode: should handle items with 19% and 10% tax', () => {
+        const order = new Order({
+          orderItems: [
+            { productId: '1', productName: 'Item 19%', quantity: 1, currentPrice: 400000, taxPercentage: 19 },
+            { productId: '2', productName: 'Item 10%', quantity: 1, currentPrice: 200000, taxPercentage: 10 },
+          ],
+          taxMode: 'exclusive',
+          orderDiscountType: 'percentage',
+          orderDiscountValue: 15,
+          fulfillmentType: 'pickup',
+        });
+
+        expect(order.preTaxSubtotal).toBe(600000);
+        expect(order.postTaxSubtotal).toBe(696000);
+        expect(order.orderDiscountAmount).toBe(90000);
+        expect(order.preTaxTotal).toBe(510000);
+        expect(order.totalTaxAmount).toBe(81600);
+        expect(order.total).toBe(591600);
+        // Integer keys iterate in ascending numeric order
+        expect(order.taxBreakdown).toHaveLength(2);
+        expect(order.taxBreakdown).toEqual(expect.arrayContaining([
+          { taxPercentage: 19, quantity: 1, baseAmount: 340000, taxAmount: 64600 },
+          { taxPercentage: 10, quantity: 1, baseAmount: 170000, taxAmount: 17000 },
+        ]));
+      });
+
+      it('inclusive mode: should handle items with 19% and 10% tax', () => {
+        const order = new Order({
+          orderItems: [
+            { productId: '1', productName: 'Item 19%', quantity: 1, currentPrice: 400000, taxPercentage: 19 },
+            { productId: '2', productName: 'Item 10%', quantity: 1, currentPrice: 200000, taxPercentage: 10 },
+          ],
+          taxMode: 'inclusive',
+          orderDiscountType: 'percentage',
+          orderDiscountValue: 15,
+          fulfillmentType: 'pickup',
+        });
+
+        expect(order.preTaxSubtotal).toBe(517952);
+        expect(order.postTaxSubtotal).toBe(600000);
+        expect(order.orderDiscountAmount).toBe(90000);
+        expect(order.preTaxTotal).toBe(440259);
+        expect(order.totalTaxAmount).toBe(69741);
+        expect(order.total).toBe(510000);
+        expect(order.taxBreakdown).toHaveLength(2);
+        expect(order.taxBreakdown).toEqual(expect.arrayContaining([
+          { taxPercentage: 19, quantity: 1, baseAmount: 285714, taxAmount: 54286 },
+          { taxPercentage: 10, quantity: 1, baseAmount: 154545, taxAmount: 15455 },
+        ]));
+      });
+    });
+
+    describe('item-level discounts without order discount', () => {
+      it('exclusive mode: item discounts reflected in currentPrice', () => {
+        const order = new Order({
+          orderItems: [
+            { productId: '1', productName: 'Discounted Item', quantity: 2, basePrice: 500000, currentPrice: 400000, taxPercentage: 19, discountType: 'fixed', discountValue: 100000 },
+            { productId: '2', productName: 'Full Price Item', quantity: 1, basePrice: 300000, currentPrice: 300000, taxPercentage: 19 },
+          ],
+          taxMode: 'exclusive',
+          fulfillmentType: 'pickup',
+        });
+
+        expect(order.preTaxSubtotal).toBe(1100000);
+        expect(order.postTaxSubtotal).toBe(1309000);
+        expect(order.orderDiscountAmount).toBe(0);
+        expect(order.preTaxTotal).toBe(1100000);
+        expect(order.totalTaxAmount).toBe(209000);
+        expect(order.total).toBe(1309000);
+        expect(order.taxBreakdown).toEqual([
+          { taxPercentage: 19, quantity: 3, baseAmount: 1100000, taxAmount: 209000 },
+        ]);
+      });
+
+      it('inclusive mode: item discounts reflected in currentPrice', () => {
+        const order = new Order({
+          orderItems: [
+            { productId: '1', productName: 'Discounted Item', quantity: 2, basePrice: 500000, currentPrice: 400000, taxPercentage: 19, discountType: 'fixed', discountValue: 100000 },
+            { productId: '2', productName: 'Full Price Item', quantity: 1, basePrice: 300000, currentPrice: 300000, taxPercentage: 19 },
+          ],
+          taxMode: 'inclusive',
+          fulfillmentType: 'pickup',
+        });
+
+        expect(order.preTaxSubtotal).toBe(924369);
+        expect(order.postTaxSubtotal).toBe(1100000);
+        expect(order.orderDiscountAmount).toBe(0);
+        expect(order.preTaxTotal).toBe(924369);
+        expect(order.totalTaxAmount).toBe(175631);
+        expect(order.total).toBe(1100000);
+        expect(order.taxBreakdown).toEqual([
+          { taxPercentage: 19, quantity: 3, baseAmount: 924369, taxAmount: 175631 },
+        ]);
+      });
+    });
+
+    describe('item-level discounts with order-level discount', () => {
+      it('exclusive mode: order discount stacks on top of item discounts', () => {
+        const order = new Order({
+          orderItems: [
+            { productId: '1', productName: 'Discounted Item', quantity: 2, basePrice: 500000, currentPrice: 400000, taxPercentage: 19, discountType: 'fixed', discountValue: 100000 },
+            { productId: '2', productName: 'Full Price Item', quantity: 1, basePrice: 300000, currentPrice: 300000, taxPercentage: 19 },
+          ],
+          taxMode: 'exclusive',
+          orderDiscountType: 'percentage',
+          orderDiscountValue: 10,
+          fulfillmentType: 'pickup',
+        });
+
+        expect(order.preTaxSubtotal).toBe(1100000);
+        expect(order.postTaxSubtotal).toBe(1309000);
+        expect(order.orderDiscountAmount).toBe(110000);
+        expect(order.preTaxTotal).toBe(990000);
+        expect(order.totalTaxAmount).toBe(188100);
+        expect(order.total).toBe(1178100);
+        expect(order.taxBreakdown).toEqual([
+          { taxPercentage: 19, quantity: 3, baseAmount: 990000, taxAmount: 188100 },
+        ]);
+      });
+
+      it('inclusive mode: order discount stacks on top of item discounts', () => {
+        const order = new Order({
+          orderItems: [
+            { productId: '1', productName: 'Discounted Item', quantity: 2, basePrice: 500000, currentPrice: 400000, taxPercentage: 19, discountType: 'fixed', discountValue: 100000 },
+            { productId: '2', productName: 'Full Price Item', quantity: 1, basePrice: 300000, currentPrice: 300000, taxPercentage: 19 },
+          ],
+          taxMode: 'inclusive',
+          orderDiscountType: 'percentage',
+          orderDiscountValue: 10,
+          fulfillmentType: 'pickup',
+        });
+
+        expect(order.preTaxSubtotal).toBe(924369);
+        expect(order.postTaxSubtotal).toBe(1100000);
+        expect(order.orderDiscountAmount).toBe(110000);
+        expect(order.preTaxTotal).toBe(831932);
+        expect(order.totalTaxAmount).toBe(158068);
+        expect(order.total).toBe(990000);
+        expect(order.taxBreakdown).toEqual([
+          { taxPercentage: 19, quantity: 3, baseAmount: 831932, taxAmount: 158068 },
+        ]);
       });
     });
 
@@ -633,6 +921,7 @@ describe('Order', () => {
 
         expect(order.orderDiscountAmount).toBe(0);
         expect(order.total).toBe(0);
+        expect(order.taxBreakdown).toEqual([]);
       });
     });
   });

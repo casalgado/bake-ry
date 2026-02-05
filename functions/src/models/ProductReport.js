@@ -1,4 +1,8 @@
 // models/ProductReport.js
+//
+// NOTE: item.subtotal is always post-tax (includes tax in both inclusive and exclusive tax modes).
+// Per-product revenue (totalIngresos) uses item.subtotal at face value (before order-level discounts).
+// totalDiscounts is provided in the summary to reconcile face-value totals with actual charged amounts.
 
 const { Order } = require('./Order');
 
@@ -28,6 +32,9 @@ class ProductReport {
 
     // Segment orders based on option
     this.orders = this.filterOrdersBySegment(this.allOrders);
+
+    // Pre-calculate common metrics
+    this.totalDiscounts = this.orders.reduce((sum, order) => sum + (order.orderDiscountAmount || 0), 0);
 
     // Pre-calculate aggregated data
     this.aggregatedData = this.aggregateProductData();
@@ -178,6 +185,7 @@ class ProductReport {
 
     if (this.options.metrics === 'ingresos' || this.options.metrics === 'both') {
       result.totals.totalIngresos = totals.totalIngresos;
+      result.totals.totalDiscounts = this.totalDiscounts;
     }
     if (this.options.metrics === 'cantidad' || this.options.metrics === 'both') {
       result.totals.totalCantidad = totals.totalCantidad;
