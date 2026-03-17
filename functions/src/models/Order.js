@@ -212,6 +212,7 @@ class Order extends BaseModel {
     isDeliveryPaid = false,
     paymentMethod = 'transfer',
     partialPaymentAmount = 0,
+    partialPayments = null,
 
     // Fulfillment
     fulfillmentType = 'pickup',
@@ -264,7 +265,28 @@ class Order extends BaseModel {
     this.isPaid = isPaid;
     this.isDeliveryPaid = isDeliveryPaid;
     this.paymentMethod = paymentMethod;
-    this.partialPaymentAmount = partialPaymentAmount;
+
+    // Normalize partialPayments:
+    // null  → field was missing (legacy record) → synthesize from old scalar fields
+    // []    → user explicitly cleared payments
+    // [...] → normal data with entries
+    if (partialPayments === null) {
+      this.partialPayments = (partialPaymentAmount > 0 && this.partialPaymentDate)
+        ? [{ amount: partialPaymentAmount, date: this.partialPaymentDate, method: paymentMethod }]
+        : [];
+    } else {
+      this.partialPayments = partialPayments.map(p => ({
+        amount: p.amount || 0,
+        date: BaseModel.ensureDate(p.date),
+        method: p.method || paymentMethod,
+      }));
+    }
+
+    // Scalars are always derived from the array — never trusted from input
+    this.partialPaymentAmount = this.partialPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+    this.partialPaymentDate = this.partialPayments.length > 0
+      ? this.partialPayments.reduce((latest, p) => (!latest || p.date > latest) ? p.date : latest, null)
+      : null;
 
     // Fulfillment
     this.fulfillmentType = fulfillmentType;
