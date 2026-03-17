@@ -125,9 +125,37 @@ const createBakeryService = () => {
     }
   };
 
+  const getAll = async (parentId = null, query = {}) => {
+    try {
+      // Simple direct query to bakeries collection
+      let bakeryQuery = db.collection("bakeries");
+
+      // Add basic sorting
+      bakeryQuery = bakeryQuery.orderBy("createdAt", "desc");
+
+      // Execute query
+      const snapshot = await bakeryQuery.get();
+
+      const documents = snapshot.docs.map((doc) => Bakery.fromFirestore(doc));
+
+      return {
+        items: documents,
+        pagination: {
+          page: 1,
+          perPage: 50,
+          total: snapshot.size,
+        },
+      };
+    } catch (error) {
+      console.error("Error in custom bakery getAll:", error);
+      throw error;
+    }
+  };
+
   return {
     ...baseService,
     create,
+    getAll,
   };
 };
 

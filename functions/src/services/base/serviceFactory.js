@@ -106,8 +106,12 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
       let dbQuery = getCollectionRef(parentId);
       const { pagination, sort, filters } = query;
 
-      if (!query.includeDeleted) {
-        dbQuery = dbQuery.where('isDeleted', '!=', true);
+      // Check both query.includeDeleted and query.filters.includeDeleted
+      const includeDeleted =
+        query.includeDeleted || query.filters?.includeDeleted;
+
+      if (!includeDeleted) {
+        dbQuery = dbQuery.where("isDeleted", "!=", true);
       }
 
       if (filters) {
@@ -116,10 +120,10 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
           const { dateField, startDate, endDate } = filters.dateRange;
 
           if (startDate) {
-            dbQuery = dbQuery.where(dateField, '>=', new Date(startDate));
+            dbQuery = dbQuery.where(dateField, ">=", new Date(startDate));
           }
           if (endDate) {
-            dbQuery = dbQuery.where(dateField, '<=', new Date(endDate));
+            dbQuery = dbQuery.where(dateField, "<=", new Date(endDate));
           }
         }
 
@@ -130,36 +134,53 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
           // Query 1: Orders with actual paymentDate in range
           let paidOrdersQuery = getCollectionRef(parentId);
           if (!query.includeDeleted) {
-            paidOrdersQuery = paidOrdersQuery.where('isDeleted', '!=', true);
+            paidOrdersQuery = paidOrdersQuery.where("isDeleted", "!=", true);
           }
           if (startDate) {
-            paidOrdersQuery = paidOrdersQuery.where('paymentDate', '>=', new Date(startDate));
+            paidOrdersQuery = paidOrdersQuery.where(
+              "paymentDate",
+              ">=",
+              new Date(startDate),
+            );
           }
           if (endDate) {
-            paidOrdersQuery = paidOrdersQuery.where('paymentDate', '<=', new Date(endDate));
+            paidOrdersQuery = paidOrdersQuery.where(
+              "paymentDate",
+              "<=",
+              new Date(endDate),
+            );
           }
 
           // Query 2: Legacy orders - get ALL paid orders in dueDate range, filter client-side
           let legacyOrdersQuery = getCollectionRef(parentId);
           if (!query.includeDeleted) {
-            legacyOrdersQuery = legacyOrdersQuery.where('isDeleted', '!=', true);
+            legacyOrdersQuery = legacyOrdersQuery.where(
+              "isDeleted",
+              "!=",
+              true,
+            );
           }
-          legacyOrdersQuery = legacyOrdersQuery.where('isPaid', '==', true);
+          legacyOrdersQuery = legacyOrdersQuery.where("isPaid", "==", true);
           if (startDate) {
-            legacyOrdersQuery = legacyOrdersQuery.where('dueDate', '>=', new Date(startDate));
+            legacyOrdersQuery = legacyOrdersQuery.where(
+              "dueDate",
+              ">=",
+              new Date(startDate),
+            );
           }
           if (endDate) {
-            legacyOrdersQuery = legacyOrdersQuery.where('dueDate', '<=', new Date(endDate));
+            legacyOrdersQuery = legacyOrdersQuery.where(
+              "dueDate",
+              "<=",
+              new Date(endDate),
+            );
           }
 
           // Apply other filters to both queries
           Object.entries(filters).forEach(([key, value]) => {
-            if (
-              key !== 'paymentDateWithFallback' &&
-              value !== undefined
-            ) {
-              paidOrdersQuery = paidOrdersQuery.where(key, '==', value);
-              legacyOrdersQuery = legacyOrdersQuery.where(key, '==', value);
+            if (key !== "paymentDateWithFallback" && value !== undefined) {
+              paidOrdersQuery = paidOrdersQuery.where(key, "==", value);
+              legacyOrdersQuery = legacyOrdersQuery.where(key, "==", value);
             }
           });
 
@@ -196,7 +217,7 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
             documents.sort((a, b) => {
               const aVal = a[sort.field];
               const bVal = b[sort.field];
-              const multiplier = sort.direction === 'desc' ? -1 : 1;
+              const multiplier = sort.direction === "desc" ? -1 : 1;
 
               if (aVal < bVal) return -1 * multiplier;
               if (aVal > bVal) return 1 * multiplier;
@@ -220,10 +241,10 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
             items: documents,
             pagination: pagination
               ? {
-                page: pagination.page,
-                perPage: pagination.perPage,
-                total: allDocs.size,
-              }
+                  page: pagination.page,
+                  perPage: pagination.perPage,
+                  total: allDocs.size,
+                }
               : null,
           };
         }
@@ -237,27 +258,29 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
             let fieldQuery = getCollectionRef(parentId);
 
             // Apply the same base filters
-            if (!query.includeDeleted) {
-              fieldQuery = fieldQuery.where('isDeleted', '!=', true);
+            const includeDeleted =
+              query.includeDeleted || query.filters?.includeDeleted;
+            if (!includeDeleted) {
+              fieldQuery = fieldQuery.where("isDeleted", "!=", true);
             }
 
             // Apply date range for this field
             if (startDate) {
-              fieldQuery = fieldQuery.where(field, '>=', new Date(startDate));
+              fieldQuery = fieldQuery.where(field, ">=", new Date(startDate));
             }
             if (endDate) {
-              fieldQuery = fieldQuery.where(field, '<=', new Date(endDate));
+              fieldQuery = fieldQuery.where(field, "<=", new Date(endDate));
             }
 
             // Apply other filters
             Object.entries(filters).forEach(([key, value]) => {
               if (
-                key !== 'dateRange' &&
-                key !== 'orDateRange' &&
-                key !== 'paymentDateWithFallback' &&
+                key !== "dateRange" &&
+                key !== "orDateRange" &&
+                key !== "paymentDateWithFallback" &&
                 value !== undefined
               ) {
-                fieldQuery = fieldQuery.where(key, '==', value);
+                fieldQuery = fieldQuery.where(key, "==", value);
               }
             });
 
@@ -285,7 +308,7 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
             documents.sort((a, b) => {
               const aVal = a[sort.field];
               const bVal = b[sort.field];
-              const multiplier = sort.direction === 'desc' ? -1 : 1;
+              const multiplier = sort.direction === "desc" ? -1 : 1;
 
               if (aVal < bVal) return -1 * multiplier;
               if (aVal > bVal) return 1 * multiplier;
@@ -309,17 +332,21 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
             items: documents,
             pagination: pagination
               ? {
-                page: pagination.page,
-                perPage: pagination.perPage,
-                total: allDocs.size,
-              }
+                  page: pagination.page,
+                  perPage: pagination.perPage,
+                  total: allDocs.size,
+                }
               : null,
           };
         }
 
         Object.entries(filters).forEach(([key, value]) => {
-          if (key !== 'dateRange' && key !== 'paymentDateWithFallback' && value !== undefined) {
-            dbQuery = dbQuery.where(key, '==', value);
+          if (
+            key !== "dateRange" &&
+            key !== "paymentDateWithFallback" &&
+            value !== undefined
+          ) {
+            dbQuery = dbQuery.where(key, "==", value);
           }
         });
       }
@@ -327,7 +354,7 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
       if (sort) {
         dbQuery = dbQuery.orderBy(sort.field, sort.direction);
       } else {
-        dbQuery = dbQuery.orderBy('createdAt', 'desc');
+        dbQuery = dbQuery.orderBy("createdAt", "desc");
       }
 
       if (pagination) {
@@ -346,10 +373,10 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
         items: documents,
         pagination: pagination
           ? {
-            page: pagination.page,
-            perPage: pagination.perPage,
-            total: snapshot.size,
-          }
+              page: pagination.page,
+              perPage: pagination.perPage,
+              total: snapshot.size,
+            }
           : null,
       };
     } catch (error) {

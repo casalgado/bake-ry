@@ -225,6 +225,171 @@ describe('Order', () => {
     });
   });
 
+  describe('partialPayments', () => {
+    describe('new order with no partial payments', () => {
+      it('should default to empty array and zero scalars when nothing is provided', () => {
+        const order = new Order({ bakeryId: '1' });
+
+        expect(order.partialPayments).toEqual([]);
+        expect(order.partialPaymentAmount).toBe(0);
+        expect(order.partialPaymentDate).toBeNull();
+      });
+
+      it('should keep empty array and zero scalars when explicitly passed empty array', () => {
+        const order = new Order({ bakeryId: '1', partialPayments: [] });
+
+        expect(order.partialPayments).toEqual([]);
+        expect(order.partialPaymentAmount).toBe(0);
+        expect(order.partialPaymentDate).toBeNull();
+      });
+    });
+
+    describe('new order with partialPayments array', () => {
+      it('should derive partialPaymentAmount as sum of all entries', () => {
+        const order = new Order({
+          bakeryId: '1',
+          paymentMethod: 'transfer',
+          partialPayments: [
+            { amount: 500, date: '2026-01-10', method: 'transfer' },
+            { amount: 300, date: '2026-01-20', method: 'cash' },
+          ],
+        });
+
+        expect(order.partialPaymentAmount).toBe(800);
+      });
+
+      it('should derive partialPaymentDate as the latest date in the array', () => {
+        const order = new Order({
+          bakeryId: '1',
+          partialPayments: [
+            { amount: 500, date: '2026-01-10', method: 'transfer' },
+            { amount: 300, date: '2026-01-20', method: 'cash' },
+          ],
+        });
+
+        expect(order.partialPaymentDate).toEqual(new Date('2026-01-20T12:00:00Z'));
+      });
+
+      it('should convert date strings to Date objects on each entry', () => {
+        const order = new Order({
+          bakeryId: '1',
+          partialPayments: [{ amount: 500, date: '2026-01-10', method: 'transfer' }],
+        });
+
+        expect(order.partialPayments[0].date).toBeInstanceOf(Date);
+      });
+
+      it('should fall back to order paymentMethod when entry has no method', () => {
+        const order = new Order({
+          bakeryId: '1',
+          paymentMethod: 'cash',
+          partialPayments: [{ amount: 500, date: '2026-01-10' }],
+        });
+
+        expect(order.partialPayments[0].method).toBe('cash');
+      });
+
+      it('should ignore any passed partialPaymentAmount scalar — derived value always wins', () => {
+        const order = new Order({
+          bakeryId: '1',
+          partialPaymentAmount: 9999,
+          partialPayments: [{ amount: 500, date: '2026-01-10', method: 'transfer' }],
+        });
+
+        expect(order.partialPaymentAmount).toBe(500);
+      });
+    });
+
+    describe('legacy record normalization', () => {
+      it('should synthesize a single-entry array from old scalar fields when partialPayments is missing', () => {
+        const order = new Order({
+          bakeryId: '1',
+          paymentMethod: 'transfer',
+          partialPaymentAmount: 500,
+          partialPaymentDate: '2026-01-10',
+          // partialPayments not provided → null default → legacy path
+        });
+
+        expect(order.partialPayments).toHaveLength(1);
+        expect(order.partialPayments[0].amount).toBe(500);
+        expect(order.partialPayments[0].method).toBe('transfer');
+      });
+
+      it('should keep scalars correct after legacy normalization', () => {
+        const order = new Order({
+          bakeryId: '1',
+          paymentMethod: 'cash',
+          partialPaymentAmount: 750,
+          partialPaymentDate: '2026-02-15',
+        });
+
+        expect(order.partialPaymentAmount).toBe(750);
+        expect(order.partialPaymentDate).toEqual(new Date('2026-02-15T12:00:00Z'));
+      });
+
+      it('should not synthesize when old amount is 0 even if date is present', () => {
+        const order = new Order({
+          bakeryId: '1',
+          partialPaymentAmount: 0,
+          partialPaymentDate: '2026-01-10',
+        });
+
+        expect(order.partialPayments).toEqual([]);
+        expect(order.partialPaymentAmount).toBe(0);
+      });
+
+      it('should not synthesize when amount is set but date is missing', () => {
+        const order = new Order({
+          bakeryId: '1',
+          partialPaymentAmount: 500,
+          partialPaymentDate: null,
+        });
+
+        expect(order.partialPayments).toEqual([]);
+        expect(order.partialPaymentAmount).toBe(0);
+      });
+
+      it('should prefer explicit empty array over legacy scalar fields', () => {
+        const order = new Order({
+          bakeryId: '1',
+          partialPaymentAmount: 500,
+          partialPaymentDate: '2026-01-10',
+          partialPayments: [], // explicit clear wins
+        });
+
+        expect(order.partialPayments).toEqual([]);
+        expect(order.partialPaymentAmount).toBe(0);
+        expect(order.partialPaymentDate).toBeNull();
+      });
+    });
+
+    describe('toFirestore', () => {
+      it('should include partialPayments array in Firestore output', () => {
+        const order = new Order({
+          bakeryId: '1',
+          partialPayments: [{ amount: 500, date: '2026-01-10', method: 'transfer' }],
+        });
+
+        const data = order.toFirestore();
+        expect(data.partialPayments).toHaveLength(1);
+        expect(data.partialPayments[0].amount).toBe(500);
+      });
+
+      it('should include derived scalars in Firestore output', () => {
+        const order = new Order({
+          bakeryId: '1',
+          partialPayments: [
+            { amount: 400, date: '2026-01-10', method: 'transfer' },
+            { amount: 100, date: '2026-01-15', method: 'cash' },
+          ],
+        });
+
+        const data = order.toFirestore();
+        expect(data.partialPaymentAmount).toBe(500);
+      });
+    });
+  });
+
   describe('price calculations', () => {
     let order;
 

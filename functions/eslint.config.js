@@ -23,7 +23,6 @@ module.exports = [
       // Basic formatting
       'semi': ['error', 'always'],
       'indent': ['error', 2],
-      'quotes': ['error', 'single'],
       'comma-dangle': ['error', 'always-multiline'],
 
       // Spacing

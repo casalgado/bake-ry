@@ -28,42 +28,55 @@ class IngredientCategory {
 }
 
 class BakerySettings extends BaseModel {
-
   // Subscription constants
-  static SUBSCRIPTION_STATUSES = ['TRIAL', 'ACTIVE', 'CANCELLED', 'SUSPENDED', 'PAYMENT_FAILED'];
-  static SUBSCRIPTION_TIERS = ['ALWAYS_FREE', 'BASIC', 'PREMIUM'];
+  static SUBSCRIPTION_STATUSES = [
+    "TRIAL",
+    "ACTIVE",
+    "CANCELLED",
+    "SUSPENDED",
+    "PAYMENT_FAILED",
+  ];
+  static SUBSCRIPTION_TIERS = ["ALWAYS_FREE", "BASIC", "PREMIUM"];
   static SUBSCRIPTION_AMOUNT = 99000; // Monthly fee in COP
   static TRIAL_DAYS = 30;
   static GRACE_PERIOD_DAYS = 7;
   static DEFAULT_FEATURES = {
     order: {
-      activePaymentMethods: ['cash', 'transfer', 'complimentary'],
+      activePaymentMethods: ["cash", "transfer", "complimentary"],
       allowPartialPayment: false,
-      defaultDate: 'production', // options are production or delivery
+      defaultDate: "production", // options are production or delivery
       timeOfDay: false, // if time of day is asked for orders
       offlineMode: false,
     },
     reports: {
-      defaultReportFilter: 'dueDate',
+      defaultReportFilter: "dueDate",
       showMultipleReports: false,
     },
     invoicing: {
-      defaultTermsAndConditions: '',
+      defaultTermsAndConditions: "",
       showProductDescriptions: true,
       showTermsAndConditions: true,
-      taxMode: 'inclusive',
+      taxMode: "inclusive",
+    },
+    pos: {
+      enabled: false,
+      autoMarkPaid: false,
+      defaultToCurrentDate: false,
+      hideDeliveryOptions: false,
+      autoSelectClient: false, // Toggle for auto-selecting POS client
+      defaultClientId: null, // Will store auto-created "Punto de Venta" client ID
     },
   };
 
   static DEFAULT_BRANDING = {
     logos: {
-      original: '',
-      small: '',
-      medium: '',
-      large: '',
+      original: "",
+      small: "",
+      medium: "",
+      large: "",
     },
-    primaryColor: '',
-    secondaryColor: '',
+    primaryColor: "",
+    secondaryColor: "",
   };
 
   constructor({
@@ -87,8 +100,14 @@ class BakerySettings extends BaseModel {
 
     this.suggestedProductVariations = suggestedProductVariations;
     this.theme = theme;
-    this.features = this.mergeWithDefaults(features, BakerySettings.DEFAULT_FEATURES);
-    this.branding = this.mergeWithDefaults(branding, BakerySettings.DEFAULT_BRANDING);
+    this.features = this.mergeWithDefaults(
+      features,
+      BakerySettings.DEFAULT_FEATURES,
+    );
+    this.branding = this.mergeWithDefaults(
+      branding,
+      BakerySettings.DEFAULT_BRANDING,
+    );
 
     // Initialize subscription
     this.subscription = this.initializeSubscription(subscription);
@@ -104,7 +123,14 @@ class BakerySettings extends BaseModel {
     const merged = { ...defaults };
 
     for (const [key, value] of Object.entries(userFeatures)) {
-      if (value && typeof value === 'object' && !Array.isArray(value) && defaults[key] && typeof defaults[key] === 'object' && !Array.isArray(defaults[key])) {
+      if (
+        value &&
+        typeof value === "object" &&
+        !Array.isArray(value) &&
+        defaults[key] &&
+        typeof defaults[key] === "object" &&
+        !Array.isArray(defaults[key])
+      ) {
         merged[key] = { ...defaults[key], ...value };
       } else {
         merged[key] = value;
@@ -118,11 +144,11 @@ class BakerySettings extends BaseModel {
   initializeSubscription(subscription) {
     if (!subscription) {
       return {
-        status: 'TRIAL',
-        tier: 'BASIC',
+        status: "TRIAL",
+        tier: "BASIC",
         subscriptionStartDate: this.createdAt || new Date(),
         amount: BakerySettings.SUBSCRIPTION_AMOUNT,
-        currency: 'COP',
+        currency: "COP",
         savedCardId: null,
         recurringPaymentId: null,
         consecutiveFailures: 0,
@@ -133,16 +159,25 @@ class BakerySettings extends BaseModel {
 
     // Ensure required fields exist
     return {
-      status: subscription.status || 'TRIAL',
-      tier: subscription.tier || 'BASIC',
-      subscriptionStartDate: this.constructor.ensureDate(subscription.subscriptionStartDate) || this.createdAt || new Date(),
+      status: subscription.status || "TRIAL",
+      tier: subscription.tier || "BASIC",
+      subscriptionStartDate:
+        this.constructor.ensureDate(subscription.subscriptionStartDate) ||
+        this.createdAt ||
+        new Date(),
       amount: subscription.amount || BakerySettings.SUBSCRIPTION_AMOUNT,
-      currency: subscription.currency || 'COP',
+      currency: subscription.currency || "COP",
       savedCardId: subscription.savedCardId || null,
       recurringPaymentId: subscription.recurringPaymentId || null,
       consecutiveFailures: subscription.consecutiveFailures || 0,
-      createdAt: this.constructor.ensureDate(subscription.createdAt) || this.createdAt || new Date(),
-      updatedAt: this.constructor.ensureDate(subscription.updatedAt) || this.updatedAt || new Date(),
+      createdAt:
+        this.constructor.ensureDate(subscription.createdAt) ||
+        this.createdAt ||
+        new Date(),
+      updatedAt:
+        this.constructor.ensureDate(subscription.updatedAt) ||
+        this.updatedAt ||
+        new Date(),
     };
   }
 
@@ -156,7 +191,7 @@ class BakerySettings extends BaseModel {
 
   // Calculate next billing date
   getNextBillingDate() {
-    if (this.subscription?.tier === 'ALWAYS_FREE') return null;
+    if (this.subscription?.tier === "ALWAYS_FREE") return null;
     if (!this.subscription?.subscriptionStartDate) return null;
 
     const trialEnd = this.getTrialEndDate();
@@ -180,7 +215,7 @@ class BakerySettings extends BaseModel {
 
   // Calculate grace period end date (from the last billing attempt)
   getGracePeriodEndDate() {
-    if (this.subscription?.tier === 'ALWAYS_FREE') return null;
+    if (this.subscription?.tier === "ALWAYS_FREE") return null;
     if (!this.subscription?.subscriptionStartDate) return null;
 
     const trialEnd = this.getTrialEndDate();
@@ -193,7 +228,10 @@ class BakerySettings extends BaseModel {
 
     // Find the last billing date that has passed
     let lastBilling = new Date(trialEnd);
-    while (lastBilling.getMonth() < now.getMonth() || lastBilling.getFullYear() < now.getFullYear()) {
+    while (
+      lastBilling.getMonth() < now.getMonth() ||
+      lastBilling.getFullYear() < now.getFullYear()
+    ) {
       const nextMonth = new Date(lastBilling);
       nextMonth.setMonth(nextMonth.getMonth() + 1);
       if (nextMonth <= now) {
@@ -205,13 +243,15 @@ class BakerySettings extends BaseModel {
 
     // Grace period is 7 days after the last billing date
     const gracePeriodEnd = new Date(lastBilling);
-    gracePeriodEnd.setDate(gracePeriodEnd.getDate() + BakerySettings.GRACE_PERIOD_DAYS);
+    gracePeriodEnd.setDate(
+      gracePeriodEnd.getDate() + BakerySettings.GRACE_PERIOD_DAYS,
+    );
     return gracePeriodEnd;
   }
 
   // Check if subscription is in trial
   isInTrial() {
-    if (this.subscription?.tier === 'ALWAYS_FREE') return false;
+    if (this.subscription?.tier === "ALWAYS_FREE") return false;
     const trialEnd = this.getTrialEndDate();
     return trialEnd && new Date() < trialEnd;
   }
@@ -223,12 +263,12 @@ class BakerySettings extends BaseModel {
     const { status, tier } = this.subscription;
 
     // ALWAYS_FREE tier can always write
-    if (tier === 'ALWAYS_FREE') return true;
+    if (tier === "ALWAYS_FREE") return true;
 
     // Active subscriptions and trials can write
-    if (['TRIAL', 'ACTIVE', 'PAYMENT_FAILED'].includes(status)) {
+    if (["TRIAL", "ACTIVE", "PAYMENT_FAILED"].includes(status)) {
       // During grace period, allow writes even with PAYMENT_FAILED
-      if (status === 'PAYMENT_FAILED') {
+      if (status === "PAYMENT_FAILED") {
         const gracePeriodEnd = this.getGracePeriodEndDate();
         return gracePeriodEnd && new Date() < gracePeriodEnd;
       }
@@ -240,8 +280,12 @@ class BakerySettings extends BaseModel {
 
   // Check if subscription needs billing
   needsBilling() {
-    if (this.subscription?.tier === 'ALWAYS_FREE') return false;
-    if (this.subscription?.status !== 'ACTIVE' && this.subscription?.status !== 'TRIAL') return false;
+    if (this.subscription?.tier === "ALWAYS_FREE") return false;
+    if (
+      this.subscription?.status !== "ACTIVE" &&
+      this.subscription?.status !== "TRIAL"
+    )
+      return false;
 
     const trialEnd = this.getTrialEndDate();
     const now = new Date();
