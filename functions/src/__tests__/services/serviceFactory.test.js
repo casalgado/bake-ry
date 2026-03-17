@@ -166,6 +166,100 @@ describe('Base Service Tests', () => {
       expect(result.items).toHaveLength(1);
       expect(result.items[0].name).toBe('Active Doc');
     });
+
+    it('should exclude deleted documents by default', async () => {
+      // Create one active and one deleted document
+      const active = await baseService.create({ name: 'Active Doc' });
+      const deleted = await baseService.create({ name: 'Deleted Doc' });
+
+      // Soft delete one document
+      const editor = {
+        uid: 'test-user',
+        email: 'test@example.com',
+        role: 'admin',
+      };
+      await baseService.remove(deleted.id, null, editor);
+
+      const result = await baseService.getAll(null, {});
+
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].name).toBe('Active Doc');
+    });
+
+    it('should include deleted documents when includeDeleted is true', async () => {
+      // Create one active and one deleted document
+      const active = await baseService.create({ name: 'Active Doc' });
+      const deleted = await baseService.create({ name: 'Deleted Doc' });
+
+      // Soft delete one document
+      const editor = {
+        uid: 'test-user',
+        email: 'test@example.com',
+        role: 'admin',
+      };
+      await baseService.remove(deleted.id, null, editor);
+
+      const result = await baseService.getAll(null, {
+        includeDeleted: true,
+      });
+
+      expect(result.items).toHaveLength(2);
+      const names = result.items.map(item => item.name);
+      expect(names).toContain('Active Doc');
+      expect(names).toContain('Deleted Doc');
+    });
+
+    it('should include deleted documents when includeDeleted is in filters', async () => {
+      // Create one active and one deleted document
+      const active = await baseService.create({ name: 'Active Doc' });
+      const deleted = await baseService.create({ name: 'Deleted Doc' });
+
+      // Soft delete one document
+      const editor = {
+        uid: 'test-user',
+        email: 'test@example.com',
+        role: 'admin',
+      };
+      await baseService.remove(deleted.id, null, editor);
+
+      const result = await baseService.getAll(null, {
+        filters: { includeDeleted: true },
+      });
+
+      expect(result.items).toHaveLength(2);
+      const names = result.items.map(item => item.name);
+      expect(names).toContain('Active Doc');
+      expect(names).toContain('Deleted Doc');
+    });
+
+    it('should work with combined filters and includeDeleted', async () => {
+      // Create documents with different statuses, some deleted
+      const activeDoc = await baseService.create({ name: 'Active Doc', status: 'active' });
+      const inactiveDoc = await baseService.create({ name: 'Inactive Doc', status: 'inactive' });
+      const deletedActiveDoc = await baseService.create({ name: 'Deleted Active Doc', status: 'active' });
+
+      // Delete one active document
+      const editor = {
+        uid: 'test-user',
+        email: 'test@example.com',
+        role: 'admin',
+      };
+      await baseService.remove(deletedActiveDoc.id, null, editor);
+
+      // Query for active documents including deleted ones
+      const result = await baseService.getAll(null, {
+        filters: {
+          status: 'active',
+          includeDeleted: true
+        },
+      });
+
+      expect(result.items).toHaveLength(2);
+      const names = result.items.map(item => item.name);
+      expect(names).toContain('Active Doc');
+      expect(names).toContain('Deleted Active Doc');
+      expect(names).not.toContain('Inactive Doc');
+    });
   });
 
   describe('History Tracking', () => {

@@ -136,6 +136,7 @@ describe('BakerySettings - Feature Management', () => {
         defaultTermsAndConditions: '',
         showProductDescriptions: true,
         showTermsAndConditions: true,
+        taxMode: 'inclusive',
       });
     });
 
@@ -155,6 +156,150 @@ describe('BakerySettings - Feature Management', () => {
       expect(settings.features.invoicing.defaultTermsAndConditions).toBe('Custom terms text');
       expect(settings.features.invoicing.showProductDescriptions).toBe(false);
       expect(settings.features.invoicing.showTermsAndConditions).toBe(true); // Default value
+    });
+  });
+
+  describe('POS Features', () => {
+    it('should include default POS features', () => {
+      const settings = new BakerySettings({
+        bakeryId: 'test',
+      });
+
+      expect(settings.features.pos).toEqual({
+        enabled: false,
+        autoMarkPaid: false,
+        defaultToCurrentDate: false,
+        hideDeliveryOptions: false,
+        autoSelectClient: false,
+        defaultClientId: null,
+      });
+    });
+
+    it('should merge custom POS settings with defaults', () => {
+      const existingFeatures = {
+        pos: {
+          enabled: true,
+          autoMarkPaid: true,
+          defaultClientId: 'client-123',
+        },
+      };
+
+      const settings = new BakerySettings({
+        bakeryId: 'test',
+        features: existingFeatures,
+      });
+
+      expect(settings.features.pos.enabled).toBe(true);
+      expect(settings.features.pos.autoMarkPaid).toBe(true);
+      expect(settings.features.pos.defaultClientId).toBe('client-123');
+      // Default values preserved
+      expect(settings.features.pos.defaultToCurrentDate).toBe(false);
+      expect(settings.features.pos.hideDeliveryOptions).toBe(false);
+      expect(settings.features.pos.autoSelectClient).toBe(false);
+    });
+
+    it('should preserve POS boolean toggles correctly', () => {
+      const existingFeatures = {
+        pos: {
+          enabled: true,
+          autoMarkPaid: false,
+          defaultToCurrentDate: true,
+          hideDeliveryOptions: true,
+          autoSelectClient: false,
+        },
+      };
+
+      const settings = new BakerySettings({
+        bakeryId: 'test',
+        features: existingFeatures,
+      });
+
+      expect(settings.features.pos.enabled).toBe(true);
+      expect(settings.features.pos.autoMarkPaid).toBe(false);
+      expect(settings.features.pos.defaultToCurrentDate).toBe(true);
+      expect(settings.features.pos.hideDeliveryOptions).toBe(true);
+      expect(settings.features.pos.autoSelectClient).toBe(false);
+      expect(settings.features.pos.defaultClientId).toBe(null); // Default
+    });
+
+    it('should add POS features to existing settings missing this section', () => {
+      // Simulate old settings without POS features
+      const existingFeatures = {
+        order: {
+          activePaymentMethods: ['cash'],
+          allowPartialPayment: true,
+        },
+        reports: {
+          defaultReportFilter: 'dueDate',
+        },
+        invoicing: {
+          taxMode: 'exclusive',
+        },
+        // No POS section
+      };
+
+      const settings = new BakerySettings({
+        bakeryId: 'test',
+        features: existingFeatures,
+      });
+
+      // Should preserve existing features
+      expect(settings.features.order.allowPartialPayment).toBe(true);
+      expect(settings.features.reports.defaultReportFilter).toBe('dueDate');
+      expect(settings.features.invoicing.taxMode).toBe('exclusive');
+
+      // Should add default POS features
+      expect(settings.features.pos).toEqual({
+        enabled: false,
+        autoMarkPaid: false,
+        defaultToCurrentDate: false,
+        hideDeliveryOptions: false,
+        autoSelectClient: false,
+        defaultClientId: null,
+      });
+    });
+
+    it('should handle partial POS configuration', () => {
+      const existingFeatures = {
+        pos: {
+          enabled: true,
+          // Only some fields provided
+        },
+      };
+
+      const settings = new BakerySettings({
+        bakeryId: 'test',
+        features: existingFeatures,
+      });
+
+      expect(settings.features.pos.enabled).toBe(true);
+      // All others should use defaults
+      expect(settings.features.pos.autoMarkPaid).toBe(false);
+      expect(settings.features.pos.defaultToCurrentDate).toBe(false);
+      expect(settings.features.pos.hideDeliveryOptions).toBe(false);
+      expect(settings.features.pos.autoSelectClient).toBe(false);
+      expect(settings.features.pos.defaultClientId).toBe(null);
+    });
+
+    it('should include POS features in Firestore serialization', () => {
+      const settings = new BakerySettings({
+        bakeryId: 'test',
+        features: {
+          pos: {
+            enabled: true,
+            autoMarkPaid: true,
+            defaultClientId: 'client-456',
+          },
+        },
+      });
+
+      const firestoreData = settings.toFirestore();
+
+      expect(firestoreData.features.pos).toBeDefined();
+      expect(firestoreData.features.pos.enabled).toBe(true);
+      expect(firestoreData.features.pos.autoMarkPaid).toBe(true);
+      expect(firestoreData.features.pos.defaultClientId).toBe('client-456');
+      expect(firestoreData.features.pos.defaultToCurrentDate).toBe(false);
     });
   });
 });

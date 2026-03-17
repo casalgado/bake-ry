@@ -57,7 +57,8 @@
       "Bash(\"$BASE/bakeries/$BAKERY/orders\")",
       "Bash(__NEW_LINE__ echo \"=== Step 7: Verify migration ===\")",
       "Bash(ls:*)",
-      "WebSearch"
+      "WebSearch",
+      "WebFetch(domain:developers.payulatam.com)"
     ],
     "deny": []
   }

@@ -261,6 +261,7 @@ describe('Combination Model', () => {
         costPrice: 80,
         isWholeGrain: true,
         isActive: false,
+        accountingCode: '',
       });
     });
   });
@@ -286,6 +287,7 @@ describe('Combination Model', () => {
         costPrice: 0,
         isWholeGrain: false,
         isActive: true,
+        accountingCode: '',
       });
     });
   });

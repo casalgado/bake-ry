@@ -518,8 +518,8 @@ const createOrderService = () => {
 
       ordersSnapshot.forEach(doc => {
         const order = Order.fromFirestore(doc);
-        // Exclude complimentary orders from income statement
-        if (!order.isComplimentary) {
+        // Exclude complimentary orders and unpaid orders from income statement
+        if (!order.isComplimentary && order.isPaid) {
           orders.push(order);
         }
       });
@@ -719,7 +719,10 @@ const createOrderService = () => {
         const metrics = calculatePeriodMetrics(allOrders);
 
         return {
-          ...metrics,
+          revenue: metrics.revenue,
+          costs: metrics.costs,
+          grossProfit: metrics.grossProfit.total,
+          coverage: metrics.coverage,
           excludedProducts: Array.from(excludedProductsMap.values()),
         };
       }
