@@ -178,7 +178,11 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
 
           // Apply other filters to both queries
           Object.entries(filters).forEach(([key, value]) => {
-            if (key !== "paymentDateWithFallback" && value !== undefined) {
+            if (
+              key !== "paymentDateWithFallback" &&
+              key !== "includeDeleted" &&
+              value !== undefined
+            ) {
               paidOrdersQuery = paidOrdersQuery.where(key, "==", value);
               legacyOrdersQuery = legacyOrdersQuery.where(key, "==", value);
             }
@@ -278,6 +282,7 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
                 key !== "dateRange" &&
                 key !== "orDateRange" &&
                 key !== "paymentDateWithFallback" &&
+                key !== "includeDeleted" &&
                 value !== undefined
               ) {
                 fieldQuery = fieldQuery.where(key, "==", value);
@@ -344,6 +349,7 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
           if (
             key !== "dateRange" &&
             key !== "paymentDateWithFallback" &&
+            key !== "includeDeleted" &&
             value !== undefined
           ) {
             dbQuery = dbQuery.where(key, "==", value);
