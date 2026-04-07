@@ -1,11 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm test:*)",
-      "Bash(npm run test:silent:*)",
       "WebSearch",
       "WebFetch(domain:developers.payulatam.com)",
-      "Read(//c/Users/casal/documents/web/front/bake-ry-front/**)"
+      "Read(//c/Users/casal/documents/web/front/bake-ry-front/**)",
+      "Bash(npm test -- --testNamePattern=\"Part 4: Period Aggregation\")"
     ],
     "deny": []
   }

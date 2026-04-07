@@ -1,367 +1,682 @@
 // models/ProductReport.js
 //
+// NEW 3-Step Pipeline Architecture:
+// Step 1: flattenOrderItems - Convert complex order structure to simple flat array
+// Step 2: groupByPeriods - Group flattened data by time periods (if needed)
+// Step 3: transformToOutput - Aggregate and format based on options
+//
 // NOTE: item.subtotal is always post-tax (includes tax in both inclusive and exclusive tax modes).
-// Per-product revenue (totalIngresos) uses item.subtotal at face value (before order-level discounts).
-// totalDiscounts is provided in the summary to reconcile face-value totals with actual charged amounts.
 
 const { Order } = require('./Order');
+const { getDateInColombia } = require('../utils/dateUtils');
 
 class ProductReport {
   constructor(orders, b2b_clients, all_products, options = {}) {
-    this.options = {
-      categories: options.categories || null, // array of collectionIds or null for all
-      period: options.period || null, // 'daily', 'weekly', 'monthly' or null
-      metrics: options.metrics || 'both', // 'ingresos', 'cantidad', or 'both'
-      segment: options.segment || 'none', // 'none', 'all', 'b2b', 'b2c'
-      dateField: options.dateField || 'dueDate',
-      defaultDateRangeApplied: options.defaultDateRangeApplied || false,
-    };
+    // Validate required inputs
+    this.validateInputs(orders, b2b_clients, all_products);
+
+    // Validate and set options
+    this.options = this.validateOptions(options);
 
     // Convert orders to Order instances and filter out complimentary
     this.allOrders = orders.map(order => order instanceof Order ? order : new Order(order))
       .filter(order => !order.isComplimentary);
 
-    // Create B2B client ID set for segmentation
-    this.b2b_clientIds = new Set(b2b_clients.map(client => client.id));
+    // Store data for processing
+    this.b2b_clients = b2b_clients;
     this.all_products = all_products;
-
-    // Filter by categories if specified
-    this.categoryIds = this.options.categories
-      ? new Set(this.options.categories)
-      : null;
-
-    // Segment orders based on option
-    this.orders = this.filterOrdersBySegment(this.allOrders);
-
-    // Pre-calculate common metrics
-    this.totalDiscounts = this.orders.reduce((sum, order) => sum + (order.orderDiscountAmount || 0), 0);
-
-    // Pre-calculate aggregated data
-    this.aggregatedData = this.aggregateProductData();
-  }
-
-  filterOrdersBySegment(orders) {
-    const segment = this.options.segment;
-
-    if (segment === 'b2b') {
-      return orders.filter(order => this.b2b_clientIds.has(order.userId));
-    } else if (segment === 'b2c') {
-      return orders.filter(order => !this.b2b_clientIds.has(order.userId));
-    }
-    // 'none' or 'all' - use all orders
-    return orders;
   }
 
   generateReport() {
+    // Step 1: Flatten orders to granular level
+    const step1_flattened = this.flattenOrderItems(this.allOrders, this.b2b_clients);
+
+    // Step 2: Aggregate by combination - Group and aggregate with period calculations
+    const step2_aggregated = this.aggregateByCombination(step1_flattened);
+
+    // Step 3: Transform to final output - Apply all filtering and formatting
+    const step3_transformed = this.transformToOutput(step2_aggregated);
+
     return {
-      metadata: this.generateMetadata(),
-      products: this.generateProductTable(),
-      summary: this.generateSummary(),
+      metadata: {
+        ...this.generateMetadata(),
+        intermediateData: {
+          step1_flattened: step1_flattened,
+          step2_aggregated: step2_aggregated,
+          step3_transformed: step3_transformed,
+        },
+      },
+      products: step3_transformed,
+      summary: this.generateSummary(step3_transformed),
     };
   }
 
   generateMetadata() {
-    const dates = this.orders.map(order => new Date(order[this.options.dateField]));
+    const dates = this.allOrders.map(order => new Date(order[this.options.dateField]));
     const validDates = dates.filter(d => !isNaN(d.getTime()));
 
     return {
       options: this.options,
-      totalOrders: this.orders.length,
+      totalOrders: this.allOrders.length,
       dateRange: validDates.length > 0 ? {
         start: new Date(Math.min(...validDates)),
         end: new Date(Math.max(...validDates)),
       } : null,
-      totalProducts: this.aggregatedData.length,
+      totalProducts: 0, // TODO: Calculate from processed data
       currency: 'COP',
     };
   }
 
-  generateProductTable() {
-    const products = this.aggregatedData.map(product => {
-      const row = {
-        categoryId: product.categoryId,
-        categoryName: product.categoryName,
-        productId: product.productId,
-        productName: product.productName,
-        avgPrice: product.avgPrice,
-      };
+  validateInputs(orders, b2b_clients, all_products) {
+    if (orders === null || orders === undefined) {
+      throw new Error('Orders array is required');
+    }
+    if (!Array.isArray(orders)) {
+      throw new Error('Orders must be an array');
+    }
 
-      // Add metrics based on options
-      if (this.options.metrics === 'ingresos' || this.options.metrics === 'both') {
-        row.totalIngresos = product.totalIngresos;
-      }
-      if (this.options.metrics === 'cantidad' || this.options.metrics === 'both') {
-        row.totalCantidad = product.totalCantidad;
-      }
+    if (b2b_clients === null || b2b_clients === undefined) {
+      throw new Error('B2B clients array is required');
+    }
+    if (!Array.isArray(b2b_clients)) {
+      throw new Error('B2B clients must be an array');
+    }
 
-      // Add segment breakdown if segment is 'all'
-      if (this.options.segment === 'all') {
-        if (this.options.metrics === 'ingresos' || this.options.metrics === 'both') {
-          row.b2bIngresos = product.b2bIngresos;
-          row.b2cIngresos = product.b2cIngresos;
-        }
-        if (this.options.metrics === 'cantidad' || this.options.metrics === 'both') {
-          row.b2bCantidad = product.b2bCantidad;
-          row.b2cCantidad = product.b2cCantidad;
-        }
-      }
-
-      // Add period data if period is specified
-      if (this.options.period && product.periods) {
-        row.periods = {};
-        Object.keys(product.periods).sort().forEach(periodKey => {
-          row.periods[periodKey] = {};
-          if (this.options.metrics === 'ingresos' || this.options.metrics === 'both') {
-            row.periods[periodKey].ingresos = product.periods[periodKey].ingresos;
-          }
-          if (this.options.metrics === 'cantidad' || this.options.metrics === 'both') {
-            row.periods[periodKey].cantidad = product.periods[periodKey].cantidad;
-          }
-          // Add B2B/B2C breakdown per period when segment is 'all'
-          if (this.options.segment === 'all') {
-            if (this.options.metrics === 'ingresos' || this.options.metrics === 'both') {
-              row.periods[periodKey].b2bIngresos = product.periods[periodKey].b2bIngresos;
-              row.periods[periodKey].b2cIngresos = product.periods[periodKey].b2cIngresos;
-            }
-            if (this.options.metrics === 'cantidad' || this.options.metrics === 'both') {
-              row.periods[periodKey].b2bCantidad = product.periods[periodKey].b2bCantidad;
-              row.periods[periodKey].b2cCantidad = product.periods[periodKey].b2cCantidad;
-            }
-          }
-        });
-      }
-
-      return row;
-    });
-
-    // Sort by category name, then product name
-    return products.sort((a, b) => {
-      const catCompare = (a.categoryName || '').localeCompare(b.categoryName || '');
-      if (catCompare !== 0) return catCompare;
-      return (a.productName || '').localeCompare(b.productName || '');
-    });
+    if (all_products === null || all_products === undefined) {
+      throw new Error('Products array is required');
+    }
+    if (!Array.isArray(all_products)) {
+      throw new Error('Products must be an array');
+    }
   }
 
-  generateSummary() {
-    const totals = this.aggregatedData.reduce((acc, product) => {
-      acc.totalIngresos += product.totalIngresos;
-      acc.totalCantidad += product.totalCantidad;
-      if (this.options.segment === 'all') {
-        acc.b2bIngresos += product.b2bIngresos;
-        acc.b2bCantidad += product.b2bCantidad;
-        acc.b2cIngresos += product.b2cIngresos;
-        acc.b2cCantidad += product.b2cCantidad;
-      }
-      return acc;
-    }, {
-      totalIngresos: 0,
-      totalCantidad: 0,
-      b2bIngresos: 0,
-      b2bCantidad: 0,
-      b2cIngresos: 0,
-      b2cCantidad: 0,
-    });
-
-    // Calculate by category
-    const byCategory = {};
-    this.aggregatedData.forEach(product => {
-      const catId = product.categoryId || 'uncategorized';
-      if (!byCategory[catId]) {
-        byCategory[catId] = {
-          categoryId: catId,
-          categoryName: product.categoryName || 'Sin categoría',
-          totalIngresos: 0,
-          totalCantidad: 0,
-        };
-      }
-      byCategory[catId].totalIngresos += product.totalIngresos;
-      byCategory[catId].totalCantidad += product.totalCantidad;
-    });
-
-    const result = {
-      totals: {},
-      byCategory: Object.values(byCategory),
+  validateOptions(options) {
+    const validatedOptions = {
+      categories: options.categories || null,
+      detailLevel: options.detailLevel || 'product',
+      period: options.period || null,
+      metrics: options.metrics || 'both',
+      segment: options.segment || 'none',
+      dateField: options.dateField || 'dueDate',
+      defaultDateRangeApplied: options.defaultDateRangeApplied || false,
     };
 
-    if (this.options.metrics === 'ingresos' || this.options.metrics === 'both') {
-      result.totals.totalIngresos = totals.totalIngresos;
-      result.totals.totalDiscounts = this.totalDiscounts;
-    }
-    if (this.options.metrics === 'cantidad' || this.options.metrics === 'both') {
-      result.totals.totalCantidad = totals.totalCantidad;
+    // Validate detailLevel
+    if (!['product', 'combination'].includes(validatedOptions.detailLevel)) {
+      throw new Error('Invalid detailLevel: must be "product" or "combination"');
     }
 
-    if (this.options.segment === 'all') {
-      if (this.options.metrics === 'ingresos' || this.options.metrics === 'both') {
-        result.totals.b2bIngresos = totals.b2bIngresos;
-        result.totals.b2cIngresos = totals.b2cIngresos;
+    // Validate period
+    if (validatedOptions.period !== null && !['daily', 'weekly', 'monthly'].includes(validatedOptions.period)) {
+      throw new Error('Invalid period: must be null, "daily", "weekly", or "monthly"');
+    }
+
+    // Validate metrics
+    if (!['ingresos', 'cantidad', 'both'].includes(validatedOptions.metrics)) {
+      throw new Error('Invalid metrics: must be "ingresos", "cantidad", or "both"');
+    }
+
+    // Validate segment
+    if (!['none', 'all', 'b2b', 'b2c'].includes(validatedOptions.segment)) {
+      throw new Error('Invalid segment: must be "none", "all", "b2b", or "b2c"');
+    }
+
+    // Validate dateField
+    const validDateFields = ['dueDate', 'paymentDate', 'preparationDate', 'createdAt', 'updatedAt'];
+    if (!validDateFields.includes(validatedOptions.dateField)) {
+      throw new Error('Invalid dateField: must be a valid order date property');
+    }
+
+    // Validate categories
+    if (validatedOptions.categories !== null) {
+      if (!Array.isArray(validatedOptions.categories)) {
+        throw new Error('Invalid categories: must be an array or null');
       }
-      if (this.options.metrics === 'cantidad' || this.options.metrics === 'both') {
-        result.totals.b2bCantidad = totals.b2bCantidad;
-        result.totals.b2cCantidad = totals.b2cCantidad;
+      if (validatedOptions.categories.length === 0) {
+        throw new Error('Invalid categories: array cannot be empty');
       }
     }
 
-    return result;
+    return validatedOptions;
   }
 
-  aggregateProductData() {
-    const products = {};
-    const productsWithSales = new Set();
+  flattenOrderItems(orders, b2bClients) {
+    const b2bClientIds = new Set(b2bClients.map(client => client.id));
+    const flattenedItems = [];
 
-    // Determine which orders to use for B2B/B2C breakdown
-    const b2bOrders = this.allOrders.filter(order => this.b2b_clientIds.has(order.userId));
-    const b2cOrders = this.allOrders.filter(order => !this.b2b_clientIds.has(order.userId));
-
-    // First pass: aggregate sales data from orders
-    this.orders.forEach(order => {
-      const orderDate = new Date(order[this.options.dateField]);
-      const periodKey = this.options.period ? this.getPeriodKey(orderDate) : null;
-      const isB2B = this.b2b_clientIds.has(order.userId);
+    orders.forEach(order => {
+      const isB2B = b2bClientIds.has(order.userId);
+      const orderDate = order[this.options.dateField];
 
       order.orderItems
         .filter(item => !item.isComplimentary)
-        .filter(item => !this.categoryIds || this.categoryIds.has(item.collectionId))
         .forEach(item => {
-          productsWithSales.add(item.productId);
+          flattenedItems.push({
+            // Identifiers
+            orderId: order.id,
+            orderItemId: item.id,
 
-          if (!products[item.productId]) {
-            products[item.productId] = this.initializeProductEntry(item);
-          }
+            // Dimensions
+            productId: item.productId,
+            combinationId: item.combination?.id || null,
+            categoryId: item.collectionId,
+            date: getDateInColombia(orderDate),
+            isB2B: isB2B,
 
-          // Add to totals
-          products[item.productId].totalIngresos += item.subtotal;
-          products[item.productId].totalCantidad += item.quantity;
-          products[item.productId].totalPriceSum += item.currentPrice * item.quantity;
+            // Metrics
+            ingresos: item.subtotal,
+            cantidad: item.quantity,
+            currentPrice: item.currentPrice,
 
-          // Add to period if applicable
-          if (periodKey) {
-            if (!products[item.productId].periods[periodKey]) {
-              products[item.productId].periods[periodKey] = {
-                ingresos: 0,
-                cantidad: 0,
-                b2bIngresos: 0,
-                b2bCantidad: 0,
-                b2cIngresos: 0,
-                b2cCantidad: 0,
-              };
-            }
-            products[item.productId].periods[periodKey].ingresos += item.subtotal;
-            products[item.productId].periods[periodKey].cantidad += item.quantity;
-
-            // Track B2B/B2C per period
-            if (isB2B) {
-              products[item.productId].periods[periodKey].b2bIngresos += item.subtotal;
-              products[item.productId].periods[periodKey].b2bCantidad += item.quantity;
-            } else {
-              products[item.productId].periods[periodKey].b2cIngresos += item.subtotal;
-              products[item.productId].periods[periodKey].b2cCantidad += item.quantity;
-            }
-          }
-
-          // Track B2B/B2C totals
-          if (isB2B) {
-            products[item.productId].b2bIngresos += item.subtotal;
-            products[item.productId].b2bCantidad += item.quantity;
-          } else {
-            products[item.productId].b2cIngresos += item.subtotal;
-            products[item.productId].b2cCantidad += item.quantity;
-          }
+            // Metadata
+            productName: item.productName,
+            categoryName: item.collectionName,
+            combinationName: item.combination?.name || null,
+          });
         });
     });
 
-    // Third pass: add products with zero sales (active or deleted with sales)
-    this.all_products
-      .filter(product => !product.isDeleted || productsWithSales.has(product.id))
-      .filter(product => !this.categoryIds || this.categoryIds.has(product.collectionId))
-      .forEach(product => {
-        if (!products[product.id]) {
-          products[product.id] = {
-            productId: product.id,
-            productName: product.name,
-            categoryId: product.collectionId,
-            categoryName: product.collectionName,
-            totalIngresos: 0,
-            totalCantidad: 0,
-            totalPriceSum: 0,
-            b2bIngresos: 0,
-            b2bCantidad: 0,
-            b2cIngresos: 0,
-            b2cCantidad: 0,
-            periods: {},
-          };
-        }
-      });
+    return flattenedItems;
+  }
 
-    // Calculate average price and finalize
-    return Object.values(products).map(product => {
-      // Get the most up-to-date name from all_products if available
-      const productInfo = this.all_products.find(p => p.id === product.productId);
-      return {
-        ...product,
-        productName: productInfo?.name || product.productName,
-        categoryName: productInfo?.collectionName || product.categoryName,
-        avgPrice: product.totalCantidad > 0
-          ? product.totalPriceSum / product.totalCantidad
-          : 0,
+  aggregateByCombination(flatData) {
+    // Group by combination key: productId + combinationId
+    const groups = {};
+
+    flatData.forEach(item => {
+      const key = `${item.productId}_${item.combinationId || 'base'}`;
+
+      if (!groups[key]) {
+        groups[key] = {
+          productId: item.productId,
+          combinationId: item.combinationId,
+          productName: item.productName,
+          combinationName: item.combinationName,
+          categoryId: item.categoryId,
+          categoryName: item.categoryName,
+          items: [],
+        };
+      }
+
+      groups[key].items.push(item);
+    });
+
+    // Calculate aggregate metrics for each group
+    return Object.values(groups).map(group => {
+      const metrics = this.calculateAggregateMetrics(group.items);
+      const periods = this.calculatePeriodMetrics(group.items);
+
+      const result = {
+        ...group,
+        ...metrics,
       };
+
+      // Only add periods if period option is set
+      if (periods) {
+        result.periods = periods;
+      }
+
+      return result;
     });
   }
 
-  initializeProductEntry(item) {
+  calculateAggregateMetrics(items) {
+    let ingresos = 0;
+    let cantidad = 0;
+    let b2bIngresos = 0;
+    let b2cIngresos = 0;
+    let b2bCantidad = 0;
+    let b2cCantidad = 0;
+
+    items.forEach(item => {
+      ingresos += item.ingresos;
+      cantidad += item.cantidad;
+
+      if (item.isB2B) {
+        b2bIngresos += item.ingresos;
+        b2bCantidad += item.cantidad;
+      } else {
+        b2cIngresos += item.ingresos;
+        b2cCantidad += item.cantidad;
+      }
+    });
+
     return {
-      productId: item.productId,
-      productName: item.productName,
-      categoryId: item.collectionId,
-      categoryName: item.collectionName,
-      totalIngresos: 0,
-      totalCantidad: 0,
-      totalPriceSum: 0,
-      b2bIngresos: 0,
-      b2bCantidad: 0,
-      b2cIngresos: 0,
-      b2cCantidad: 0,
-      periods: {},
+      ingresos,
+      cantidad,
+      b2bIngresos,
+      b2cIngresos,
+      b2bCantidad,
+      b2cCantidad,
     };
   }
 
-  getPeriodKey(date) {
-    if (!date || isNaN(date.getTime())) return null;
+  generatePeriodKey(dateString) {
+    if (!this.options.period) return null;
+
+    const date = new Date(dateString + 'T12:00:00Z'); // Noon UTC to avoid timezone issues
 
     switch (this.options.period) {
     case 'daily':
-      return date.toISOString().split('T')[0];
-    case 'weekly':
-      return this.getWeekRange(date);
+      return dateString;
+
+    case 'weekly': {
+      // Find Monday of the week (Monday = 1, Sunday = 0)
+      const dayOfWeek = date.getUTCDay();
+      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Sunday is 0, so offset is -6
+
+      const monday = new Date(date);
+      monday.setUTCDate(date.getUTCDate() + mondayOffset);
+
+      const sunday = new Date(monday);
+      sunday.setUTCDate(monday.getUTCDate() + 6);
+
+      return `${monday.getUTCFullYear()}-${String(monday.getUTCMonth() + 1).padStart(2, '0')}-${String(monday.getUTCDate()).padStart(2, '0')}/${sunday.getUTCFullYear()}-${String(sunday.getUTCMonth() + 1).padStart(2, '0')}-${String(sunday.getUTCDate()).padStart(2, '0')}`;
+    }
+
     case 'monthly':
-      return this.getMonthKey(date);
+      return dateString.substring(0, 7); // "2026-03-21" -> "2026-03"
+
     default:
       return null;
     }
   }
 
-  getWeekRange(date) {
-    const current = new Date(date);
-    current.setHours(0, 0, 0, 0);
+  calculatePeriodMetrics(items) {
+    if (!this.options.period) return null;
 
-    const day = current.getDay() || 7;
+    const periodGroups = {};
 
-    const monday = new Date(current);
-    monday.setDate(current.getDate() - (day - 1));
+    items.forEach(item => {
+      const periodKey = this.generatePeriodKey(item.date);
 
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
+      if (!periodGroups[periodKey]) {
+        periodGroups[periodKey] = [];
+      }
 
-    const mondayStr = monday.toISOString().split('T')[0];
-    const sundayStr = sunday.toISOString().split('T')[0];
+      periodGroups[periodKey].push(item);
+    });
 
-    return `${mondayStr}/${sundayStr}`;
+    // Calculate metrics for each period
+    const periods = {};
+    Object.entries(periodGroups).forEach(([periodKey, periodItems]) => {
+      periods[periodKey] = this.calculateAggregateMetrics(periodItems);
+    });
+
+    return periods;
   }
 
-  getMonthKey(date) {
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    return `${year}-${month}`;
+  // Individual methods for testing specific behaviors
+  applySegmentFilteringToItem(item) {
+    // Deep copy to avoid mutating original data
+    const transformed = JSON.parse(JSON.stringify(item));
+    this.applySegmentFiltering(transformed);
+    return transformed;
+  }
+
+  applyMetricsFilteringToItem(item) {
+    // Deep copy to avoid mutating original data
+    const transformed = JSON.parse(JSON.stringify(item));
+    this.applyMetricsFiltering(transformed);
+    return transformed;
+  }
+
+  applyDetailLevelGroupingToItems(items) {
+    return this.applyDetailLevelGrouping(items);
+  }
+
+  applyCategoryFilteringToItems(items) {
+    return this.applyCategoryFiltering(items);
+  }
+
+  applyFinalFormattingToItems(items) {
+    return this.applyFinalFormatting(items);
+  }
+
+  // Full pipeline for production use
+  transformToOutput(combinationData) {
+    let result = combinationData.map(item => {
+      // Deep copy to avoid mutating original data
+      const transformed = JSON.parse(JSON.stringify(item));
+
+      // Apply segment filtering
+      this.applySegmentFiltering(transformed);
+
+      // Apply metrics filtering
+      this.applyMetricsFiltering(transformed);
+
+      return transformed;
+    });
+
+    // Apply detail level grouping
+    result = this.applyDetailLevelGrouping(result);
+
+    // Apply category filtering
+    result = this.applyCategoryFiltering(result);
+
+    // Apply final formatting
+    result = this.applyFinalFormatting(result);
+
+    return result;
+  }
+
+  applySegmentFiltering(item) {
+    switch (this.options.segment) {
+    case 'none':
+      // Keep only total metrics, remove segment breakdown
+      delete item.b2bIngresos;
+      delete item.b2cIngresos;
+      delete item.b2bCantidad;
+      delete item.b2cCantidad;
+
+      // Apply to periods as well
+      if (item.periods) {
+        Object.values(item.periods).forEach(period => {
+          delete period.b2bIngresos;
+          delete period.b2cIngresos;
+          delete period.b2bCantidad;
+          delete period.b2cCantidad;
+        });
+      }
+      break;
+
+    case 'all':
+      // Keep everything (totals + segment breakdown)
+      break;
+
+    case 'b2b':
+      // Replace totals with B2B values, remove segment properties
+      item.ingresos = item.b2bIngresos;
+      item.cantidad = item.b2bCantidad;
+      delete item.b2bIngresos;
+      delete item.b2cIngresos;
+      delete item.b2bCantidad;
+      delete item.b2cCantidad;
+
+      // Apply to periods
+      if (item.periods) {
+        Object.values(item.periods).forEach(period => {
+          period.ingresos = period.b2bIngresos || 0;
+          period.cantidad = period.b2bCantidad || 0;
+          delete period.b2bIngresos;
+          delete period.b2cIngresos;
+          delete period.b2bCantidad;
+          delete period.b2cCantidad;
+        });
+      }
+      break;
+
+    case 'b2c':
+      // Replace totals with B2C values, remove segment properties
+      item.ingresos = item.b2cIngresos;
+      item.cantidad = item.b2cCantidad;
+      delete item.b2bIngresos;
+      delete item.b2cIngresos;
+      delete item.b2bCantidad;
+      delete item.b2cCantidad;
+
+      // Apply to periods
+      if (item.periods) {
+        Object.values(item.periods).forEach(period => {
+          period.ingresos = period.b2cIngresos || 0;
+          period.cantidad = period.b2cCantidad || 0;
+          delete period.b2bIngresos;
+          delete period.b2cIngresos;
+          delete period.b2bCantidad;
+          delete period.b2cCantidad;
+        });
+      }
+      break;
+    }
+  }
+
+  applyMetricsFiltering(item) {
+    switch (this.options.metrics) {
+    case 'ingresos':
+      // Keep only revenue fields (remove quantity fields if they exist)
+      if (Object.prototype.hasOwnProperty.call(item, 'cantidad')) delete item.cantidad;
+      if (Object.prototype.hasOwnProperty.call(item, 'b2bCantidad')) delete item.b2bCantidad;
+      if (Object.prototype.hasOwnProperty.call(item, 'b2cCantidad')) delete item.b2cCantidad;
+
+      // Apply to periods
+      if (item.periods) {
+        Object.values(item.periods).forEach(period => {
+          if (Object.prototype.hasOwnProperty.call(period, 'cantidad')) delete period.cantidad;
+          if (Object.prototype.hasOwnProperty.call(period, 'b2bCantidad')) delete period.b2bCantidad;
+          if (Object.prototype.hasOwnProperty.call(period, 'b2cCantidad')) delete period.b2cCantidad;
+        });
+      }
+      break;
+
+    case 'cantidad':
+      // Keep only quantity fields (remove revenue fields if they exist)
+      if (Object.prototype.hasOwnProperty.call(item, 'ingresos')) delete item.ingresos;
+      if (Object.prototype.hasOwnProperty.call(item, 'b2bIngresos')) delete item.b2bIngresos;
+      if (Object.prototype.hasOwnProperty.call(item, 'b2cIngresos')) delete item.b2cIngresos;
+
+      // Apply to periods
+      if (item.periods) {
+        Object.values(item.periods).forEach(period => {
+          if (Object.prototype.hasOwnProperty.call(period, 'ingresos')) delete period.ingresos;
+          if (Object.prototype.hasOwnProperty.call(period, 'b2bIngresos')) delete period.b2bIngresos;
+          if (Object.prototype.hasOwnProperty.call(period, 'b2cIngresos')) delete period.b2cIngresos;
+        });
+      }
+      break;
+
+    case 'both':
+      // Keep everything
+      break;
+    }
+  }
+
+  applyDetailLevelGrouping(items) {
+    if (this.options.detailLevel === 'combination') {
+      // Keep as-is, return all combinations
+      return items;
+    }
+
+    // Group by productId for product-level aggregation
+    const productGroups = {};
+
+    items.forEach(item => {
+      const productId = item.productId;
+
+      if (!productGroups[productId]) {
+        productGroups[productId] = {
+          productId: item.productId,
+          combinationId: null,
+          productName: item.productName,
+          combinationName: null,
+          categoryId: item.categoryId,
+          categoryName: item.categoryName,
+          items: [],
+        };
+      }
+
+      productGroups[productId].items.push(item);
+    });
+
+    // Aggregate each product group
+    return Object.values(productGroups).map(group => {
+      const aggregated = this.aggregateProductItems(group.items);
+
+      return {
+        ...group,
+        ...aggregated,
+      };
+    });
+  }
+
+  aggregateProductItems(items) {
+    // Check which fields exist in the first item to determine what to aggregate
+    const firstItem = items[0];
+
+    // Aggregate total metrics
+    let ingresos = 0;
+    let cantidad = 0;
+    let b2bIngresos = 0;
+    let b2cIngresos = 0;
+    let b2bCantidad = 0;
+    let b2cCantidad = 0;
+
+    items.forEach(item => {
+      if (Object.prototype.hasOwnProperty.call(item, 'ingresos')) ingresos += item.ingresos || 0;
+      if (Object.prototype.hasOwnProperty.call(item, 'cantidad')) cantidad += item.cantidad || 0;
+      if (Object.prototype.hasOwnProperty.call(item, 'b2bIngresos')) b2bIngresos += item.b2bIngresos || 0;
+      if (Object.prototype.hasOwnProperty.call(item, 'b2cIngresos')) b2cIngresos += item.b2cIngresos || 0;
+      if (Object.prototype.hasOwnProperty.call(item, 'b2bCantidad')) b2bCantidad += item.b2bCantidad || 0;
+      if (Object.prototype.hasOwnProperty.call(item, 'b2cCantidad')) b2cCantidad += item.b2cCantidad || 0;
+    });
+
+    const result = {};
+
+    // Only include fields that exist in the source items
+    if (Object.prototype.hasOwnProperty.call(firstItem, 'ingresos')) result.ingresos = ingresos;
+    if (Object.prototype.hasOwnProperty.call(firstItem, 'cantidad')) result.cantidad = cantidad;
+    if (Object.prototype.hasOwnProperty.call(firstItem, 'b2bIngresos')) result.b2bIngresos = b2bIngresos;
+    if (Object.prototype.hasOwnProperty.call(firstItem, 'b2cIngresos')) result.b2cIngresos = b2cIngresos;
+    if (Object.prototype.hasOwnProperty.call(firstItem, 'b2bCantidad')) result.b2bCantidad = b2bCantidad;
+    if (Object.prototype.hasOwnProperty.call(firstItem, 'b2cCantidad')) result.b2cCantidad = b2cCantidad;
+
+    // Aggregate periods if they exist
+    const periodKeys = new Set();
+    items.forEach(item => {
+      if (item.periods) {
+        Object.keys(item.periods).forEach(key => periodKeys.add(key));
+      }
+    });
+
+    // Always include periods field (even if empty)
+    result.periods = {};
+
+    if (periodKeys.size > 0) {
+      periodKeys.forEach(periodKey => {
+        let periodIngresos = 0;
+        let periodCantidad = 0;
+        let periodB2bIngresos = 0;
+        let periodB2cIngresos = 0;
+        let periodB2bCantidad = 0;
+        let periodB2cCantidad = 0;
+
+        items.forEach(item => {
+          if (item.periods && item.periods[periodKey]) {
+            const period = item.periods[periodKey];
+            periodIngresos += period.ingresos || 0;
+            periodCantidad += period.cantidad || 0;
+            periodB2bIngresos += period.b2bIngresos || 0;
+            periodB2cIngresos += period.b2cIngresos || 0;
+            periodB2bCantidad += period.b2bCantidad || 0;
+            periodB2cCantidad += period.b2cCantidad || 0;
+          }
+        });
+
+        const periodResult = {};
+
+        // Only include period fields that exist in the source items
+        if (Object.prototype.hasOwnProperty.call(firstItem, 'ingresos')) periodResult.ingresos = periodIngresos;
+        if (Object.prototype.hasOwnProperty.call(firstItem, 'cantidad')) periodResult.cantidad = periodCantidad;
+        if (Object.prototype.hasOwnProperty.call(firstItem, 'b2bIngresos')) periodResult.b2bIngresos = periodB2bIngresos;
+        if (Object.prototype.hasOwnProperty.call(firstItem, 'b2cIngresos')) periodResult.b2cIngresos = periodB2cIngresos;
+        if (Object.prototype.hasOwnProperty.call(firstItem, 'b2bCantidad')) periodResult.b2bCantidad = periodB2bCantidad;
+        if (Object.prototype.hasOwnProperty.call(firstItem, 'b2cCantidad')) periodResult.b2cCantidad = periodB2cCantidad;
+
+        result.periods[periodKey] = periodResult;
+      });
+    }
+
+    return result;
+  }
+
+  applyCategoryFiltering(items) {
+    // If no category filter specified, return all items
+    if (!this.options.categories || this.options.categories.length === 0) {
+      return items;
+    }
+
+    // Filter items where categoryId is in the categories array
+    return items.filter(item => this.options.categories.includes(item.categoryId));
+  }
+
+  applyFinalFormatting(items) {
+    // Apply final transformations to match API response structure
+    const formatted = items.map(item => {
+      const result = { ...item };
+
+      // Calculate avgPrice (avoid division by zero)
+      const totalRevenue = result.ingresos || 0;
+      const totalQuantity = result.cantidad || 0;
+      result.avgPrice = totalQuantity > 0 ? totalRevenue / totalQuantity : 0;
+
+      // Rename fields to match API response
+      result.totalIngresos = result.ingresos;
+      result.totalCantidad = result.cantidad;
+      delete result.ingresos;
+      delete result.cantidad;
+
+      // Preserve periods structure (don't rename fields inside periods)
+      // Periods already have correct ingresos/cantidad field names
+
+      return result;
+    });
+
+    // Sort by totalIngresos descending
+    formatted.sort((a, b) => (b.totalIngresos || 0) - (a.totalIngresos || 0));
+
+    return formatted;
+  }
+
+  generateSummary(products) {
+    const totals = {
+      totalIngresos: 0,
+      totalCantidad: 0,
+    };
+
+    const categoryTotals = {};
+
+    products.forEach(product => {
+      const ingresos = product.totalIngresos || 0;
+      const cantidad = product.totalCantidad || 0;
+
+      // Add to overall totals
+      totals.totalIngresos += ingresos;
+      totals.totalCantidad += cantidad;
+
+      // Add B2B/B2C breakdowns if they exist
+      if (Object.prototype.hasOwnProperty.call(product, 'b2bIngresos')) {
+        if (!Object.prototype.hasOwnProperty.call(totals, 'b2bIngresos')) {
+          totals.b2bIngresos = 0;
+          totals.b2cIngresos = 0;
+          totals.b2bCantidad = 0;
+          totals.b2cCantidad = 0;
+        }
+        totals.b2bIngresos += product.b2bIngresos || 0;
+        totals.b2cIngresos += product.b2cIngresos || 0;
+        totals.b2bCantidad += product.b2bCantidad || 0;
+        totals.b2cCantidad += product.b2cCantidad || 0;
+      }
+
+      // Aggregate by category
+      const categoryId = product.categoryId;
+      const categoryName = product.categoryName;
+
+      if (!categoryTotals[categoryId]) {
+        categoryTotals[categoryId] = {
+          categoryId,
+          categoryName,
+          totalIngresos: 0,
+          totalCantidad: 0,
+        };
+      }
+
+      categoryTotals[categoryId].totalIngresos += ingresos;
+      categoryTotals[categoryId].totalCantidad += cantidad;
+    });
+
+    return {
+      totals,
+      byCategory: Object.values(categoryTotals),
+    };
   }
 }
 

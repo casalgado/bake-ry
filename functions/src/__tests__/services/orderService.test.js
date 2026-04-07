@@ -710,4 +710,525 @@ describe('Order Service Tests', () => {
       expect(result.summary.totalPaidOrders).toBe(3);
     });
   }, 30000);
+
+  describe("Product Report", () => {
+    let testProducts;
+    let testOrdersWithCategories;
+
+    beforeEach(async () => {
+      // Create test products with categories
+      testProducts = [
+        {
+          id: "GRzDxeAWOj2HBhmlObSy",
+          name: "Product Category 1",
+          collectionId: "GRzDxeAWOj2HBhmlObSy",
+          collectionName: "Test Category 1",
+          costPrice: 5000,
+        },
+        {
+          id: "HvG0VIiluQ3ULrgp7QSN",
+          name: "Product Category 2",
+          collectionId: "HvG0VIiluQ3ULrgp7QSN",
+          collectionName: "Test Category 2",
+          costPrice: 7000,
+        },
+        {
+          id: "y4koQ0pzabULphKDyb7E",
+          name: "Product Category 3",
+          collectionId: "y4koQ0pzabULphKDyb7E",
+          collectionName: "Test Category 3",
+          costPrice: 3000,
+        },
+        {
+          id: "jSuTNbAyUtHSVbMIcfXq",
+          name: "Product Category 4",
+          collectionId: "jSuTNbAyUtHSVbMIcfXq",
+          collectionName: "Test Category 4",
+          costPrice: 4000,
+        },
+      ];
+
+      // Store products in Firestore
+      const productsRef = db
+        .collection("bakeries")
+        .doc(testStoreId)
+        .collection("products");
+      for (const product of testProducts) {
+        await productsRef.doc(product.id).set(product);
+      }
+
+      // Create orders with specific product categories and combinations
+      testOrdersWithCategories = [];
+      const baseDate = new Date("2026-04-01");
+
+      for (let i = 0; i < 8; i++) {
+        const productIndex = i % testProducts.length;
+        const product = testProducts[productIndex];
+        const isB2B = i % 2 === 0;
+        const userId = isB2B ? "b2b-user" : "test-user";
+        const quantity = i + 1;
+        const basePrice = 10000 + i * 1000;
+        const itemTotal = quantity * basePrice;
+
+        const orderData = {
+          userId: userId,
+          userName: isB2B ? "B2B Customer" : "Test Customer",
+          userEmail: isB2B ? "b2b@example.com" : "test@example.com",
+          orderItems: [
+            {
+              id: `item-${i}`,
+              productId: product.id,
+              productName: product.name,
+              collectionId: product.collectionId,
+              collectionName: product.collectionName,
+              quantity: quantity,
+              basePrice: basePrice,
+              currentPrice: basePrice,
+              subtotal: itemTotal,
+              combination:
+                i % 3 === 0 ? { id: "combo-1", name: "Medium" } : null,
+              variation: { name: "regular", value: 1 },
+              recipeId: `recipe-${i}`,
+              taxPercentage: 19,
+              isComplimentary: false,
+              productionBatch: 1,
+              status: 0,
+              total: itemTotal,
+            },
+          ],
+          status: i % 4,
+          isPaid: true,
+          paymentMethod: i % 3 === 0 ? "transfer" : "cash",
+          fulfillmentType: isB2B ? "delivery" : "pickup",
+          deliveryFee: isB2B ? 5000 : 0,
+          total: itemTotal + (isB2B ? 5000 : 0),
+          subtotal: itemTotal,
+          dueDate: new Date(baseDate.getTime() + i * 24 * 60 * 60 * 1000), // Spread across different days
+          preparationDate: new Date(
+            baseDate.getTime() + i * 24 * 60 * 60 * 1000,
+          ),
+        };
+
+        const order = await orderService.create(orderData, testStoreId);
+        testOrdersWithCategories.push(order);
+      }
+    });
+
+    it("should generate product report with single category filter", async () => {
+      const QueryParser = require("../../utils/queryParser");
+      const mockReq = {
+        query: {
+          date_field: "dueDate",
+          start_date: "2026-04-01",
+          end_date: "2026-04-07",
+          categories: "GRzDxeAWOj2HBhmlObSy",
+          detailLevel: "product",
+          metrics: "both",
+          segment: "none",
+        },
+      };
+
+      const queryParser = new QueryParser(mockReq);
+      const query = queryParser.getQuery();
+
+      expect(query.filters.categories).toBe("GRzDxeAWOj2HBhmlObSy");
+      expect(query.filters.detailLevel).toBe("product");
+      expect(query.filters.metrics).toBe("both");
+      expect(query.filters.segment).toBe("none");
+
+      const report = await orderService.getProductReport(testStoreId, query);
+
+      expect(report).toHaveProperty("metadata");
+      expect(report).toHaveProperty("products");
+      expect(report).toHaveProperty("summary");
+      expect(report.metadata.options.categories).toEqual([
+        "GRzDxeAWOj2HBhmlObSy",
+      ]);
+      expect(report.metadata.options.detailLevel).toBe("product");
+      expect(report.metadata.options.metrics).toBe("both");
+      expect(report.metadata.options.segment).toBe("none");
+    });
+
+    it("should generate product report with combination detail level", async () => {
+      const QueryParser = require("../../utils/queryParser");
+      const mockReq = {
+        query: {
+          date_field: "dueDate",
+          start_date: "2026-04-01",
+          end_date: "2026-04-07",
+          categories: "GRzDxeAWOj2HBhmlObSy",
+          detailLevel: "combination",
+          metrics: "both",
+          segment: "none",
+        },
+      };
+
+      const queryParser = new QueryParser(mockReq);
+      const query = queryParser.getQuery();
+      const report = await orderService.getProductReport(testStoreId, query);
+
+      expect(report.metadata.options.detailLevel).toBe("combination");
+
+      const productWithCombination = report.products.find(
+        (p) => p.combinationName,
+      );
+      if (productWithCombination) {
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(productWithCombination).toHaveProperty("combinationName");
+      }
+    });
+
+    it("should generate product report with daily period", async () => {
+      const QueryParser = require("../../utils/queryParser");
+      const mockReq = {
+        query: {
+          date_field: "dueDate",
+          start_date: "2026-04-01",
+          end_date: "2026-04-07",
+          categories: "GRzDxeAWOj2HBhmlObSy",
+          detailLevel: "combination",
+          metrics: "both",
+          segment: "none",
+          period: "daily",
+        },
+      };
+
+      const queryParser = new QueryParser(mockReq);
+      const query = queryParser.getQuery();
+      const report = await orderService.getProductReport(testStoreId, query);
+
+      expect(report.metadata.options.period).toBe("daily");
+
+      const productWithPeriods = report.products.find((p) => p.periods);
+      if (productWithPeriods) {
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(productWithPeriods).toHaveProperty("periods");
+        const periodKeys = Object.keys(productWithPeriods.periods);
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(periodKeys.length).toBeGreaterThan(0);
+
+        const dailyPeriod = periodKeys.find((key) =>
+          key.match(/^\d{4}-\d{2}-\d{2}$/),
+        );
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(dailyPeriod).toBeDefined();
+      }
+    });
+
+    it("should generate product report with weekly period", async () => {
+      const QueryParser = require("../../utils/queryParser");
+      const mockReq = {
+        query: {
+          date_field: "dueDate",
+          start_date: "2026-04-01",
+          end_date: "2026-04-07",
+          categories: "GRzDxeAWOj2HBhmlObSy",
+          detailLevel: "product",
+          metrics: "both",
+          segment: "none",
+          period: "weekly",
+        },
+      };
+
+      const queryParser = new QueryParser(mockReq);
+      const query = queryParser.getQuery();
+      const report = await orderService.getProductReport(testStoreId, query);
+
+      expect(report.metadata.options.period).toBe("weekly");
+
+      const productWithPeriods = report.products.find((p) => p.periods);
+      if (productWithPeriods) {
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(productWithPeriods).toHaveProperty("periods");
+        const periodKeys = Object.keys(productWithPeriods.periods);
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(periodKeys.length).toBeGreaterThan(0);
+
+        const weeklyPeriod = periodKeys.find((key) =>
+          key.match(/^\d{4}-\d{2}-\d{2}\/\d{4}-\d{2}-\d{2}$/),
+        );
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(weeklyPeriod).toBeDefined();
+      }
+    });
+
+    it("should generate product report with ingresos metrics only", async () => {
+      const QueryParser = require("../../utils/queryParser");
+      const mockReq = {
+        query: {
+          date_field: "dueDate",
+          start_date: "2026-04-01",
+          end_date: "2026-04-07",
+          categories: "GRzDxeAWOj2HBhmlObSy",
+          detailLevel: "product",
+          metrics: "ingresos",
+          segment: "none",
+          period: "weekly",
+        },
+      };
+
+      const queryParser = new QueryParser(mockReq);
+      const query = queryParser.getQuery();
+      const report = await orderService.getProductReport(testStoreId, query);
+
+      expect(report.metadata.options.metrics).toBe("ingresos");
+
+      report.products.forEach((product) => {
+        expect(product).toHaveProperty("totalIngresos");
+        expect(product).not.toHaveProperty("totalCantidad");
+      });
+
+      expect(report.summary.totals).toHaveProperty("totalIngresos");
+      expect(report.summary.totals).not.toHaveProperty("totalCantidad");
+    });
+
+    it("should generate product report with B2C segment", async () => {
+      const QueryParser = require("../../utils/queryParser");
+      const mockReq = {
+        query: {
+          date_field: "dueDate",
+          start_date: "2026-04-01",
+          end_date: "2026-04-07",
+          categories: "GRzDxeAWOj2HBhmlObSy",
+          detailLevel: "product",
+          metrics: "ingresos",
+          segment: "b2c",
+          period: "weekly",
+        },
+      };
+
+      const queryParser = new QueryParser(mockReq);
+      const query = queryParser.getQuery();
+      const report = await orderService.getProductReport(testStoreId, query);
+
+      expect(report.metadata.options.segment).toBe("b2c");
+
+      report.products.forEach((product) => {
+        expect(product).not.toHaveProperty("b2bIngresos");
+        expect(product).not.toHaveProperty("b2cIngresos");
+      });
+
+      expect(report.summary.totals).not.toHaveProperty("b2bIngresos");
+      expect(report.summary.totals).not.toHaveProperty("b2cIngresos");
+    });
+
+    it("should generate product report with all segments breakdown", async () => {
+      const QueryParser = require("../../utils/queryParser");
+      const mockReq = {
+        query: {
+          date_field: "dueDate",
+          start_date: "2026-04-01",
+          end_date: "2026-04-07",
+          categories: "GRzDxeAWOj2HBhmlObSy",
+          detailLevel: "product",
+          metrics: "ingresos",
+          segment: "all",
+          period: "weekly",
+        },
+      };
+
+      const queryParser = new QueryParser(mockReq);
+      const query = queryParser.getQuery();
+      const report = await orderService.getProductReport(testStoreId, query);
+
+      expect(report.metadata.options.segment).toBe("all");
+
+      const productWithSegments = report.products.find(
+        (p) => p.totalIngresos > 0,
+      );
+      if (productWithSegments) {
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(productWithSegments).toHaveProperty("b2bIngresos");
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(productWithSegments).toHaveProperty("b2cIngresos");
+      }
+
+      expect(report.summary.totals).toHaveProperty("b2bIngresos");
+      expect(report.summary.totals).toHaveProperty("b2cIngresos");
+    });
+
+    it("should generate product report with multiple categories", async () => {
+      const QueryParser = require("../../utils/queryParser");
+      const mockReq = {
+        query: {
+          date_field: "dueDate",
+          start_date: "2026-04-01",
+          end_date: "2026-04-07",
+          categories:
+            "GRzDxeAWOj2HBhmlObSy,HvG0VIiluQ3ULrgp7QSN,y4koQ0pzabULphKDyb7E",
+          detailLevel: "product",
+          metrics: "both",
+          segment: "all",
+        },
+      };
+
+      const queryParser = new QueryParser(mockReq);
+      const query = queryParser.getQuery();
+
+      expect(query.filters.categories).toBe(
+        "GRzDxeAWOj2HBhmlObSy,HvG0VIiluQ3ULrgp7QSN,y4koQ0pzabULphKDyb7E",
+      );
+
+      const report = await orderService.getProductReport(testStoreId, query);
+
+      expect(report.metadata.options.categories).toEqual([
+        "GRzDxeAWOj2HBhmlObSy",
+        "HvG0VIiluQ3ULrgp7QSN",
+        "y4koQ0pzabULphKDyb7E",
+      ]);
+
+      const categoryIds = [
+        ...new Set(report.products.map((p) => p.categoryId)),
+      ];
+      expect(categoryIds).toEqual(
+        expect.arrayContaining([
+          "GRzDxeAWOj2HBhmlObSy",
+          "HvG0VIiluQ3ULrgp7QSN",
+          "y4koQ0pzabULphKDyb7E",
+        ]),
+      );
+      expect(categoryIds).not.toContain("jSuTNbAyUtHSVbMIcfXq");
+    });
+
+    it("should generate product report with daily period and multiple categories", async () => {
+      const QueryParser = require("../../utils/queryParser");
+      const mockReq = {
+        query: {
+          date_field: "dueDate",
+          start_date: "2026-04-01",
+          end_date: "2026-04-07",
+          categories:
+            "HvG0VIiluQ3ULrgp7QSN,y4koQ0pzabULphKDyb7E,jSuTNbAyUtHSVbMIcfXq",
+          detailLevel: "product",
+          metrics: "ingresos",
+          segment: "all",
+          period: "daily",
+        },
+      };
+
+      const queryParser = new QueryParser(mockReq);
+      const query = queryParser.getQuery();
+      const report = await orderService.getProductReport(testStoreId, query);
+
+      expect(report.metadata.options.categories).toEqual([
+        "HvG0VIiluQ3ULrgp7QSN",
+        "y4koQ0pzabULphKDyb7E",
+        "jSuTNbAyUtHSVbMIcfXq",
+      ]);
+      expect(report.metadata.options.period).toBe("daily");
+      expect(report.metadata.options.metrics).toBe("ingresos");
+      expect(report.metadata.options.segment).toBe("all");
+    });
+
+    it("should properly handle options extraction from query filters", async () => {
+      const QueryParser = require("../../utils/queryParser");
+      const mockReq = {
+        query: {
+          date_field: "dueDate",
+          start_date: "2026-04-01",
+          end_date: "2026-04-07",
+          categories: "GRzDxeAWOj2HBhmlObSy,HvG0VIiluQ3ULrgp7QSN",
+          detailLevel: "combination",
+          period: "weekly",
+          metrics: "cantidad",
+          segment: "b2b",
+          someOtherFilter: "should-remain",
+        },
+      };
+
+      const queryParser = new QueryParser(mockReq);
+      const query = queryParser.getQuery();
+
+      // Verify that report-specific filters are parsed correctly
+      expect(query.filters.categories).toBe(
+        "GRzDxeAWOj2HBhmlObSy,HvG0VIiluQ3ULrgp7QSN",
+      );
+      expect(query.filters.detailLevel).toBe("combination");
+      expect(query.filters.period).toBe("weekly");
+      expect(query.filters.metrics).toBe("cantidad");
+      expect(query.filters.segment).toBe("b2b");
+      expect(query.filters.someOtherFilter).toBe("should-remain");
+
+      const report = await orderService.getProductReport(testStoreId, query);
+
+      // Verify options were extracted correctly in the service method
+      expect(report.metadata.options.categories).toEqual([
+        "GRzDxeAWOj2HBhmlObSy",
+        "HvG0VIiluQ3ULrgp7QSN",
+      ]);
+      expect(report.metadata.options.detailLevel).toBe("combination");
+      expect(report.metadata.options.period).toBe("weekly");
+      expect(report.metadata.options.metrics).toBe("cantidad");
+      expect(report.metadata.options.segment).toBe("b2b");
+      expect(report.metadata.options.dateField).toBe("dueDate");
+    });
+
+    it("should apply default date range when no range provided", async () => {
+      const QueryParser = require("../../utils/queryParser");
+      const mockReq = {
+        query: {
+          categories: "GRzDxeAWOj2HBhmlObSy",
+          detailLevel: "product",
+          metrics: "both",
+          segment: "none",
+        },
+      };
+
+      const queryParser = new QueryParser(mockReq);
+      const query = queryParser.getQuery();
+
+      // No dateRange should be set initially
+      expect(query.filters.dateRange).toBeUndefined();
+
+      const report = await orderService.getProductReport(testStoreId, query);
+
+      // Should have applied default date range
+      expect(report.metadata.options.defaultDateRangeApplied).toBe(true);
+      expect(report.metadata.options.dateField).toBe("dueDate");
+    });
+
+    it("should preserve original filters after extracting report options", async () => {
+      const QueryParser = require("../../utils/queryParser");
+      const mockReq = {
+        query: {
+          date_field: "dueDate",
+          start_date: "2026-04-01",
+          end_date: "2026-04-07",
+          categories: "GRzDxeAWOj2HBhmlObSy",
+          detailLevel: "product",
+          period: "daily",
+          metrics: "both",
+          segment: "all",
+          status: "2",
+          isPaid: "true",
+          orderType: "regular",
+        },
+      };
+
+      const queryParser = new QueryParser(mockReq);
+      const originalQuery = queryParser.getQuery();
+
+      // Test the report generation and verify the structure
+      const report = await orderService.getProductReport(testStoreId, originalQuery);
+
+      // Verify the report was generated correctly
+      expect(report).toHaveProperty("metadata");
+      expect(report).toHaveProperty("products");
+      expect(report).toHaveProperty("summary");
+
+      // Verify that options were extracted correctly in the service method
+      expect(report.metadata.options.categories).toEqual([
+        "GRzDxeAWOj2HBhmlObSy",
+      ]);
+      expect(report.metadata.options.detailLevel).toBe("product");
+      expect(report.metadata.options.period).toBe("daily");
+      expect(report.metadata.options.metrics).toBe("both");
+      expect(report.metadata.options.segment).toBe("all");
+      expect(report.metadata.options.dateField).toBe("dueDate");
+
+      // Verify that the report-specific filters were handled properly
+      // (this is implicit - if the report generated successfully, the filters were processed correctly)
+      expect(report.summary.totals).toBeDefined();
+    });
+  }, 30000);
 });

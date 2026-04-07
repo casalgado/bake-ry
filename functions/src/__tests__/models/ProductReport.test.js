@@ -1,796 +1,1780 @@
-// tests/unit/models/ProductReport.test.js
-const ProductReport = require('../../models/ProductReport');
-const { Order } = require('../../models/Order');
+// __tests__/models/ProductReport.test.js
 
-describe('ProductReport', () => {
-  let mockOrders;
-  let mockB2BClients;
-  let mockProducts;
-  let b2bUserId1;
-  let b2bUserId2;
-  let b2cUserId1;
-  let b2cUserId2;
+const ProductReport = require("../../models/ProductReport");
+const { Order } = require("../../models/Order");
 
-  beforeEach(() => {
-    // Define user IDs
-    b2bUserId1 = 'b2b-user-1';
-    b2bUserId2 = 'b2b-user-2';
-    b2cUserId1 = 'b2c-user-1';
-    b2cUserId2 = 'b2c-user-2';
+describe("ProductReport", () => {
+  // Test data setup based on real structures from test_data/
+  const mockB2BClients = [
+    {
+      id: "028uK6R1xGf4gBdyYpp30cSfIDt2",
+      name: "Stephanie Botero Cafe - Luis Botero",
+      email: "pendiente@stephanieboterocafe.com",
+      phone: "3012348177",
+      address: "",
+    },
+    {
+      id: "SUF9kFw8r9hvVxmTQ66w7EuSgZx2",
+      name: "Another B2B Client",
+      email: "test@b2b.com",
+      phone: "123456789",
+      address: "Test Address",
+    },
+  ];
 
-    // Mock B2B clients
-    mockB2BClients = [
-      { id: b2bUserId1, name: 'B2B Client 1' },
-      { id: b2bUserId2, name: 'B2B Client 2' },
-    ];
-
-    // Mock products
-    mockProducts = [
-      { id: 'prod-1', name: 'Original Sourdough', collectionId: 'col-sourdough', collectionName: 'sourdough', isDeleted: false },
-      { id: 'prod-2', name: 'Zaatar Sourdough', collectionId: 'col-sourdough', collectionName: 'sourdough', isDeleted: false },
-      { id: 'prod-3', name: 'Pan Hamburguesa', collectionId: 'col-panaderia', collectionName: 'panaderia tradicional', isDeleted: false },
-      { id: 'prod-4', name: 'Baguette Original', collectionId: 'col-baguette', collectionName: 'baguette', isDeleted: false },
-      { id: 'prod-5', name: 'Mermelada Fresa', collectionId: 'col-untables', collectionName: 'untables', isDeleted: false },
-      { id: 'prod-deleted', name: 'Old Product', collectionId: 'col-sourdough', collectionName: 'sourdough', isDeleted: true },
-    ];
-
-    // Create mock orders with varied data across different dates
-    mockOrders = [
-      // B2B Order 1 - January 15 - Delivery
-      {
-        id: 'order-1',
-        userId: b2bUserId1,
-        dueDate: '2024-01-15T10:00:00Z',
-        status: 3,
-        fulfillmentType: 'delivery',
-        deliveryFee: 6000,
-        deliveryCost: 4000,
-        paymentMethod: 'transfer',
-        isComplimentary: false,
-        orderItems: [
+  const mockProducts = [
+    {
+      id: "tfTjV8pOp1ZDVg4ZQ99R",
+      name: "integral",
+      collectionId: "GRzDxeAWOj2HBhmlObSy",
+      collectionName: "sourdough",
+      hasVariations: true,
+      isDeleted: false,
+      variations: {
+        combinations: [
           {
-            productId: 'prod-1',
-            productName: 'Original Sourdough',
-            collectionId: 'col-sourdough',
-            collectionName: 'sourdough',
-            quantity: 2,
-            currentPrice: 22000,
-            taxPercentage: 0,
-            isComplimentary: false,
-          },
-          {
-            productId: 'prod-3',
-            productName: 'Pan Hamburguesa',
-            collectionId: 'col-panaderia',
-            collectionName: 'panaderia tradicional',
-            quantity: 30,
-            currentPrice: 1200,
-            taxPercentage: 0,
-            isComplimentary: false,
+            id: "tJ24gFRsSsgIQ57I",
+            name: "Mediano",
+            basePrice: 23700,
+            currentPrice: 23700,
+            isActive: true,
           },
         ],
       },
-      // B2B Order 2 - January 22 - Pickup
-      {
-        id: 'order-2',
-        userId: b2bUserId2,
-        dueDate: '2024-01-22T10:00:00Z',
-        status: 3,
-        fulfillmentType: 'pickup',
-        paymentMethod: 'cash',
-        isComplimentary: false,
-        orderItems: [
-          {
-            productId: 'prod-1',
-            productName: 'Original Sourdough',
-            collectionId: 'col-sourdough',
-            collectionName: 'sourdough',
-            quantity: 4,
-            currentPrice: 23925,
-            taxPercentage: 0,
-            isComplimentary: false,
-          },
-        ],
-      },
-      // B2C Order 1 - January 20 - Delivery
-      {
-        id: 'order-3',
-        userId: b2cUserId1,
-        dueDate: '2024-01-20T14:00:00Z',
-        status: 3,
-        fulfillmentType: 'delivery',
-        deliveryFee: 7000,
-        deliveryCost: 5000,
-        paymentMethod: 'transfer',
-        isComplimentary: false,
-        orderItems: [
-          {
-            productId: 'prod-2',
-            productName: 'Zaatar Sourdough',
-            collectionId: 'col-sourdough',
-            collectionName: 'sourdough',
-            quantity: 1,
-            currentPrice: 22000,
-            taxPercentage: 0,
-            isComplimentary: false,
-          },
-          {
-            productId: 'prod-4',
-            productName: 'Baguette Original',
-            collectionId: 'col-baguette',
-            collectionName: 'baguette',
-            quantity: 5,
-            currentPrice: 9900,
-            taxPercentage: 0,
-            isComplimentary: false,
-          },
-        ],
-      },
-      // B2C Order 2 - February 5 - Pickup
-      {
-        id: 'order-4',
-        userId: b2cUserId2,
-        dueDate: '2024-02-05T10:00:00Z',
-        status: 3,
-        fulfillmentType: 'pickup',
-        paymentMethod: 'transfer',
-        isComplimentary: false,
-        orderItems: [
-          {
-            productId: 'prod-1',
-            productName: 'Original Sourdough',
-            collectionId: 'col-sourdough',
-            collectionName: 'sourdough',
-            quantity: 1,
-            currentPrice: 19800,
-            taxPercentage: 0,
-            isComplimentary: false,
-          },
-          {
-            productId: 'prod-5',
-            productName: 'Mermelada Fresa',
-            collectionId: 'col-untables',
-            collectionName: 'untables',
-            quantity: 2,
-            currentPrice: 18000,
-            taxPercentage: 0,
-            isComplimentary: false,
-          },
-        ],
-      },
-      // Complimentary Order (should be filtered out)
-      {
-        id: 'order-5',
-        userId: b2cUserId1,
-        dueDate: '2024-01-17T10:00:00Z',
-        status: 3,
-        fulfillmentType: 'pickup',
-        paymentMethod: 'complimentary',
-        orderItems: [
-          {
-            productId: 'prod-2',
-            productName: 'Zaatar Sourdough',
-            collectionId: 'col-sourdough',
-            collectionName: 'sourdough',
-            quantity: 10,
-            currentPrice: 22000,
-            taxPercentage: 0,
-          },
-        ],
-      },
-    ];
-  });
-
-  describe('constructor', () => {
-    it('should initialize with orders, b2b clients, products, and default options', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts);
-
-      expect(report).toBeDefined();
-      expect(report.options).toBeDefined();
-      expect(report.options.categories).toBeNull();
-      expect(report.options.period).toBeNull();
-      expect(report.options.metrics).toBe('both');
-      expect(report.options.segment).toBe('none');
-      expect(report.options.dateField).toBe('dueDate');
-    });
-
-    it('should filter out complimentary orders', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts);
-
-      expect(report.orders).toHaveLength(4);
-    });
-
-    it('should accept custom options', () => {
-      const options = {
-        categories: ['col-sourdough'],
-        period: 'monthly',
-        metrics: 'ingresos',
-        segment: 'b2b',
-        dateField: 'paymentDate',
-      };
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, options);
-
-      expect(report.options.categories).toEqual(['col-sourdough']);
-      expect(report.options.period).toBe('monthly');
-      expect(report.options.metrics).toBe('ingresos');
-      expect(report.options.segment).toBe('b2b');
-      expect(report.options.dateField).toBe('paymentDate');
-    });
-  });
-
-  describe('filterOrdersBySegment', () => {
-    it('should return all orders when segment is "none"', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, { segment: 'none' });
-
-      expect(report.orders).toHaveLength(4);
-    });
-
-    it('should return all orders when segment is "all"', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, { segment: 'all' });
-
-      expect(report.orders).toHaveLength(4);
-    });
-
-    it('should return only B2B orders when segment is "b2b"', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, { segment: 'b2b' });
-
-      expect(report.orders).toHaveLength(2);
-      report.orders.forEach(order => {
-        expect(report.b2b_clientIds.has(order.userId)).toBe(true);
-      });
-    });
-
-    it('should return only B2C orders when segment is "b2c"', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, { segment: 'b2c' });
-
-      expect(report.orders).toHaveLength(2);
-      report.orders.forEach(order => {
-        expect(report.b2b_clientIds.has(order.userId)).toBe(false);
-      });
-    });
-  });
-
-  describe('generateReport', () => {
-    it('should return complete report structure', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts);
-      const fullReport = report.generateReport();
-
-      expect(fullReport).toHaveProperty('metadata');
-      expect(fullReport).toHaveProperty('products');
-      expect(fullReport).toHaveProperty('summary');
-    });
-  });
-
-  describe('generateMetadata', () => {
-    it('should include all required metadata fields', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts);
-      const metadata = report.generateMetadata();
-
-      expect(metadata).toHaveProperty('options');
-      expect(metadata).toHaveProperty('totalOrders');
-      expect(metadata).toHaveProperty('dateRange');
-      expect(metadata).toHaveProperty('totalProducts');
-      expect(metadata).toHaveProperty('currency');
-    });
-
-    it('should calculate date range from orders', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts);
-      const metadata = report.generateMetadata();
-
-      expect(metadata.dateRange.start).toBeInstanceOf(Date);
-      expect(metadata.dateRange.end).toBeInstanceOf(Date);
-    });
-
-    it('should count orders correctly', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts);
-      const metadata = report.generateMetadata();
-
-      expect(metadata.totalOrders).toBe(4);
-    });
-  });
-
-  describe('generateProductTable', () => {
-    it('should return array of products with required fields', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts);
-      const products = report.generateProductTable();
-
-      expect(Array.isArray(products)).toBe(true);
-      expect(products.length).toBeGreaterThan(0);
-
-      products.forEach(product => {
-        expect(product).toHaveProperty('categoryId');
-        expect(product).toHaveProperty('categoryName');
-        expect(product).toHaveProperty('productId');
-        expect(product).toHaveProperty('productName');
-        expect(product).toHaveProperty('avgPrice');
-      });
-    });
-
-    it('should include both metrics when metrics option is "both"', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, { metrics: 'both' });
-      const products = report.generateProductTable();
-
-      products.forEach(product => {
-        expect(product).toHaveProperty('totalIngresos');
-        expect(product).toHaveProperty('totalCantidad');
-      });
-    });
-
-    it('should include only ingresos when metrics option is "ingresos"', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, { metrics: 'ingresos' });
-      const products = report.generateProductTable();
-
-      products.forEach(product => {
-        expect(product).toHaveProperty('totalIngresos');
-        expect(product).not.toHaveProperty('totalCantidad');
-      });
-    });
-
-    it('should include only cantidad when metrics option is "cantidad"', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, { metrics: 'cantidad' });
-      const products = report.generateProductTable();
-
-      products.forEach(product => {
-        expect(product).not.toHaveProperty('totalIngresos');
-        expect(product).toHaveProperty('totalCantidad');
-      });
-    });
-
-    it('should include B2B/B2C breakdown when segment is "all"', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, { segment: 'all' });
-      const products = report.generateProductTable();
-
-      products.forEach(product => {
-        expect(product).toHaveProperty('totalIngresos');
-        expect(product).toHaveProperty('totalCantidad');
-        expect(product).toHaveProperty('b2bIngresos');
-        expect(product).toHaveProperty('b2bCantidad');
-        expect(product).toHaveProperty('b2cIngresos');
-        expect(product).toHaveProperty('b2cCantidad');
-      });
-    });
-
-    it('should sort products by category then by product name', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts);
-      const products = report.generateProductTable();
-
-      for (let i = 0; i < products.length - 1; i++) {
-        const catCompare = (products[i].categoryName || '').localeCompare(products[i + 1].categoryName || '');
-        if (catCompare === 0) {
-          expect((products[i].productName || '').localeCompare(products[i + 1].productName || '')).toBeLessThanOrEqual(0);
-        } else {
-          expect(catCompare).toBeLessThanOrEqual(0);
-        }
-      }
-    });
-  });
-
-  describe('generateProductTable with periods', () => {
-    it('should include period data when period option is set', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, { period: 'monthly' });
-      const products = report.generateProductTable();
-
-      const productsWithSales = products.filter(p => p.totalCantidad > 0);
-      productsWithSales.forEach(product => {
-        expect(product).toHaveProperty('periods');
-        expect(typeof product.periods).toBe('object');
-      });
-    });
-
-    it('should create monthly period keys in correct format', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, { period: 'monthly' });
-      const products = report.generateProductTable();
-
-      const productWithPeriods = products.find(p => p.periods && Object.keys(p.periods).length > 0);
-      if (productWithPeriods) {
-        Object.keys(productWithPeriods.periods).forEach(key => {
-          expect(key).toMatch(/^\d{4}-\d{2}$/); // YYYY-MM format
-        });
-      }
-    });
-
-    it('should create weekly period keys in correct format', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, { period: 'weekly' });
-      const products = report.generateProductTable();
-
-      const productWithPeriods = products.find(p => p.periods && Object.keys(p.periods).length > 0);
-      if (productWithPeriods) {
-        Object.keys(productWithPeriods.periods).forEach(key => {
-          expect(key).toMatch(/^\d{4}-\d{2}-\d{2}\/\d{4}-\d{2}-\d{2}$/); // YYYY-MM-DD/YYYY-MM-DD format
-        });
-      }
-    });
-
-    it('should create daily period keys in correct format', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, { period: 'daily' });
-      const products = report.generateProductTable();
-
-      const productWithPeriods = products.find(p => p.periods && Object.keys(p.periods).length > 0);
-      if (productWithPeriods) {
-        Object.keys(productWithPeriods.periods).forEach(key => {
-          expect(key).toMatch(/^\d{4}-\d{2}-\d{2}$/); // YYYY-MM-DD format
-        });
-      }
-    });
-
-    it('should only include requested metrics in period data', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, {
-        period: 'monthly',
-        metrics: 'ingresos',
-      });
-      const products = report.generateProductTable();
-
-      const productWithPeriods = products.find(p => p.periods && Object.keys(p.periods).length > 0);
-      if (productWithPeriods) {
-        Object.values(productWithPeriods.periods).forEach(periodData => {
-          expect(periodData).toHaveProperty('ingresos');
-          expect(periodData).not.toHaveProperty('cantidad');
-        });
-      }
-    });
-  });
-
-  describe('generateSummary', () => {
-    it('should include totals and byCategory', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts);
-      const summary = report.generateSummary();
-
-      expect(summary).toHaveProperty('totals');
-      expect(summary).toHaveProperty('byCategory');
-    });
-
-    it('should calculate overall totals correctly', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts);
-      const summary = report.generateSummary();
-
-      expect(summary.totals.totalIngresos).toBeGreaterThan(0);
-      expect(summary.totals.totalCantidad).toBeGreaterThan(0);
-    });
-
-    it('should include B2B/B2C breakdown when segment is "all"', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, { segment: 'all' });
-      const summary = report.generateSummary();
-
-      expect(summary.totals).toHaveProperty('b2bIngresos');
-      expect(summary.totals).toHaveProperty('b2cIngresos');
-      expect(summary.totals).toHaveProperty('b2bCantidad');
-      expect(summary.totals).toHaveProperty('b2cCantidad');
-    });
-
-    it('should calculate totals by category', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts);
-      const summary = report.generateSummary();
-
-      expect(Array.isArray(summary.byCategory)).toBe(true);
-      summary.byCategory.forEach(cat => {
-        expect(cat).toHaveProperty('categoryId');
-        expect(cat).toHaveProperty('categoryName');
-        expect(cat).toHaveProperty('totalIngresos');
-        expect(cat).toHaveProperty('totalCantidad');
-      });
-    });
-  });
-
-  describe('aggregateProductData', () => {
-    it('should aggregate products with sales', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts);
-
-      expect(report.aggregatedData.length).toBeGreaterThan(0);
-    });
-
-    it('should include products with zero sales', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts);
-
-      // prod-5 (Mermelada) only has sales in one order
-      // All non-deleted products should be included
-      const activeProducts = mockProducts.filter(p => !p.isDeleted);
-      expect(report.aggregatedData.length).toBeGreaterThanOrEqual(activeProducts.length);
-    });
-
-    it('should not include complimentary items', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts);
-
-      // Zaatar (prod-2) has 1 in order-3, 10 in complimentary order-5
-      const zaatar = report.aggregatedData.find(p => p.productId === 'prod-2');
-      expect(zaatar.totalCantidad).toBe(1); // Only from order-3
-    });
-
-    it('should aggregate same product from multiple orders', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts);
-
-      // Original Sourdough (prod-1) is in orders 1, 2, 4 with quantities 2, 4, 1
-      const original = report.aggregatedData.find(p => p.productId === 'prod-1');
-      expect(original.totalCantidad).toBe(7);
-    });
-
-    it('should calculate correct average price', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts);
-
-      // Original Sourdough: (22000*2 + 23925*4 + 19800*1) / 7 = 159500 / 7 ≈ 22785.71
-      const original = report.aggregatedData.find(p => p.productId === 'prod-1');
-      const expectedAvg = (22000 * 2 + 23925 * 4 + 19800 * 1) / 7;
-      expect(original.avgPrice).toBeCloseTo(expectedAvg, 2);
-    });
-
-    it('should calculate B2B/B2C breakdown when segment is "all"', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, { segment: 'all' });
-
-      // prod-1 is in B2B (orders 1, 2) and B2C (order 4)
-      const original = report.aggregatedData.find(p => p.productId === 'prod-1');
-      expect(original.b2bCantidad).toBe(6); // 2 + 4
-      expect(original.b2cCantidad).toBe(1);
-    });
-  });
-
-  describe('category filtering', () => {
-    it('should filter products by category when categories option is set', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, {
-        categories: ['col-sourdough'],
-      });
-      const products = report.generateProductTable();
-
-      products.filter(p => p.totalCantidad > 0).forEach(product => {
-        expect(product.categoryId).toBe('col-sourdough');
-      });
-    });
-
-    it('should include multiple categories when specified', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, {
-        categories: ['col-sourdough', 'col-baguette'],
-      });
-      const products = report.generateProductTable();
-
-      const categoryIds = [...new Set(products.filter(p => p.totalCantidad > 0).map(p => p.categoryId))];
-      expect(categoryIds.every(id => ['col-sourdough', 'col-baguette'].includes(id))).toBe(true);
-    });
-
-    it('should return all categories when categories option is null', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, {
-        categories: null,
-      });
-      const products = report.generateProductTable();
-
-      const categoryIds = [...new Set(products.filter(p => p.totalCantidad > 0).map(p => p.categoryId))];
-      expect(categoryIds.length).toBeGreaterThan(1);
-    });
-  });
-
-  describe('getPeriodKey', () => {
-    it('should return correct monthly key', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, { period: 'monthly' });
-      const key = report.getPeriodKey(new Date('2024-01-15T12:00:00Z'));
-
-      expect(key).toBe('2024-01');
-    });
-
-    it('should return correct daily key', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, { period: 'daily' });
-      const key = report.getPeriodKey(new Date('2024-01-15T12:00:00Z'));
-
-      expect(key).toBe('2024-01-15');
-    });
-
-    it('should return null when period is not set', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts);
-      const key = report.getPeriodKey(new Date('2024-01-15T12:00:00Z'));
-
-      expect(key).toBeNull();
-    });
-  });
-
-  describe('getWeekRange', () => {
-    it('should return Monday-Sunday range', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, { period: 'weekly' });
-
-      // Jan 17, 2024 is a Wednesday
-      const weekRange = report.getWeekRange(new Date('2024-01-17'));
-
-      expect(weekRange).toContain('2024-01-15'); // Monday
-      expect(weekRange).toContain('2024-01-21'); // Sunday
-    });
-
-    it('should handle dates that are already Monday', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, { period: 'weekly' });
-
-      // Jan 15, 2024 is a Monday - use full ISO string to avoid timezone issues
-      const weekRange = report.getWeekRange(new Date('2024-01-15T12:00:00Z'));
-
-      expect(weekRange).toContain('2024-01-15'); // Same Monday
-      expect(weekRange).toContain('2024-01-21'); // Sunday
-    });
-  });
-
-  describe('getMonthKey', () => {
-    it('should return year-month format', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts);
-      const monthKey = report.getMonthKey(new Date('2024-01-15'));
-
-      expect(monthKey).toBe('2024-01');
-    });
-
-    it('should pad single digit months with zero', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts);
-      const monthKey = report.getMonthKey(new Date('2024-09-15T12:00:00Z'));
-
-      expect(monthKey).toBe('2024-09');
-    });
-  });
-
-  describe('edge cases', () => {
-    it('should handle empty orders array', () => {
-      const report = new ProductReport([], mockB2BClients, mockProducts);
-      const fullReport = report.generateReport();
-
-      expect(report.orders).toHaveLength(0);
-      expect(fullReport.metadata.totalOrders).toBe(0);
-      expect(fullReport.summary.totals.totalIngresos).toBe(0);
-    });
-
-    it('should handle all complimentary orders', () => {
-      const allComplimentary = mockOrders.map(order => ({ ...order, paymentMethod: 'complimentary' }));
-      const report = new ProductReport(allComplimentary, mockB2BClients, mockProducts);
-
-      expect(report.orders).toHaveLength(0);
-    });
-
-    it('should handle no B2B clients', () => {
-      const report = new ProductReport(mockOrders, [], mockProducts, { segment: 'b2b' });
-
-      expect(report.orders).toHaveLength(0);
-    });
-
-    it('should handle empty products list', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, []);
-      const products = report.generateProductTable();
-
-      // Should still aggregate products from orders
-      expect(products.length).toBeGreaterThan(0);
-    });
-
-    it('should handle products with zero sales', () => {
-      const unusedProduct = {
-        id: 'unused-product',
-        name: 'Unused Product',
-        collectionId: 'col-test',
-        collectionName: 'test',
-        isDeleted: false,
-      };
-      const productsWithUnused = [...mockProducts, unusedProduct];
-
-      const report = new ProductReport(mockOrders, mockB2BClients, productsWithUnused);
-      const products = report.generateProductTable();
-
-      const unused = products.find(p => p.productId === 'unused-product');
-      expect(unused).toBeDefined();
-      expect(unused.totalCantidad).toBe(0);
-      expect(unused.totalIngresos).toBe(0);
-    });
-
-    it('should include deleted products that have sales', () => {
-      const orderWithDeletedProduct = {
-        id: 'order-deleted',
-        userId: b2cUserId1,
-        dueDate: '2024-01-18T10:00:00Z',
-        status: 3,
-        fulfillmentType: 'pickup',
-        paymentMethod: 'transfer',
-        isComplimentary: false,
-        orderItems: [
-          {
-            productId: 'prod-deleted',
-            productName: 'Old Product',
-            collectionId: 'col-sourdough',
-            collectionName: 'sourdough',
-            quantity: 1,
-            currentPrice: 15000,
-            taxPercentage: 0,
-            isComplimentary: false,
-          },
-        ],
-      };
-
-      const ordersWithDeleted = [...mockOrders, orderWithDeletedProduct];
-      const report = new ProductReport(ordersWithDeleted, mockB2BClients, mockProducts);
-      const products = report.generateProductTable();
-
-      const deletedProduct = products.find(p => p.productId === 'prod-deleted');
-      expect(deletedProduct).toBeDefined();
-      expect(deletedProduct.totalCantidad).toBe(1);
-    });
-
-    it('should not include deleted products without sales', () => {
-      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts);
-      const products = report.generateProductTable();
-
-      const deletedProduct = products.find(p => p.productId === 'prod-deleted');
-      expect(deletedProduct).toBeUndefined();
-    });
-
-    it('should handle null date in dateField', () => {
-      const ordersWithNullDate = mockOrders.map(order => ({
-        ...order,
-        paymentDate: null,
-      }));
-
-      const report = new ProductReport(ordersWithNullDate, mockB2BClients, mockProducts, {
-        dateField: 'paymentDate',
-        period: 'monthly',
-      });
-
-      // Should not throw error
-      expect(() => report.generateReport()).not.toThrow();
-    });
-  });
-
-  describe('real data simulation', () => {
-    it('should handle typical bakery order data', () => {
-      // Simulate real bakery data from es-alimento
-      const realOrders = [
+    },
+    {
+      id: "product2",
+      name: "Simple Product",
+      collectionId: "HvG0VIiluQ3ULrgp7QSN",
+      collectionName: "pastries",
+      hasVariations: false,
+      isDeleted: false,
+      basePrice: 15000,
+      currentPrice: 15000,
+    },
+  ];
+
+  const mockOrders = [
+    new Order({
+      id: "order1",
+      userId: "028uK6R1xGf4gBdyYpp30cSfIDt2", // B2B client
+      dueDate: new Date("2026-04-01"),
+      paymentDate: new Date("2026-04-02"),
+      isComplimentary: false,
+      orderItems: [
         {
-          id: 'sNye2ffNFlm5fnuPokvP',
-          userId: 'ksRLss9xFBTdct68Oio2QdqOsEy2',
-          dueDate: '2025-01-20T12:00:00.000Z',
-          status: 2,
-          fulfillmentType: 'delivery',
-          deliveryFee: 6000,
-          deliveryCost: 5000,
-          paymentMethod: 'transfer',
-          orderItems: [{
-            productId: 'xJpCPiTpzkJvpw3hGwkK',
-            productName: 'zaatar',
-            collectionId: 'GRzDxeAWOj2HBhmlObSy',
-            collectionName: 'sourdough',
+          id: "item1",
+          productId: "tfTjV8pOp1ZDVg4ZQ99R",
+          productName: "integral",
+          collectionId: "GRzDxeAWOj2HBhmlObSy",
+          collectionName: "sourdough",
+          quantity: 1,
+          currentPrice: 23700,
+          subtotal: 23700,
+          isComplimentary: false,
+          combination: {
+            id: "tJ24gFRsSsgIQ57I",
+            name: "Mediano",
+            currentPrice: 23700,
+          },
+        },
+      ],
+    }),
+    new Order({
+      id: "order2",
+      userId: "regularUser123", // B2C client (not in B2B list)
+      dueDate: new Date("2026-04-03"),
+      isComplimentary: false,
+      orderItems: [
+        {
+          id: "item2",
+          productId: "product2",
+          productName: "Simple Product",
+          collectionId: "HvG0VIiluQ3ULrgp7QSN",
+          collectionName: "pastries",
+          quantity: 2,
+          currentPrice: 15000,
+          subtotal: 30000,
+          isComplimentary: false,
+        },
+      ],
+    }),
+    new Order({
+      id: "order3",
+      userId: "user3",
+      dueDate: new Date("2026-04-04"),
+      paymentMethod: "complimentary", // This makes isComplimentary = true
+      orderItems: [],
+    }),
+  ];
+
+  describe("Constructor", () => {
+    describe("with default options", () => {
+      it("should create instance with default options", () => {
+        const report = new ProductReport(
+          mockOrders,
+          mockB2BClients,
+          mockProducts,
+        );
+
+        expect(report.options).toEqual({
+          categories: null,
+          detailLevel: "product",
+          period: null,
+          metrics: "both",
+          segment: "none",
+          dateField: "dueDate",
+          defaultDateRangeApplied: false,
+        });
+      });
+
+      it("should filter out complimentary orders", () => {
+        const report = new ProductReport(
+          mockOrders,
+          mockB2BClients,
+          mockProducts,
+        );
+
+        expect(report.allOrders).toHaveLength(2);
+        expect(report.allOrders[0].id).toBe("order1");
+        expect(report.allOrders[1].id).toBe("order2");
+      });
+
+      it("should store b2b_clients and all_products for processing", () => {
+        const report = new ProductReport(
+          mockOrders,
+          mockB2BClients,
+          mockProducts,
+        );
+
+        expect(report.b2b_clients).toEqual(mockB2BClients);
+        expect(report.all_products).toEqual(mockProducts);
+      });
+    });
+
+    describe("with custom options", () => {
+      it("should accept and set custom categories", () => {
+        const options = { categories: ["cat1", "cat2"] };
+        const report = new ProductReport(
+          mockOrders,
+          mockB2BClients,
+          mockProducts,
+          options,
+        );
+
+        expect(report.options.categories).toEqual(["cat1", "cat2"]);
+      });
+
+      it("should accept custom detailLevel", () => {
+        const options = { detailLevel: "combination" };
+        const report = new ProductReport(
+          mockOrders,
+          mockB2BClients,
+          mockProducts,
+          options,
+        );
+
+        expect(report.options.detailLevel).toBe("combination");
+      });
+
+      it("should accept custom period", () => {
+        const options = { period: "daily" };
+        const report = new ProductReport(
+          mockOrders,
+          mockB2BClients,
+          mockProducts,
+          options,
+        );
+
+        expect(report.options.period).toBe("daily");
+      });
+
+      it("should accept custom metrics", () => {
+        const options = { metrics: "ingresos" };
+        const report = new ProductReport(
+          mockOrders,
+          mockB2BClients,
+          mockProducts,
+          options,
+        );
+
+        expect(report.options.metrics).toBe("ingresos");
+      });
+
+      it("should accept custom segment", () => {
+        const options = { segment: "b2b" };
+        const report = new ProductReport(
+          mockOrders,
+          mockB2BClients,
+          mockProducts,
+          options,
+        );
+
+        expect(report.options.segment).toBe("b2b");
+      });
+
+      it("should accept custom dateField", () => {
+        const options = { dateField: "paymentDate" };
+        const report = new ProductReport(
+          mockOrders,
+          mockB2BClients,
+          mockProducts,
+          options,
+        );
+
+        expect(report.options.dateField).toBe("paymentDate");
+      });
+
+      it("should accept defaultDateRangeApplied flag", () => {
+        const options = { defaultDateRangeApplied: true };
+        const report = new ProductReport(
+          mockOrders,
+          mockB2BClients,
+          mockProducts,
+          options,
+        );
+
+        expect(report.options.defaultDateRangeApplied).toBe(true);
+      });
+    });
+
+    describe("options validation", () => {
+      it("should throw error for invalid detailLevel", () => {
+        const options = { detailLevel: "invalid" };
+
+        expect(() => {
+          new ProductReport(mockOrders, mockB2BClients, mockProducts, options);
+        }).toThrow('Invalid detailLevel: must be "product" or "combination"');
+      });
+
+      it("should throw error for invalid period", () => {
+        const options = { period: "invalid" };
+
+        expect(() => {
+          new ProductReport(mockOrders, mockB2BClients, mockProducts, options);
+        }).toThrow(
+          'Invalid period: must be null, "daily", "weekly", or "monthly"',
+        );
+      });
+
+      it("should throw error for invalid metrics", () => {
+        const options = { metrics: "invalid" };
+
+        expect(() => {
+          new ProductReport(mockOrders, mockB2BClients, mockProducts, options);
+        }).toThrow(
+          'Invalid metrics: must be "ingresos", "cantidad", or "both"',
+        );
+      });
+
+      it("should throw error for invalid segment", () => {
+        const options = { segment: "invalid" };
+
+        expect(() => {
+          new ProductReport(mockOrders, mockB2BClients, mockProducts, options);
+        }).toThrow('Invalid segment: must be "none", "all", "b2b", or "b2c"');
+      });
+
+      it("should throw error for invalid dateField", () => {
+        const options = { dateField: "invalidDate" };
+
+        expect(() => {
+          new ProductReport(mockOrders, mockB2BClients, mockProducts, options);
+        }).toThrow("Invalid dateField: must be a valid order date property");
+      });
+
+      it("should throw error for invalid categories type", () => {
+        const options = { categories: "not-an-array" };
+
+        expect(() => {
+          new ProductReport(mockOrders, mockB2BClients, mockProducts, options);
+        }).toThrow("Invalid categories: must be an array or null");
+      });
+
+      it("should throw error for empty categories array", () => {
+        const options = { categories: [] };
+
+        expect(() => {
+          new ProductReport(mockOrders, mockB2BClients, mockProducts, options);
+        }).toThrow("Invalid categories: array cannot be empty");
+      });
+    });
+
+    describe("input validation", () => {
+      it("should throw error for missing orders", () => {
+        expect(() => {
+          new ProductReport(null, mockB2BClients, mockProducts);
+        }).toThrow("Orders array is required");
+      });
+
+      it("should throw error for non-array orders", () => {
+        expect(() => {
+          new ProductReport("not-array", mockB2BClients, mockProducts);
+        }).toThrow("Orders must be an array");
+      });
+
+      it("should throw error for missing b2b_clients", () => {
+        expect(() => {
+          new ProductReport(mockOrders, null, mockProducts);
+        }).toThrow("B2B clients array is required");
+      });
+
+      it("should throw error for missing products", () => {
+        expect(() => {
+          new ProductReport(mockOrders, mockB2BClients, null);
+        }).toThrow("Products array is required");
+      });
+
+      it("should handle empty arrays gracefully", () => {
+        expect(() => {
+          new ProductReport([], [], []);
+        }).not.toThrow();
+      });
+    });
+  });
+
+  describe("flattenOrderItems", () => {
+    // Helper factory for creating minimal test orders
+    const createOrder = (overrides = {}) =>
+      new Order({
+        id: "order1",
+        userId: "user1",
+        dueDate: new Date("2026-04-01"),
+        orderItems: [
+          {
+            id: "item1",
+            productId: "product1",
+            productName: "Test Product",
+            collectionId: "category1",
+            collectionName: "Test Category",
+            subtotal: 1000,
             quantity: 1,
-            currentPrice: 22000,
-            taxPercentage: 0,
+            currentPrice: 1000,
             isComplimentary: false,
-          }],
+          },
+        ],
+        ...overrides,
+      });
+
+    const createB2BClient = (id) => ({ id });
+
+    it("should extract basic fields from single order item", () => {
+      const order = createOrder();
+      const b2bClients = [];
+      const report = new ProductReport([order], b2bClients, mockProducts);
+
+      const result = report.flattenOrderItems([order], b2bClients);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        orderId: "order1",
+        orderItemId: "item1",
+        productId: "product1",
+        productName: "Test Product",
+        categoryId: "category1",
+        categoryName: "Test Category",
+        ingresos: 1000,
+        cantidad: 1,
+        currentPrice: 1000,
+      });
+    });
+
+    it("should identify B2B client correctly", () => {
+      const order = createOrder({ userId: "b2b-client-1" });
+      const b2bClients = [createB2BClient("b2b-client-1")];
+      const report = new ProductReport([order], b2bClients, mockProducts);
+
+      const result = report.flattenOrderItems([order], b2bClients);
+
+      expect(result[0].isB2B).toBe(true);
+    });
+
+    it("should identify B2C client correctly", () => {
+      const order = createOrder({ userId: "regular-user" });
+      const b2bClients = [createB2BClient("b2b-client-1")];
+      const report = new ProductReport([order], b2bClients, mockProducts);
+
+      const result = report.flattenOrderItems([order], b2bClients);
+
+      expect(result[0].isB2B).toBe(false);
+    });
+
+    it("should handle combination data", () => {
+      const order = createOrder({
+        orderItems: [
+          {
+            id: "item1",
+            productId: "product1",
+            productName: "Test Product",
+            collectionId: "category1",
+            collectionName: "Test Category",
+            subtotal: 2000,
+            quantity: 2,
+            currentPrice: 1000,
+            isComplimentary: false,
+            combination: {
+              id: "combo1",
+              name: "Large",
+            },
+          },
+        ],
+      });
+      const report = new ProductReport([order], [], mockProducts);
+
+      const result = report.flattenOrderItems([order], []);
+
+      expect(result[0]).toMatchObject({
+        combinationId: "combo1",
+        combinationName: "Large",
+      });
+    });
+
+    it("should handle base product without combination", () => {
+      const order = createOrder();
+      const report = new ProductReport([order], [], mockProducts);
+
+      const result = report.flattenOrderItems([order], []);
+
+      expect(result[0].combinationId).toBeNull();
+      expect(result[0].combinationName).toBeNull();
+    });
+
+    it("should extract date from order", () => {
+      const testDate = new Date("2026-04-05");
+      const order = createOrder({ dueDate: testDate });
+      const report = new ProductReport([order], [], mockProducts);
+
+      const result = report.flattenOrderItems([order], []);
+
+      expect(result[0].date).toBe("2026-04-04"); // UTC date converted to Colombia timezone
+    });
+
+    it("should flatten multiple items from multiple orders", () => {
+      const order1 = createOrder({
+        id: "order1",
+        orderItems: [
+          {
+            id: "item1",
+            productId: "product1",
+            subtotal: 1000,
+            quantity: 1,
+            currentPrice: 1000,
+            isComplimentary: false,
+          },
+        ],
+      });
+      const order2 = createOrder({
+        id: "order2",
+        orderItems: [
+          {
+            id: "item2",
+            productId: "product2",
+            subtotal: 2000,
+            quantity: 2,
+            currentPrice: 1000,
+            isComplimentary: false,
+          },
+        ],
+      });
+      const report = new ProductReport([order1, order2], [], mockProducts);
+
+      const result = report.flattenOrderItems([order1, order2], []);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].orderId).toBe("order1");
+      expect(result[1].orderId).toBe("order2");
+    });
+
+    it("should filter out complimentary items", () => {
+      const order = createOrder({
+        orderItems: [
+          {
+            id: "item1",
+            productId: "product1",
+            subtotal: 1000,
+            quantity: 1,
+            currentPrice: 1000,
+            isComplimentary: false,
+          },
+          {
+            id: "item2",
+            productId: "product2",
+            subtotal: 2000,
+            quantity: 2,
+            currentPrice: 1000,
+            isComplimentary: true,
+          },
+        ],
+      });
+      const report = new ProductReport([order], [], mockProducts);
+
+      const result = report.flattenOrderItems([order], []);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].orderItemId).toBe("item1");
+    });
+
+    it("should use correct dateField when flattening data", () => {
+      // Order1 has dueDate: 2026-04-01, paymentDate: 2026-04-02
+      const reportWithDueDate = new ProductReport(
+        mockOrders,
+        mockB2BClients,
+        mockProducts,
+        { dateField: "dueDate" },
+      );
+      const reportWithPaymentDate = new ProductReport(
+        mockOrders,
+        mockB2BClients,
+        mockProducts,
+        { dateField: "paymentDate" },
+      );
+
+      const dueDateResult = reportWithDueDate.flattenOrderItems(
+        [mockOrders[0]],
+        [],
+      );
+      const paymentDateResult = reportWithPaymentDate.flattenOrderItems(
+        [mockOrders[0]],
+        [],
+      );
+
+      // Should use different dates based on dateField
+      expect(dueDateResult[0].date).toBe("2026-03-31"); // dueDate 2026-04-01 → Colombia 2026-03-31
+      expect(paymentDateResult[0].date).toBe("2026-04-01"); // paymentDate 2026-04-02 → Colombia 2026-04-01
+    });
+
+    it("should show what flattened output looks like with mock data", () => {
+      const report = new ProductReport(
+        mockOrders,
+        mockB2BClients,
+        mockProducts,
+      );
+      const result = report.flattenOrderItems(mockOrders, mockB2BClients);
+
+      console.log("=== FLATTENED OUTPUT ===");
+      console.log(JSON.stringify(result, null, 2));
+
+      expect(result.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("aggregateByCombination", () => {
+    describe("Part 1: Basic Combination Grouping", () => {
+      it("should group by combination when product has variations", () => {
+        const flatData = [
+          {
+            productId: "p1",
+            combinationId: "combo1",
+            productName: "Product 1",
+            combinationName: "Small",
+            ingresos: 1000,
+            cantidad: 1,
+            isB2B: false,
+          },
+          {
+            productId: "p1",
+            combinationId: "combo1",
+            productName: "Product 1",
+            combinationName: "Small",
+            ingresos: 1500,
+            cantidad: 1,
+            isB2B: true,
+          },
+          {
+            productId: "p1",
+            combinationId: "combo2",
+            productName: "Product 1",
+            combinationName: "Large",
+            ingresos: 2000,
+            cantidad: 1,
+            isB2B: false,
+          },
+        ];
+
+        const report = new ProductReport([], [], []);
+        const result = report.aggregateByCombination(flatData);
+
+        // Should have 2 combinations
+        expect(result).toHaveLength(2);
+
+        // Find combo1 and combo2
+        const combo1 = result.find((r) => r.combinationId === "combo1");
+        const combo2 = result.find((r) => r.combinationId === "combo2");
+
+        expect(combo1).toBeDefined();
+        expect(combo1.productId).toBe("p1");
+        expect(combo1.combinationName).toBe("Small");
+
+        expect(combo2).toBeDefined();
+        expect(combo2.productId).toBe("p1");
+        expect(combo2.combinationName).toBe("Large");
+      });
+
+      it("should group by base product when no combination", () => {
+        const flatData = [
+          {
+            productId: "p1",
+            combinationId: null,
+            productName: "Base Product",
+            combinationName: null,
+            ingresos: 1000,
+            cantidad: 1,
+            isB2B: false,
+          },
+          {
+            productId: "p1",
+            combinationId: null,
+            productName: "Base Product",
+            combinationName: null,
+            ingresos: 1500,
+            cantidad: 1,
+            isB2B: true,
+          },
+        ];
+
+        const report = new ProductReport([], [], []);
+        const result = report.aggregateByCombination(flatData);
+
+        expect(result).toHaveLength(1);
+        expect(result[0].productId).toBe("p1");
+        expect(result[0].combinationId).toBeNull();
+        expect(result[0].combinationName).toBeNull();
+      });
+
+      it("should handle mixed combination and base products", () => {
+        const flatData = [
+          {
+            productId: "p1",
+            combinationId: "combo1",
+            productName: "Product 1",
+            combinationName: "Small",
+            ingresos: 1000,
+            cantidad: 1,
+            isB2B: false,
+          },
+          {
+            productId: "p2",
+            combinationId: null,
+            productName: "Product 2",
+            combinationName: null,
+            ingresos: 2000,
+            cantidad: 1,
+            isB2B: false,
+          },
+        ];
+
+        const report = new ProductReport([], [], []);
+        const result = report.aggregateByCombination(flatData);
+
+        expect(result).toHaveLength(2);
+
+        const combo = result.find((r) => r.combinationId === "combo1");
+        const base = result.find((r) => r.combinationId === null);
+
+        expect(combo.productId).toBe("p1");
+        expect(base.productId).toBe("p2");
+      });
+    });
+
+    describe("Part 2: Aggregate Metrics Calculation", () => {
+      it("should calculate total metrics for combination", () => {
+        const flatData = [
+          {
+            productId: "p1",
+            combinationId: "combo1",
+            ingresos: 1000,
+            cantidad: 1,
+            isB2B: false,
+          },
+          {
+            productId: "p1",
+            combinationId: "combo1",
+            ingresos: 1500,
+            cantidad: 2,
+            isB2B: true,
+          },
+          {
+            productId: "p1",
+            combinationId: "combo1",
+            ingresos: 500,
+            cantidad: 1,
+            isB2B: false,
+          },
+        ];
+
+        const report = new ProductReport([], [], []);
+        const result = report.aggregateByCombination(flatData);
+
+        expect(result).toHaveLength(1);
+        expect(result[0]).toMatchObject({
+          ingresos: 3000, // 1000 + 1500 + 500
+          cantidad: 4, // 1 + 2 + 1
+          b2bIngresos: 1500, // only the B2B item
+          b2cIngresos: 1500, // 1000 + 500
+          b2bCantidad: 2, // only the B2B item
+          b2cCantidad: 2, // 1 + 1
+        });
+      });
+
+      it("should handle all B2B items", () => {
+        const flatData = [
+          {
+            productId: "p1",
+            combinationId: "combo1",
+            ingresos: 1000,
+            cantidad: 1,
+            isB2B: true,
+          },
+          {
+            productId: "p1",
+            combinationId: "combo1",
+            ingresos: 2000,
+            cantidad: 1,
+            isB2B: true,
+          },
+        ];
+
+        const report = new ProductReport([], [], []);
+        const result = report.aggregateByCombination(flatData);
+
+        expect(result[0]).toMatchObject({
+          ingresos: 3000,
+          cantidad: 2,
+          b2bIngresos: 3000,
+          b2cIngresos: 0,
+          b2bCantidad: 2,
+          b2cCantidad: 0,
+        });
+      });
+
+      it("should handle all B2C items", () => {
+        const flatData = [
+          {
+            productId: "p1",
+            combinationId: null,
+            ingresos: 1000,
+            cantidad: 1,
+            isB2B: false,
+          },
+          {
+            productId: "p1",
+            combinationId: null,
+            ingresos: 500,
+            cantidad: 2,
+            isB2B: false,
+          },
+        ];
+
+        const report = new ProductReport([], [], []);
+        const result = report.aggregateByCombination(flatData);
+
+        expect(result[0]).toMatchObject({
+          ingresos: 1500,
+          cantidad: 3,
+          b2bIngresos: 0,
+          b2cIngresos: 1500,
+          b2bCantidad: 0,
+          b2cCantidad: 3,
+        });
+      });
+    });
+
+    describe("Part 3: Period Key Generation", () => {
+      it("should generate daily period keys", () => {
+        const report = new ProductReport([], [], [], { period: "daily" });
+
+        expect(report.generatePeriodKey("2026-03-21")).toBe("2026-03-21");
+        expect(report.generatePeriodKey("2026-12-01")).toBe("2026-12-01");
+      });
+
+      it("should generate weekly period keys (Monday to Sunday)", () => {
+        const report = new ProductReport([], [], [], { period: "weekly" });
+
+        // March 21, 2026 is a Saturday, should be in week starting March 16 (Monday)
+        expect(report.generatePeriodKey("2026-03-21")).toBe(
+          "2026-03-16/2026-03-22",
+        );
+
+        // March 16, 2026 is a Monday, should be start of its week
+        expect(report.generatePeriodKey("2026-03-16")).toBe(
+          "2026-03-16/2026-03-22",
+        );
+
+        // March 22, 2026 is a Sunday, should be end of same week
+        expect(report.generatePeriodKey("2026-03-22")).toBe(
+          "2026-03-16/2026-03-22",
+        );
+      });
+
+      it("should generate monthly period keys", () => {
+        const report = new ProductReport([], [], [], { period: "monthly" });
+
+        expect(report.generatePeriodKey("2026-03-21")).toBe("2026-03");
+        expect(report.generatePeriodKey("2026-12-01")).toBe("2026-12");
+        expect(report.generatePeriodKey("2026-01-31")).toBe("2026-01");
+      });
+
+      it("should handle period is null", () => {
+        const report = new ProductReport([], [], [], { period: null });
+
+        expect(report.generatePeriodKey("2026-03-21")).toBeNull();
+      });
+    });
+
+    describe("Part 4: Period Aggregation", () => {
+      it("should add periods when period option is set", () => {
+        const flatData = [
+          {
+            productId: "p1",
+            combinationId: "combo1",
+            productName: "Product 1",
+            date: "2026-03-21",
+            ingresos: 1000,
+            cantidad: 1,
+            isB2B: false,
+          },
+          {
+            productId: "p1",
+            combinationId: "combo1",
+            productName: "Product 1",
+            date: "2026-03-21",
+            ingresos: 500,
+            cantidad: 1,
+            isB2B: true,
+          },
+          {
+            productId: "p1",
+            combinationId: "combo1",
+            productName: "Product 1",
+            date: "2026-03-22",
+            ingresos: 2000,
+            cantidad: 2,
+            isB2B: false,
+          },
+        ];
+
+        const report = new ProductReport([], [], [], { period: "daily" });
+        const result = report.aggregateByCombination(flatData);
+
+        expect(result).toHaveLength(1);
+        expect(result[0].periods).toBeDefined();
+        expect(result[0].periods["2026-03-21"]).toEqual({
+          ingresos: 1500, // 1000 + 500
+          cantidad: 2, // 1 + 1
+          b2bIngresos: 500,
+          b2cIngresos: 1000,
+          b2bCantidad: 1,
+          b2cCantidad: 1,
+        });
+        expect(result[0].periods["2026-03-22"]).toEqual({
+          ingresos: 2000,
+          cantidad: 2,
+          b2bIngresos: 0,
+          b2cIngresos: 2000,
+          b2bCantidad: 0,
+          b2cCantidad: 2,
+        });
+      });
+
+      it("should not add periods when period is null", () => {
+        const flatData = [
+          {
+            productId: "p1",
+            combinationId: "combo1",
+            date: "2026-03-21",
+            ingresos: 1000,
+            cantidad: 1,
+            isB2B: false,
+          },
+        ];
+
+        const report = new ProductReport([], [], [], { period: null });
+        const result = report.aggregateByCombination(flatData);
+
+        expect(result[0].periods).toBeUndefined();
+      });
+
+      it("should handle weekly period aggregation", () => {
+        const flatData = [
+          {
+            productId: "p1",
+            combinationId: "combo1",
+            date: "2026-03-16",
+            ingresos: 1000,
+            cantidad: 1,
+            isB2B: false,
+          }, // Monday
+          {
+            productId: "p1",
+            combinationId: "combo1",
+            date: "2026-03-22",
+            ingresos: 2000,
+            cantidad: 1,
+            isB2B: true,
+          }, // Sunday (same week)
+          {
+            productId: "p1",
+            combinationId: "combo1",
+            date: "2026-03-23",
+            ingresos: 3000,
+            cantidad: 1,
+            isB2B: false,
+          }, // Monday (next week)
+        ];
+
+        const report = new ProductReport([], [], [], { period: "weekly" });
+        const result = report.aggregateByCombination(flatData);
+
+        expect(Object.keys(result[0].periods)).toHaveLength(2);
+        expect(result[0].periods["2026-03-16/2026-03-22"]).toEqual({
+          ingresos: 3000, // 1000 + 2000
+          cantidad: 2,
+          b2bIngresos: 2000,
+          b2cIngresos: 1000,
+          b2bCantidad: 1,
+          b2cCantidad: 1,
+        });
+        expect(result[0].periods["2026-03-23/2026-03-29"]).toEqual({
+          ingresos: 3000,
+          cantidad: 1,
+          b2bIngresos: 0,
+          b2cIngresos: 3000,
+          b2bCantidad: 0,
+          b2cCantidad: 1,
+        });
+      });
+    });
+
+    describe("Part 5: Complete Integration", () => {
+      it("should handle complete aggregation with mixed data", () => {
+        const flatData = [
+          // Product 1, Combination 1 - Multiple dates and B2B/B2C
+          {
+            productId: "p1",
+            combinationId: "combo1",
+            productName: "Bread",
+            combinationName: "Small",
+            categoryId: "cat1",
+            categoryName: "Bakery",
+            date: "2026-03-21",
+            ingresos: 1000,
+            cantidad: 1,
+            isB2B: false,
+          },
+          {
+            productId: "p1",
+            combinationId: "combo1",
+            productName: "Bread",
+            combinationName: "Small",
+            categoryId: "cat1",
+            categoryName: "Bakery",
+            date: "2026-03-21",
+            ingresos: 1500,
+            cantidad: 1,
+            isB2B: true,
+          },
+          {
+            productId: "p1",
+            combinationId: "combo1",
+            productName: "Bread",
+            combinationName: "Small",
+            categoryId: "cat1",
+            categoryName: "Bakery",
+            date: "2026-03-22",
+            ingresos: 2000,
+            cantidad: 2,
+            isB2B: false,
+          },
+
+          // Product 1, Combination 2
+          {
+            productId: "p1",
+            combinationId: "combo2",
+            productName: "Bread",
+            combinationName: "Large",
+            categoryId: "cat1",
+            categoryName: "Bakery",
+            date: "2026-03-21",
+            ingresos: 3000,
+            cantidad: 1,
+            isB2B: true,
+          },
+
+          // Product 2, No combination
+          {
+            productId: "p2",
+            combinationId: null,
+            productName: "Cookie",
+            combinationName: null,
+            categoryId: "cat2",
+            categoryName: "Sweets",
+            date: "2026-03-22",
+            ingresos: 500,
+            cantidad: 3,
+            isB2B: false,
+          },
+        ];
+
+        const report = new ProductReport([], [], [], { period: "daily" });
+        const result = report.aggregateByCombination(flatData);
+
+        // Should have 3 combinations: p1-combo1, p1-combo2, p2-base
+        expect(result).toHaveLength(3);
+
+        // Test Product 1, Combination 1
+        const p1combo1 = result.find(
+          (r) => r.productId === "p1" && r.combinationId === "combo1",
+        );
+        expect(p1combo1).toMatchObject({
+          productName: "Bread",
+          combinationName: "Small",
+          categoryName: "Bakery",
+          ingresos: 4500, // 1000 + 1500 + 2000
+          cantidad: 4, // 1 + 1 + 2
+          b2bIngresos: 1500,
+          b2cIngresos: 3000, // 1000 + 2000
+          b2bCantidad: 1,
+          b2cCantidad: 3, // 1 + 2
+        });
+
+        // Test periods for p1combo1
+        expect(p1combo1.periods["2026-03-21"]).toEqual({
+          ingresos: 2500,
+          cantidad: 2,
+          b2bIngresos: 1500,
+          b2cIngresos: 1000,
+          b2bCantidad: 1,
+          b2cCantidad: 1,
+        });
+        expect(p1combo1.periods["2026-03-22"]).toEqual({
+          ingresos: 2000,
+          cantidad: 2,
+          b2bIngresos: 0,
+          b2cIngresos: 2000,
+          b2bCantidad: 0,
+          b2cCantidad: 2,
+        });
+
+        // Test Product 2, no combination
+        const p2base = result.find(
+          (r) => r.productId === "p2" && r.combinationId === null,
+        );
+        expect(p2base).toMatchObject({
+          productName: "Cookie",
+          combinationName: null,
+          ingresos: 500,
+          cantidad: 3,
+          b2bIngresos: 0,
+          b2cIngresos: 500,
+          b2bCantidad: 0,
+          b2cCantidad: 3,
+        });
+        expect(p2base.periods["2026-03-22"]).toEqual({
+          ingresos: 500,
+          cantidad: 3,
+          b2bIngresos: 0,
+          b2cIngresos: 500,
+          b2bCantidad: 0,
+          b2cCantidad: 3,
+        });
+      });
+    });
+  });
+
+  describe("transformToOutput", () => {
+    // Sample combination data from Step 2
+    const mockCombinationData = [
+      {
+        productId: "p1",
+        combinationId: "combo1",
+        productName: "Bread",
+        combinationName: "Small",
+        categoryId: "cat1",
+        categoryName: "Bakery",
+        ingresos: 3000,
+        cantidad: 3,
+        b2bIngresos: 1000,
+        b2cIngresos: 2000,
+        b2bCantidad: 1,
+        b2cCantidad: 2,
+        periods: {
+          "2026-03-21": {
+            ingresos: 1500,
+            cantidad: 2,
+            b2bIngresos: 500,
+            b2cIngresos: 1000,
+            b2bCantidad: 1,
+            b2cCantidad: 1,
+          },
+          "2026-03-22": {
+            ingresos: 1500,
+            cantidad: 1,
+            b2bIngresos: 500,
+            b2cIngresos: 1000,
+            b2bCantidad: 0,
+            b2cCantidad: 1,
+          },
+        },
+      },
+    ];
+
+    describe("Part 1: Segment Filtering", () => {
+      it("should show totals only when segment is 'none'", () => {
+        const report = new ProductReport([], [], [], { segment: "none" });
+        const result = report.applySegmentFilteringToItem(
+          mockCombinationData[0],
+        );
+
+        expect(result).toMatchObject({
+          ingresos: 3000,
+          cantidad: 3,
+        });
+        expect(result).not.toHaveProperty("b2bIngresos");
+        expect(result).not.toHaveProperty("b2cIngresos");
+      });
+
+      it("should show totals with B2B/B2C breakdown when segment is 'all'", () => {
+        const report = new ProductReport([], [], [], { segment: "all" });
+        const result = report.applySegmentFilteringToItem(
+          mockCombinationData[0],
+        );
+
+        expect(result).toMatchObject({
+          ingresos: 3000,
+          cantidad: 3,
+          b2bIngresos: 1000,
+          b2cIngresos: 2000,
+          b2bCantidad: 1,
+          b2cCantidad: 2,
+        });
+      });
+
+      it("should filter to only B2B metrics when segment is 'b2b'", () => {
+        const report = new ProductReport([], [], [], { segment: "b2b" });
+        const result = report.applySegmentFilteringToItem(
+          mockCombinationData[0],
+        );
+
+        expect(result).toMatchObject({
+          ingresos: 1000, // Only b2bIngresos
+          cantidad: 1, // Only b2bCantidad
+        });
+        expect(result).not.toHaveProperty("b2bIngresos");
+        expect(result).not.toHaveProperty("b2cIngresos");
+      });
+
+      it("should filter to only B2C metrics when segment is 'b2c'", () => {
+        const report = new ProductReport([], [], [], { segment: "b2c" });
+        const result = report.applySegmentFilteringToItem(
+          mockCombinationData[0],
+        );
+
+        expect(result).toMatchObject({
+          ingresos: 2000, // Only b2cIngresos
+          cantidad: 2, // Only b2cCantidad
+        });
+        expect(result).not.toHaveProperty("b2bIngresos");
+        expect(result).not.toHaveProperty("b2cIngresos");
+      });
+
+      it("should apply segment filtering to periods as well", () => {
+        const report = new ProductReport([], [], [], {
+          segment: "b2b",
+          period: "daily",
+        });
+        const result = report.transformToOutput(mockCombinationData);
+
+        expect(result[0].periods["2026-03-21"]).toEqual({
+          ingresos: 500,
+          cantidad: 1,
+        });
+        expect(result[0].periods["2026-03-22"]).toEqual({
+          ingresos: 500,
+          cantidad: 0,
+        });
+      });
+    });
+
+    describe("Part 2: Metrics Filtering", () => {
+      it("should keep only revenue metrics when metrics is 'ingresos' with segment 'all'", () => {
+        const report = new ProductReport([], [], [], {
+          metrics: "ingresos",
+          segment: "all",
+        });
+        const result = report.applyMetricsFilteringToItem(
+          mockCombinationData[0],
+        );
+
+        expect(result).toMatchObject({
+          ingresos: 3000,
+          b2bIngresos: 1000,
+          b2cIngresos: 2000,
+        });
+        expect(result).not.toHaveProperty("cantidad");
+        expect(result).not.toHaveProperty("b2bCantidad");
+        expect(result).not.toHaveProperty("b2cCantidad");
+      });
+
+      it("should keep only quantity metrics when metrics is 'cantidad' with segment 'all'", () => {
+        const report = new ProductReport([], [], [], {
+          metrics: "cantidad",
+          segment: "all",
+        });
+        const result = report.applyMetricsFilteringToItem(
+          mockCombinationData[0],
+        );
+
+        expect(result).toMatchObject({
+          cantidad: 3,
+          b2bCantidad: 1,
+          b2cCantidad: 2,
+        });
+        expect(result).not.toHaveProperty("ingresos");
+        expect(result).not.toHaveProperty("b2bIngresos");
+        expect(result).not.toHaveProperty("b2cIngresos");
+      });
+
+      it("should keep all metrics when metrics is 'both' with segment 'all'", () => {
+        const report = new ProductReport([], [], [], {
+          metrics: "both",
+          segment: "all",
+        });
+        const result = report.applyMetricsFilteringToItem(
+          mockCombinationData[0],
+        );
+
+        expect(result).toMatchObject({
+          ingresos: 3000,
+          cantidad: 3,
+          b2bIngresos: 1000,
+          b2cIngresos: 2000,
+          b2bCantidad: 1,
+          b2cCantidad: 2,
+        });
+      });
+
+      it("should keep only revenue totals when metrics is 'ingresos' with segment 'none'", () => {
+        const report = new ProductReport([], [], [], {
+          metrics: "ingresos",
+          segment: "none",
+        });
+        // Apply both segment filtering (removes B2B/B2C) and metrics filtering (removes quantity)
+        let result = report.applySegmentFilteringToItem(mockCombinationData[0]);
+        result = report.applyMetricsFilteringToItem(result);
+
+        expect(result).toMatchObject({
+          ingresos: 3000,
+        });
+        expect(result).not.toHaveProperty("cantidad");
+        expect(result).not.toHaveProperty("b2bIngresos");
+        expect(result).not.toHaveProperty("b2cIngresos");
+        expect(result).not.toHaveProperty("b2bCantidad");
+        expect(result).not.toHaveProperty("b2cCantidad");
+      });
+
+      it("should apply metrics filtering to periods as well", () => {
+        const report = new ProductReport([], [], [], {
+          metrics: "ingresos",
+          segment: "all",
+          period: "daily",
+        });
+        const result = report.transformToOutput(mockCombinationData);
+
+        expect(result[0].periods["2026-03-21"]).toEqual({
+          ingresos: 1500,
+          b2bIngresos: 500,
+          b2cIngresos: 1000,
+        });
+        expect(result[0].periods["2026-03-21"]).not.toHaveProperty("cantidad");
+      });
+    });
+
+    describe("Part 3: Detail Level Grouping", () => {
+      const mockCombinationDataForGrouping = [
+        {
+          productId: "p1",
+          combinationId: "combo1",
+          productName: "Bread",
+          combinationName: "Small",
+          categoryId: "cat1",
+          categoryName: "Bakery",
+          ingresos: 1500,
+          cantidad: 2,
+          b2bIngresos: 500,
+          b2cIngresos: 1000,
+          b2bCantidad: 1,
+          b2cCantidad: 1,
+          periods: {
+            "2026-03-21": {
+              ingresos: 1000,
+              cantidad: 1,
+              b2bIngresos: 300,
+              b2cIngresos: 700,
+              b2bCantidad: 0,
+              b2cCantidad: 1,
+            },
+            "2026-03-22": {
+              ingresos: 500,
+              cantidad: 1,
+              b2bIngresos: 200,
+              b2cIngresos: 300,
+              b2bCantidad: 1,
+              b2cCantidad: 0,
+            },
+          },
         },
         {
-          id: 'G7af7toUqlEmyJZ74PhQ',
-          userId: 'qjqQsjEE3WP3drG2KVDHHk9Nw693',
-          dueDate: '2025-01-20T12:00:00.000Z',
-          status: 2,
-          fulfillmentType: 'pickup',
-          paymentMethod: 'transfer',
-          orderItems: [
-            {
-              productId: 'zXHgfeYE4dqWP6XuqV34',
-              productName: 'original',
-              collectionId: 'GRzDxeAWOj2HBhmlObSy',
-              collectionName: 'sourdough',
-              quantity: 1,
-              currentPrice: 18000,
-              taxPercentage: 0,
-              isComplimentary: false,
+          productId: "p1",
+          combinationId: "combo2",
+          productName: "Bread",
+          combinationName: "Large",
+          categoryId: "cat1",
+          categoryName: "Bakery",
+          ingresos: 2500,
+          cantidad: 3,
+          b2bIngresos: 1000,
+          b2cIngresos: 1500,
+          b2bCantidad: 1,
+          b2cCantidad: 2,
+          periods: {
+            "2026-03-21": {
+              ingresos: 1500,
+              cantidad: 2,
+              b2bIngresos: 600,
+              b2cIngresos: 900,
+              b2bCantidad: 1,
+              b2cCantidad: 1,
             },
-            {
-              productId: 'GV4N5DadSlhPFY4Oqrgj',
-              productName: 'mermelada de fresa',
-              collectionId: 'HvG0VIiluQ3ULrgp7QSN',
-              collectionName: 'untables',
-              quantity: 1,
-              currentPrice: 18000,
-              taxPercentage: 0,
-              isComplimentary: false,
+            "2026-03-22": {
+              ingresos: 1000,
+              cantidad: 1,
+              b2bIngresos: 400,
+              b2cIngresos: 600,
+              b2bCantidad: 0,
+              b2cCantidad: 1,
             },
-          ],
+          },
+        },
+        {
+          productId: "p2",
+          combinationId: null,
+          productName: "Cookie",
+          combinationName: null,
+          categoryId: "cat2",
+          categoryName: "Sweets",
+          ingresos: 800,
+          cantidad: 4,
+          b2bIngresos: 200,
+          b2cIngresos: 600,
+          b2bCantidad: 1,
+          b2cCantidad: 3,
+          periods: {
+            "2026-03-22": {
+              ingresos: 800,
+              cantidad: 4,
+              b2bIngresos: 200,
+              b2cIngresos: 600,
+              b2bCantidad: 1,
+              b2cCantidad: 3,
+            },
+          },
         },
       ];
 
-      const realProducts = [
-        { id: 'xJpCPiTpzkJvpw3hGwkK', name: 'zaatar', collectionId: 'GRzDxeAWOj2HBhmlObSy', collectionName: 'sourdough', isDeleted: false },
-        { id: 'zXHgfeYE4dqWP6XuqV34', name: 'original', collectionId: 'GRzDxeAWOj2HBhmlObSy', collectionName: 'sourdough', isDeleted: false },
-        { id: 'GV4N5DadSlhPFY4Oqrgj', name: 'mermelada de fresa', collectionId: 'HvG0VIiluQ3ULrgp7QSN', collectionName: 'untables', isDeleted: false },
+      it("should keep combinations when detailLevel is 'combination'", () => {
+        const report = new ProductReport([], [], [], {
+          detailLevel: "combination",
+        });
+        const result = report.applyDetailLevelGroupingToItems(
+          mockCombinationDataForGrouping,
+        );
+
+        // Should have 3 items (2 combinations + 1 base product)
+        expect(result).toHaveLength(3);
+        expect(
+          result.find(
+            (r) => r.productId === "p1" && r.combinationId === "combo1",
+          ),
+        ).toBeDefined();
+        expect(
+          result.find(
+            (r) => r.productId === "p1" && r.combinationId === "combo2",
+          ),
+        ).toBeDefined();
+        expect(
+          result.find((r) => r.productId === "p2" && r.combinationId === null),
+        ).toBeDefined();
+      });
+
+      it("should group combinations into products when detailLevel is 'product'", () => {
+        const report = new ProductReport([], [], [], {
+          detailLevel: "product",
+          segment: "all",
+        });
+        const result = report.applyDetailLevelGroupingToItems(
+          mockCombinationDataForGrouping,
+        );
+
+        // Should have 2 products (p1 and p2)
+        expect(result).toHaveLength(2);
+
+        // Find product p1 (should combine combo1 + combo2)
+        const p1 = result.find((r) => r.productId === "p1");
+        expect(p1).toMatchObject({
+          productId: "p1",
+          combinationId: null,
+          productName: "Bread",
+          combinationName: null,
+          categoryId: "cat1",
+          categoryName: "Bakery",
+          ingresos: 4000, // 1500 + 2500
+          cantidad: 5, // 2 + 3
+          b2bIngresos: 1500, // 500 + 1000
+          b2cIngresos: 2500, // 1000 + 1500
+          b2bCantidad: 2, // 1 + 1
+          b2cCantidad: 3, // 1 + 2
+        });
+
+        // Find product p2 (already a base product)
+        const p2 = result.find((r) => r.productId === "p2");
+        expect(p2).toMatchObject({
+          productId: "p2",
+          combinationId: null,
+          productName: "Cookie",
+          combinationName: null,
+          ingresos: 800,
+          cantidad: 4,
+        });
+      });
+
+      it("should group to product level with segment 'none' (no breakdown fields)", () => {
+        const report = new ProductReport([], [], [], {
+          detailLevel: "product",
+          segment: "none",
+        });
+        // First apply segment filtering to remove B2B/B2C fields, then group
+        const segmentFiltered = mockCombinationDataForGrouping.map((item) =>
+          report.applySegmentFilteringToItem(item),
+        );
+        const result = report.applyDetailLevelGroupingToItems(segmentFiltered);
+
+        const p1 = result.find((r) => r.productId === "p1");
+        expect(p1).toMatchObject({
+          productId: "p1",
+          combinationId: null,
+          productName: "Bread",
+          ingresos: 4000, // 1500 + 2500
+          cantidad: 5, // 2 + 3
+        });
+        // Should not have breakdown fields
+        expect(p1).not.toHaveProperty("b2bIngresos");
+        expect(p1).not.toHaveProperty("b2cIngresos");
+      });
+
+      it("should aggregate periods when grouping to product level", () => {
+        const report = new ProductReport([], [], [], {
+          detailLevel: "product",
+          segment: "all",
+          period: "daily",
+        });
+        const result = report.transformToOutput(mockCombinationDataForGrouping);
+
+        const p1 = result.find((r) => r.productId === "p1");
+
+        // Periods should be combined: combo1 + combo2 per date
+        expect(p1.periods["2026-03-21"]).toEqual({
+          ingresos: 2500, // 1000 + 1500
+          cantidad: 3, // 1 + 2
+          b2bIngresos: 900, // 300 + 600
+          b2cIngresos: 1600, // 700 + 900
+          b2bCantidad: 1, // 0 + 1
+          b2cCantidad: 2, // 1 + 1
+        });
+
+        expect(p1.periods["2026-03-22"]).toEqual({
+          ingresos: 1500, // 500 + 1000
+          cantidad: 2, // 1 + 1
+          b2bIngresos: 600, // 200 + 400
+          b2cIngresos: 900, // 300 + 600
+          b2bCantidad: 1, // 1 + 0
+          b2cCantidad: 1, // 0 + 1
+        });
+      });
+    });
+
+    describe("Part 4: Category Filtering", () => {
+      const mockCombinationDataForCategories = [
+        {
+          productId: "p1",
+          combinationId: "combo1",
+          productName: "Bread",
+          categoryId: "cat1",
+          categoryName: "Bakery",
+          ingresos: 1000,
+          cantidad: 2,
+        },
+        {
+          productId: "p2",
+          combinationId: null,
+          productName: "Cookie",
+          categoryId: "cat2",
+          categoryName: "Sweets",
+          ingresos: 500,
+          cantidad: 1,
+        },
+        {
+          productId: "p3",
+          combinationId: "combo2",
+          productName: "Cake",
+          categoryId: "cat2",
+          categoryName: "Sweets",
+          ingresos: 800,
+          cantidad: 1,
+        },
+        {
+          productId: "p4",
+          combinationId: null,
+          productName: "Sandwich",
+          categoryId: "cat3",
+          categoryName: "Savory",
+          ingresos: 600,
+          cantidad: 1,
+        },
       ];
 
-      const report = new ProductReport(realOrders, [], realProducts);
-      const fullReport = report.generateReport();
+      it("should return all items when categories is null", () => {
+        const report = new ProductReport([], [], [], { categories: null });
+        const result = report.applyCategoryFilteringToItems(
+          mockCombinationDataForCategories,
+        );
 
-      expect(fullReport.metadata.totalOrders).toBe(2);
-      expect(fullReport.products.length).toBe(3);
-      expect(fullReport.summary.totals.totalIngresos).toBe(58000); // 22000 + 18000 + 18000
-      expect(fullReport.summary.totals.totalCantidad).toBe(3);
+        expect(result).toHaveLength(4);
+      });
+
+      it("should filter by single category", () => {
+        const report = new ProductReport([], [], [], { categories: ["cat1"] });
+        const result = report.applyCategoryFilteringToItems(
+          mockCombinationDataForCategories,
+        );
+
+        expect(result).toHaveLength(1);
+        expect(result[0].categoryId).toBe("cat1");
+        expect(result[0].productName).toBe("Bread");
+      });
+
+      it("should filter by multiple categories", () => {
+        const report = new ProductReport([], [], [], {
+          categories: ["cat1", "cat3"],
+        });
+        const result = report.applyCategoryFilteringToItems(
+          mockCombinationDataForCategories,
+        );
+
+        expect(result).toHaveLength(2);
+
+        const categoryIds = result.map((r) => r.categoryId);
+        expect(categoryIds).toContain("cat1");
+        expect(categoryIds).toContain("cat3");
+        expect(categoryIds).not.toContain("cat2");
+      });
+
+      it("should return empty array when filtering by non-existent category", () => {
+        const report = new ProductReport([], [], [], {
+          categories: ["nonexistent"],
+        });
+        const result = report.applyCategoryFilteringToItems(
+          mockCombinationDataForCategories,
+        );
+
+        expect(result).toHaveLength(0);
+      });
+
+      it("should filter after detail level grouping", () => {
+        // Test that category filtering works after product-level grouping
+        const report = new ProductReport([], [], [], {
+          categories: ["cat2"],
+          detailLevel: "product",
+        });
+        const result = report.applyCategoryFilteringToItems(
+          mockCombinationDataForCategories,
+        );
+
+        // Should have 2 products (p2 and p3 are separate products in cat2, p1 and p4 filtered out)
+        expect(result).toHaveLength(2);
+
+        const productIds = result.map((r) => r.productId);
+        expect(productIds).toContain("p2");
+        expect(productIds).toContain("p3");
+
+        // All should be in cat2
+        result.forEach((item) => {
+          expect(item.categoryId).toBe("cat2");
+        });
+      });
+    });
+
+    describe("Part 5: Final Output Formatting", () => {
+      const mockDataForFinalFormatting = [
+        {
+          productId: "p1",
+          combinationId: null,
+          productName: "Bread",
+          combinationName: null,
+          categoryId: "cat1",
+          categoryName: "Bakery",
+          ingresos: 500,
+          cantidad: 2,
+          b2bIngresos: 200,
+          b2cIngresos: 300,
+          b2bCantidad: 1,
+          b2cCantidad: 1,
+          periods: {
+            "2026-03-21": {
+              ingresos: 300,
+              cantidad: 1,
+              b2bIngresos: 100,
+              b2cIngresos: 200,
+              b2bCantidad: 1,
+              b2cCantidad: 0,
+            },
+            "2026-03-22": {
+              ingresos: 200,
+              cantidad: 1,
+              b2bIngresos: 100,
+              b2cIngresos: 100,
+              b2bCantidad: 0,
+              b2cCantidad: 1,
+            },
+          },
+        },
+        {
+          productId: "p2",
+          combinationId: "combo1",
+          productName: "Cookie",
+          combinationName: "Large",
+          categoryId: "cat1",
+          categoryName: "Bakery",
+          ingresos: 0,
+          cantidad: 0,
+          b2bIngresos: 0,
+          b2cIngresos: 0,
+          b2bCantidad: 0,
+          b2cCantidad: 0,
+          periods: {},
+        },
+      ];
+
+      it("should calculate avgPrice correctly", () => {
+        const report = new ProductReport([], [], [], { segment: "all" });
+        const result = report.applyFinalFormattingToItems(
+          mockDataForFinalFormatting,
+        );
+
+        expect(result[0]).toHaveProperty("avgPrice", 250); // 500 / 2 = 250
+        expect(result[1]).toHaveProperty("avgPrice", 0); // 0 / 0 = 0
+      });
+
+      it("should add avgPrice field for all segments", () => {
+        const testCases = ["none", "all", "b2b", "b2c"];
+
+        testCases.forEach((segment) => {
+          const report = new ProductReport([], [], [], { segment });
+          const result = report.applyFinalFormattingToItems(
+            mockDataForFinalFormatting,
+          );
+
+          result.forEach((item) => {
+            expect(item).toHaveProperty("avgPrice");
+            expect(typeof item.avgPrice).toBe("number");
+          });
+        });
+      });
+
+      it("should sort products by totalIngresos descending", () => {
+        const unsortedData = [
+          {
+            productId: "p1",
+            combinationId: null,
+            productName: "Low Sales",
+            categoryId: "cat1",
+            categoryName: "Bakery",
+            ingresos: 100,
+            cantidad: 1,
+          },
+          {
+            productId: "p2",
+            combinationId: null,
+            productName: "High Sales",
+            categoryId: "cat1",
+            categoryName: "Bakery",
+            ingresos: 1000,
+            cantidad: 2,
+          },
+          {
+            productId: "p3",
+            combinationId: null,
+            productName: "Medium Sales",
+            categoryId: "cat1",
+            categoryName: "Bakery",
+            ingresos: 500,
+            cantidad: 1,
+          },
+        ];
+
+        const report = new ProductReport([], [], [], {});
+        const result = report.applyFinalFormattingToItems(unsortedData);
+
+        expect(result[0].productName).toBe("High Sales");
+        expect(result[1].productName).toBe("Medium Sales");
+        expect(result[2].productName).toBe("Low Sales");
+        expect(result[0].totalIngresos).toBe(1000);
+        expect(result[1].totalIngresos).toBe(500);
+        expect(result[2].totalIngresos).toBe(100);
+      });
+
+      it("should rename ingresos to totalIngresos and cantidad to totalCantidad", () => {
+        const report = new ProductReport([], [], [], {});
+        const result = report.applyFinalFormattingToItems(
+          mockDataForFinalFormatting,
+        );
+
+        result.forEach((item) => {
+          expect(item).toHaveProperty("totalIngresos");
+          expect(item).toHaveProperty("totalCantidad");
+          expect(item).not.toHaveProperty("ingresos");
+          expect(item).not.toHaveProperty("cantidad");
+        });
+      });
+
+      it("should preserve period structure without renaming", () => {
+        const report = new ProductReport([], [], [], { segment: "all" });
+        const result = report.applyFinalFormattingToItems(
+          mockDataForFinalFormatting,
+        );
+
+        const itemWithPeriods = result.find((item) => item.productId === "p1");
+        expect(itemWithPeriods).toHaveProperty("periods");
+        expect(itemWithPeriods.periods["2026-03-21"]).toHaveProperty(
+          "ingresos",
+        );
+        expect(itemWithPeriods.periods["2026-03-21"]).toHaveProperty(
+          "cantidad",
+        );
+        expect(itemWithPeriods.periods["2026-03-21"]).not.toHaveProperty(
+          "totalIngresos",
+        );
+      });
+
+      it("should handle empty periods correctly", () => {
+        const report = new ProductReport([], [], [], {});
+        const result = report.applyFinalFormattingToItems(
+          mockDataForFinalFormatting,
+        );
+
+        const emptyItem = result.find((item) => item.productId === "p2");
+        expect(emptyItem).toHaveProperty("periods");
+        expect(emptyItem.periods).toEqual({});
+      });
     });
   });
 });

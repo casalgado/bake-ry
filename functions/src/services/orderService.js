@@ -404,6 +404,7 @@ const createOrderService = () => {
       // Extract report-specific options before querying orders
       const options = {
         categories: query.filters.categories?.split(',') || null,
+        detailLevel: query.filters.detailLevel || 'product',
         period: query.filters.period || null,
         metrics: query.filters.metrics || 'both',
         segment: query.filters.segment || 'none',
@@ -418,6 +419,7 @@ const createOrderService = () => {
         filters: { ...query.filters },
       };
       delete orderQuery.filters.categories;
+      delete orderQuery.filters.detailLevel;
       delete orderQuery.filters.period;
       delete orderQuery.filters.metrics;
       delete orderQuery.filters.segment;
