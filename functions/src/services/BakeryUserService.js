@@ -495,7 +495,7 @@ const createBakeryUserService = () => {
     create,
     update,
     getHistory,
-    delete: remove,
+    remove, // This overrides the baseService.remove
     getBakerySubscriptionData,
     updateUserJWTWithSubscription,
     refreshAllBakeryUserTokens,

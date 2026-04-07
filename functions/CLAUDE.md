@@ -31,7 +31,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Core Patterns
 
-This is a Firebase Functions Express.js API for a bakery management system with a factory pattern architecture:
+This is a Firebase Functions Express.js API for a restaurant management system with a factory pattern architecture:
 
 1. **Factory Pattern**: Controllers and services are created using factory functions
    - `src/controllers/base/controllerFactory.js` - Creates standardized CRUD controllers
