@@ -306,33 +306,6 @@ class ProductReport {
     return periods;
   }
 
-  // Individual methods for testing specific behaviors
-  applySegmentFilteringToItem(item) {
-    // Deep copy to avoid mutating original data
-    const transformed = JSON.parse(JSON.stringify(item));
-    this.applySegmentFiltering(transformed);
-    return transformed;
-  }
-
-  applyMetricsFilteringToItem(item) {
-    // Deep copy to avoid mutating original data
-    const transformed = JSON.parse(JSON.stringify(item));
-    this.applyMetricsFiltering(transformed);
-    return transformed;
-  }
-
-  applyDetailLevelGroupingToItems(items) {
-    return this.applyDetailLevelGrouping(items);
-  }
-
-  applyCategoryFilteringToItems(items) {
-    return this.applyCategoryFiltering(items);
-  }
-
-  applyFinalFormattingToItems(items) {
-    return this.applyFinalFormatting(items);
-  }
-
   // Full pipeline for production use
   transformToOutput(combinationData) {
     let result = combinationData.map(item => {
@@ -340,28 +313,28 @@ class ProductReport {
       const transformed = JSON.parse(JSON.stringify(item));
 
       // Apply segment filtering
-      this.applySegmentFiltering(transformed);
+      ProductReport.applySegmentFiltering(transformed, this.options.segment);
 
       // Apply metrics filtering
-      this.applyMetricsFiltering(transformed);
+      ProductReport.applyMetricsFiltering(transformed, this.options.metrics);
 
       return transformed;
     });
 
     // Apply detail level grouping
-    result = this.applyDetailLevelGrouping(result);
+    result = ProductReport.applyDetailLevelGrouping(result, this.options.detailLevel);
 
     // Apply category filtering
-    result = this.applyCategoryFiltering(result);
+    result = ProductReport.applyCategoryFiltering(result, this.options.categories);
 
     // Apply final formatting
-    result = this.applyFinalFormatting(result);
+    result = ProductReport.applyFinalFormatting(result);
 
     return result;
   }
 
-  applySegmentFiltering(item) {
-    switch (this.options.segment) {
+  static applySegmentFiltering(item, segment) {
+    switch (segment) {
     case 'none':
       // Keep only total metrics, remove segment breakdown
       delete item.b2bIngresos;
@@ -430,8 +403,8 @@ class ProductReport {
     }
   }
 
-  applyMetricsFiltering(item) {
-    switch (this.options.metrics) {
+  static applyMetricsFiltering(item, metrics) {
+    switch (metrics) {
     case 'ingresos':
       // Keep only revenue fields (remove quantity fields if they exist)
       if (Object.prototype.hasOwnProperty.call(item, 'cantidad')) delete item.cantidad;
@@ -470,8 +443,8 @@ class ProductReport {
     }
   }
 
-  applyDetailLevelGrouping(items) {
-    if (this.options.detailLevel === 'combination') {
+  static applyDetailLevelGrouping(items, detailLevel) {
+    if (detailLevel === 'combination') {
       // Keep as-is, return all combinations
       return items;
     }
@@ -499,7 +472,7 @@ class ProductReport {
 
     // Aggregate each product group
     return Object.values(productGroups).map(group => {
-      const aggregated = this.aggregateProductItems(group.items);
+      const aggregated = ProductReport.aggregateProductItems(group.items);
 
       return {
         ...group,
@@ -508,7 +481,7 @@ class ProductReport {
     });
   }
 
-  aggregateProductItems(items) {
+  static aggregateProductItems(items) {
     // Check which fields exist in the first item to determine what to aggregate
     const firstItem = items[0];
 
@@ -588,31 +561,40 @@ class ProductReport {
     return result;
   }
 
-  applyCategoryFiltering(items) {
+  static applyCategoryFiltering(items, categories) {
     // If no category filter specified, return all items
-    if (!this.options.categories || this.options.categories.length === 0) {
+    if (!categories || categories.length === 0) {
       return items;
     }
 
     // Filter items where categoryId is in the categories array
-    return items.filter(item => this.options.categories.includes(item.categoryId));
+    return items.filter(item => categories.includes(item.categoryId));
   }
 
-  applyFinalFormatting(items) {
+  static applyFinalFormatting(items) {
     // Apply final transformations to match API response structure
-    const formatted = items.map(item => {
+    const formatted = items.map((item) => {
       const result = { ...item };
 
-      // Calculate avgPrice (avoid division by zero)
-      const totalRevenue = result.ingresos || 0;
-      const totalQuantity = result.cantidad || 0;
-      result.avgPrice = totalQuantity > 0 ? totalRevenue / totalQuantity : 0;
+      // Calculate avgPrice only if both revenue and quantity fields exist
+      if (
+        Object.prototype.hasOwnProperty.call(result, "ingresos") &&
+        Object.prototype.hasOwnProperty.call(result, "cantidad")
+      ) {
+        const totalRevenue = result.ingresos || 0;
+        const totalQuantity = result.cantidad || 0;
+        result.avgPrice = totalQuantity > 0 ? totalRevenue / totalQuantity : 0;
+      }
 
-      // Rename fields to match API response
-      result.totalIngresos = result.ingresos;
-      result.totalCantidad = result.cantidad;
-      delete result.ingresos;
-      delete result.cantidad;
+      // Rename fields to match API response (only if they exist)
+      if (Object.prototype.hasOwnProperty.call(result, "ingresos")) {
+        result.totalIngresos = result.ingresos;
+        delete result.ingresos;
+      }
+      if (Object.prototype.hasOwnProperty.call(result, "cantidad")) {
+        result.totalCantidad = result.cantidad;
+        delete result.cantidad;
+      }
 
       // Preserve periods structure (don't rename fields inside periods)
       // Periods already have correct ingresos/cantidad field names
@@ -620,8 +602,19 @@ class ProductReport {
       return result;
     });
 
-    // Sort by totalIngresos descending
-    formatted.sort((a, b) => (b.totalIngresos || 0) - (a.totalIngresos || 0));
+    // Sort by totalIngresos descending (if totalIngresos field exists)
+    if (
+      formatted.length > 0 &&
+      Object.prototype.hasOwnProperty.call(formatted[0], "totalIngresos")
+    ) {
+      formatted.sort((a, b) => (b.totalIngresos || 0) - (a.totalIngresos || 0));
+    } else if (
+      formatted.length > 0 &&
+      Object.prototype.hasOwnProperty.call(formatted[0], "totalCantidad")
+    ) {
+      // Sort by quantity if revenue not available
+      formatted.sort((a, b) => (b.totalCantidad || 0) - (a.totalCantidad || 0));
+    }
 
     return formatted;
   }

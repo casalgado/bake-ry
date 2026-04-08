@@ -1120,26 +1120,22 @@ describe("ProductReport", () => {
 
     describe("Part 1: Segment Filtering", () => {
       it("should show totals only when segment is 'none'", () => {
-        const report = new ProductReport([], [], [], { segment: "none" });
-        const result = report.applySegmentFilteringToItem(
-          mockCombinationData[0],
-        );
+        const item = JSON.parse(JSON.stringify(mockCombinationData[0]));
+        ProductReport.applySegmentFiltering(item, "none");
 
-        expect(result).toMatchObject({
+        expect(item).toMatchObject({
           ingresos: 3000,
           cantidad: 3,
         });
-        expect(result).not.toHaveProperty("b2bIngresos");
-        expect(result).not.toHaveProperty("b2cIngresos");
+        expect(item).not.toHaveProperty("b2bIngresos");
+        expect(item).not.toHaveProperty("b2cIngresos");
       });
 
       it("should show totals with B2B/B2C breakdown when segment is 'all'", () => {
-        const report = new ProductReport([], [], [], { segment: "all" });
-        const result = report.applySegmentFilteringToItem(
-          mockCombinationData[0],
-        );
+        const item = JSON.parse(JSON.stringify(mockCombinationData[0]));
+        ProductReport.applySegmentFiltering(item, "all");
 
-        expect(result).toMatchObject({
+        expect(item).toMatchObject({
           ingresos: 3000,
           cantidad: 3,
           b2bIngresos: 1000,
@@ -1150,31 +1146,27 @@ describe("ProductReport", () => {
       });
 
       it("should filter to only B2B metrics when segment is 'b2b'", () => {
-        const report = new ProductReport([], [], [], { segment: "b2b" });
-        const result = report.applySegmentFilteringToItem(
-          mockCombinationData[0],
-        );
+        const item = JSON.parse(JSON.stringify(mockCombinationData[0]));
+        ProductReport.applySegmentFiltering(item, "b2b");
 
-        expect(result).toMatchObject({
+        expect(item).toMatchObject({
           ingresos: 1000, // Only b2bIngresos
           cantidad: 1, // Only b2bCantidad
         });
-        expect(result).not.toHaveProperty("b2bIngresos");
-        expect(result).not.toHaveProperty("b2cIngresos");
+        expect(item).not.toHaveProperty("b2bIngresos");
+        expect(item).not.toHaveProperty("b2cIngresos");
       });
 
       it("should filter to only B2C metrics when segment is 'b2c'", () => {
-        const report = new ProductReport([], [], [], { segment: "b2c" });
-        const result = report.applySegmentFilteringToItem(
-          mockCombinationData[0],
-        );
+        const item = JSON.parse(JSON.stringify(mockCombinationData[0]));
+        ProductReport.applySegmentFiltering(item, "b2c");
 
-        expect(result).toMatchObject({
+        expect(item).toMatchObject({
           ingresos: 2000, // Only b2cIngresos
           cantidad: 2, // Only b2cCantidad
         });
-        expect(result).not.toHaveProperty("b2bIngresos");
-        expect(result).not.toHaveProperty("b2cIngresos");
+        expect(item).not.toHaveProperty("b2bIngresos");
+        expect(item).not.toHaveProperty("b2cIngresos");
       });
 
       it("should apply segment filtering to periods as well", () => {
@@ -1197,53 +1189,38 @@ describe("ProductReport", () => {
 
     describe("Part 2: Metrics Filtering", () => {
       it("should keep only revenue metrics when metrics is 'ingresos' with segment 'all'", () => {
-        const report = new ProductReport([], [], [], {
-          metrics: "ingresos",
-          segment: "all",
-        });
-        const result = report.applyMetricsFilteringToItem(
-          mockCombinationData[0],
-        );
+        const item = JSON.parse(JSON.stringify(mockCombinationData[0]));
+        ProductReport.applyMetricsFiltering(item, "ingresos");
 
-        expect(result).toMatchObject({
+        expect(item).toMatchObject({
           ingresos: 3000,
           b2bIngresos: 1000,
           b2cIngresos: 2000,
         });
-        expect(result).not.toHaveProperty("cantidad");
-        expect(result).not.toHaveProperty("b2bCantidad");
-        expect(result).not.toHaveProperty("b2cCantidad");
+        expect(item).not.toHaveProperty("cantidad");
+        expect(item).not.toHaveProperty("b2bCantidad");
+        expect(item).not.toHaveProperty("b2cCantidad");
       });
 
       it("should keep only quantity metrics when metrics is 'cantidad' with segment 'all'", () => {
-        const report = new ProductReport([], [], [], {
-          metrics: "cantidad",
-          segment: "all",
-        });
-        const result = report.applyMetricsFilteringToItem(
-          mockCombinationData[0],
-        );
+        const item = JSON.parse(JSON.stringify(mockCombinationData[0]));
+        ProductReport.applyMetricsFiltering(item, "cantidad");
 
-        expect(result).toMatchObject({
+        expect(item).toMatchObject({
           cantidad: 3,
           b2bCantidad: 1,
           b2cCantidad: 2,
         });
-        expect(result).not.toHaveProperty("ingresos");
-        expect(result).not.toHaveProperty("b2bIngresos");
-        expect(result).not.toHaveProperty("b2cIngresos");
+        expect(item).not.toHaveProperty("ingresos");
+        expect(item).not.toHaveProperty("b2bIngresos");
+        expect(item).not.toHaveProperty("b2cIngresos");
       });
 
       it("should keep all metrics when metrics is 'both' with segment 'all'", () => {
-        const report = new ProductReport([], [], [], {
-          metrics: "both",
-          segment: "all",
-        });
-        const result = report.applyMetricsFilteringToItem(
-          mockCombinationData[0],
-        );
+        const item = JSON.parse(JSON.stringify(mockCombinationData[0]));
+        ProductReport.applyMetricsFiltering(item, "both");
 
-        expect(result).toMatchObject({
+        expect(item).toMatchObject({
           ingresos: 3000,
           cantidad: 3,
           b2bIngresos: 1000,
@@ -1254,22 +1231,19 @@ describe("ProductReport", () => {
       });
 
       it("should keep only revenue totals when metrics is 'ingresos' with segment 'none'", () => {
-        const report = new ProductReport([], [], [], {
-          metrics: "ingresos",
-          segment: "none",
-        });
         // Apply both segment filtering (removes B2B/B2C) and metrics filtering (removes quantity)
-        let result = report.applySegmentFilteringToItem(mockCombinationData[0]);
-        result = report.applyMetricsFilteringToItem(result);
+        const item = JSON.parse(JSON.stringify(mockCombinationData[0]));
+        ProductReport.applySegmentFiltering(item, "none");
+        ProductReport.applyMetricsFiltering(item, "ingresos");
 
-        expect(result).toMatchObject({
+        expect(item).toMatchObject({
           ingresos: 3000,
         });
-        expect(result).not.toHaveProperty("cantidad");
-        expect(result).not.toHaveProperty("b2bIngresos");
-        expect(result).not.toHaveProperty("b2cIngresos");
-        expect(result).not.toHaveProperty("b2bCantidad");
-        expect(result).not.toHaveProperty("b2cCantidad");
+        expect(item).not.toHaveProperty("cantidad");
+        expect(item).not.toHaveProperty("b2bIngresos");
+        expect(item).not.toHaveProperty("b2cIngresos");
+        expect(item).not.toHaveProperty("b2bCantidad");
+        expect(item).not.toHaveProperty("b2cCantidad");
       });
 
       it("should apply metrics filtering to periods as well", () => {
@@ -1382,11 +1356,9 @@ describe("ProductReport", () => {
       ];
 
       it("should keep combinations when detailLevel is 'combination'", () => {
-        const report = new ProductReport([], [], [], {
-          detailLevel: "combination",
-        });
-        const result = report.applyDetailLevelGroupingToItems(
+        const result = ProductReport.applyDetailLevelGrouping(
           mockCombinationDataForGrouping,
+          "combination",
         );
 
         // Should have 3 items (2 combinations + 1 base product)
@@ -1407,12 +1379,9 @@ describe("ProductReport", () => {
       });
 
       it("should group combinations into products when detailLevel is 'product'", () => {
-        const report = new ProductReport([], [], [], {
-          detailLevel: "product",
-          segment: "all",
-        });
-        const result = report.applyDetailLevelGroupingToItems(
+        const result = ProductReport.applyDetailLevelGrouping(
           mockCombinationDataForGrouping,
+          "product",
         );
 
         // Should have 2 products (p1 and p2)
@@ -1448,15 +1417,16 @@ describe("ProductReport", () => {
       });
 
       it("should group to product level with segment 'none' (no breakdown fields)", () => {
-        const report = new ProductReport([], [], [], {
-          detailLevel: "product",
-          segment: "none",
-        });
         // First apply segment filtering to remove B2B/B2C fields, then group
-        const segmentFiltered = mockCombinationDataForGrouping.map((item) =>
-          report.applySegmentFilteringToItem(item),
+        const segmentFiltered = mockCombinationDataForGrouping.map((item) => {
+          const copy = JSON.parse(JSON.stringify(item));
+          ProductReport.applySegmentFiltering(copy, "none");
+          return copy;
+        });
+        const result = ProductReport.applyDetailLevelGrouping(
+          segmentFiltered,
+          "product",
         );
-        const result = report.applyDetailLevelGroupingToItems(segmentFiltered);
 
         const p1 = result.find((r) => r.productId === "p1");
         expect(p1).toMatchObject({
@@ -1543,18 +1513,18 @@ describe("ProductReport", () => {
       ];
 
       it("should return all items when categories is null", () => {
-        const report = new ProductReport([], [], [], { categories: null });
-        const result = report.applyCategoryFilteringToItems(
+        const result = ProductReport.applyCategoryFiltering(
           mockCombinationDataForCategories,
+          null,
         );
 
         expect(result).toHaveLength(4);
       });
 
       it("should filter by single category", () => {
-        const report = new ProductReport([], [], [], { categories: ["cat1"] });
-        const result = report.applyCategoryFilteringToItems(
+        const result = ProductReport.applyCategoryFiltering(
           mockCombinationDataForCategories,
+          ["cat1"],
         );
 
         expect(result).toHaveLength(1);
@@ -1563,11 +1533,9 @@ describe("ProductReport", () => {
       });
 
       it("should filter by multiple categories", () => {
-        const report = new ProductReport([], [], [], {
-          categories: ["cat1", "cat3"],
-        });
-        const result = report.applyCategoryFilteringToItems(
+        const result = ProductReport.applyCategoryFiltering(
           mockCombinationDataForCategories,
+          ["cat1", "cat3"],
         );
 
         expect(result).toHaveLength(2);
@@ -1579,11 +1547,9 @@ describe("ProductReport", () => {
       });
 
       it("should return empty array when filtering by non-existent category", () => {
-        const report = new ProductReport([], [], [], {
-          categories: ["nonexistent"],
-        });
-        const result = report.applyCategoryFilteringToItems(
+        const result = ProductReport.applyCategoryFiltering(
           mockCombinationDataForCategories,
+          ["nonexistent"],
         );
 
         expect(result).toHaveLength(0);
@@ -1591,12 +1557,9 @@ describe("ProductReport", () => {
 
       it("should filter after detail level grouping", () => {
         // Test that category filtering works after product-level grouping
-        const report = new ProductReport([], [], [], {
-          categories: ["cat2"],
-          detailLevel: "product",
-        });
-        const result = report.applyCategoryFilteringToItems(
+        const result = ProductReport.applyCategoryFiltering(
           mockCombinationDataForCategories,
+          ["cat2"],
         );
 
         // Should have 2 products (p2 and p3 are separate products in cat2, p1 and p4 filtered out)
@@ -1665,8 +1628,7 @@ describe("ProductReport", () => {
       ];
 
       it("should calculate avgPrice correctly", () => {
-        const report = new ProductReport([], [], [], { segment: "all" });
-        const result = report.applyFinalFormattingToItems(
+        const result = ProductReport.applyFinalFormatting(
           mockDataForFinalFormatting,
         );
 
@@ -1678,8 +1640,7 @@ describe("ProductReport", () => {
         const testCases = ["none", "all", "b2b", "b2c"];
 
         testCases.forEach((segment) => {
-          const report = new ProductReport([], [], [], { segment });
-          const result = report.applyFinalFormattingToItems(
+          const result = ProductReport.applyFinalFormatting(
             mockDataForFinalFormatting,
           );
 
@@ -1721,8 +1682,7 @@ describe("ProductReport", () => {
           },
         ];
 
-        const report = new ProductReport([], [], [], {});
-        const result = report.applyFinalFormattingToItems(unsortedData);
+        const result = ProductReport.applyFinalFormatting(unsortedData);
 
         expect(result[0].productName).toBe("High Sales");
         expect(result[1].productName).toBe("Medium Sales");
@@ -1733,8 +1693,7 @@ describe("ProductReport", () => {
       });
 
       it("should rename ingresos to totalIngresos and cantidad to totalCantidad", () => {
-        const report = new ProductReport([], [], [], {});
-        const result = report.applyFinalFormattingToItems(
+        const result = ProductReport.applyFinalFormatting(
           mockDataForFinalFormatting,
         );
 
@@ -1747,8 +1706,7 @@ describe("ProductReport", () => {
       });
 
       it("should preserve period structure without renaming", () => {
-        const report = new ProductReport([], [], [], { segment: "all" });
-        const result = report.applyFinalFormattingToItems(
+        const result = ProductReport.applyFinalFormatting(
           mockDataForFinalFormatting,
         );
 
@@ -1766,8 +1724,7 @@ describe("ProductReport", () => {
       });
 
       it("should handle empty periods correctly", () => {
-        const report = new ProductReport([], [], [], {});
-        const result = report.applyFinalFormattingToItems(
+        const result = ProductReport.applyFinalFormatting(
           mockDataForFinalFormatting,
         );
 
@@ -1775,6 +1732,292 @@ describe("ProductReport", () => {
         expect(emptyItem).toHaveProperty("periods");
         expect(emptyItem.periods).toEqual({});
       });
+    });
+  });
+
+  // Integration tests for common option combinations
+  describe("Integration Tests - Full Pipeline", () => {
+    let mockOrders, mockB2BClients, mockProducts;
+
+    beforeEach(() => {
+      mockOrders = [
+        {
+          id: "order1",
+          userId: "b2b-client-1",
+          dueDate: "2026-03-21T10:00:00Z",
+          isComplimentary: false,
+          orderItems: [
+            {
+              id: "item1",
+              productId: "p1",
+              productName: "Sourdough Bread",
+              collectionId: "cat1",
+              collectionName: "Bakery",
+              quantity: 2,
+              subtotal: 1000,
+              currentPrice: 500,
+              isComplimentary: false,
+              combination: { id: "combo1", name: "Large" },
+            },
+            {
+              id: "item2",
+              productId: "p2",
+              productName: "Chocolate Chip Cookie",
+              collectionId: "cat2",
+              collectionName: "Desserts",
+              quantity: 5,
+              subtotal: 1500,
+              currentPrice: 300,
+              isComplimentary: false,
+              combination: null,
+            },
+          ],
+        },
+        {
+          id: "order2",
+          userId: "regular-customer",
+          dueDate: "2026-03-21T14:00:00Z",
+          isComplimentary: false,
+          orderItems: [
+            {
+              id: "item3",
+              productId: "p1",
+              productName: "Sourdough Bread",
+              collectionId: "cat1",
+              collectionName: "Bakery",
+              quantity: 1,
+              subtotal: 600,
+              currentPrice: 600,
+              isComplimentary: false,
+              combination: { id: "combo2", name: "Medium" },
+            },
+            {
+              id: "item4",
+              productId: "p3",
+              productName: "Croissant",
+              collectionId: "cat1",
+              collectionName: "Bakery",
+              quantity: 3,
+              subtotal: 900,
+              currentPrice: 300,
+              isComplimentary: false,
+              combination: null,
+            },
+          ],
+        },
+      ];
+
+      mockB2BClients = [{ id: "b2b-client-1" }];
+
+      mockProducts = [
+        { id: "p1", name: "Sourdough Bread" },
+        { id: "p2", name: "Chocolate Chip Cookie" },
+        { id: "p3", name: "Croissant" },
+      ];
+    });
+
+    it("should handle product-level B2B segment with revenue-only metrics", () => {
+      const options = {
+        detailLevel: "product",
+        segment: "b2b",
+        metrics: "ingresos",
+        categories: null,
+      };
+
+      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, options);
+      const result = report.generateReport();
+
+      expect(result.products).toHaveLength(3); // All products (p1, p2, p3) but filtered to B2B values
+
+      // Find p1 which should have B2B sales
+      const p1 = result.products.find(p => p.productId === "p1");
+      expect(p1).toMatchObject({
+        productId: "p1",
+        productName: "Sourdough Bread",
+        combinationId: null,
+        totalIngresos: 1000, // Only B2B revenue from combo1
+      });
+      // avgPrice should not exist when metrics='ingresos' (quantity data removed)
+      expect(p1.avgPrice).toBeUndefined();
+      expect(p1).not.toHaveProperty("totalCantidad"); // Metrics filtered to ingresos only
+      expect(p1).not.toHaveProperty("b2bIngresos"); // Segment filtered to B2B only
+
+      // Find p2 which has B2B sales and p3 which doesn't
+      const p2 = result.products.find(p => p.productId === "p2");
+      expect(p2).toMatchObject({
+        productId: "p2",
+        totalIngresos: 1500, // B2B revenue from order1
+      });
+      expect(p2.avgPrice).toBeUndefined(); // No avgPrice for revenue-only metrics
+
+      const p3 = result.products.find(p => p.productId === "p3");
+      expect(p3).toMatchObject({
+        productId: "p3",
+        totalIngresos: 0, // No B2B sales (only in B2C order2)
+      });
+      expect(p3.avgPrice).toBeUndefined(); // No avgPrice for revenue-only metrics
+    });
+
+    it("should handle combination-level B2C segment with both metrics", () => {
+      const options = {
+        detailLevel: "combination",
+        segment: "b2c",
+        metrics: "both",
+        categories: null,
+      };
+
+      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, options);
+      const result = report.generateReport();
+
+      // Should have 4 combinations: p1-combo1 (B2B->0), p1-combo2 (B2C), p2-base (B2B->0), p3-base (B2C)
+      expect(result.products).toHaveLength(4);
+
+      const p1Combo2 = result.products.find(p => p.productId === "p1" && p.combinationId === "combo2");
+      expect(p1Combo2).toMatchObject({
+        productId: "p1",
+        combinationId: "combo2",
+        combinationName: "Medium",
+        avgPrice: 600,
+        totalIngresos: 600,
+        totalCantidad: 1,
+      });
+
+      const p2Base = result.products.find(p => p.productId === "p2");
+      expect(p2Base).toMatchObject({
+        productId: "p2",
+        combinationId: null,
+        avgPrice: 0, // 0 revenue / 0 quantity = 0 (valid avgPrice calculation)
+        totalIngresos: 0, // B2B item filtered to B2C = 0
+        totalCantidad: 0,
+      });
+
+      const p3Base = result.products.find(p => p.productId === "p3");
+      expect(p3Base).toMatchObject({
+        productId: "p3",
+        combinationId: null,
+        avgPrice: 300,
+        totalIngresos: 900,
+        totalCantidad: 3,
+      });
+    });
+
+    it("should handle category filtering with all segment breakdown", () => {
+      const options = {
+        detailLevel: "product",
+        segment: "all",
+        metrics: "both",
+        categories: ["cat1"], // Only Bakery items
+      };
+
+      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, options);
+      const result = report.generateReport();
+
+      // Should have 2 products: p1 (Bakery) and p3 (Bakery), p2 filtered out
+      expect(result.products).toHaveLength(2);
+
+      const p1 = result.products.find(p => p.productId === "p1");
+      expect(p1).toMatchObject({
+        productId: "p1",
+        categoryId: "cat1",
+        categoryName: "Bakery",
+        avgPrice: 533.3333333333334, // 1600 / 3 (total revenue / total quantity)
+        totalIngresos: 1600, // 1000 + 600
+        totalCantidad: 3, // 2 + 1
+        b2bIngresos: 1000,
+        b2cIngresos: 600,
+        b2bCantidad: 2,
+        b2cCantidad: 1,
+      });
+
+      const p3 = result.products.find(p => p.productId === "p3");
+      expect(p3).toMatchObject({
+        productId: "p3",
+        categoryId: "cat1",
+        avgPrice: 300,
+        totalIngresos: 900,
+        totalCantidad: 3,
+        b2bIngresos: 0,
+        b2cIngresos: 900,
+        b2bCantidad: 0,
+        b2cCantidad: 3,
+      });
+    });
+
+    it("should handle quantity-only metrics with no segment breakdown", () => {
+      const options = {
+        detailLevel: "combination",
+        segment: "none",
+        metrics: "cantidad",
+        categories: null,
+      };
+
+      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, options);
+      const result = report.generateReport();
+
+      expect(result.products).toHaveLength(4); // All combinations
+
+      result.products.forEach(product => {
+        expect(product).toHaveProperty("totalCantidad");
+        // For quantity-only metrics, totalIngresos might be undefined or absent
+        expect(product.totalIngresos).toBeUndefined();
+        expect(product.b2bCantidad).toBeUndefined();
+        expect(product.b2cCantidad).toBeUndefined();
+        expect(product.avgPrice).toBeUndefined(); // No price calc for quantity-only
+      });
+
+      const p1Combo1 = result.products.find(p => p.productId === "p1" && p.combinationId === "combo1");
+      expect(p1Combo1).toMatchObject({
+        productId: "p1",
+        combinationId: "combo1",
+        totalCantidad: 2,
+      });
+    });
+
+    it("should properly sort results by totalIngresos in final formatting", () => {
+      const options = {
+        detailLevel: "product",
+        segment: "none",
+        metrics: "both",
+        categories: null,
+      };
+
+      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, options);
+      const result = report.generateReport();
+
+      // Products should be sorted by totalIngresos descending
+      expect(result.products).toHaveLength(3);
+      expect(result.products[0].totalIngresos).toBeGreaterThanOrEqual(result.products[1].totalIngresos);
+      expect(result.products[1].totalIngresos).toBeGreaterThanOrEqual(result.products[2].totalIngresos);
+
+      // Verify the highest revenue product is p1 (1600 total)
+      expect(result.products[0].productId).toBe("p1");
+      expect(result.products[0].totalIngresos).toBe(1600);
+    });
+
+    it("should include intermediate data in metadata for debugging", () => {
+      const options = {
+        detailLevel: "product",
+        segment: "all",
+        metrics: "both",
+        categories: null,
+      };
+
+      const report = new ProductReport(mockOrders, mockB2BClients, mockProducts, options);
+      const result = report.generateReport();
+
+      expect(result.metadata).toHaveProperty("intermediateData");
+      expect(result.metadata.intermediateData).toHaveProperty("step1_flattened");
+      expect(result.metadata.intermediateData).toHaveProperty("step2_aggregated");
+      expect(result.metadata.intermediateData).toHaveProperty("step3_transformed");
+
+      // Verify step1 flattened data has correct structure
+      const step1 = result.metadata.intermediateData.step1_flattened;
+      expect(step1).toHaveLength(4); // 4 order items
+      expect(step1[0]).toHaveProperty("productId");
+      expect(step1[0]).toHaveProperty("combinationId");
+      expect(step1[0]).toHaveProperty("isB2B");
+      expect(step1[0]).toHaveProperty("ingresos");
+      expect(step1[0]).toHaveProperty("cantidad");
     });
   });
 });
