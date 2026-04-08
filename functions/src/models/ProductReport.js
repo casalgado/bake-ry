@@ -1,9 +1,9 @@
 // models/ProductReport.js
 //
-// NEW 3-Step Pipeline Architecture:
-// Step 1: flattenOrderItems - Convert complex order structure to simple flat array
-// Step 2: groupByPeriods - Group flattened data by time periods (if needed)
-// Step 3: transformToOutput - Aggregate and format based on options
+// OPTIMIZED 3-Step Pipeline Architecture:
+// Step 1: flattenOrderItems - Convert complex order structure to simple flat array (includes early category filtering)
+// Step 2: aggregateByDetailLevel - Group directly by target detail level (product or combination) with aggregate metrics
+// Step 3: transformToOutput - Apply segment/metrics filtering and final formatting (no regrouping needed)
 //
 // NOTE: item.subtotal is always post-tax (includes tax in both inclusive and exclusive tax modes).
 
@@ -31,8 +31,8 @@ class ProductReport {
     // Step 1: Flatten orders to granular level
     const step1_flattened = this.flattenOrderItems(this.allOrders, this.b2b_clients);
 
-    // Step 2: Aggregate by combination - Group and aggregate with period calculations
-    const step2_aggregated = this.aggregateByCombination(step1_flattened);
+    // Step 2: Aggregate by detail level - Group directly at target detail level (product or combination)
+    const step2_aggregated = this.aggregateByDetailLevel(step1_flattened);
 
     // Step 3: Transform to final output - Apply all filtering and formatting
     const step3_transformed = this.transformToOutput(step2_aggregated);
@@ -41,6 +41,7 @@ class ProductReport {
       metadata: {
         ...this.generateMetadata(),
         intermediateData: {
+          b2bclients: this.b2b_clients,
           step1_flattened: step1_flattened,
           step2_aggregated: step2_aggregated,
           step3_transformed: step3_transformed,
@@ -150,7 +151,17 @@ class ProductReport {
 
       order.orderItems
         .filter(item => !item.isComplimentary)
+        .filter(item => {
+          // Apply category filtering early if categories option is set
+          if (this.options.categories && this.options.categories.length > 0) {
+            return this.options.categories.includes(item.collectionId);
+          }
+          return true; // Include all items if no category filter
+        })
         .forEach(item => {
+          const originalCombinationId = item.combination?.id || null;
+          const normalizedCombinationId = this.normalizeCombinationId(item.productId, originalCombinationId, item.combination?.name || null);
+
           flattenedItems.push({
             // Identifiers
             orderId: order.id,
@@ -158,7 +169,7 @@ class ProductReport {
 
             // Dimensions
             productId: item.productId,
-            combinationId: item.combination?.id || null,
+            combinationId: normalizedCombinationId,
             categoryId: item.collectionId,
             date: getDateInColombia(orderDate),
             isB2B: isB2B,
@@ -179,19 +190,66 @@ class ProductReport {
     return flattenedItems;
   }
 
-  aggregateByCombination(flatData) {
-    // Group by combination key: productId + combinationId
+  normalizeCombinationId(productId, combinationId, combinationName) {
+    // If no combination ID or no products data, return as-is
+    if (!combinationId || !this.all_products) {
+      return combinationId;
+    }
+
+    // Find the product in our current products data
+    const product = this.all_products.find(p => p.id === productId);
+    if (!product || !product.variations || !product.variations.combinations) {
+      return combinationId;
+    }
+
+    // If the combination ID already exists in current product, it's valid
+    const existingCombination = product.variations.combinations.find(combo => combo.id === combinationId);
+    if (existingCombination) {
+      return combinationId;
+    }
+
+    // Legacy combination ID - try to find current ID by matching name
+    if (combinationName) {
+      const matchingCombination = product.variations.combinations.find(
+        (combo) => combo.name === combinationName,
+      );
+
+      if (matchingCombination) {
+        return matchingCombination.id;
+      }
+    }
+
+    // If we can't normalize, return original (will be handled as orphaned data)
+    return combinationId;
+  }
+
+  aggregateByDetailLevel(flatData) {
+    // Group directly by the target detail level to avoid expensive regrouping later:
+    // - detailLevel 'product': Group by productId only, aggregating all combinations
+    // - detailLevel 'combination': Group by productId_combinationId for separate combination metrics
     const groups = {};
 
     flatData.forEach(item => {
-      const key = `${item.productId}_${item.combinationId || 'base'}`;
+      let key, combinationId, combinationName;
+
+      if (this.options.detailLevel === 'product') {
+        // Group by product only, ignore combinations
+        key = item.productId;
+        combinationId = null;
+        combinationName = null;
+      } else {
+        // Group by combination (productId + combinationId)
+        key = `${item.productId}_${item.combinationId || 'base'}`;
+        combinationId = item.combinationId;
+        combinationName = item.combinationName;
+      }
 
       if (!groups[key]) {
         groups[key] = {
           productId: item.productId,
-          combinationId: item.combinationId,
+          combinationId: combinationId,
           productName: item.productName,
-          combinationName: item.combinationName,
+          combinationName: combinationName,
           categoryId: item.categoryId,
           categoryName: item.categoryName,
           items: [],
@@ -307,8 +365,8 @@ class ProductReport {
   }
 
   // Full pipeline for production use
-  transformToOutput(combinationData) {
-    let result = combinationData.map(item => {
+  transformToOutput(aggregatedData) {
+    let result = aggregatedData.map(item => {
       // Deep copy to avoid mutating original data
       const transformed = JSON.parse(JSON.stringify(item));
 
@@ -321,11 +379,8 @@ class ProductReport {
       return transformed;
     });
 
-    // Apply detail level grouping
-    result = ProductReport.applyDetailLevelGrouping(result, this.options.detailLevel);
-
-    // Apply category filtering
-    result = ProductReport.applyCategoryFiltering(result, this.options.categories);
+    // Category filtering is now done in flattenOrderItems for better performance
+    // Detail level grouping is now done in aggregateByDetailLevel for better performance
 
     // Apply final formatting
     result = ProductReport.applyFinalFormatting(result);
@@ -441,134 +496,6 @@ class ProductReport {
       // Keep everything
       break;
     }
-  }
-
-  static applyDetailLevelGrouping(items, detailLevel) {
-    if (detailLevel === 'combination') {
-      // Keep as-is, return all combinations
-      return items;
-    }
-
-    // Group by productId for product-level aggregation
-    const productGroups = {};
-
-    items.forEach(item => {
-      const productId = item.productId;
-
-      if (!productGroups[productId]) {
-        productGroups[productId] = {
-          productId: item.productId,
-          combinationId: null,
-          productName: item.productName,
-          combinationName: null,
-          categoryId: item.categoryId,
-          categoryName: item.categoryName,
-          items: [],
-        };
-      }
-
-      productGroups[productId].items.push(item);
-    });
-
-    // Aggregate each product group
-    return Object.values(productGroups).map(group => {
-      const aggregated = ProductReport.aggregateProductItems(group.items);
-
-      return {
-        ...group,
-        ...aggregated,
-      };
-    });
-  }
-
-  static aggregateProductItems(items) {
-    // Check which fields exist in the first item to determine what to aggregate
-    const firstItem = items[0];
-
-    // Aggregate total metrics
-    let ingresos = 0;
-    let cantidad = 0;
-    let b2bIngresos = 0;
-    let b2cIngresos = 0;
-    let b2bCantidad = 0;
-    let b2cCantidad = 0;
-
-    items.forEach(item => {
-      if (Object.prototype.hasOwnProperty.call(item, 'ingresos')) ingresos += item.ingresos || 0;
-      if (Object.prototype.hasOwnProperty.call(item, 'cantidad')) cantidad += item.cantidad || 0;
-      if (Object.prototype.hasOwnProperty.call(item, 'b2bIngresos')) b2bIngresos += item.b2bIngresos || 0;
-      if (Object.prototype.hasOwnProperty.call(item, 'b2cIngresos')) b2cIngresos += item.b2cIngresos || 0;
-      if (Object.prototype.hasOwnProperty.call(item, 'b2bCantidad')) b2bCantidad += item.b2bCantidad || 0;
-      if (Object.prototype.hasOwnProperty.call(item, 'b2cCantidad')) b2cCantidad += item.b2cCantidad || 0;
-    });
-
-    const result = {};
-
-    // Only include fields that exist in the source items
-    if (Object.prototype.hasOwnProperty.call(firstItem, 'ingresos')) result.ingresos = ingresos;
-    if (Object.prototype.hasOwnProperty.call(firstItem, 'cantidad')) result.cantidad = cantidad;
-    if (Object.prototype.hasOwnProperty.call(firstItem, 'b2bIngresos')) result.b2bIngresos = b2bIngresos;
-    if (Object.prototype.hasOwnProperty.call(firstItem, 'b2cIngresos')) result.b2cIngresos = b2cIngresos;
-    if (Object.prototype.hasOwnProperty.call(firstItem, 'b2bCantidad')) result.b2bCantidad = b2bCantidad;
-    if (Object.prototype.hasOwnProperty.call(firstItem, 'b2cCantidad')) result.b2cCantidad = b2cCantidad;
-
-    // Aggregate periods if they exist
-    const periodKeys = new Set();
-    items.forEach(item => {
-      if (item.periods) {
-        Object.keys(item.periods).forEach(key => periodKeys.add(key));
-      }
-    });
-
-    // Always include periods field (even if empty)
-    result.periods = {};
-
-    if (periodKeys.size > 0) {
-      periodKeys.forEach(periodKey => {
-        let periodIngresos = 0;
-        let periodCantidad = 0;
-        let periodB2bIngresos = 0;
-        let periodB2cIngresos = 0;
-        let periodB2bCantidad = 0;
-        let periodB2cCantidad = 0;
-
-        items.forEach(item => {
-          if (item.periods && item.periods[periodKey]) {
-            const period = item.periods[periodKey];
-            periodIngresos += period.ingresos || 0;
-            periodCantidad += period.cantidad || 0;
-            periodB2bIngresos += period.b2bIngresos || 0;
-            periodB2cIngresos += period.b2cIngresos || 0;
-            periodB2bCantidad += period.b2bCantidad || 0;
-            periodB2cCantidad += period.b2cCantidad || 0;
-          }
-        });
-
-        const periodResult = {};
-
-        // Only include period fields that exist in the source items
-        if (Object.prototype.hasOwnProperty.call(firstItem, 'ingresos')) periodResult.ingresos = periodIngresos;
-        if (Object.prototype.hasOwnProperty.call(firstItem, 'cantidad')) periodResult.cantidad = periodCantidad;
-        if (Object.prototype.hasOwnProperty.call(firstItem, 'b2bIngresos')) periodResult.b2bIngresos = periodB2bIngresos;
-        if (Object.prototype.hasOwnProperty.call(firstItem, 'b2cIngresos')) periodResult.b2cIngresos = periodB2cIngresos;
-        if (Object.prototype.hasOwnProperty.call(firstItem, 'b2bCantidad')) periodResult.b2bCantidad = periodB2bCantidad;
-        if (Object.prototype.hasOwnProperty.call(firstItem, 'b2cCantidad')) periodResult.b2cCantidad = periodB2cCantidad;
-
-        result.periods[periodKey] = periodResult;
-      });
-    }
-
-    return result;
-  }
-
-  static applyCategoryFiltering(items, categories) {
-    // If no category filter specified, return all items
-    if (!categories || categories.length === 0) {
-      return items;
-    }
-
-    // Filter items where categoryId is in the categories array
-    return items.filter(item => categories.includes(item.categoryId));
   }
 
   static applyFinalFormatting(items) {

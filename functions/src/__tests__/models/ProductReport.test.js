@@ -543,6 +543,53 @@ describe("ProductReport", () => {
       expect(paymentDateResult[0].date).toBe("2026-04-01"); // paymentDate 2026-04-02 → Colombia 2026-04-01
     });
 
+    it("should filter by categories when categories option is provided", () => {
+      const order = createOrder({
+        orderItems: [
+          {
+            id: "item1",
+            productId: "product1",
+            productName: "Test Product 1",
+            collectionId: "category1",
+            collectionName: "Test Category 1",
+            subtotal: 1000,
+            quantity: 1,
+            currentPrice: 1000,
+            isComplimentary: false,
+          },
+          {
+            id: "item2",
+            productId: "product2",
+            productName: "Test Product 2",
+            collectionId: "category2",
+            collectionName: "Test Category 2",
+            subtotal: 2000,
+            quantity: 1,
+            currentPrice: 2000,
+            isComplimentary: false,
+          },
+        ],
+      });
+
+      // Test with category filtering
+      const reportWithFilter = new ProductReport([order], [], mockProducts, {
+        categories: ["category1"],
+      });
+      const resultWithFilter = reportWithFilter.flattenOrderItems([order], []);
+
+      // Should only have 1 item (category1)
+      expect(resultWithFilter).toHaveLength(1);
+      expect(resultWithFilter[0].categoryId).toBe("category1");
+      expect(resultWithFilter[0].productName).toBe("Test Product 1");
+
+      // Test without category filtering
+      const reportWithoutFilter = new ProductReport([order], [], mockProducts);
+      const resultWithoutFilter = reportWithoutFilter.flattenOrderItems([order], []);
+
+      // Should have both items
+      expect(resultWithoutFilter).toHaveLength(2);
+    });
+
     it("should show what flattened output looks like with mock data", () => {
       const report = new ProductReport(
         mockOrders,
@@ -558,9 +605,9 @@ describe("ProductReport", () => {
     });
   });
 
-  describe("aggregateByCombination", () => {
-    describe("Part 1: Basic Combination Grouping", () => {
-      it("should group by combination when product has variations", () => {
+  describe("aggregateByDetailLevel", () => {
+    describe("Part 1: Detail Level Grouping", () => {
+      it("should group by combination when detailLevel is 'combination'", () => {
         const flatData = [
           {
             productId: "p1",
@@ -591,8 +638,8 @@ describe("ProductReport", () => {
           },
         ];
 
-        const report = new ProductReport([], [], []);
-        const result = report.aggregateByCombination(flatData);
+        const report = new ProductReport([], [], [], { detailLevel: 'combination' });
+        const result = report.aggregateByDetailLevel(flatData);
 
         // Should have 2 combinations
         expect(result).toHaveLength(2);
@@ -608,6 +655,77 @@ describe("ProductReport", () => {
         expect(combo2).toBeDefined();
         expect(combo2.productId).toBe("p1");
         expect(combo2.combinationName).toBe("Large");
+      });
+
+      it("should group by product when detailLevel is 'product'", () => {
+        const flatData = [
+          {
+            productId: "p1",
+            combinationId: "combo1",
+            productName: "Product 1",
+            combinationName: "Small",
+            categoryId: "cat1",
+            categoryName: "Category 1",
+            ingresos: 1000,
+            cantidad: 1,
+            isB2B: false,
+          },
+          {
+            productId: "p1",
+            combinationId: "combo2",
+            productName: "Product 1",
+            combinationName: "Large",
+            categoryId: "cat1",
+            categoryName: "Category 1",
+            ingresos: 2000,
+            cantidad: 1,
+            isB2B: true,
+          },
+          {
+            productId: "p2",
+            combinationId: null,
+            productName: "Product 2",
+            combinationName: null,
+            categoryId: "cat1",
+            categoryName: "Category 1",
+            ingresos: 500,
+            cantidad: 1,
+            isB2B: false,
+          },
+        ];
+
+        const report = new ProductReport([], [], [], { detailLevel: 'product' });
+        const result = report.aggregateByDetailLevel(flatData);
+
+        // Should have 2 products (p1 aggregated from combo1+combo2, p2 as-is)
+        expect(result).toHaveLength(2);
+
+        const p1 = result.find((r) => r.productId === "p1");
+        const p2 = result.find((r) => r.productId === "p2");
+
+        expect(p1).toMatchObject({
+          productId: "p1",
+          combinationId: null,
+          productName: "Product 1",
+          combinationName: null,
+          ingresos: 3000, // 1000 + 2000
+          cantidad: 2, // 1 + 1
+          b2bIngresos: 2000,
+          b2cIngresos: 1000,
+          b2bCantidad: 1,
+          b2cCantidad: 1,
+        });
+
+        expect(p2).toMatchObject({
+          productId: "p2",
+          combinationId: null,
+          productName: "Product 2",
+          combinationName: null,
+          ingresos: 500,
+          cantidad: 1,
+          b2bIngresos: 0,
+          b2cIngresos: 500,
+        });
       });
 
       it("should group by base product when no combination", () => {
@@ -632,8 +750,8 @@ describe("ProductReport", () => {
           },
         ];
 
-        const report = new ProductReport([], [], []);
-        const result = report.aggregateByCombination(flatData);
+        const report = new ProductReport([], [], [], { detailLevel: 'combination' });
+        const result = report.aggregateByDetailLevel(flatData);
 
         expect(result).toHaveLength(1);
         expect(result[0].productId).toBe("p1");
@@ -663,8 +781,8 @@ describe("ProductReport", () => {
           },
         ];
 
-        const report = new ProductReport([], [], []);
-        const result = report.aggregateByCombination(flatData);
+        const report = new ProductReport([], [], [], { detailLevel: 'combination' });
+        const result = report.aggregateByDetailLevel(flatData);
 
         expect(result).toHaveLength(2);
 
@@ -702,8 +820,8 @@ describe("ProductReport", () => {
           },
         ];
 
-        const report = new ProductReport([], [], []);
-        const result = report.aggregateByCombination(flatData);
+        const report = new ProductReport([], [], [], { detailLevel: 'combination' });
+        const result = report.aggregateByDetailLevel(flatData);
 
         expect(result).toHaveLength(1);
         expect(result[0]).toMatchObject({
@@ -734,8 +852,8 @@ describe("ProductReport", () => {
           },
         ];
 
-        const report = new ProductReport([], [], []);
-        const result = report.aggregateByCombination(flatData);
+        const report = new ProductReport([], [], [], { detailLevel: 'combination' });
+        const result = report.aggregateByDetailLevel(flatData);
 
         expect(result[0]).toMatchObject({
           ingresos: 3000,
@@ -765,8 +883,8 @@ describe("ProductReport", () => {
           },
         ];
 
-        const report = new ProductReport([], [], []);
-        const result = report.aggregateByCombination(flatData);
+        const report = new ProductReport([], [], [], { detailLevel: 'combination' });
+        const result = report.aggregateByDetailLevel(flatData);
 
         expect(result[0]).toMatchObject({
           ingresos: 1500,
@@ -854,7 +972,7 @@ describe("ProductReport", () => {
         ];
 
         const report = new ProductReport([], [], [], { period: "daily" });
-        const result = report.aggregateByCombination(flatData);
+        const result = report.aggregateByDetailLevel(flatData);
 
         expect(result).toHaveLength(1);
         expect(result[0].periods).toBeDefined();
@@ -889,7 +1007,7 @@ describe("ProductReport", () => {
         ];
 
         const report = new ProductReport([], [], [], { period: null });
-        const result = report.aggregateByCombination(flatData);
+        const result = report.aggregateByDetailLevel(flatData);
 
         expect(result[0].periods).toBeUndefined();
       });
@@ -923,7 +1041,7 @@ describe("ProductReport", () => {
         ];
 
         const report = new ProductReport([], [], [], { period: "weekly" });
-        const result = report.aggregateByCombination(flatData);
+        const result = report.aggregateByDetailLevel(flatData);
 
         expect(Object.keys(result[0].periods)).toHaveLength(2);
         expect(result[0].periods["2026-03-16/2026-03-22"]).toEqual({
@@ -945,7 +1063,7 @@ describe("ProductReport", () => {
       });
     });
 
-    describe("Part 5: Complete Integration", () => {
+    describe("Part 4: Complete Integration", () => {
       it("should handle complete aggregation with mixed data", () => {
         const flatData = [
           // Product 1, Combination 1 - Multiple dates and B2B/B2C
@@ -1015,8 +1133,8 @@ describe("ProductReport", () => {
           },
         ];
 
-        const report = new ProductReport([], [], [], { period: "daily" });
-        const result = report.aggregateByCombination(flatData);
+        const report = new ProductReport([], [], [], { period: "daily", detailLevel: "combination" });
+        const result = report.aggregateByDetailLevel(flatData);
 
         // Should have 3 combinations: p1-combo1, p1-combo2, p2-base
         expect(result).toHaveLength(3);
@@ -1263,320 +1381,9 @@ describe("ProductReport", () => {
       });
     });
 
-    describe("Part 3: Detail Level Grouping", () => {
-      const mockCombinationDataForGrouping = [
-        {
-          productId: "p1",
-          combinationId: "combo1",
-          productName: "Bread",
-          combinationName: "Small",
-          categoryId: "cat1",
-          categoryName: "Bakery",
-          ingresos: 1500,
-          cantidad: 2,
-          b2bIngresos: 500,
-          b2cIngresos: 1000,
-          b2bCantidad: 1,
-          b2cCantidad: 1,
-          periods: {
-            "2026-03-21": {
-              ingresos: 1000,
-              cantidad: 1,
-              b2bIngresos: 300,
-              b2cIngresos: 700,
-              b2bCantidad: 0,
-              b2cCantidad: 1,
-            },
-            "2026-03-22": {
-              ingresos: 500,
-              cantidad: 1,
-              b2bIngresos: 200,
-              b2cIngresos: 300,
-              b2bCantidad: 1,
-              b2cCantidad: 0,
-            },
-          },
-        },
-        {
-          productId: "p1",
-          combinationId: "combo2",
-          productName: "Bread",
-          combinationName: "Large",
-          categoryId: "cat1",
-          categoryName: "Bakery",
-          ingresos: 2500,
-          cantidad: 3,
-          b2bIngresos: 1000,
-          b2cIngresos: 1500,
-          b2bCantidad: 1,
-          b2cCantidad: 2,
-          periods: {
-            "2026-03-21": {
-              ingresos: 1500,
-              cantidad: 2,
-              b2bIngresos: 600,
-              b2cIngresos: 900,
-              b2bCantidad: 1,
-              b2cCantidad: 1,
-            },
-            "2026-03-22": {
-              ingresos: 1000,
-              cantidad: 1,
-              b2bIngresos: 400,
-              b2cIngresos: 600,
-              b2bCantidad: 0,
-              b2cCantidad: 1,
-            },
-          },
-        },
-        {
-          productId: "p2",
-          combinationId: null,
-          productName: "Cookie",
-          combinationName: null,
-          categoryId: "cat2",
-          categoryName: "Sweets",
-          ingresos: 800,
-          cantidad: 4,
-          b2bIngresos: 200,
-          b2cIngresos: 600,
-          b2bCantidad: 1,
-          b2cCantidad: 3,
-          periods: {
-            "2026-03-22": {
-              ingresos: 800,
-              cantidad: 4,
-              b2bIngresos: 200,
-              b2cIngresos: 600,
-              b2bCantidad: 1,
-              b2cCantidad: 3,
-            },
-          },
-        },
-      ];
 
-      it("should keep combinations when detailLevel is 'combination'", () => {
-        const result = ProductReport.applyDetailLevelGrouping(
-          mockCombinationDataForGrouping,
-          "combination",
-        );
 
-        // Should have 3 items (2 combinations + 1 base product)
-        expect(result).toHaveLength(3);
-        expect(
-          result.find(
-            (r) => r.productId === "p1" && r.combinationId === "combo1",
-          ),
-        ).toBeDefined();
-        expect(
-          result.find(
-            (r) => r.productId === "p1" && r.combinationId === "combo2",
-          ),
-        ).toBeDefined();
-        expect(
-          result.find((r) => r.productId === "p2" && r.combinationId === null),
-        ).toBeDefined();
-      });
-
-      it("should group combinations into products when detailLevel is 'product'", () => {
-        const result = ProductReport.applyDetailLevelGrouping(
-          mockCombinationDataForGrouping,
-          "product",
-        );
-
-        // Should have 2 products (p1 and p2)
-        expect(result).toHaveLength(2);
-
-        // Find product p1 (should combine combo1 + combo2)
-        const p1 = result.find((r) => r.productId === "p1");
-        expect(p1).toMatchObject({
-          productId: "p1",
-          combinationId: null,
-          productName: "Bread",
-          combinationName: null,
-          categoryId: "cat1",
-          categoryName: "Bakery",
-          ingresos: 4000, // 1500 + 2500
-          cantidad: 5, // 2 + 3
-          b2bIngresos: 1500, // 500 + 1000
-          b2cIngresos: 2500, // 1000 + 1500
-          b2bCantidad: 2, // 1 + 1
-          b2cCantidad: 3, // 1 + 2
-        });
-
-        // Find product p2 (already a base product)
-        const p2 = result.find((r) => r.productId === "p2");
-        expect(p2).toMatchObject({
-          productId: "p2",
-          combinationId: null,
-          productName: "Cookie",
-          combinationName: null,
-          ingresos: 800,
-          cantidad: 4,
-        });
-      });
-
-      it("should group to product level with segment 'none' (no breakdown fields)", () => {
-        // First apply segment filtering to remove B2B/B2C fields, then group
-        const segmentFiltered = mockCombinationDataForGrouping.map((item) => {
-          const copy = JSON.parse(JSON.stringify(item));
-          ProductReport.applySegmentFiltering(copy, "none");
-          return copy;
-        });
-        const result = ProductReport.applyDetailLevelGrouping(
-          segmentFiltered,
-          "product",
-        );
-
-        const p1 = result.find((r) => r.productId === "p1");
-        expect(p1).toMatchObject({
-          productId: "p1",
-          combinationId: null,
-          productName: "Bread",
-          ingresos: 4000, // 1500 + 2500
-          cantidad: 5, // 2 + 3
-        });
-        // Should not have breakdown fields
-        expect(p1).not.toHaveProperty("b2bIngresos");
-        expect(p1).not.toHaveProperty("b2cIngresos");
-      });
-
-      it("should aggregate periods when grouping to product level", () => {
-        const report = new ProductReport([], [], [], {
-          detailLevel: "product",
-          segment: "all",
-          period: "daily",
-        });
-        const result = report.transformToOutput(mockCombinationDataForGrouping);
-
-        const p1 = result.find((r) => r.productId === "p1");
-
-        // Periods should be combined: combo1 + combo2 per date
-        expect(p1.periods["2026-03-21"]).toEqual({
-          ingresos: 2500, // 1000 + 1500
-          cantidad: 3, // 1 + 2
-          b2bIngresos: 900, // 300 + 600
-          b2cIngresos: 1600, // 700 + 900
-          b2bCantidad: 1, // 0 + 1
-          b2cCantidad: 2, // 1 + 1
-        });
-
-        expect(p1.periods["2026-03-22"]).toEqual({
-          ingresos: 1500, // 500 + 1000
-          cantidad: 2, // 1 + 1
-          b2bIngresos: 600, // 200 + 400
-          b2cIngresos: 900, // 300 + 600
-          b2bCantidad: 1, // 1 + 0
-          b2cCantidad: 1, // 0 + 1
-        });
-      });
-    });
-
-    describe("Part 4: Category Filtering", () => {
-      const mockCombinationDataForCategories = [
-        {
-          productId: "p1",
-          combinationId: "combo1",
-          productName: "Bread",
-          categoryId: "cat1",
-          categoryName: "Bakery",
-          ingresos: 1000,
-          cantidad: 2,
-        },
-        {
-          productId: "p2",
-          combinationId: null,
-          productName: "Cookie",
-          categoryId: "cat2",
-          categoryName: "Sweets",
-          ingresos: 500,
-          cantidad: 1,
-        },
-        {
-          productId: "p3",
-          combinationId: "combo2",
-          productName: "Cake",
-          categoryId: "cat2",
-          categoryName: "Sweets",
-          ingresos: 800,
-          cantidad: 1,
-        },
-        {
-          productId: "p4",
-          combinationId: null,
-          productName: "Sandwich",
-          categoryId: "cat3",
-          categoryName: "Savory",
-          ingresos: 600,
-          cantidad: 1,
-        },
-      ];
-
-      it("should return all items when categories is null", () => {
-        const result = ProductReport.applyCategoryFiltering(
-          mockCombinationDataForCategories,
-          null,
-        );
-
-        expect(result).toHaveLength(4);
-      });
-
-      it("should filter by single category", () => {
-        const result = ProductReport.applyCategoryFiltering(
-          mockCombinationDataForCategories,
-          ["cat1"],
-        );
-
-        expect(result).toHaveLength(1);
-        expect(result[0].categoryId).toBe("cat1");
-        expect(result[0].productName).toBe("Bread");
-      });
-
-      it("should filter by multiple categories", () => {
-        const result = ProductReport.applyCategoryFiltering(
-          mockCombinationDataForCategories,
-          ["cat1", "cat3"],
-        );
-
-        expect(result).toHaveLength(2);
-
-        const categoryIds = result.map((r) => r.categoryId);
-        expect(categoryIds).toContain("cat1");
-        expect(categoryIds).toContain("cat3");
-        expect(categoryIds).not.toContain("cat2");
-      });
-
-      it("should return empty array when filtering by non-existent category", () => {
-        const result = ProductReport.applyCategoryFiltering(
-          mockCombinationDataForCategories,
-          ["nonexistent"],
-        );
-
-        expect(result).toHaveLength(0);
-      });
-
-      it("should filter after detail level grouping", () => {
-        // Test that category filtering works after product-level grouping
-        const result = ProductReport.applyCategoryFiltering(
-          mockCombinationDataForCategories,
-          ["cat2"],
-        );
-
-        // Should have 2 products (p2 and p3 are separate products in cat2, p1 and p4 filtered out)
-        expect(result).toHaveLength(2);
-
-        const productIds = result.map((r) => r.productId);
-        expect(productIds).toContain("p2");
-        expect(productIds).toContain("p3");
-
-        // All should be in cat2
-        result.forEach((item) => {
-          expect(item.categoryId).toBe("cat2");
-        });
-      });
-    });
-
-    describe("Part 5: Final Output Formatting", () => {
+    describe("Part 4: Final Output Formatting", () => {
       const mockDataForFinalFormatting = [
         {
           productId: "p1",
