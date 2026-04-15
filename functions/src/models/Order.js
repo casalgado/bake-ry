@@ -194,6 +194,7 @@ class Order extends BaseModel {
     userCategory = '',
     userLegalName = '',
     userNationalId = '',
+    invoiceGracePeriod = 0,
     orderItems = [],
 
     // Dates
@@ -254,6 +255,7 @@ class Order extends BaseModel {
     this.userCategory = userCategory;
 
     this.userNationalId = userNationalId;
+    this.invoiceGracePeriod = invoiceGracePeriod;
     this.taxMode = taxMode;
     this.orderItems = orderItems.map(item =>
       item instanceof OrderItem ? item : new OrderItem({ ...item, taxMode }),
