@@ -4,6 +4,7 @@ const User = require('../models/User');
 const { Order } = require('../models/Order');
 const createBaseService = require('./base/serviceFactory');
 const { BadRequestError, NotFoundError } = require('../utils/errors');
+const { parseSpanishName } = require('../utils/helpers');
 
 const AUTH_REQUIRED_ROLES = [
   'bakery_staff',
@@ -53,9 +54,11 @@ const handleRelatedCollections = async (transaction, bakeryId, userId, userData,
     if (isDelete) {
       transaction.delete(staffRef);
     } else {
+      const parsedName = parseSpanishName(userData.name);
       const staffData = {
         name: userData.name,
-        firstName: userData.name.split(' ')[0],
+        firstName: parsedName.firstName,
+        lastName: parsedName.lastName,
         email: userData.email,
         phone: userData.phone,
         role: userData.role,

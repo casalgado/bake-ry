@@ -47,6 +47,7 @@ class BakerySettings extends BaseModel {
       defaultDate: "production", // options are production or delivery
       timeOfDay: false, // if time of day is asked for orders
       offlineMode: false,
+      loadHistoricalOnUserSelection: false, // Load historical objects when user is selected
     },
     reports: {
       defaultReportFilter: "dueDate",
