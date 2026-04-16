@@ -194,7 +194,7 @@ class Order extends BaseModel {
     userCategory = '',
     userLegalName = '',
     userNationalId = '',
-    invoiceGracePeriod = 0,
+    invoiceGracePeriod = null,
     orderItems = [],
 
     // Dates
@@ -256,6 +256,15 @@ class Order extends BaseModel {
 
     this.userNationalId = userNationalId;
     this.invoiceGracePeriod = invoiceGracePeriod;
+    this.isInvoiceExpired =
+      this.invoiceGracePeriod > 0 && this.dueDate instanceof Date
+        ? (() => {
+            const expiry = new Date(this.dueDate);
+            expiry.setDate(expiry.getDate() + this.invoiceGracePeriod);
+            return expiry < new Date();
+          })()
+        : false;
+
     this.taxMode = taxMode;
     this.orderItems = orderItems.map(item =>
       item instanceof OrderItem ? item : new OrderItem({ ...item, taxMode }),

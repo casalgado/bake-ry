@@ -20,7 +20,7 @@ class User extends BaseModel {
     nationalId = '',
     isActive = true,
     isDeleted = false,
-    invoiceGracePeriod = 0,
+    invoiceGracePeriod = null,
   }) {
     super({ id, createdAt, updatedAt });
 
@@ -43,7 +43,7 @@ class User extends BaseModel {
     this.nationalId = nationalId;
     this.isActive = isActive;
     this.isDeleted = isDeleted;
-    this.invoiceGracePeriod = Number(invoiceGracePeriod) || 0;
+    this.invoiceGracePeriod = invoiceGracePeriod == null ? null : Number(invoiceGracePeriod);
   }
 
   static get dateFields() {
