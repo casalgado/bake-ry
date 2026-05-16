@@ -303,6 +303,45 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
             });
           });
 
+          // Handle overlap range: orders where minField <= endDate AND maxField >= startDate
+          if (filters.orDateRange.overlapRange) {
+            const { minField, maxField } = filters.orDateRange.overlapRange;
+            let overlapQuery = getCollectionRef(parentId);
+            const includeDeletedForOverlap = query.includeDeleted || query.filters?.includeDeleted;
+            if (!includeDeletedForOverlap) {
+              overlapQuery = overlapQuery.where('isDeleted', '!=', true);
+            }
+            if (endDate) {
+              overlapQuery = overlapQuery.where(minField, '<=', new Date(endDate));
+            }
+
+            Object.entries(filters).forEach(([key, value]) => {
+              if (
+                key !== 'dateRange' &&
+                key !== 'orDateRange' &&
+                key !== 'paymentDateWithFallback' &&
+                key !== 'includeDeleted' &&
+                value !== undefined
+              ) {
+                overlapQuery = overlapQuery.where(key, '==', value);
+              }
+            });
+
+            const overlapSnapshot = await overlapQuery.get();
+            overlapSnapshot.docs.forEach((doc) => {
+              if (!allDocs.has(doc.id)) {
+                const data = doc.data();
+                const maxDate = data[maxField];
+                if (maxDate) {
+                  const maxDateObj = maxDate.toDate ? maxDate.toDate() : new Date(maxDate);
+                  if (startDate && maxDateObj >= new Date(startDate)) {
+                    allDocs.set(doc.id, doc);
+                  }
+                }
+              }
+            });
+          }
+
           // Convert to array and sort
           let documents = Array.from(allDocs.values()).map((doc) =>
             ModelClass.fromFirestore(doc),

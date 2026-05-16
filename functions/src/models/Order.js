@@ -298,6 +298,9 @@ class Order extends BaseModel {
     this.partialPaymentDate = this.partialPayments.length > 0
       ? this.partialPayments.reduce((latest, p) => (!latest || p.date > latest) ? p.date : latest, null)
       : null;
+    this.earliestPartialPaymentDate = this.partialPayments.length > 0
+      ? this.partialPayments.reduce((earliest, p) => (!earliest || p.date < earliest) ? p.date : earliest, null)
+      : null;
 
     // Fulfillment
     this.fulfillmentType = fulfillmentType;
@@ -513,6 +516,7 @@ class Order extends BaseModel {
       'preparationDate',
       'paymentDate',
       'partialPaymentDate',
+      'earliestPartialPaymentDate',
       'dueDate',
     ];
   }

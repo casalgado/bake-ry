@@ -54,6 +54,8 @@ class QueryParser {
       or_date_fields,
       or_start_date,
       or_end_date,
+      or_overlap_min_field,
+      or_overlap_max_field,
       ...otherFilters
     } = req.query;
 
@@ -81,6 +83,13 @@ class QueryParser {
         startDate: or_start_date,
         endDate: or_end_date,
       };
+
+      if (or_overlap_min_field && or_overlap_max_field) {
+        filters.orDateRange.overlapRange = {
+          minField: or_overlap_min_field,
+          maxField: or_overlap_max_field,
+        };
+      }
     }
 
     // Handle other filters
