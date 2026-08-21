@@ -70,6 +70,25 @@ const orderController = {
     }
   },
 
+  async getClientReport(req, res) {
+    try {
+      const { bakeryId } = req.params;
+      const queryParser = new QueryParser(req);
+      const query = queryParser.getQuery();
+      // QueryParser drops date_field when no start_date/end_date is sent (it only
+      // surfaces date_field as part of a date-range filter), but this report has
+      // no date range by design, so read it straight off req.query instead.
+      if (req.query.date_field) {
+        query.filters.date_field = req.query.date_field;
+      }
+
+      const report = await orderService.getClientReport(bakeryId, query);
+      baseController.handleResponse(res, report);
+    } catch (error) {
+      baseController.handleError(res, error);
+    }
+  },
+
   async getIncomeStatement(req, res) {
     try {
       const { bakeryId } = req.params;

@@ -2,6 +2,7 @@
 const { Order } = require('../models/Order');
 const SalesReport = require('../models/SalesReport');
 const ProductReport = require('../models/ProductReport');
+const ClientReport = require('../models/ClientReport');
 const OrderHistory = require('../models/OrderHistory');
 const createBaseService = require('./base/serviceFactory');
 const { db } = require('../config/firebase');
@@ -454,6 +455,42 @@ const createOrderService = () => {
     }
   };
 
+  const getClientReport = async (bakeryId, query) => {
+    try {
+      const options = {
+        period: query.filters.period || 'weekly',
+        count: Number(query.filters.count) || 12,
+        segment: query.filters.segment || 'b2b',
+        dateField: query.filters.date_field || 'dueDate',
+      };
+
+      const orderQuery = {
+        ...query,
+        pagination: { ...query.pagination, perPage: 10000, offset: 0 },
+        filters: { ...query.filters },
+      };
+      delete orderQuery.filters.period;
+      delete orderQuery.filters.count;
+      delete orderQuery.filters.segment;
+      delete orderQuery.filters.date_field;
+
+      // ponytail: full-history scan. If this gets slow, denormalize firstOrderDate
+      // + orderCount onto the user doc on order create, and window this query.
+      const [orders, b2b_clients_query] = await Promise.all([
+        baseService.getAll(bakeryId, orderQuery),
+        db.collection('bakeries').doc(bakeryId).collection('settings').doc('default').collection('b2b_clients').get(),
+      ]);
+
+      const b2b_clients = b2b_clients_query.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      const clientReport = new ClientReport(orders.items, b2b_clients, options);
+      return clientReport.generateReport();
+    } catch (error) {
+      console.error('Error generating client report:', error);
+      throw error;
+    }
+  };
+
   const getHistory = async (bakeryId, orderId) => {
     try {
       if (!bakeryId || !orderId) {
@@ -743,6 +780,7 @@ const createOrderService = () => {
     remove,
     getSalesReport,
     getProductReport,
+    getClientReport,
     getHistory,
     getIncomeStatement,
   };

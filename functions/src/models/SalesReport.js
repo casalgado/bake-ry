@@ -5,6 +5,7 @@
 // Order-level totals (totalRevenue, totalDiscounts) reflect the actual charged amounts.
 
 const { Order } = require('./Order');
+const { getWeekRange, getMonthKey } = require('../utils/periods');
 
 class SalesReport {
   constructor(orders, b2b_clients, all_products) {
@@ -132,10 +133,10 @@ class SalesReport {
 
       if (period === 'weekly') {
         // Get the week range for this specific date
-        periodKey = this.getWeekRange(currentDate);
+        periodKey = getWeekRange(currentDate);
       } else {
         // Get the month key for this specific date
-        periodKey = this.getMonthKey(currentDate);
+        periodKey = getMonthKey(currentDate);
       }
 
       // Initialize period if it doesn't exist
@@ -182,27 +183,11 @@ class SalesReport {
   }
 
   getWeekRange(date) {
-    const current = new Date(date);
-    current.setHours(0, 0, 0, 0);
-
-    const day = current.getDay() || 7;
-
-    const monday = new Date(current);
-    monday.setDate(current.getDate() - (day - 1));
-
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-
-    const mondayStr = monday.toISOString().split('T')[0];
-    const sundayStr = sunday.toISOString().split('T')[0];
-
-    return `${mondayStr}/${sundayStr}`;
+    return getWeekRange(date);
   }
 
   getMonthKey(date) {
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    return `${year}-${month}`;
+    return getMonthKey(date);
   }
 
   generateSalesMetrics() {
