@@ -3,6 +3,20 @@ const BaseModel = require('./base/BaseModel');
 const VariationGroups = require('./VariationGroups');
 
 class Product extends BaseModel {
+  // How a sale of this product moves stock (INVENTORY-IMPLEMENTATION.md §5).
+  // 'none' is the default so every existing product behaves exactly as before.
+  static INVENTORY_MODES = {
+    NONE: 'none',
+    UNIT: 'unit',
+    RECIPE: 'recipe',
+  };
+
+  // Whether costPrice is typed by hand or computed from the recipe (§7).
+  static COST_PRICE_SOURCES = {
+    MANUAL: 'manual',
+    RECIPE: 'recipe',
+  };
+
   constructor({
     // Basic Information
     id,
@@ -17,8 +31,13 @@ class Product extends BaseModel {
     recipeId,
     basePrice,
     costPrice,
+    costPriceSource = Product.COST_PRICE_SOURCES.MANUAL,
     currentPrice,
     taxPercentage = 0,
+
+    // Inventory
+    inventoryMode = Product.INVENTORY_MODES.NONE,
+    usedInRecipes = [], // reverse index: recipes using this product as a component
 
     // Display & Marketing
     displayOrder,
@@ -52,6 +71,11 @@ class Product extends BaseModel {
     // Basic price
     this.basePrice = basePrice;
     this.costPrice = costPrice;
+    this.costPriceSource = costPriceSource;
+
+    // Inventory
+    this.inventoryMode = inventoryMode;
+    this.usedInRecipes = usedInRecipes;
     this.currentPrice = currentPrice || basePrice;
     this.taxPercentage = Number(Number(taxPercentage).toFixed(1));
 

@@ -67,6 +67,11 @@ class BakerySettings extends BaseModel {
       autoSelectClient: false, // Toggle for auto-selecting POS client
       defaultClientId: null, // Will store auto-created "Punto de Venta" client ID
     },
+    // Opt-in module. Gates frontend visibility only — never backend logic.
+    // See zplanning/strategy/INVENTORY-IMPLEMENTATION.md §14 (front repo).
+    inventory: {
+      enabled: false,
+    },
   };
 
   static DEFAULT_BRANDING = {

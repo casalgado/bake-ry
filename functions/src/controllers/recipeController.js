@@ -12,18 +12,13 @@ const validateRecipeData = (recipeData) => {
     return errors;
   }
 
+  // Components are ingredients or products (§3); legacy payloads carry the id
+  // in `ingredientId`, typed ones in `id`.
   ingredients.forEach((ingredient, index) => {
-    if (!ingredient.ingredientId || !ingredient.quantity) {
-      errors.push(`Ingredient at index ${index} must have ingredientId and quantity`);
+    if (!(ingredient.id || ingredient.ingredientId) || !ingredient.quantity) {
+      errors.push(`Component at index ${index} must have an id and a quantity`);
     }
   });
-
-  const hasResaleItems = ingredients.some(ing => ing.type === 'resale');
-  const hasManufacturedItems = ingredients.some(ing => ing.type === 'manufactured');
-
-  if (hasResaleItems && hasManufacturedItems) {
-    errors.push('Recipe cannot mix resale and manufactured ingredients');
-  }
 
   return errors;
 };
@@ -46,7 +41,10 @@ const recipeController = {
 
       baseController.validateRequestData(updateData);
 
-      const result = await recipeService.update(id, updateData, bakeryId, req.user);
+      // NB: the 4th argument of recipeService.update is an optional outer
+      // transaction, not the editor. Passing req.user here made every recipe
+      // update throw.
+      const result = await recipeService.update(id, updateData, bakeryId);
       baseController.handleResponse(res, result);
     } catch (error) {
       baseController.handleError(res, error);

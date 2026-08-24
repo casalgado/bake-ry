@@ -8,6 +8,9 @@
       "source": "functions",
       "runtime": "nodejs20",
       "codebase": "default",
+      "predeploy": [
+        "npm --prefix functions run check:filenames"
+      ],
       "ignore": [
         "node_modules",
         ".git",

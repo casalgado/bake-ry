@@ -3,18 +3,34 @@ const { db } = require('../config/firebase');
 const Product = require('../models/Product');
 const createBaseService = require('./base/serviceFactory');
 const { NotFoundError, BadRequestError } = require('../utils/errors');
+const { syncProductStockDocs } = require('./stockService');
 
 const createProductService = () => {
   const baseService = createBaseService('products', Product, 'bakeries/{bakeryId}');
 
+  const validateInventoryMode = (data) => {
+    if (
+      data.inventoryMode !== undefined &&
+      !Object.values(Product.INVENTORY_MODES).includes(data.inventoryMode)
+    ) {
+      throw new BadRequestError(
+        `Invalid inventory mode: ${data.inventoryMode}`,
+      );
+    }
+  };
+
   const create = async (productData, bakeryId) => {
     try {
-      return await db.runTransaction(async (transaction) => {
+      validateInventoryMode(productData);
+
+      const created = await db.runTransaction(async (transaction) => {
 
         let productRef;
         let productId;
         if (productData.id) {
           productRef = baseService.getCollectionRef(bakeryId).doc(productData.id);
+          // Was left undefined, so a caller-supplied id never reached the model.
+          productId = productData.id;
         } else {
           productRef = baseService.getCollectionRef(bakeryId).doc();
           productId = productRef.id;
@@ -36,6 +52,11 @@ const createProductService = () => {
 
         return newProduct;
       });
+
+      // After the commit: the stocks doc is a rebuildable cache (§8), and
+      // syncProductStockDocs swallows its own failures.
+      await syncProductStockDocs(bakeryId, created);
+      return created;
     } catch (error) {
       console.error('Error in createProduct:', error);
       throw error;
@@ -44,7 +65,9 @@ const createProductService = () => {
 
   const update = async (productId, updateData, bakeryId) => {
     try {
-      return await db.runTransaction(async (transaction) => {
+      validateInventoryMode(updateData);
+
+      const updated = await db.runTransaction(async (transaction) => {
         const productRef = baseService.getCollectionRef(bakeryId).doc(productId);
         const productDoc = await transaction.get(productRef);
 
@@ -96,6 +119,9 @@ const createProductService = () => {
         transaction.update(productRef, updatedProduct.toFirestore());
         return updatedProduct;
       });
+
+      await syncProductStockDocs(bakeryId, { ...updated, id: productId });
+      return updated;
     } catch (error) {
       console.error('Error in updateProduct:', error);
       throw error;
@@ -249,11 +275,55 @@ const createProductService = () => {
     }
   };
 
+  /**
+   * A product used as a recipe component cannot be deleted (§1A.7). The reverse
+   * index on the product doc is maintained by recipeService.
+   */
+  const remove = async (productId, bakeryId, editor = null) => {
+    try {
+      const productDoc = await baseService
+        .getCollectionRef(bakeryId)
+        .doc(productId)
+        .get();
+
+      if (!productDoc.exists) {
+        throw new NotFoundError('Product not found');
+      }
+
+      const recipeIds = productDoc.data().usedInRecipes || [];
+
+      if (recipeIds.length > 0) {
+        const recipeDocs = await db.getAll(
+          ...recipeIds.map((recipeId) =>
+            db.collection(`bakeries/${bakeryId}/recipes`).doc(recipeId),
+          ),
+        );
+
+        // Stale ids must not block a deletion — only recipes that still exist do.
+        const recipeNames = recipeDocs
+          .filter((doc) => doc.exists)
+          .map((doc) => doc.data().name || doc.id);
+
+        if (recipeNames.length > 0) {
+          throw new BadRequestError(
+            `No se puede eliminar un producto usado en recetas. Usado en: ${recipeNames.join(', ')}`,
+          );
+        }
+      }
+
+      return baseService.remove(productId, bakeryId, editor);
+    } catch (error) {
+      console.error('Error in deleteProduct:', error);
+      throw error;
+    }
+  };
+
   return {
     ...baseService,
     create,
     update,
     patchAll,
+    remove,
   };
 };
 

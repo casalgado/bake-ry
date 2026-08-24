@@ -10,6 +10,11 @@ class Combination {
     this.basePrice = data.basePrice || 0;
     this.currentPrice = data.currentPrice || this.basePrice;
     this.costPrice = data.costPrice || 0;
+    // The combination is the unit of selling, stocking and costing (§2):
+    // recipes attach here when the product has variations. No fallback to the
+    // product-level recipe — a missing recipe is a gap, never a guess.
+    this.recipeId = data.recipeId || null;
+    this.costPriceSource = data.costPriceSource || 'manual';
     this.isWholeGrain = data.isWholeGrain || false;
     this.isActive = data.isActive !== undefined ? data.isActive : true;
     this.accountingCode = data.accountingCode || '';
@@ -51,6 +56,8 @@ class Combination {
       basePrice: this.basePrice,
       currentPrice: this.currentPrice,
       costPrice: this.costPrice,
+      costPriceSource: this.costPriceSource,
+      recipeId: this.recipeId,
       isWholeGrain: this.isWholeGrain,
       isActive: this.isActive,
       accountingCode: this.accountingCode,
@@ -67,6 +74,8 @@ class Combination {
       basePrice: this.basePrice,
       currentPrice: this.currentPrice,
       costPrice: this.costPrice,
+      costPriceSource: this.costPriceSource,
+      recipeId: this.recipeId,
       isWholeGrain: this.isWholeGrain,
       isActive: this.isActive,
       accountingCode: this.accountingCode,
