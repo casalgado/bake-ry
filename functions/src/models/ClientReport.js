@@ -118,9 +118,11 @@ class ClientReport {
 
   generateReport() {
     const rangeStart = this.periods[0].start;
-    const rangeEnd = this.options.endDate;
     const completePeriods = this.periods.slice(0, this.completeCount);
     const partialPeriod = this.periods[this.periods.length - 1];
+    // End of the last period, not `endDate`: the E5 cutoff admits orders through
+    // the end of the current period, so `endDate` would understate the window.
+    const rangeEnd = partialPeriod.end;
     const periodIndexByKey = new Map(this.periods.map((p, i) => [p.key, i]));
 
     const buckets = { estrella: [], futuraEstrella: [], reactivado: [], intermitente: [], caido: [], perdido: [] };
