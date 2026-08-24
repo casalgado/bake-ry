@@ -1,11 +1,12 @@
 // utils/periods.js
 //
-// Week/month bucketing helpers, moved out of SalesReport so ClientReport can
-// share the exact same key generation (bucketing must match exactly).
+// Week/month/quincena bucketing helpers, moved out of SalesReport so
+// ClientReport can share the exact same key generation (bucketing must
+// match exactly).
 //
 // ponytail: date-fns is not installed on the backend (frontend-only dep per
 // package.json), so labels are hand-rolled Spanish month abbreviations
-// instead of date-fns/locale/es as the plan assumed.
+// instead of date-fns/locale/es.
 
 const SPANISH_MONTHS_ABBR = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
@@ -33,8 +34,28 @@ function getMonthKey(date) {
   return `${year}-${month}`;
 }
 
-// Returns `count` period descriptors ending at endDate, OLDEST FIRST.
-// [{ key: '2026-08-10/2026-08-16', label: '10–16 Ago' }, ...]
+// Calendar quincena: day 1-15 is Q1, day 16-end-of-month is Q2.
+function getQuincenaKey(date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+
+  const isFirstHalf = d.getDate() <= 15;
+  const start = isFirstHalf
+    ? new Date(d.getFullYear(), d.getMonth(), 1)
+    : new Date(d.getFullYear(), d.getMonth(), 16);
+  const end = isFirstHalf
+    ? new Date(d.getFullYear(), d.getMonth(), 15)
+    : new Date(d.getFullYear(), d.getMonth() + 1, 0);
+
+  const startStr = start.toISOString().split('T')[0];
+  const endStr = end.toISOString().split('T')[0];
+  return `${startStr}/${endStr}`;
+}
+
+// Returns { periods, completeCount }, OLDEST FIRST.
+// periods: [{ key, label, start, end, isPartial }]
+// The period containing `endDate` (always the last one) is marked partial —
+// it is by definition the period we're currently in, so it can't be complete.
 function buildPeriods(endDate, period, count) {
   const periods = [];
 
@@ -48,12 +69,28 @@ function buildPeriods(endDate, period, count) {
     for (let i = count - 1; i >= 0; i--) {
       const monday = new Date(currentMonday);
       monday.setDate(currentMonday.getDate() - i * 7);
-      const key = getWeekRange(monday);
-      const [startStr, endStr] = key.split('/');
-      const start = new Date(startStr + 'T00:00:00');
-      const end = new Date(endStr + 'T00:00:00');
-      const label = `${start.getDate()}–${end.getDate()} ${SPANISH_MONTHS_ABBR[end.getMonth()]}`;
-      periods.push({ key, label });
+      const end = new Date(monday);
+      end.setDate(monday.getDate() + 6);
+      const label = `${monday.getDate()}–${end.getDate()} ${SPANISH_MONTHS_ABBR[end.getMonth()]}`;
+      periods.push({ key: getWeekRange(monday), label, start: monday, end });
+    }
+  } else if (period === 'biweekly') {
+    const current = new Date(endDate);
+    current.setHours(0, 0, 0, 0);
+    const currentQOffset = current.getDate() <= 15 ? 0 : 1;
+    const currentTotalQ = (current.getFullYear() * 12 + current.getMonth()) * 2 + currentQOffset;
+
+    for (let i = count - 1; i >= 0; i--) {
+      const totalQ = currentTotalQ - i;
+      const totalMonths = Math.floor(totalQ / 2);
+      const year = Math.floor(totalMonths / 12);
+      const month = totalMonths % 12;
+      const qOffset = ((totalQ % 2) + 2) % 2;
+      const start = qOffset === 0 ? new Date(year, month, 1) : new Date(year, month, 16);
+      const end = qOffset === 0 ? new Date(year, month, 15) : new Date(year, month + 1, 0);
+      const key = getQuincenaKey(start);
+      const label = `Q${qOffset + 1} ${SPANISH_MONTHS_ABBR[month]}`;
+      periods.push({ key, label, start, end });
     }
   } else {
     const current = new Date(endDate);
@@ -61,11 +98,15 @@ function buildPeriods(endDate, period, count) {
       const d = new Date(current.getFullYear(), current.getMonth() - i, 1);
       const key = getMonthKey(d);
       const label = `${SPANISH_MONTHS_ABBR[d.getMonth()]} ${d.getFullYear()}`;
-      periods.push({ key, label });
+      const end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+      periods.push({ key, label, start: d, end });
     }
   }
 
-  return periods;
+  periods.forEach((p, i) => { p.isPartial = i === periods.length - 1; });
+  const completeCount = periods.length - 1;
+
+  return { periods, completeCount };
 }
 
-module.exports = { getWeekRange, getMonthKey, buildPeriods };
+module.exports = { getWeekRange, getMonthKey, getQuincenaKey, buildPeriods };

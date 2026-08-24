@@ -1,46 +1,82 @@
 // models/ClientReport.js
 //
-// Answers: how many new clients are we getting, and which clients keep
-// ordering vs. quietly stopped. Reads full order history (no date-range
-// filter) because "new" and the median gap both require the client's whole
-// past, not just the visible window.
+// Answers: which clients are new, and which recurring clients are healthy
+// vs. quietly churning. Reads full order history (no date-range filter)
+// because "new" requires the client's whole past, not just the visible
+// window.
+//
+// Each client gets a `.`/`0`/`1` vector over the report's complete periods
+// (the current, still-open period is excluded from the vector — ordering in
+// it can only promote a client, never demote one) and is sorted into one of
+// six buckets from that vector. See zplanning/CLIENT_PERSISTENCY_REDESIGN.md
+// (bake-ry-front) for the full decision tree and worked examples.
 
 const { Order } = require('./Order');
-const { getWeekRange, getMonthKey, buildPeriods } = require('../utils/periods');
+const { BadRequestError } = require('../utils/errors');
+const { getWeekRange, getMonthKey, getQuincenaKey, buildPeriods } = require('../utils/periods');
 
-const DAY_MS = 1000 * 60 * 60 * 24;
-const ACTIVE_FLOOR_DAYS = 20;
-const LAPSED_CEILING_DAYS = 540;
-const RETURN_WINDOW_DAYS = 90;
-
-function median(numbers) {
-  if (numbers.length === 0) return null;
-  const sorted = [...numbers].sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
-}
-
-function daysBetween(from, to) {
-  return Math.floor((to.getTime() - from.getTime()) / DAY_MS);
-}
+const REACTIVADO_QUIET_THRESHOLD = 3; // consecutive quiet periods before a comeback reads as "reactivado" rather than "intermitente" (same threshold defines "perdido" — a reactivado is a perdido who came back)
+const CAIDO_MAX_MISSED = 2; // periods missed since the last order before a non-recent client is "perdido" instead of "caido"
 
 function periodKeyForDate(date, period) {
-  return period === 'weekly' ? getWeekRange(date) : getMonthKey(date);
+  if (period === 'weekly') return getWeekRange(date);
+  if (period === 'biweekly') return getQuincenaKey(date);
+  return getMonthKey(date);
 }
 
-function clampGap(days) {
-  return Math.min(Math.max(days, ACTIVE_FLOOR_DAYS), LAPSED_CEILING_DAYS);
+// Pure function over a vector STRING (e.g. "..11011"), decoupled from dates
+// so it can be unit-tested directly against the design doc's example
+// vectors. Precondition: the vector must contain at least one non-'.'
+// character (guaranteed by ClientReport, which filters out clients with no
+// activity in range before calling this), and '.' only ever appears as a
+// prefix (periods before the client's first order).
+function classifyVector(vectorString, orderedInPartial) {
+  const N = vectorString.length;
+  const start = vectorString.lastIndexOf('.') + 1;
+  const last = vectorString.lastIndexOf('1');
+
+  const missed = last === -1 ? undefined : N - 1 - last;
+  const hasGaps = vectorString.includes('0', start);
+  const recent = orderedInPartial || missed === 0;
+
+  // Consecutive quiet periods immediately before the client's latest order:
+  // counted back from the end when that order is in the partial period,
+  // otherwise from the last '1'.
+  let quietBeforeLast = 0;
+  for (let i = orderedInPartial ? N - 1 : last - 1; i >= 0 && vectorString[i] === '0'; i--) quietBeforeLast++;
+
+  if (!hasGaps) return start === 0 ? 'estrella' : 'futuraEstrella';
+  if (recent) return quietBeforeLast >= REACTIVADO_QUIET_THRESHOLD ? 'reactivado' : 'intermitente';
+  if (missed <= CAIDO_MAX_MISSED) return 'caido';
+  return 'perdido';
 }
 
 class ClientReport {
   constructor(orders, b2b_clients, options = {}) {
     this.options = this.validateOptions(options);
 
+    const { periods, completeCount } = buildPeriods(this.options.endDate, this.options.period, this.options.count);
+    this.periods = periods;
+    this.completeCount = completeCount;
+
+    // E5 cutoff: end of the LAST period, not `endDate`. Orders are placed days
+    // ahead, so a dueDate later this week still belongs to the current period
+    // and must count. Only orders past the window (next week, next month) are
+    // dropped — they have no bucket to land in and would make lastOrderDate
+    // point at an order that hasn't happened. `end` is that day at 00:00, so
+    // the cutoff is the following midnight to cover the whole final day.
+    const lastPeriodEnd = periods[periods.length - 1].end;
+    const cutoff = new Date(lastPeriodEnd);
+    cutoff.setDate(cutoff.getDate() + 1);
+
     const b2bClientIds = new Set((b2b_clients || []).map(client => client.id));
     const allOrders = orders
       .map(order => order instanceof Order ? order : new Order(order))
       .filter(order => !order.isComplimentary)
-      .filter(order => b2bClientIds.has(order.userId) === (this.options.segment === 'b2b'));
+      .filter(order => b2bClientIds.has(order.userId) === (this.options.segment === 'b2b'))
+      // E4: a null paymentDate can't be sorted/bucketed when dateField is paymentDate.
+      .filter(order => this.options.dateField !== 'paymentDate' || order.paymentDate !== null)
+      .filter(order => order[this.options.dateField] < cutoff);
 
     this.ordersByClient = new Map();
     allOrders.forEach(order => {
@@ -52,9 +88,6 @@ class ClientReport {
     this.ordersByClient.forEach(clientOrders => {
       clientOrders.sort((a, b) => a[this.options.dateField] - b[this.options.dateField]);
     });
-
-    this.periods = buildPeriods(this.options.endDate, this.options.period, this.options.count);
-    this.periodKeys = new Set(this.periods.map(p => p.key));
   }
 
   validateOptions(options) {
@@ -66,34 +99,103 @@ class ClientReport {
       endDate: options.endDate ? new Date(options.endDate) : new Date(),
     };
 
-    if (!['weekly', 'monthly'].includes(validated.period)) {
-      throw new Error('Invalid period: must be "weekly" or "monthly"');
+    // These come straight off the query string, so a bad value is a 400, not a 500.
+    if (!['weekly', 'biweekly', 'monthly'].includes(validated.period)) {
+      throw new BadRequestError('Invalid period: must be "weekly", "biweekly" or "monthly"');
     }
     if (!Number.isInteger(validated.count) || validated.count < 1 || validated.count > 12) {
-      throw new Error('Invalid count: must be an integer between 1 and 12');
+      throw new BadRequestError('Invalid count: must be an integer between 1 and 12');
     }
     if (!['b2b', 'b2c'].includes(validated.segment)) {
-      throw new Error('Invalid segment: must be "b2b" or "b2c"');
+      throw new BadRequestError('Invalid segment: must be "b2b" or "b2c"');
     }
     if (!['dueDate', 'paymentDate'].includes(validated.dateField)) {
-      throw new Error('Invalid dateField: must be "dueDate" or "paymentDate"');
+      throw new BadRequestError('Invalid dateField: must be "dueDate" or "paymentDate"');
     }
 
     return validated;
   }
 
   generateReport() {
-    const clientStats = this.computeClientStats();
-    const baselineGap = this.computeBaselineGap(clientStats);
-    clientStats.forEach(stats => this.applyLifetimeStatus(stats, baselineGap));
+    const rangeStart = this.periods[0].start;
+    const rangeEnd = this.options.endDate;
+    const completePeriods = this.periods.slice(0, this.completeCount);
+    const partialPeriod = this.periods[this.periods.length - 1];
+    const periodIndexByKey = new Map(this.periods.map((p, i) => [p.key, i]));
 
-    const clientRows = new Map(clientStats.map(stats => [stats.userId, this.buildClientRow(stats)]));
-    const clients = clientStats
-      .filter(stats =>
-        clientRows.get(stats.userId).cells.some(cell => cell.orderCount > 0) ||
-        ['at_risk', 'lapsed', 'one_time'].includes(stats.status),
-      )
-      .map(stats => clientRows.get(stats.userId));
+    const buckets = { estrella: [], futuraEstrella: [], reactivado: [], intermitente: [], caido: [], perdido: [] };
+    const recurringBuckets = new Set(['estrella', 'futuraEstrella', 'reactivado', 'intermitente']);
+    const nuevosPorPeriodo = this.periods.map(p => ({ periodKey: p.key, clients: [] }));
+
+    let activeClients = 0;
+    let newClients = 0;
+    let newClientsInCompletePeriods = 0;
+    let recurringCount = 0;
+
+    this.ordersByClient.forEach((clientOrders, userId) => {
+      const firstOrder = clientOrders[0];
+      const lastOrder = clientOrders[clientOrders.length - 1];
+      const firstOrderDate = firstOrder[this.options.dateField];
+      const veteran = firstOrderDate < rangeStart;
+
+      const keyOf = order => periodKeyForDate(order[this.options.dateField], this.options.period);
+      const clientPeriodKeys = new Set(clientOrders.map(keyOf));
+      const ordersInRange = clientOrders.filter(o => periodIndexByKey.has(keyOf(o)));
+
+      // "New" = first-ever order falls within the reported window (any period, partial included).
+      if (!veteran) {
+        const firstOrderPeriodIndex = periodIndexByKey.get(keyOf(firstOrder));
+
+        if (firstOrderPeriodIndex !== undefined) {
+          newClients += 1;
+          if (firstOrderPeriodIndex < this.completeCount) newClientsInCompletePeriods += 1;
+          const periodObj = this.periods[firstOrderPeriodIndex];
+          const ordersInPeriod = clientOrders.filter(o => keyOf(o) === periodObj.key);
+          nuevosPorPeriodo[firstOrderPeriodIndex].clients.push({
+            userId,
+            name: lastOrder.userName,
+            total: ordersInPeriod.reduce((sum, o) => sum + o.total, 0),
+            orderCount: ordersInPeriod.length,
+            lastOrderDate: lastOrder[this.options.dateField],
+          });
+
+          activeClients += 1;
+
+          // E1: first-ever order lands in the still-open period — lives only in nuevosPorPeriodo.
+          if (firstOrderPeriodIndex === this.periods.length - 1) return;
+        }
+      }
+
+      const orderedInPartial = clientPeriodKeys.has(partialPeriod.key);
+      const bornIndex = completePeriods.findIndex(p => clientPeriodKeys.has(p.key));
+
+      const vector = completePeriods.map((period, i) => {
+        if (!veteran && i < bornIndex) return '.';
+        return clientPeriodKeys.has(period.key) ? '1' : '0';
+      }).join('');
+
+      // E2: veteran with no activity anywhere in the window (not even the partial period) — skip entirely.
+      if (!vector.includes('1') && !orderedInPartial) return;
+
+      // Only counted here for veterans; "new" clients already counted above.
+      if (veteran) activeClients += 1;
+
+      const bucket = classifyVector(vector, orderedInPartial);
+      buckets[bucket].push({
+        userId,
+        name: lastOrder.userName,
+        email: lastOrder.userEmail,
+        phone: lastOrder.userPhone,
+        rangeTotal: ordersInRange.reduce((sum, o) => sum + o.total, 0),
+        orderCount: ordersInRange.length,
+        lastOrderDate: lastOrder[this.options.dateField],
+        vector,
+        orderedInPartial,
+      });
+      if (recurringBuckets.has(bucket)) recurringCount += 1;
+    });
+
+    const classifiedClients = Object.values(buckets).reduce((sum, rows) => sum + rows.length, 0);
 
     return {
       meta: {
@@ -102,228 +204,28 @@ class ClientReport {
         segment: this.options.segment,
         dateField: this.options.dateField,
         generatedAt: new Date(),
+        rangeStart,
+        rangeEnd,
       },
       periods: this.periods,
-      clients,
-      summary: this.generateSummary(clients, clientStats),
-    };
-  }
-
-  computeClientStats() {
-    const stats = [];
-
-    this.ordersByClient.forEach((clientOrders, userId) => {
-      const dates = clientOrders.map(order => order[this.options.dateField]);
-      const gaps = [];
-      for (let i = 1; i < dates.length; i++) {
-        gaps.push(daysBetween(dates[i - 1], dates[i]));
-      }
-
-      stats.push({
-        userId,
-        name: clientOrders[clientOrders.length - 1].userName,
-        orders: clientOrders,
-        firstOrderDate: dates[0],
-        lastOrderDate: dates[dates.length - 1],
-        orderCount: clientOrders.length,
-        ltv: clientOrders.reduce((sum, order) => sum + order.total, 0),
-        medianGapDays: clientOrders.length >= 3 ? median(gaps) : null,
-      });
-    });
-
-    return stats;
-  }
-
-  computeBaselineGap(clientStats) {
-    const knownGaps = clientStats
-      .filter(stats => stats.medianGapDays !== null)
-      .map(stats => stats.medianGapDays);
-    return median(knownGaps);
-  }
-
-  applyLifetimeStatus(stats, segmentBaselineGap) {
-    stats.daysSinceLast = daysBetween(stats.lastOrderDate, this.options.endDate);
-    stats.baselineGap = stats.orderCount >= 3 ? stats.medianGapDays : segmentBaselineGap;
-    stats.gapRatio = stats.baselineGap ? stats.daysSinceLast / stats.baselineGap : null;
-
-    if (stats.daysSinceLast < ACTIVE_FLOOR_DAYS) {
-      stats.status = 'active';
-    } else if (stats.daysSinceLast > LAPSED_CEILING_DAYS) {
-      stats.status = 'lapsed';
-    } else if (stats.orderCount === 1 && stats.baselineGap !== null && stats.daysSinceLast > stats.baselineGap) {
-      stats.status = 'one_time';
-    } else if (stats.gapRatio !== null && stats.gapRatio > 3) {
-      stats.status = 'lapsed';
-    } else if (stats.gapRatio !== null && stats.gapRatio > 1.5) {
-      stats.status = 'at_risk';
-    } else if (stats.gapRatio !== null && stats.gapRatio > 1) {
-      stats.status = 'overdue';
-    } else {
-      stats.status = 'active';
-    }
-  }
-
-  buildClientRow(stats) {
-    const totals = new Map();
-    stats.orders.forEach(order => {
-      const key = periodKeyForDate(order[this.options.dateField], this.options.period);
-      if (!this.periodKeys.has(key)) return;
-      if (!totals.has(key)) totals.set(key, { total: 0, orderCount: 0 });
-      const bucket = totals.get(key);
-      bucket.total += order.total;
-      bucket.orderCount += 1;
-    });
-
-    const firstOrderPeriodKey = periodKeyForDate(stats.firstOrderDate, this.options.period);
-
-    let previousTotal = 0;
-    let firstSeenIndex = -1;
-    const cells = this.periods.map((period, index) => {
-      const bucket = totals.get(period.key) || { total: 0, orderCount: 0 };
-      let status;
-      if (bucket.total === 0) {
-        status = 'absent';
-      } else if (period.key === firstOrderPeriodKey) {
-        status = 'new';
-      } else if (index > 0 && previousTotal > 0) {
-        status = 'persistent';
-      } else {
-        status = 'old';
-      }
-      if (status !== 'absent' && firstSeenIndex === -1) firstSeenIndex = index;
-      previousTotal = bucket.total;
-      return { total: bucket.total, orderCount: bucket.orderCount, status };
-    });
-
-    const windowTotal = cells.reduce((sum, cell) => sum + cell.total, 0);
-    const persistentCount = cells.filter(cell => cell.status === 'persistent').length;
-
-    return {
-      userId: stats.userId,
-      name: stats.name,
-      cells,
-      windowTotal,
-      persistentCount,
-      firstSeenIndex,
-      orderCount: stats.orderCount,
-      ltv: stats.ltv,
-      firstOrderDate: stats.firstOrderDate,
-      lastOrderDate: stats.lastOrderDate,
-      medianGapDays: stats.medianGapDays,
-      daysSinceLast: stats.daysSinceLast,
-      gapRatio: stats.gapRatio,
-      status: stats.status,
-    };
-  }
-
-  generateSummary(clients, clientStats) {
-    const windowedClients = clients.filter(client => client.cells.some(cell => cell.orderCount > 0));
-
-    const perPeriod = this.periods.map((period, index) => {
-      const counts = { nuevos: 0, persistentes: 0, viejos: 0, ausentes: 0 };
-      windowedClients.forEach(client => {
-        const status = client.cells[index].status;
-        if (status === 'new') counts.nuevos += 1;
-        else if (status === 'persistent') counts.persistentes += 1;
-        else if (status === 'old') counts.viejos += 1;
-        else counts.ausentes += 1;
-      });
-      return { ...counts, activos: windowedClients.length - counts.ausentes };
-    });
-
-    return {
-      perPeriod,
-      tiles: {
-        newClients: this.computeNewClientsTile(clientStats),
-        returnRate: this.computeReturnRateTile(clientStats),
-        atRisk: { count: clientStats.filter(c => c.status === 'at_risk').length },
-        lapsed: { count: clientStats.filter(c => c.status === 'lapsed').length },
-        quickRatio: this.computeQuickRatioTile(clientStats),
+      kpis: {
+        activeClients,
+        newClients,
+        // Complete periods only — the still-open period would drag the average down.
+        avgNewPerPeriod: this.completeCount > 0
+          ? Math.round(10 * newClientsInCompletePeriods / this.completeCount) / 10
+          : null,
+        // Share of CLASSIFIED clients that are recurring. E1 clients (first-ever order
+        // in the still-open period) are active but have no vector to judge — one order
+        // is neither loyal nor churning — so they're out of both sides of the ratio.
+        // Denominator is every bucketed client; activeClients is the wider count.
+        returningPct: classifiedClients > 0 ? Math.round(100 * recurringCount / classifiedClients) : null,
       },
+      nuevosPorPeriodo,
+      buckets,
     };
-  }
-
-  computeNewClientsTile(clientStats) {
-    const lastPeriod = this.periods[this.periods.length - 1];
-    const prevPeriod = this.periods.length >= 2 ? this.periods[this.periods.length - 2] : null;
-    const lastYearEndDate = this.shiftOneYearBack(this.options.endDate);
-    const lastYearPeriod = buildPeriods(lastYearEndDate, this.options.period, 1)[0];
-
-    const countInPeriod = periodKey => clientStats.filter(client =>
-      periodKeyForDate(client.firstOrderDate, this.options.period) === periodKey,
-    ).length;
-
-    return {
-      value: countInPeriod(lastPeriod.key),
-      prevPeriod: prevPeriod ? countInPeriod(prevPeriod.key) : null,
-      lastYear: countInPeriod(lastYearPeriod.key),
-    };
-  }
-
-  shiftOneYearBack(date) {
-    const shifted = new Date(date);
-    if (this.options.period === 'weekly') {
-      shifted.setDate(shifted.getDate() - 52 * 7);
-    } else {
-      shifted.setFullYear(shifted.getFullYear() - 1);
-    }
-    return shifted;
-  }
-
-  computeReturnRateTile(clientStats) {
-    let judged = 0;
-    let returned = 0;
-    let tooEarly = 0;
-
-    clientStats.forEach(client => {
-      const clientAgeDays = daysBetween(client.firstOrderDate, this.options.endDate);
-      if (clientAgeDays < RETURN_WINDOW_DAYS) {
-        tooEarly += 1;
-        return;
-      }
-      judged += 1;
-      if (client.orderCount >= 2) {
-        const secondOrderDate = client.orders[1][this.options.dateField];
-        if (daysBetween(client.firstOrderDate, secondOrderDate) <= RETURN_WINDOW_DAYS) returned += 1;
-      }
-    });
-
-    return {
-      judged,
-      value: judged > 0 ? Math.round((returned / judged) * 100) : null,
-      tooEarly,
-    };
-  }
-
-  computeQuickRatioTile(clientStats) {
-    const lastPeriod = this.periods[this.periods.length - 1];
-
-    let gained = 0;
-    let lost = 0;
-
-    clientStats.forEach(client => {
-      const firstOrderInLastPeriod = periodKeyForDate(client.firstOrderDate, this.options.period) === lastPeriod.key;
-
-      let returnedFromLapseInLastPeriod = false;
-      if (!firstOrderInLastPeriod) {
-        const lastOrderInLastPeriod = periodKeyForDate(client.lastOrderDate, this.options.period) === lastPeriod.key;
-        if (lastOrderInLastPeriod && client.orders.length >= 2 && client.medianGapDays !== null) {
-          // Gap before the most recent order, measured against the client's own baseline.
-          const gapBeforeLast = daysBetween(client.orders[client.orders.length - 2][this.options.dateField], client.lastOrderDate);
-          returnedFromLapseInLastPeriod = gapBeforeLast > 3 * client.medianGapDays;
-        }
-      }
-
-      if (firstOrderInLastPeriod || returnedFromLapseInLastPeriod) gained += 1;
-
-      if (client.baselineGap) {
-        const lapseDate = new Date(client.lastOrderDate.getTime() + clampGap(3 * client.baselineGap) * DAY_MS);
-        if (periodKeyForDate(lapseDate, this.options.period) === lastPeriod.key) lost += 1;
-      }
-    });
-
-    return { gained, lost, value: lost > 0 ? gained / lost : (gained > 0 ? Infinity : 0) };
   }
 }
 
+ClientReport.classifyVector = classifyVector;
 module.exports = ClientReport;

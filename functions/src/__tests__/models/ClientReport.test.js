@@ -1,7 +1,9 @@
 // __tests__/models/ClientReport.test.js
 
 const ClientReport = require('../../models/ClientReport');
+const { classifyVector } = ClientReport;
 const { Order } = require('../../models/Order');
+const { buildPeriods } = require('../../utils/periods');
 
 function mondayOf(date) {
   const d = new Date(date);
@@ -17,12 +19,15 @@ function addDays(date, n) {
   return d;
 }
 
-function makeOrder(id, userId, userName, dueDate, subtotal = 10000) {
+function makeOrder(id, userId, userName, dueDate, { subtotal = 10000, paymentDate = null, userEmail = '', userPhone = '' } = {}) {
   return new Order({
     id,
     userId,
     userName,
+    userEmail,
+    userPhone,
     dueDate,
+    paymentDate,
     orderItems: [{
       id: `${id}-item`,
       productId: 'p1',
@@ -37,140 +42,234 @@ function makeOrder(id, userId, userName, dueDate, subtotal = 10000) {
   });
 }
 
-describe('ClientReport', () => {
-  const NOW = new Date('2026-08-21T12:00:00Z');
+describe('classifyVector (design doc example vectors)', () => {
+  it('perfect streak since a veteran client existed -> estrella', () => {
+    expect(classifyVector('11111111', false)).toBe('estrella');
+  });
+
+  it('perfect streak since birth, not a veteran -> futuraEstrella', () => {
+    expect(classifyVector('...11111', false)).toBe('futuraEstrella');
+  });
+
+  it('5 quiet periods then a comeback -> reactivado', () => {
+    expect(classifyVector('11000001', false)).toBe('reactivado');
+  });
+
+  it('gaps but never 3+ quiet before returning -> intermitente', () => {
+    expect(classifyVector('10110101', false)).toBe('intermitente');
+  });
+
+  it('gaps, missed = 2 -> caido', () => {
+    expect(classifyVector('.1101100', false)).toBe('caido');
+  });
+
+  it('comeback that fizzled, recency wins -> caido', () => {
+    expect(classifyVector('10000010', false)).toBe('caido');
+  });
+
+  it('missed = 5 -> perdido', () => {
+    expect(classifyVector('11100000', false)).toBe('perdido');
+  });
+
+  describe('E3: veteran, all-zero vector, ordered in the partial period', () => {
+    it('reads quietBeforeLast as N when N >= threshold -> reactivado', () => {
+      expect(classifyVector('00000000', true)).toBe('reactivado');
+    });
+
+    it('falls to intermitente when N is too small', () => {
+      expect(classifyVector('00', true)).toBe('intermitente');
+    });
+  });
+});
+
+describe('buildPeriods', () => {
+  it('marks only the last period as partial and reports the right completeCount', () => {
+    const { periods, completeCount } = buildPeriods(new Date('2026-08-21T12:00:00Z'), 'weekly', 6);
+    expect(periods).toHaveLength(6);
+    expect(completeCount).toBe(5);
+    expect(periods.slice(0, 5).every(p => !p.isPartial)).toBe(true);
+    expect(periods[5].isPartial).toBe(true);
+  });
+
+  it('splits a quincena at day 15/16 and labels Q1/Q2', () => {
+    const { periods } = buildPeriods(new Date('2026-02-16T12:00:00Z'), 'biweekly', 2);
+    expect(periods[0].label).toBe('Q1 Feb');
+    expect(periods[0].start.getDate()).toBe(1);
+    expect(periods[0].end.getDate()).toBe(15);
+    expect(periods[1].label).toBe('Q2 Feb');
+    expect(periods[1].start.getDate()).toBe(16);
+    expect(periods[1].end.getDate()).toBe(28); // 2026 is not a leap year
+  });
+
+  it('closes Q2 on the last calendar day of a 31-day month', () => {
+    const { periods } = buildPeriods(new Date('2026-03-20T12:00:00Z'), 'biweekly', 1);
+    expect(periods[0].label).toBe('Q2 Mar');
+    expect(periods[0].end.getDate()).toBe(31);
+  });
+});
+
+describe('ClientReport.generateReport', () => {
+  const NOW = new Date('2026-08-21T12:00:00Z'); // a Friday, inside the partial week
   const THIS_MONDAY = mondayOf(NOW);
-
-  const b2bClients = [
-    { id: 'steady' },
-    { id: 'atRisk' },
-    { id: 'lapsedCeiling' },
-    { id: 'activeFloor' },
-    { id: 'oneTime' },
-    { id: 'newInWindow' },
-    { id: 'oldReturner' },
-  ];
-
-  const orders = [
-    // steady: 4 orders, 7-day cadence, recent -> active, persistent after the first
-    makeOrder('o1', 'steady', 'Steady Client', addDays(THIS_MONDAY, -21)),
-    makeOrder('o2', 'steady', 'Steady Client', addDays(THIS_MONDAY, -14)),
-    makeOrder('o3', 'steady', 'Steady Client', addDays(THIS_MONDAY, -7)),
-    makeOrder('o4', 'steady', 'Steady Client', THIS_MONDAY),
-
-    // atRisk: 3 orders on a 10-day median, then 25 days silent -> gapRatio 2.5 -> at_risk
-    makeOrder('o5', 'atRisk', 'At Risk Client', addDays(NOW, -45)),
-    makeOrder('o6', 'atRisk', 'At Risk Client', addDays(NOW, -35)),
-    makeOrder('o7', 'atRisk', 'At Risk Client', addDays(NOW, -25)),
-
-    // lapsedCeiling: silent 600 days -> lapsed via the ceiling, zero orders in the window
-    makeOrder('o8', 'lapsedCeiling', 'Lapsed Client', addDays(NOW, -610)),
-    makeOrder('o9', 'lapsedCeiling', 'Lapsed Client', addDays(NOW, -600)),
-
-    // activeFloor: 2 orders 3 days apart, silent 8 days -> active via the floor
-    makeOrder('o10', 'activeFloor', 'Floor Client', addDays(NOW, -11)),
-    makeOrder('o11', 'activeFloor', 'Floor Client', addDays(NOW, -8)),
-
-    // oneTime: 1 order ever, 100 days ago
-    makeOrder('o12', 'oneTime', 'One Time Client', addDays(NOW, -100)),
-
-    // newInWindow: first order inside the window (2 weeks back), reorder this week
-    makeOrder('o13', 'newInWindow', 'New Client', addDays(THIS_MONDAY, -14)),
-    makeOrder('o14', 'newInWindow', 'New Client', THIS_MONDAY),
-
-    // oldReturner: first order 3 years ago, reorders inside the window -> not "new"
-    makeOrder('o15', 'oldReturner', 'Old Returner', addDays(NOW, -3 * 365)),
-    makeOrder('o16', 'oldReturner', 'Old Returner', THIS_MONDAY),
-  ];
-
+  const b2bClients = [{ id: 'estrella' }, { id: 'newInPartial' }, { id: 'veteranSilent' }, { id: 'reactivatedYesterday' }, { id: 'nullPayment' }];
   const options = { period: 'weekly', count: 6, segment: 'b2b', dateField: 'dueDate', endDate: NOW };
 
-  const report = new ClientReport(orders, b2bClients, options).generateReport();
-  const clientsById = Object.fromEntries(report.clients.map(c => [c.userId, c]));
+  it('classifies a steady veteran as estrella and counts it as active, not new', () => {
+    // -42 predates rangeStart (veteran); -35..-7 cover the 5 complete periods.
+    const orders = [-42, -35, -28, -21, -14, -7].map((offset, i) =>
+      makeOrder(`s${i}`, 'estrella', 'Estrella Client', addDays(THIS_MONDAY, offset)),
+    );
+    const report = new ClientReport(orders, b2bClients, options).generateReport();
+    expect(report.buckets.estrella.map(c => c.userId)).toContain('estrella');
+    expect(report.kpis.activeClients).toBe(1);
+    expect(report.kpis.newClients).toBe(0);
 
-  it('marks a steady, recent client active with persistent cells after the first', () => {
-    const client = clientsById.steady;
-    expect(client.status).toBe('active');
-    const nonAbsent = client.cells.filter(c => c.status !== 'absent');
-    expect(nonAbsent[0].status).toBe('new');
-    expect(nonAbsent.slice(1).every(c => c.status === 'persistent')).toBe(true);
+    const row = report.buckets.estrella.find(c => c.userId === 'estrella');
+    expect(row.orderedInPartial).toBe(false);
   });
 
-  it('flags a moderate gap past its median as at_risk', () => {
-    expect(clientsById.atRisk.status).toBe('at_risk');
+  it('E1: first-ever order in the partial period appears only in nuevosPorPeriodo, not in any bucket', () => {
+    const orders = [makeOrder('n1', 'newInPartial', 'New Client', addDays(THIS_MONDAY, 1))];
+    const report = new ClientReport(orders, b2bClients, options).generateReport();
+
+    const allBucketed = Object.values(report.buckets).flat().map(c => c.userId);
+    expect(allBucketed).not.toContain('newInPartial');
+
+    const partialPeriodEntry = report.nuevosPorPeriodo[report.nuevosPorPeriodo.length - 1];
+    expect(partialPeriodEntry.clients.map(c => c.userId)).toContain('newInPartial');
+    expect(report.kpis.activeClients).toBe(1);
+    expect(report.kpis.newClients).toBe(1);
+    // Nobody classified, so there is no ratio to report — not 0%.
+    expect(report.kpis.returningPct).toBeNull();
   });
 
-  it('flags 600 days of silence as lapsed via the ceiling, with an all-absent row', () => {
-    const client = clientsById.lapsedCeiling;
-    expect(client.status).toBe('lapsed');
-    expect(client.cells.every(c => c.status === 'absent')).toBe(true);
-    expect(client.firstSeenIndex).toBe(-1);
+  it('E1 clients do not drag returningPct down', () => {
+    const steady = [-35, -28, -21, -14, -7].map((offset, i) =>
+      makeOrder(`rp${i}`, 'estrella', 'Estrella Client', addDays(THIS_MONDAY, offset)),
+    );
+    const withNewcomer = [...steady, makeOrder('rpNew', 'newInPartial', 'New Client', addDays(THIS_MONDAY, 1))];
+
+    const before = new ClientReport(steady, b2bClients, options).generateReport();
+    const after = new ClientReport(withNewcomer, b2bClients, options).generateReport();
+
+    expect(before.kpis.returningPct).toBe(100);
+    expect(after.kpis.returningPct).toBe(100);
+    expect(after.kpis.activeClients).toBe(2);
   });
 
-  it('keeps a short-gap client active via the floor, not overdue', () => {
-    expect(clientsById.activeFloor.status).toBe('active');
+  it('E2: veteran with orders only before the range is excluded entirely', () => {
+    const orders = [makeOrder('v1', 'veteranSilent', 'Silent Veteran', addDays(THIS_MONDAY, -365))];
+    const report = new ClientReport(orders, b2bClients, options).generateReport();
+
+    const allBucketed = Object.values(report.buckets).flat().map(c => c.userId);
+    expect(allBucketed).not.toContain('veteranSilent');
+    expect(report.kpis.activeClients).toBe(0);
   });
 
-  it('marks a single lifetime order as one_time with a null median gap', () => {
-    const client = clientsById.oneTime;
-    expect(client.status).toBe('one_time');
-    expect(client.medianGapDays).toBeNull();
-  });
-
-  it('marks exactly one cell "new" for a client whose first order is in the window', () => {
-    const client = clientsById.newInWindow;
-    const newCells = client.cells.filter(c => c.status === 'new');
-    expect(newCells).toHaveLength(1);
-  });
-
-  it('does not mark a reorder as "new" when the first order was years ago', () => {
-    const client = clientsById.oldReturner;
-    const newCells = client.cells.filter(c => c.status === 'new');
-    expect(newCells).toHaveLength(0);
-  });
-
-  it('includes zero-window lapsed/at_risk/one_time clients in clients[]', () => {
-    expect(clientsById.lapsedCeiling).toBeDefined();
-  });
-
-  it('satisfies nuevos + persistentes + viejos + ausentes === windowed clients for every period', () => {
-    const windowedCount = report.clients.filter(c => c.cells.some(cell => cell.orderCount > 0)).length;
-    report.summary.perPeriod.forEach(period => {
-      expect(period.nuevos + period.persistentes + period.viejos + period.ausentes).toBe(windowedCount);
-    });
-  });
-
-  it('flags a gap ratio between 1 and 1.5 as overdue, not at_risk', () => {
-    // median gap 20 days, silent 25 days -> ratio 1.25
-    const overdueClients = [{ id: 'overdue' }];
-    const overdueOrders = [
-      makeOrder('d1', 'overdue', 'Overdue Client', addDays(NOW, -65)),
-      makeOrder('d2', 'overdue', 'Overdue Client', addDays(NOW, -45)),
-      makeOrder('d3', 'overdue', 'Overdue Client', addDays(NOW, -25)),
+  it('E3: veteran silent for the whole window but ordered in the partial period lands in reactivado', () => {
+    const orders = [
+      makeOrder('r1', 'reactivatedYesterday', 'Reactivated', addDays(THIS_MONDAY, -365)),
+      makeOrder('r2', 'reactivatedYesterday', 'Reactivated', addDays(THIS_MONDAY, 1)),
     ];
-    const overdueReport = new ClientReport(overdueOrders, overdueClients, options).generateReport();
-    expect(overdueReport.clients.find(c => c.userId === 'overdue').status).toBe('overdue');
+    const report = new ClientReport(orders, b2bClients, options).generateReport();
+    expect(report.buckets.reactivado.map(c => c.userId)).toContain('reactivatedYesterday');
+
+    const row = report.buckets.reactivado.find(c => c.userId === 'reactivatedYesterday');
+    expect(row.orderedInPartial).toBe(true);
   });
 
-  describe('b2c segment', () => {
-    const shopperOrders = [
-      makeOrder('e1', 'shopBoss', 'Shop Boss', addDays(THIS_MONDAY, -7)),
-      makeOrder('e2', 'shopBoss', 'Shop Boss', THIS_MONDAY),
+  it('E4: a null paymentDate is excluded when dateField is paymentDate', () => {
+    const orders = [
+      makeOrder('p1', 'nullPayment', 'Null Payment', THIS_MONDAY, { paymentDate: null }),
     ];
+    const paymentOptions = { ...options, dateField: 'paymentDate' };
+    const report = new ClientReport(orders, b2bClients, paymentOptions).generateReport();
+    const allBucketed = Object.values(report.buckets).flat().map(c => c.userId);
+    const allNuevos = report.nuevosPorPeriodo.flatMap(p => p.clients).map(c => c.userId);
+    expect(allBucketed).not.toContain('nullPayment');
+    expect(allNuevos).not.toContain('nullPayment');
+  });
 
-    it('includes a client absent from the b2b list when segment is b2c', () => {
-      const b2cReport = new ClientReport(shopperOrders, b2bClients, { ...options, segment: 'b2c' }).generateReport();
-      expect(b2cReport.clients.some(c => c.userId === 'shopBoss')).toBe(true);
+  it('E5: an order due later this week still counts — it belongs to the partial period', () => {
+    // NOW is Friday; +6 is Sunday, past "now" but inside the current period.
+    const orders = [makeOrder('ahead', 'newInPartial', 'Orders Ahead', addDays(THIS_MONDAY, 6))];
+    const report = new ClientReport(orders, b2bClients, options).generateReport();
+
+    const partialPeriodEntry = report.nuevosPorPeriodo[report.nuevosPorPeriodo.length - 1];
+    expect(partialPeriodEntry.clients.map(c => c.userId)).toContain('newInPartial');
+    expect(report.kpis.activeClients).toBe(1);
+  });
+
+  it('E5: a steady client ordering ahead keeps its current-period activity', () => {
+    const orders = [
+      ...[-35, -28, -21, -14, -7].map((offset, i) => makeOrder(`a${i}`, 'estrella', 'Estrella Client', addDays(THIS_MONDAY, offset))),
+      makeOrder('ahead', 'estrella', 'Estrella Client', addDays(THIS_MONDAY, 6)),
+    ];
+    const report = new ClientReport(orders, b2bClients, options).generateReport();
+    const row = Object.values(report.buckets).flat().find(c => c.userId === 'estrella');
+    expect(row.orderedInPartial).toBe(true);
+    expect(row.orderCount).toBe(6);
+  });
+
+  it('E5: an order dated beyond the window is ignored, so lastOrderDate stays inside it', () => {
+    const orders = [
+      ...[-35, -28, -21, -14, -7].map((offset, i) => makeOrder(`f${i}`, 'estrella', 'Estrella Client', addDays(THIS_MONDAY, offset))),
+      makeOrder('future', 'estrella', 'Estrella Client', addDays(THIS_MONDAY, 30)),
+    ];
+    const report = new ClientReport(orders, b2bClients, options).generateReport();
+    const row = Object.values(report.buckets).flat().find(c => c.userId === 'estrella');
+    expect(row.lastOrderDate.getTime()).toBeLessThanOrEqual(NOW.getTime());
+    expect(row.orderCount).toBe(5);
+  });
+
+  it('takes email/phone/name from the client\'s latest order', () => {
+    const orders = [
+      makeOrder('l1', 'estrella', 'Old Name', addDays(THIS_MONDAY, -35), { userEmail: 'old@x.com', userPhone: '111' }),
+      makeOrder('l2', 'estrella', 'New Name', addDays(THIS_MONDAY, -7), { userEmail: 'new@x.com', userPhone: '222' }),
+    ];
+    const report = new ClientReport(orders, b2bClients, options).generateReport();
+    const row = Object.values(report.buckets).flat().find(c => c.userId === 'estrella');
+    expect(row.name).toBe('New Name');
+    expect(row.email).toBe('new@x.com');
+    expect(row.phone).toBe('222');
+  });
+
+  it('satisfies bucket-sum and single-bucket-membership invariants across a mixed population', () => {
+    const orders = [
+      // estrella: veteran, orders every complete period
+      ...[-42, -35, -28, -21, -14, -7].map((offset, i) => makeOrder(`e${i}`, 'c1', 'C1', addDays(THIS_MONDAY, offset))),
+      // perdido: veteran, one order 4 periods ago then silence (missed = 4)
+      ...[-42, -35].map((offset, i) => makeOrder(`p${i}`, 'c2', 'C2', addDays(THIS_MONDAY, offset))),
+      // new, born mid-window (period 3), perfect since -> futuraEstrella
+      ...[-14, -7].map((offset, i) => makeOrder(`f${i}`, 'c3', 'C3', addDays(THIS_MONDAY, offset))),
+      // E1: brand new this (partial) period
+      makeOrder('e1new', 'c4', 'C4', addDays(THIS_MONDAY, 1)),
+      // E2: only ever ordered long before the window
+      makeOrder('old', 'c5', 'C5', addDays(THIS_MONDAY, -400)),
+    ];
+    const report = new ClientReport(orders, b2bClients.concat([{ id: 'c1' }, { id: 'c2' }, { id: 'c3' }, { id: 'c4' }, { id: 'c5' }]), options).generateReport();
+
+    const bucketSizes = Object.values(report.buckets).reduce((sum, arr) => sum + arr.length, 0);
+    const e1Count = 1; // c4
+    expect(bucketSizes).toBe(report.kpis.activeClients - e1Count);
+
+    const seen = new Set();
+    Object.values(report.buckets).flat().forEach(row => {
+      expect(seen.has(row.userId)).toBe(false);
+      seen.add(row.userId);
     });
 
-    it('excludes that same client when segment is b2b', () => {
-      const b2bReport = new ClientReport(shopperOrders, b2bClients, { ...options, segment: 'b2b' }).generateReport();
-      expect(b2bReport.clients.some(c => c.userId === 'shopBoss')).toBe(false);
-    });
+    expect(report.buckets.estrella.map(c => c.userId)).toContain('c1');
+    expect(report.buckets.perdido.map(c => c.userId)).toContain('c2');
+    expect(report.buckets.futuraEstrella.map(c => c.userId)).toContain('c3');
   });
 
   describe('validateOptions', () => {
     const base = { period: 'weekly', count: 6, segment: 'b2b', dateField: 'dueDate' };
+
+    it('accepts biweekly', () => {
+      expect(() => new ClientReport([], [], { ...base, period: 'biweekly' })).not.toThrow();
+    });
 
     it('rejects an invalid period', () => {
       expect(() => new ClientReport([], [], { ...base, period: 'daily' })).toThrow(/period/);
@@ -189,64 +288,20 @@ describe('ClientReport', () => {
     });
   });
 
-  describe('summary tiles', () => {
-    const tileClients = [
-      { id: 'tearly' }, { id: 'tjudgedReturn' }, { id: 'tjudgedNoReturn' },
-      { id: 'tnewThisPeriod' }, { id: 'tnewLastPeriod' }, { id: 'tnewLastYear' },
-      { id: 'tlapseReturn' }, { id: 'tprojectedLost' },
+  describe('b2c segment', () => {
+    const shopperOrders = [
+      makeOrder('sh1', 'shopBoss', 'Shop Boss', addDays(THIS_MONDAY, -7)),
+      makeOrder('sh2', 'shopBoss', 'Shop Boss', THIS_MONDAY),
     ];
 
-    const tileOrders = [
-      // too early for the return-rate window (first order < 90 days ago), placed
-      // in the oldest reporting period so it doesn't collide with the new-clients tile
-      makeOrder('t1', 'tearly', 'Too Early', addDays(THIS_MONDAY, -35)),
-
-      // judged, and returns inside the 90-day window
-      makeOrder('t2', 'tjudgedReturn', 'Judged Return', addDays(NOW, -100)),
-      makeOrder('t3', 'tjudgedReturn', 'Judged Return', addDays(NOW, -70)),
-
-      // judged, single order, no return
-      makeOrder('t4', 'tjudgedNoReturn', 'Judged No Return', addDays(NOW, -200)),
-
-      // first (only) order lands in the current period -> "new" this period
-      makeOrder('t5', 'tnewThisPeriod', 'New This Period', THIS_MONDAY),
-
-      // first (only) order lands in the period right before the current one
-      makeOrder('t6', 'tnewLastPeriod', 'New Last Period', addDays(THIS_MONDAY, -7)),
-
-      // first (only) order lands exactly one reporting-year back (52 weeks)
-      makeOrder('t7', 'tnewLastYear', 'New Last Year', addDays(THIS_MONDAY, -364)),
-
-      // steady 10-day cadence, then returns this period after a 40-day gap -> gained via lapse-return
-      makeOrder('t8', 'tlapseReturn', 'Lapse Return', addDays(THIS_MONDAY, -60)),
-      makeOrder('t9', 'tlapseReturn', 'Lapse Return', addDays(THIS_MONDAY, -50)),
-      makeOrder('t10', 'tlapseReturn', 'Lapse Return', addDays(THIS_MONDAY, -40)),
-      makeOrder('t11', 'tlapseReturn', 'Lapse Return', THIS_MONDAY),
-
-      // steady 10-day cadence, went quiet 30 days ago -> projected to lapse this period
-      makeOrder('t12', 'tprojectedLost', 'Projected Lost', addDays(THIS_MONDAY, -50)),
-      makeOrder('t13', 'tprojectedLost', 'Projected Lost', addDays(THIS_MONDAY, -40)),
-      makeOrder('t14', 'tprojectedLost', 'Projected Lost', addDays(THIS_MONDAY, -30)),
-    ];
-
-    const tiles = new ClientReport(tileOrders, tileClients, options).generateReport().summary.tiles;
-
-    it('counts new clients for the current period, the prior period, and the same period last year', () => {
-      expect(tiles.newClients.value).toBe(1);
-      expect(tiles.newClients.prevPeriod).toBe(1);
-      expect(tiles.newClients.lastYear).toBe(1);
+    it('includes a client absent from the b2b list when segment is b2c', () => {
+      const report = new ClientReport(shopperOrders, b2bClients, { ...options, segment: 'b2c' }).generateReport();
+      expect(Object.values(report.buckets).flat().some(c => c.userId === 'shopBoss')).toBe(true);
     });
 
-    it('excludes clients under the return window and rates returns over the judged ones', () => {
-      expect(tiles.returnRate.tooEarly).toBe(5);
-      expect(tiles.returnRate.judged).toBe(3);
-      expect(tiles.returnRate.value).toBe(33);
-    });
-
-    it('counts a lapse-return and a same-period new order as gained, a projected lapse as lost', () => {
-      expect(tiles.quickRatio.gained).toBe(2);
-      expect(tiles.quickRatio.lost).toBe(1);
-      expect(tiles.quickRatio.value).toBe(2);
+    it('excludes that same client when segment is b2b', () => {
+      const report = new ClientReport(shopperOrders, b2bClients, { ...options, segment: 'b2b' }).generateReport();
+      expect(Object.values(report.buckets).flat().some(c => c.userId === 'shopBoss')).toBe(false);
     });
   });
 });
