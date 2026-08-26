@@ -4,7 +4,8 @@
       "WebSearch",
       "WebFetch(domain:developers.payulatam.com)",
       "Read(//c/Users/casal/documents/web/front/bake-ry-front/**)",
-      "Bash(npm test -- --testNamePattern=\"Part 4: Period Aggregation\")"
+      "Bash(npm test -- --testNamePattern=\"Part 4: Period Aggregation\")",
+      "Read(//c/Users/casal/documents/web/back/bake-ry/**)"
     ],
     "deny": []
   }

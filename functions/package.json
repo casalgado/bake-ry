@@ -22,7 +22,8 @@
     "seed:users": "node src/seeds/runners/seedUsers.js",
     "seed:orders": "node src/seeds/runners/seedOrders.js",
     "save:backup": "node src/seeds/saveBackup.js",
-    "sync:models": "node scripts/syncModels.js"
+    "sync:models": "node scripts/syncModels.js",
+    "schema:snapshot": "node scripts/schema-snapshot.js"
   },
   "engines": {
     "node": "20"
