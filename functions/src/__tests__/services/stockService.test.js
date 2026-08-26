@@ -15,9 +15,17 @@ describe('Stock ledger', () => {
   const flourItem = { itemType: 'ingredient', ingredientId: 'harina' };
   const cokeItem = { itemType: 'product', productId: 'coke' };
 
-  const seedStock = (item, currentStock = 0, extra = {}) =>
-    col('stocks').doc(stockService.buildItemKey(item)).set({
+  // Every bakery has this one without a migration (CORRECTIONS §1.1).
+  const MAIN = 'main';
+  const BRANCH = 'sucursal';
+
+  const docIdOf = (item, warehouseId = MAIN) =>
+    stockService.buildStockDocId(stockService.buildItemKey(item), warehouseId);
+
+  const seedStock = (item, currentStock = 0, warehouseId = MAIN, extra = {}) =>
+    col('stocks').doc(docIdOf(item, warehouseId)).set({
       itemKey: stockService.buildItemKey(item),
+      warehouseId,
       itemType: item.itemType,
       ...(item.ingredientId
         ? { ingredientId: item.ingredientId }
@@ -30,8 +38,8 @@ describe('Stock ledger', () => {
       ...extra,
     });
 
-  const readStock = async (item) => {
-    const doc = await col('stocks').doc(stockService.buildItemKey(item)).get();
+  const readStock = async (item, warehouseId = MAIN) => {
+    const doc = await col('stocks').doc(docIdOf(item, warehouseId)).get();
     return doc.exists ? doc.data() : null;
   };
 
@@ -42,8 +50,21 @@ describe('Stock ledger', () => {
     ingredientService = require('../../services/ingredientService');
   });
 
+  // The entry points refuse a warehouse the bakery has not declared, so the
+  // two-warehouse tests need settings that declare both.
+  const seedWarehouses = (...ids) =>
+    col('settings').doc('default').set({
+      features: {
+        inventory: {
+          enabled: true,
+          warehouses: ids.map((id) => ({ id, name: id, isDefault: id === MAIN })),
+        },
+      },
+    });
+
   beforeEach(async () => {
     await clearFirestoreData(db);
+    await seedWarehouses(MAIN, BRANCH);
   });
 
   describe('itemKey (invariant 7)', () => {
@@ -61,12 +82,62 @@ describe('Stock ledger', () => {
     });
   });
 
+  describe('stock doc id (item × warehouse)', () => {
+    it('separates the item identity from the warehouse it sits in', () => {
+      expect(stockService.buildStockDocId('ingredient_harina', 'main')).toBe(
+        'ingredient_harina__main',
+      );
+      // Item keys use single underscores, so `__` never collides with one.
+      expect(stockService.buildStockDocId('product_coke_c350', 'sucursal')).toBe(
+        'product_coke_c350__sucursal',
+      );
+    });
+
+    it('refuses to build an id without a warehouse', () => {
+      expect(() => stockService.buildStockDocId('ingredient_harina')).toThrow();
+    });
+
+    it('falls back to main for settings that predate the warehouses field', async () => {
+      await col('settings').doc('default').set({ features: { inventory: { enabled: true } } });
+
+      expect(await stockService.getDefaultWarehouseId(bakeryId)).toBe(MAIN);
+    });
+
+    it('reads the default warehouse out of settings', async () => {
+      await col('settings').doc('default').set({
+        features: {
+          inventory: {
+            enabled: true,
+            warehouses: [
+              { id: MAIN, name: 'Principal', isDefault: false },
+              { id: BRANCH, name: 'Sucursal', isDefault: true },
+            ],
+          },
+        },
+      });
+
+      expect(await stockService.getDefaultWarehouseId(bakeryId)).toBe(BRANCH);
+    });
+
+    it('refuses a warehouse the bakery never declared', async () => {
+      await expect(
+        stockService.resolveWarehouseId(bakeryId, 'bodega-fantasma'),
+      ).rejects.toThrow(/Bodega desconocida/);
+    });
+  });
+
   describe('writeMovements', () => {
     it('appends the movement and moves the cache together', async () => {
       await seedStock(flourItem, 1000);
 
       await stockService.writeMovements(bakeryId, [
-        { item: flourItem, qty: -250, type: 'sale', refs: { orderId: 'o1' } },
+        {
+          item: flourItem,
+          warehouseId: MAIN,
+          qty: -250,
+          type: 'sale',
+          refs: { orderId: 'o1' },
+        },
       ]);
 
       expect((await readStock(flourItem)).currentStock).toBe(750);
@@ -75,9 +146,23 @@ describe('Stock ledger', () => {
       expect(movements.size).toBe(1);
       expect(movements.docs[0].data()).toMatchObject({
         itemKey: 'ingredient_harina',
+        warehouseId: MAIN,
         qty: -250,
         type: 'sale',
       });
+    });
+
+    it('refuses a movement with no warehouse — explicit always, never "means main"', async () => {
+      await seedStock(flourItem, 1000);
+
+      await expect(
+        stockService.writeMovements(bakeryId, [
+          { item: flourItem, qty: -250, type: 'sale' },
+        ]),
+      ).rejects.toThrow(/warehouseId/);
+
+      expect((await readStock(flourItem)).currentStock).toBe(1000);
+      expect((await col('stockMovements').get()).size).toBe(0);
     });
 
     it('is a structural no-op when a deterministic id is written twice', async () => {
@@ -86,6 +171,7 @@ describe('Stock ledger', () => {
       const movement = {
         id: 'o1_item9_ingredient_harina',
         item: flourItem,
+        warehouseId: MAIN,
         qty: -250,
         type: 'sale',
       };
@@ -102,28 +188,53 @@ describe('Stock ledger', () => {
       await seedStock(flourItem, 1000);
 
       await stockService.writeMovements(bakeryId, [
-        { item: flourItem, qty: -100, type: 'sale' },
-        { item: flourItem, qty: -50, type: 'sale' },
+        { item: flourItem, warehouseId: MAIN, qty: -100, type: 'sale' },
+        { item: flourItem, warehouseId: MAIN, qty: -50, type: 'sale' },
       ]);
 
       expect((await readStock(flourItem)).currentStock).toBe(850);
       expect((await col('stockMovements').get()).size).toBe(2);
     });
 
-    it('creates a missing stocks doc rather than losing the movement', async () => {
+    it('keeps the same item in two warehouses on separate docs', async () => {
+      await seedStock(flourItem, 1000, MAIN);
+      await seedStock(flourItem, 40, BRANCH);
+
       await stockService.writeMovements(bakeryId, [
-        { item: flourItem, qty: 500, type: 'purchase', name: 'harina', unit: 'g' },
+        { item: flourItem, warehouseId: MAIN, qty: -100, type: 'sale' },
+        { item: flourItem, warehouseId: BRANCH, qty: -10, type: 'sale' },
       ]);
 
-      const stock = await readStock(flourItem);
-      expect(stock).toMatchObject({ currentStock: 500, name: 'harina', unit: 'g' });
+      expect((await readStock(flourItem, MAIN)).currentStock).toBe(900);
+      expect((await readStock(flourItem, BRANCH)).currentStock).toBe(30);
+    });
+
+    it('creates a missing stocks doc rather than losing the movement', async () => {
+      await stockService.writeMovements(bakeryId, [
+        {
+          item: flourItem,
+          warehouseId: BRANCH,
+          qty: 500,
+          type: 'purchase',
+          name: 'harina',
+          unit: 'g',
+        },
+      ]);
+
+      const stock = await readStock(flourItem, BRANCH);
+      expect(stock).toMatchObject({
+        currentStock: 500,
+        name: 'harina',
+        unit: 'g',
+        warehouseId: BRANCH,
+      });
     });
 
     it('lets stock go negative instead of blocking (§12.4)', async () => {
       await seedStock(flourItem, 100);
 
       await stockService.writeMovements(bakeryId, [
-        { item: flourItem, qty: -300, type: 'sale' },
+        { item: flourItem, warehouseId: MAIN, qty: -300, type: 'sale' },
       ]);
 
       expect((await readStock(flourItem)).currentStock).toBe(-200);
@@ -134,8 +245,8 @@ describe('Stock ledger', () => {
 
       await expect(
         stockService.writeMovements(bakeryId, [
-          { item: flourItem, qty: -100, type: 'sale' },
-          { item: flourItem, qty: -50, type: 'not-a-type' },
+          { item: flourItem, warehouseId: MAIN, qty: -100, type: 'sale' },
+          { item: flourItem, warehouseId: MAIN, qty: -50, type: 'not-a-type' },
         ]),
       ).rejects.toThrow(/Unknown movement type/);
 
@@ -149,7 +260,7 @@ describe('Stock ledger', () => {
       await db.runTransaction(async (transaction) => {
         await stockService.writeMovements(
           bakeryId,
-          [{ item: flourItem, qty: -400, type: 'sale' }],
+          [{ item: flourItem, warehouseId: MAIN, qty: -400, type: 'sale' }],
           { transaction },
         );
       });
@@ -182,6 +293,176 @@ describe('Stock ledger', () => {
         stockService.adjust(bakeryId, 'ingredient_harina', { qty: -30, reason: '  ' }),
       ).rejects.toThrow(/motivo/);
     });
+
+    it('deducts once when the same retry key arrives twice', async () => {
+      await seedStock(flourItem, 1000);
+
+      const body = { qty: -30, reason: 'conteo', idempotencyKey: 'form-open-xyz' };
+
+      const first = await stockService.adjust(bakeryId, 'ingredient_harina', body);
+      const retry = await stockService.adjust(bakeryId, 'ingredient_harina', body);
+
+      expect((await readStock(flourItem)).currentStock).toBe(970);
+      expect((await col('stockMovements').get()).size).toBe(1);
+      expect(retry.id).toBe(first.id);
+    });
+
+    it('refuses a retry key that would not survive as a doc id', async () => {
+      await seedStock(flourItem, 1000);
+
+      await expect(
+        stockService.adjust(bakeryId, 'ingredient_harina', {
+          qty: -30,
+          reason: 'conteo',
+          idempotencyKey: 'bad/key',
+        }),
+      ).rejects.toThrow(/idempotencyKey/);
+    });
+
+    it('adjusts the warehouse it was told to, not the default one', async () => {
+      await seedStock(flourItem, 1000, MAIN);
+      await seedStock(flourItem, 50, BRANCH);
+
+      await stockService.adjust(bakeryId, 'ingredient_harina', {
+        qty: -10,
+        reason: 'conteo rápido',
+        warehouseId: BRANCH,
+      });
+
+      expect((await readStock(flourItem, MAIN)).currentStock).toBe(1000);
+      expect((await readStock(flourItem, BRANCH)).currentStock).toBe(40);
+    });
+  });
+
+  describe('bajas (§3)', () => {
+    it('records a negative waste movement with its reason', async () => {
+      await seedStock(flourItem, 1000);
+
+      await stockService.waste(bakeryId, 'ingredient_harina', {
+        qty: -20,
+        reason: 'expired',
+        note: 'saco abierto',
+      });
+
+      expect((await readStock(flourItem)).currentStock).toBe(980);
+
+      const movement = (await col('stockMovements').get()).docs[0].data();
+      expect(movement.type).toBe('waste');
+      // The enum stays bare: the note rides alongside, never welded into it.
+      expect(movement.reason).toBe('expired');
+      expect(movement.note).toBe('saco abierto');
+    });
+
+    it('refuses a positive quantity — a baja is a loss, not an entry', async () => {
+      await seedStock(flourItem, 1000);
+
+      await expect(
+        stockService.waste(bakeryId, 'ingredient_harina', { qty: 20, reason: 'expired' }),
+      ).rejects.toThrow(/negativa/);
+
+      expect((await readStock(flourItem)).currentStock).toBe(1000);
+      expect((await col('stockMovements').get()).size).toBe(0);
+    });
+
+    it('refuses a reason outside the enum', async () => {
+      await seedStock(flourItem, 1000);
+
+      await expect(
+        stockService.waste(bakeryId, 'ingredient_harina', { qty: -20, reason: 'porque sí' }),
+      ).rejects.toThrow(/Motivo de baja/);
+    });
+  });
+
+  describe('transfers (§1.2)', () => {
+    it('moves stock between two warehouses in one transaction', async () => {
+      await seedStock(flourItem, 1000, MAIN);
+
+      const movements = await stockService.transfer(bakeryId, 'ingredient_harina', {
+        qty: 300,
+        fromWarehouseId: MAIN,
+        toWarehouseId: BRANCH,
+      });
+
+      expect((await readStock(flourItem, MAIN)).currentStock).toBe(700);
+      // The destination doc did not exist: the movement created it.
+      expect((await readStock(flourItem, BRANCH)).currentStock).toBe(300);
+
+      expect(movements).toHaveLength(2);
+      const [transferId] = [...new Set(movements.map((m) => m.refs.transferId))];
+      expect(transferId).toBeTruthy();
+      expect(movements.every((m) => m.type === 'transfer')).toBe(true);
+    });
+
+    it('refuses a transfer to the same warehouse, or of a non-positive quantity', async () => {
+      await seedStock(flourItem, 1000, MAIN);
+
+      await expect(
+        stockService.transfer(bakeryId, 'ingredient_harina', {
+          qty: 10,
+          fromWarehouseId: MAIN,
+          toWarehouseId: MAIN,
+        }),
+      ).rejects.toThrow(/distintos/);
+
+      await expect(
+        stockService.transfer(bakeryId, 'ingredient_harina', {
+          qty: -10,
+          fromWarehouseId: MAIN,
+          toWarehouseId: BRANCH,
+        }),
+      ).rejects.toThrow(/positiva/);
+
+      expect((await col('stockMovements').get()).size).toBe(0);
+    });
+
+    it('moves the stock once when the same retry key arrives twice', async () => {
+      await seedStock(flourItem, 1000, MAIN);
+
+      const body = {
+        qty: 300,
+        fromWarehouseId: MAIN,
+        toWarehouseId: BRANCH,
+        idempotencyKey: 'form-open-abc123',
+      };
+
+      const first = await stockService.transfer(bakeryId, 'ingredient_harina', body);
+      const retry = await stockService.transfer(bakeryId, 'ingredient_harina', body);
+
+      expect((await readStock(flourItem, MAIN)).currentStock).toBe(700);
+      expect((await readStock(flourItem, BRANCH)).currentStock).toBe(300);
+      expect((await col('stockMovements').get()).size).toBe(2);
+
+      // The retry is indistinguishable from the first call to its caller.
+      expect(retry.map((m) => m.id).sort()).toEqual(first.map((m) => m.id).sort());
+    });
+
+    it('refuses a destination the bakery never declared', async () => {
+      await seedStock(flourItem, 1000, MAIN);
+
+      await expect(
+        stockService.transfer(bakeryId, 'ingredient_harina', {
+          qty: 10,
+          fromWarehouseId: MAIN,
+          toWarehouseId: 'bodega-fantasma',
+        }),
+      ).rejects.toThrow(/Bodega desconocida/);
+
+      // Nothing was debited: the typo cannot strand stock in a doc no one reads.
+      expect((await readStock(flourItem, MAIN)).currentStock).toBe(1000);
+      expect((await col('stockMovements').get()).size).toBe(0);
+    });
+
+    it('refuses to transfer out of a warehouse that holds nothing of the item', async () => {
+      await seedStock(flourItem, 1000, MAIN);
+
+      await expect(
+        stockService.transfer(bakeryId, 'ingredient_harina', {
+          qty: 10,
+          fromWarehouseId: BRANCH,
+          toWarehouseId: MAIN,
+        }),
+      ).rejects.toThrow(/not found/i);
+    });
   });
 
   describe('stocks doc lifecycle (1B.2)', () => {
@@ -208,6 +489,27 @@ describe('Stock ledger', () => {
         'product_coke_c1l',
         'product_coke_c350',
       ]);
+      // Only the default warehouse: the others are born from their first
+      // movement (CORRECTIONS §1.2).
+      expect(stocks.map((s) => s.id).sort()).toEqual([
+        'product_coke_c1l__main',
+        'product_coke_c350__main',
+      ]);
+    });
+
+    it('gives a recipe-mode product a stocks doc too (§2.3 amends §5)', async () => {
+      await productService.create(
+        {
+          id: 'panDeBono',
+          name: 'pan de bono',
+          basePrice: 2000,
+          inventoryMode: 'recipe',
+        },
+        bakeryId,
+      );
+
+      const stocks = await stockService.getStocks(bakeryId);
+      expect(stocks.map((s) => s.itemKey)).toEqual(['product_panDeBono']);
     });
 
     it('creates no stocks doc for a none-mode product (silence is the feature)', async () => {
@@ -236,7 +538,12 @@ describe('Stock ledger', () => {
 
       const stocks = await stockService.getStocks(bakeryId);
       expect(stocks).toHaveLength(1);
-      expect(stocks[0]).toMatchObject({ itemKey: 'ingredient_crema', unit: 'g' });
+      expect(stocks[0]).toMatchObject({
+        id: 'ingredient_crema__main',
+        itemKey: 'ingredient_crema',
+        warehouseId: 'main',
+        unit: 'g',
+      });
     });
   });
 
@@ -245,13 +552,38 @@ describe('Stock ledger', () => {
       await seedStock(flourItem, 1000);
 
       await stockService.writeMovements(bakeryId, [
-        { item: flourItem, qty: -10, type: 'sale', refs: { orderId: 'o1' } },
-        { item: flourItem, qty: -20, type: 'sale', refs: { orderId: 'o2' } },
+        { item: flourItem, warehouseId: MAIN, qty: -10, type: 'sale', refs: { orderId: 'o1' } },
+        { item: flourItem, warehouseId: MAIN, qty: -20, type: 'sale', refs: { orderId: 'o2' } },
       ]);
 
       const movements = await stockService.getOrderMovements(bakeryId, 'o1');
       expect(movements).toHaveLength(1);
       expect(movements[0].qty).toBe(-10);
+    });
+
+    it('lists one row per warehouse, and filters to one on request', async () => {
+      await seedStock(flourItem, 1000, MAIN);
+      await seedStock(flourItem, 25, BRANCH);
+
+      expect(await stockService.getStocks(bakeryId)).toHaveLength(2);
+
+      const branchOnly = await stockService.getStocks(bakeryId, { warehouseId: BRANCH });
+      expect(branchOnly).toHaveLength(1);
+      expect(branchOnly[0].currentStock).toBe(25);
+    });
+
+    it('shows an item\'s history across every warehouse it sits in', async () => {
+      await seedStock(flourItem, 1000, MAIN);
+      await seedStock(flourItem, 25, BRANCH);
+
+      await stockService.writeMovements(bakeryId, [
+        { item: flourItem, warehouseId: MAIN, qty: -10, type: 'sale' },
+        { item: flourItem, warehouseId: BRANCH, qty: -5, type: 'sale' },
+      ]);
+
+      const movements = await stockService.getItemMovements(bakeryId, 'ingredient_harina');
+      expect(movements).toHaveLength(2);
+      expect(movements.map((m) => m.warehouseId).sort()).toEqual([MAIN, BRANCH].sort());
     });
   });
 });

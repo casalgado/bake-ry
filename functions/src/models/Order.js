@@ -1,8 +1,15 @@
 const BaseModel = require('./base/BaseModel');
 const Combination = require('./Combination');
 const { generateId } = require('../utils/helpers');
+const { BadRequestError } = require('../utils/errors');
 
 class OrderItem {
+  // Where an order line's units come from (§2.1). Existing orders read as
+  // 'produce' — today's behavior — so there is no migration. Nothing consumes
+  // this yet: deduction is phase 2. Static on the class like
+  // Product.INVENTORY_MODES, so it travels with what owns it.
+  static FULFILLMENT_SOURCES = ['produce', 'stock'];
+
   constructor({
     id,
     productId,
@@ -27,7 +34,17 @@ class OrderItem {
     discountType = null,
     discountValue = 0,
     invoiceTitle = '',
+    fulfillmentSource,
+    sourceWarehouseId = null,
   }) {
+    // `??`, not a default parameter: a stored null would slip past a default
+    // and throw on *read*, making an existing order un-loadable.
+    const source = fulfillmentSource ?? 'produce';
+
+    if (!OrderItem.FULFILLMENT_SOURCES.includes(source)) {
+      throw new BadRequestError(`Invalid fulfillment source: ${source}`);
+    }
+
     this.id = id || generateId();
     this.productId = productId;
     this.productName = productName;
@@ -45,6 +62,10 @@ class OrderItem {
     this.status = status;
     this.taxMode = taxMode;
     this.displayOrder = displayOrder;
+
+    // Inventory: which branch of the phase-2 expansion this line will take.
+    this.fulfillmentSource = source;
+    this.sourceWarehouseId = sourceWarehouseId;
 
     // Discount tracking fields
     this.referencePrice = basePrice > 0 ? basePrice : (referencePrice ?? currentPrice);

@@ -11,13 +11,23 @@ const { BadRequestError } = require('../utils/errors');
 // handlers are exactly what this controller must not expose.
 const { handleError } = createBaseController(stockService);
 
+const editorOf = (req) => ({
+  userId: req.user?.uid,
+  email: req.user?.email,
+  role: req.user?.role,
+});
+
 const stockController = {
   async getAll(req, res) {
     try {
       const { bakeryId } = req.params;
-      const { itemType, search } = req.query;
+      const { itemType, search, warehouseId } = req.query;
 
-      const stocks = await stockService.getStocks(bakeryId, { itemType, search });
+      const stocks = await stockService.getStocks(bakeryId, {
+        itemType,
+        search,
+        warehouseId,
+      });
       res.status(200).json(stocks);
     } catch (error) {
       handleError(res, error);
@@ -56,21 +66,58 @@ const stockController = {
   async adjust(req, res) {
     try {
       const { bakeryId, itemKey } = req.params;
-      const { qty, reason } = req.body;
-
-      if (qty === undefined) throw new BadRequestError('qty is required');
+      const { qty, reason, warehouseId, idempotencyKey } = req.body;
 
       const movement = await stockService.adjust(bakeryId, itemKey, {
         qty,
         reason,
-        editor: {
-          userId: req.user?.uid,
-          email: req.user?.email,
-          role: req.user?.role,
-        },
+        warehouseId,
+        idempotencyKey,
+        editor: editorOf(req),
       });
 
       res.status(201).json(movement);
+    } catch (error) {
+      handleError(res, error);
+    }
+  },
+
+  // Sibling of adjust, deliberately not the same endpoint: a baja is a real
+  // loss, an adjustment is a correction, and the ledger keeps them apart (§3).
+  async waste(req, res) {
+    try {
+      const { bakeryId, itemKey } = req.params;
+      const { qty, reason, note, warehouseId, idempotencyKey } = req.body;
+
+      const movement = await stockService.waste(bakeryId, itemKey, {
+        qty,
+        reason,
+        note,
+        warehouseId,
+        idempotencyKey,
+        editor: editorOf(req),
+      });
+
+      res.status(201).json(movement);
+    } catch (error) {
+      handleError(res, error);
+    }
+  },
+
+  async transfer(req, res) {
+    try {
+      const { bakeryId, itemKey } = req.params;
+      const { qty, fromWarehouseId, toWarehouseId, idempotencyKey } = req.body;
+
+      const movements = await stockService.transfer(bakeryId, itemKey, {
+        qty,
+        fromWarehouseId,
+        toWarehouseId,
+        idempotencyKey,
+        editor: editorOf(req),
+      });
+
+      res.status(201).json(movements);
     } catch (error) {
       handleError(res, error);
     }

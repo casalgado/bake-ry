@@ -19,6 +19,14 @@ const createIngredientService = () => {
     );
   };
 
+  const create = async (ingredientData, bakeryId) => {
+    const created = await baseService.create(ingredientData, bakeryId);
+    // Same post-commit, non-fatal sync as update(): an ingredient created
+    // already 'stocked' needs its stocks doc without waiting for a first edit.
+    await syncIngredientStockDoc(bakeryId, created);
+    return created;
+  };
+
   const update = async (ingredientId, updateData, bakeryId) => {
     try {
       const ingredientRef = baseService.getCollectionRef(bakeryId).doc(ingredientId);
@@ -125,6 +133,7 @@ const createIngredientService = () => {
 
   return {
     ...baseService,
+    create,
     update,
     remove,
   };

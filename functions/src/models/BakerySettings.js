@@ -71,6 +71,13 @@ class BakerySettings extends BaseModel {
     // See zplanning/strategy/INVENTORY-IMPLEMENTATION.md §14 (front repo).
     inventory: {
       enabled: false,
+      // Stock is held per (item, warehouse) — "bodega" in the UI. Living in
+      // the defaults means every bakery reads one without a migration, and a
+      // bakery with exactly one sees no warehouse UI at all (§1.1).
+      warehouses: [{ id: "main", name: "Principal", isDefault: true }],
+      // Which fulfillment source an order line preselects (§2.1).
+      // 'produce' behaves exactly like today — the safe default.
+      orderDefault: "produce", // 'smart' | 'produce' | 'stock'
     },
   };
 

@@ -34,6 +34,16 @@ bakeryRouter.post(
   requireBakeryStaffOrAdmin,
   stockController.adjust,
 );
+bakeryRouter.post(
+  '/stocks/:itemKey/waste',
+  requireBakeryStaffOrAdmin,
+  stockController.waste,
+);
+bakeryRouter.post(
+  '/stocks/:itemKey/transfer',
+  requireBakeryStaffOrAdmin,
+  stockController.transfer,
+);
 
 // No PUT/PATCH/DELETE anywhere in this router: movements are append-only and
 // stocks docs are a derived cache. Corrections are adjustments or counts.

@@ -39,6 +39,10 @@ class Ingredient extends BaseModel {
     costPerUnit = 0,
     currency = 'COP',
 
+    // "Where do I buy this" — free text, pre-fills a purchase entry (§4).
+    // Deliberately not an entity: suppliers belong to the balance-sheet epic.
+    preferredSupplier = '',
+
     // Units and Measurements
     unit,
 
@@ -87,6 +91,7 @@ class Ingredient extends BaseModel {
     // Cost and Pricing
     this.costPerUnit = costPerUnit;
     this.currency = currency;
+    this.preferredSupplier = preferredSupplier;
 
     // Current stock is NOT held here — it lives on the stocks docs
     // (INVENTORY-IMPLEMENTATION.md §8.1). Legacy `currentStock` values remain in
