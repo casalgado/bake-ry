@@ -593,9 +593,20 @@ class ProductReport {
       categoryTotals[categoryId].totalCantidad += cantidad;
     });
 
+    const byCategory = Object.values(categoryTotals);
+
+    // Match per-product metrics filtering: drop the total not requested
+    const metrics = this.options.metrics;
+    if (metrics === 'ingresos' || metrics === 'cantidad') {
+      const drop = metrics === 'ingresos'
+        ? ['totalCantidad', 'b2bCantidad', 'b2cCantidad']
+        : ['totalIngresos', 'b2bIngresos', 'b2cIngresos'];
+      [totals, ...byCategory].forEach(item => drop.forEach(key => delete item[key]));
+    }
+
     return {
       totals,
-      byCategory: Object.values(categoryTotals),
+      byCategory,
     };
   }
 }
