@@ -3,11 +3,6 @@ const BaseModel = require('./base/BaseModel');
 const { BadRequestError } = require('../utils/errors');
 
 class Ingredient extends BaseModel {
-  static TYPES = {
-    MANUFACTURED: 'manufactured',
-    RESALE: 'resale',
-  };
-
   // What deduction does when it reaches this ingredient (§4).
   // passThrough (default): hold no stock, deduct this ingredient's own recipe
   // components instead — correct raw-material deduction with zero user effort.
@@ -22,7 +17,8 @@ class Ingredient extends BaseModel {
     id,
     bakeryId,
     name,
-    type = Ingredient.TYPES.MANUFACTURED,
+    // false: consumed to make your products. true: bought and sold as-is.
+    isResale = false,
     categoryId,
     categoryName,
     createdAt,
@@ -30,7 +26,7 @@ class Ingredient extends BaseModel {
 
     // Usage and Recipes
     usedInRecipes = [],
-    // Manufactured ingredients may be produced from their own recipe (§4).
+    // Ingredients you make (not resale) may be produced from their own recipe (§4).
     recipeId = null,
     stockBehavior = Ingredient.STOCK_BEHAVIORS.PASS_THROUGH,
     notes,
@@ -60,17 +56,12 @@ class Ingredient extends BaseModel {
     // Pass common fields to BaseModel
     super({ id, createdAt, updatedAt });
 
-    // Validate type
-    if (!Object.values(Ingredient.TYPES).includes(type)) {
-      throw new BadRequestError('Invalid ingredient type');
-    }
-
     if (!Object.values(Ingredient.STOCK_BEHAVIORS).includes(stockBehavior)) {
       throw new BadRequestError('Invalid ingredient stock behavior');
     }
 
     // Only something you make can have a recipe (§4).
-    if (recipeId && type === Ingredient.TYPES.RESALE) {
+    if (recipeId && isResale) {
       throw new BadRequestError('Resale ingredients cannot have a recipe');
     }
 
@@ -80,7 +71,7 @@ class Ingredient extends BaseModel {
     this.categoryId = categoryId;
     this.categoryName = categoryName;
 
-    this.type = type;
+    this.isResale = Boolean(isResale);
 
     // Usage and Recipes
     this.usedInRecipes = usedInRecipes;
@@ -110,16 +101,6 @@ class Ingredient extends BaseModel {
     // Custom Attributes
     this.customAttributes = customAttributes;
   }
-
-  // Helper methods
-  isManufactured() {
-    return this.type === Ingredient.TYPES.MANUFACTURED;
-  }
-
-  isResale() {
-    return this.type === Ingredient.TYPES.RESALE;
-  }
-
 }
 
 module.exports = Ingredient;

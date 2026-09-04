@@ -1,16 +1,20 @@
 // services/recipeGraph.js
 //
 // Everything that walks the recipe component graph:
-//   - save-time guardrails: cycle detection + depth cap (§6, plan 1A.6)
-//   - cost propagation planning: recipe cost -> owner cost -> consumers (§7, plan 1A.8)
+//   - save-time guardrails: cycle detection + depth cap
+//   - cost propagation: recipe cost -> owner cache -> consumers, and back again
 //
-// Both live here because they traverse the same edges. Phase 2's deduction
-// expansion is a third walk of this graph, but it belongs to stockService — it
-// runs inside the order transaction and yields movements, not validations.
+// Both live here because they traverse the same edges. Stock deduction is a
+// third walk of this graph, but it belongs to stockService — it runs inside the
+// order transaction and yields movements, not validations.
+//
+// See docs/recipe-costing.md for how the pieces fit together.
 const { db } = require('../config/firebase');
-const { BadRequestError } = require('../utils/errors');
+const { BadRequestError, NotFoundError } = require('../utils/errors');
+const recordHistory = require('./base/recordHistory');
 
-// The depth cap is what makes phase-2 write fan-out provably bounded (§6).
+// Bounds the propagation write fan-out: a valid recipe graph can nest at most
+// this deep (assertGraphIsSane refuses to save anything deeper).
 const MAX_DEPTH = 5;
 
 const recipesRef = (bakeryId) => db.collection(`bakeries/${bakeryId}/recipes`);
@@ -19,7 +23,7 @@ const ingredientsRef = (bakeryId) =>
   db.collection(`bakeries/${bakeryId}/ingredients`);
 
 /**
- * The one place that decides which recipe a sellable unit uses (§2, plan 1A.3).
+ * The one place that decides which recipe a sellable unit uses.
  * NO FALLBACK: a combination without a recipe never inherits the product's.
  */
 const resolveRecipeId = (product, combinationId = null) => {
@@ -35,22 +39,19 @@ const resolveRecipeId = (product, combinationId = null) => {
 };
 
 /**
- * Reduces a stored or incoming component row to { type, id, combinationId }.
+ * Reduces a component row to { type, id, combinationId }.
  *
- * Rows reach us in three shapes: typed ({ type, id }), legacy ({ ingredientId },
- * no type) and half-legacy (the ingredient's own 'manufactured' / 'resale' type
- * in the `type` field). Only an explicit 'product' is a product — everything
- * else is an ingredient. This is the same rule resolveComponents applies in
- * recipeService; both must agree or the cycle check keys a node differently
- * from how it reads it.
+ * Only an explicit 'product' is a product — everything else is an ingredient.
+ * This is the same rule resolveComponents applies in recipeService; both must
+ * agree or the cycle check keys a node differently from how it reads it.
  */
 const normalizeComponent = (raw = {}) => ({
   type: raw.type === 'product' ? 'product' : 'ingredient',
-  id: raw.id || raw.ingredientId,
+  id: raw.id,
   combinationId: raw.combinationId || null,
 });
 
-/** Stable identity of a stock-holding / recipe-owning node (mirrors §8.1 itemKey). */
+/** Stable identity of a stock-holding / recipe-owning node (matches stockService's itemKey). */
 const nodeKey = (component) => {
   const { type, id, combinationId } = normalizeComponent(component);
   if (type === 'product') {
@@ -67,12 +68,6 @@ const ownerKeyOf = (recipe) => {
   return recipe.productId ? `product_${recipe.productId}` : null;
 };
 
-const totalCostOf = (components = []) =>
-  components.reduce(
-    (sum, c) => sum + (Number(c.quantity) || 0) * (Number(c.costPerUnit) || 0),
-    0,
-  );
-
 // Costs are money; compare with a cent-level epsilon so float noise never
 // triggers a cascade of pointless writes.
 const sameCost = (a, b) => Math.abs((Number(a) || 0) - (Number(b) || 0)) < 0.005;
@@ -84,9 +79,9 @@ const sameCost = (a, b) => Math.abs((Number(a) || 0) - (Number(b) || 0)) < 0.005
  * the incoming components directly.
  *
  * ponytail: read-then-write race — a concurrent save elsewhere could make the
- * graph cyclic between this check and the commit. The phase-2 runtime depth
- * guard is the backstop; a transactional graph lock is not worth it at bakery
- * scale.
+ * graph cyclic between this check and the commit. The MAX_DEPTH guard in the
+ * propagation walk is the backstop; a transactional graph lock is not worth it
+ * at bakery scale.
  */
 const assertGraphIsSane = async (bakeryId, recipe) => {
   const ownerKey = ownerKeyOf(recipe);
@@ -153,12 +148,24 @@ const assertGraphIsSane = async (bakeryId, recipe) => {
  *
  * `writesByPath` is keyed by document path, not pushed to a list, because one
  * run legitimately touches the same document more than once: a product with two
- * recipe-costed combinations is reached through two different recipes. Two
- * separate transaction.update() calls would each carry a full `variations` blob
- * built from the same pre-change snapshot, so the last one silently discarded
- * the other's new costPrice.
+ * recipe-costed combinations is reached through two different recipes. Keying by
+ * path merges the two edits; separate transaction.update() calls would each
+ * carry a full `variations` blob built from the same snapshot, and the last one
+ * would win.
  */
-const createPlan = () => ({ visited: new Set(), writesByPath: new Map() });
+const createPlan = () => ({
+  visited: new Set(),
+  writesByPath: new Map(),
+  // nodeKey -> the node's post-walk cost (per-unit for an ingredient, total for
+  // a product/combination). computeRecipeCost reads this before hitting
+  // Firestore, so a value changed earlier in the same walk — and not yet
+  // committed — is still seen by everything downstream.
+  costOverrides: new Map(),
+  // [{ ref, changes }] — one entry per owner doc whose cached cost the walk
+  // actually moved. Flushed to updateHistory by applyPlan; read as-is (without
+  // committing) by the dry-run preview.
+  history: [],
+});
 
 /** Merges a document's planned fields, so later edits build on earlier ones. */
 const stage = (plan, ref, data) => {
@@ -177,12 +184,72 @@ const stagedData = (plan, ref) => plan.writesByPath.get(ref.path)?.data;
 
 const planWrites = (plan) => [...plan.writesByPath.values()];
 
+/** Records that an owner doc's cached cost moved, for applyPlan / the preview. */
+const recordCostChange = (plan, ref, changes) => {
+  plan.history.push({ ref, changes });
+};
+
 /**
- * Plans — never applies — the writes implied by a recipe's cost.
+ * "What does this recipe's component list cost right now" — the single place
+ * that question is answered. One live read per component (ingredient.costPerUnit
+ * or product.costPrice / combination.costPrice); a component whose cost already
+ * moved earlier in this same walk is taken from plan.costOverrides instead, so
+ * the sum reflects the not-yet-committed state the walk is building.
  *
- * Every Firestore read happens while planning, so the caller can apply the
- * returned writes afterwards and keep a transaction's reads-before-writes rule
- * (plan invariant 4). Returns [{ ref, data }].
+ * Not recursive: a recipe's own component list is flat. Nesting is handled by
+ * the propagation walk, which calls this once per level.
+ */
+const computeRecipeCost = async (
+  transaction,
+  bakeryId,
+  components = [],
+  plan = createPlan(),
+) => {
+  let total = 0;
+
+  for (const raw of components) {
+    const component = normalizeComponent(raw);
+    if (!component.id) continue;
+
+    const quantity = Number(raw.quantity) || 0;
+    if (quantity <= 0) continue;
+
+    const key = nodeKey(component);
+    if (plan.costOverrides.has(key)) {
+      total += quantity * plan.costOverrides.get(key);
+      continue;
+    }
+
+    if (component.type === 'product') {
+      const doc = await transaction.get(productsRef(bakeryId).doc(component.id));
+      if (!doc.exists) continue;
+      const product = doc.data();
+
+      if (component.combinationId) {
+        const combination = (product.variations?.combinations || []).find(
+          (c) => c.id === component.combinationId,
+        );
+        total += quantity * (Number(combination?.costPrice) || 0);
+      } else {
+        total += quantity * (Number(product.costPrice) || 0);
+      }
+    } else {
+      const doc = await transaction.get(
+        ingredientsRef(bakeryId).doc(component.id),
+      );
+      if (!doc.exists) continue;
+      total += quantity * (Number(doc.data().costPerUnit) || 0);
+    }
+  }
+
+  return total;
+};
+
+/**
+ * Stages — never applies — the owner-cache writes implied by a recipe's cost,
+ * onto the shared `plan`. Every Firestore read happens here, so the caller
+ * applies the plan afterwards and keeps a transaction's reads-before-writes
+ * rule.
  */
 const planRecipeCostPropagation = async (
   transaction,
@@ -192,15 +259,21 @@ const planRecipeCostPropagation = async (
 ) => {
   const key = ownerKeyOf(recipe);
 
-  // The save-time cycle check guarantees termination; these are belt-and-braces
-  // for data that predates it.
+  // assertGraphIsSane already rejects cyclic/too-deep graphs at save time; the
+  // depth cap and visited set here just bound a walk over data that reaches
+  // this without that check (a direct Firestore edit, a future script).
   if (depth > MAX_DEPTH || !key || plan.visited.has(key)) return planWrites(plan);
   plan.visited.add(key);
 
-  const totalCost = totalCostOf(recipe.ingredients);
+  const totalCost = await computeRecipeCost(
+    transaction,
+    bakeryId,
+    recipe.ingredients,
+    plan,
+  );
 
   // Ingredient-owned recipe: derive costPerUnit through the yield, then let the
-  // ingredient's own consumers pick the change up (§7).
+  // ingredient's own consumers pick the change up.
   if (recipe.ingredientId) {
     if (!recipe.yield) return planWrites(plan);
 
@@ -209,9 +282,16 @@ const planRecipeCostPropagation = async (
     if (!doc.exists) return planWrites(plan);
 
     const newCostPerUnit = totalCost / recipe.yield;
+    // Publish the new per-unit cost to the walk before the sameCost gate: a
+    // sibling recipe reached later this walk must cost this ingredient
+    // consistently even when the owner cache itself needs no write.
+    plan.costOverrides.set(key, newCostPerUnit);
     if (sameCost(doc.data().costPerUnit, newCostPerUnit)) return planWrites(plan);
 
     stage(plan, ref, { costPerUnit: newCostPerUnit, updatedAt: new Date() });
+    recordCostChange(plan, ref, {
+      costPerUnit: { from: Number(doc.data().costPerUnit) || 0, to: newCostPerUnit },
+    });
 
     await planIngredientCostPropagation(
       transaction,
@@ -226,6 +306,11 @@ const planRecipeCostPropagation = async (
 
   if (!recipe.productId) return planWrites(plan);
 
+  // NB: unlike the ingredient branch, the override is published only AFTER the
+  // costPriceSource gate below. A 'manual' owner keeps the cost the user typed,
+  // so that — not this recipe's total — is what consumers must see for the rest
+  // of the walk. planOwnerLink falls back to computeRecipeCost when the override
+  // is absent, which is exactly the manual-owner case at create time.
   const productDocRef = productsRef(bakeryId).doc(recipe.productId);
   const productDoc = await transaction.get(productDocRef);
   if (!productDoc.exists) return planWrites(plan);
@@ -240,8 +325,10 @@ const planRecipeCostPropagation = async (
     const combinations = variations.combinations || [];
     const target = combinations.find((c) => c.id === recipe.combinationId);
 
-    // A manual cost is never silently clobbered (§7 / plan 1A.8).
+    // A manually typed cost is never silently clobbered by propagation.
     if (!target || target.costPriceSource !== 'recipe') return planWrites(plan);
+
+    plan.costOverrides.set(key, totalCost);
     if (sameCost(target.costPrice, totalCost)) return planWrites(plan);
 
     stage(plan, productDocRef, {
@@ -253,22 +340,42 @@ const planRecipeCostPropagation = async (
       },
       updatedAt: new Date(),
     });
+    recordCostChange(plan, productDocRef, {
+      costPrice: {
+        from: Number(target.costPrice) || 0,
+        to: totalCost,
+        combinationId: recipe.combinationId,
+      },
+    });
 
     return planWrites(plan);
   }
 
   // Product-owned (no variations).
   if (product.costPriceSource !== 'recipe') return planWrites(plan);
+
+  plan.costOverrides.set(key, totalCost);
   if (sameCost(product.costPrice, totalCost)) return planWrites(plan);
 
   stage(plan, productDocRef, { costPrice: totalCost, updatedAt: new Date() });
+  recordCostChange(plan, productDocRef, {
+    costPrice: { from: Number(product.costPrice) || 0, to: totalCost },
+  });
+  // ponytail: the walk stops here. The ingredient branch above recurses into
+  // planIngredientCostPropagation, but a product's new cost is never carried on
+  // to the recipes that consume that product, even though product.usedInRecipes
+  // is maintained. reconcileOwnerCost on the consumer is the backstop.
   return planWrites(plan);
 };
 
 /**
- * An ingredient's cost changed: refresh the denormalized costPerUnit on every
- * recipe that uses it, then carry each of those recipes' new totals on to their
- * own owners. One hop at a time; the cycle check keeps it terminating.
+ * An ingredient's cost changed: for every recipe that uses it, recompute that
+ * recipe's cost and carry the new total on to its owner. One hop at a time; the
+ * depth cap keeps it terminating.
+ *
+ * The new cost is published to the walk via plan.costOverrides — computeRecipeCost
+ * reads it from there instead of the ingredient doc, whose write isn't committed
+ * until this transaction ends.
  */
 const planIngredientCostPropagation = async (
   transaction,
@@ -282,6 +389,7 @@ const planIngredientCostPropagation = async (
   // Seed — never check — the entry node: a cycle coming back to a recipe owned
   // by this ingredient is then caught by the guard in planRecipeCostPropagation.
   plan.visited.add(`ingredient_${ingredientId}`);
+  plan.costOverrides.set(`ingredient_${ingredientId}`, newCostPerUnit);
 
   const ingredientDoc = await transaction.get(
     ingredientsRef(bakeryId).doc(ingredientId),
@@ -297,32 +405,18 @@ const planIngredientCostPropagation = async (
 
     const recipe = { id: doc.id, ...doc.data() };
 
-    // Same reason as the variations blob below: this run can reach one recipe
-    // twice (it uses ingredient A, and is also the production recipe of
-    // ingredient B, which A's fan-out reaches). Rebuilding from the stored
-    // array would drop the cost already staged for the earlier ingredient.
-    const components = stagedData(plan, ref)?.ingredients
-      || recipe.ingredients
-      || [];
+    const isTarget = (c) => c.type !== 'product' && c.id === ingredientId;
+    if (!(recipe.ingredients || []).some(isTarget)) continue;
 
-    // Legacy rows keep their id in `ingredientId`; typed rows use `id` (§1A.4).
-    const isTarget = (c) =>
-      c.type !== 'product' && (c.id || c.ingredientId) === ingredientId;
-
-    if (!components.some(isTarget)) continue;
-
-    const updatedComponents = components.map((c) =>
-      isTarget(c) ? { ...c, costPerUnit: newCostPerUnit } : c,
-    );
-
-    stage(plan, ref, { ingredients: updatedComponents, updatedAt: new Date() });
-
-    await planRecipeCostPropagation(
-      transaction,
-      bakeryId,
-      { ...recipe, ingredients: updatedComponents },
-      { plan, depth: depth + 1 },
-    );
+    // ponytail: a recipe fed by two ingredients that BOTH move in one walk is
+    // re-costed only on its first reach (planRecipeCostPropagation's visited
+    // guard); the second mover isn't reflected until the next cost change or a
+    // reconcileOwnerCost run. A diamond in the cost graph — rare enough at
+    // bakery scale that widening the walk isn't worth it.
+    await planRecipeCostPropagation(transaction, bakeryId, recipe, {
+      plan,
+      depth: depth + 1,
+    });
   }
 
   return planWrites(plan);
@@ -332,9 +426,94 @@ const applyWrites = (transaction, writes) => {
   writes.forEach(({ ref, data }) => transaction.update(ref, data));
 };
 
+/**
+ * Commits a plan: the staged owner-cache writes, then one updateHistory entry
+ * per owner whose cost actually moved. `reason` tags the history entries
+ * ('reconciliation' for a drift fix); ordinary edits leave it null.
+ */
+const applyPlan = (transaction, plan, { editor = null, reason = null } = {}) => {
+  applyWrites(transaction, planWrites(plan));
+  for (const { ref, changes } of plan.history) {
+    recordHistory(transaction, ref, changes, null, editor, reason);
+  }
+};
+
+/**
+ * Read-only dry run: what an ingredient cost change WOULD do, without doing it.
+ * Runs the same walk inside a transaction and returns the planned owner-cost
+ * moves; never calls applyPlan.
+ */
+const previewIngredientCostImpact = (bakeryId, ingredientId, newCostPerUnit) =>
+  db.runTransaction(async (transaction) => {
+    const plan = createPlan();
+    await planIngredientCostPropagation(
+      transaction,
+      bakeryId,
+      ingredientId,
+      newCostPerUnit,
+      { plan },
+    );
+    return plan.history.map(({ ref, changes }) => ({ path: ref.path, changes }));
+  });
+
+/**
+ * Recompute-and-compare-and-correct for one owner (product, combination or
+ * manufactured ingredient). Targets the owner's recipe directly, so it catches
+ * drift even when the usedInRecipes reverse-index — what normal propagation
+ * follows — has gone stale. On mismatch it corrects the cache and writes a
+ * history entry tagged 'reconciliation'. On-demand only.
+ */
+const reconcileOwnerCost = (bakeryId, owner = {}, editor = null) =>
+  db.runTransaction(async (transaction) => {
+    const { type, id, combinationId = null } = owner;
+
+    let recipeId;
+    if (type === 'ingredient') {
+      const doc = await transaction.get(ingredientsRef(bakeryId).doc(id));
+      if (!doc.exists) throw new NotFoundError('Ingredient not found');
+      recipeId = doc.data().recipeId || null;
+    } else {
+      const doc = await transaction.get(productsRef(bakeryId).doc(id));
+      if (!doc.exists) throw new NotFoundError('Product not found');
+      recipeId = resolveRecipeId(doc.data(), combinationId);
+    }
+
+    if (!recipeId) return { changed: false, reason: 'owner has no recipe' };
+
+    const recipeDoc = await transaction.get(recipesRef(bakeryId).doc(recipeId));
+    if (!recipeDoc.exists) return { changed: false, reason: 'recipe not found' };
+
+    const plan = createPlan();
+    await planRecipeCostPropagation(
+      transaction,
+      bakeryId,
+      { id: recipeDoc.id, ...recipeDoc.data() },
+      { plan },
+    );
+
+    if (planWrites(plan).length === 0) return { changed: false };
+
+    applyPlan(transaction, plan, { editor, reason: 'reconciliation' });
+    return {
+      changed: true,
+      corrections: plan.history.map(({ ref, changes }) => ({
+        path: ref.path,
+        changes,
+      })),
+    };
+  });
+
 module.exports = {
   assertGraphIsSane,
+  sameCost,
+  computeRecipeCost,
+  createPlan,
+  stage,
+  stagedData,
+  recordCostChange,
   planRecipeCostPropagation,
   planIngredientCostPropagation,
-  applyWrites,
+  applyPlan,
+  previewIngredientCostImpact,
+  reconcileOwnerCost,
 };

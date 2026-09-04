@@ -2,7 +2,7 @@ const BaseModel = require('./base/BaseModel');
 
 /**
  * A recipe line: either an ingredient or another product's sellable unit.
- * See INVENTORY-IMPLEMENTATION.md §3.
+ * See docs/recipe-costing.md.
  */
 class RecipeComponent {
   static TYPES = {
@@ -13,30 +13,28 @@ class RecipeComponent {
   constructor({
     type,
     id,
-    ingredientId, // legacy field name, still accepted on read and on write
     combinationId = null,
-    name,
     quantity,
     unit,
-    costPerUnit,
     notes = '',
   }) {
-    // Backward compatibility on read (§1A.4): rows stored before typed components
-    // have no `type` (or carry the ingredient's own 'manufactured'/'resale' type)
-    // and keep their id in `ingredientId`. Anything that is not explicitly a
-    // product is an ingredient. Stored docs are never rewritten in bulk.
+    // Only an explicit 'product' is a product; anything else is an ingredient.
+    // A component's `type` says what KIND OF ROW this is — never confuse it with
+    // an ingredient's own `isResale` flag, which is a different question about
+    // a different document.
     this.type =
       type === RecipeComponent.TYPES.PRODUCT
         ? RecipeComponent.TYPES.PRODUCT
         : RecipeComponent.TYPES.INGREDIENT;
 
-    this.id = id || ingredientId;
+    this.id = id;
     this.combinationId = this.isProduct() ? combinationId || null : null;
 
-    this.name = name;
+    // Pure structure — how much of this ingredient/product the recipe uses.
+    // Cost is never stored here; recipeGraph.computeRecipeCost reads it live
+    // from the component's own source doc.
     this.quantity = quantity;
     this.unit = unit;
-    this.costPerUnit = costPerUnit;
     this.notes = notes;
   }
 
@@ -50,14 +48,6 @@ class RecipeComponent {
 
   toPlainObject() {
     const data = { ...this };
-
-    // COMPAT SHIM: the frontend's Recipe model still reads `ingredientId` only,
-    // so an ingredient row keeps a mirrored copy. `id` is the source of truth —
-    // nothing new reads this field. Remove once the recipe editor (plan 1C.2)
-    // ships and no stored row predates it.
-    if (this.isIngredient()) {
-      data.ingredientId = this.id;
-    }
 
     // Remove undefined values
     Object.keys(data).forEach(key => {
@@ -74,15 +64,15 @@ class Recipe extends BaseModel {
     // Basic Information
     id,
     bakeryId,
-    // Owner — exactly one of these three shapes (§1A.3, §2):
+    // Owner — exactly one of these three shapes:
     //   productId alone            → product without variations
     //   productId + combinationId  → a specific sellable combination
-    //   ingredientId alone         → a manufactured ingredient (crema pastelera)
+    //   ingredientId alone         → a production ingredient (crema pastelera)
     productId = null,
     combinationId = null,
     ingredientId = null,
     // Required iff ingredient-owned: how much this recipe produces, in the
-    // owning ingredient's base unit (§4). `yield` is a reserved word in the
+    // owning ingredient's base unit. `yield` is a reserved word in the
     // strict-mode class body, hence the rename.
     yield: recipeYield = null,
     name,
@@ -118,8 +108,8 @@ class Recipe extends BaseModel {
     this.description = description;
     this.version = version;
 
-    // Core Recipe Details — the field keeps its name for compatibility, but the
-    // rows are RecipeComponents (ingredients or products).
+    // Core Recipe Details — the rows are RecipeComponents (ingredients or
+    // products), though the field is named `ingredients`.
     this.ingredients = ingredients.map(ingredient =>
       ingredient instanceof RecipeComponent
         ? ingredient
@@ -140,11 +130,6 @@ class Recipe extends BaseModel {
 
   get totalTime() {
     return this.preparationTime + this.bakingTime;
-  }
-
-  get totalCost() {
-    return this.ingredients.reduce((sum, ingredient) =>
-      sum + (ingredient.quantity * ingredient.costPerUnit), 0);
   }
 
   toFirestore() {

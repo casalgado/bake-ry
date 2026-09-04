@@ -1,5 +1,6 @@
 const { db } = require('../../config/firebase');
 const { NotFoundError } = require('../../utils/errors');
+const recordHistory = require('./recordHistory');
 
 const createBaseService = (collectionName, ModelClass, parentPath = null) => {
   // Helper functions
@@ -42,27 +43,6 @@ const createBaseService = (collectionName, ModelClass, parentPath = null) => {
     });
 
     return changes;
-  };
-
-  const recordHistory = async (
-    transaction,
-    docRef,
-    changes,
-    currentData,
-    editor,
-  ) => {
-    const historyRef = docRef.collection('updateHistory').doc();
-    const historyRecord = {
-      timestamp: new Date(),
-      editor: {
-        userId: editor?.uid || 'system',
-        email: editor?.email || 'system@system.com',
-        role: editor?.role || 'system',
-      },
-      changes,
-    };
-
-    transaction.set(historyRef, historyRecord);
   };
 
   // Service methods

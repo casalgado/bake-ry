@@ -27,6 +27,18 @@ Audit the currently **staged** changes, propose code fixes (without staging them
    - **Tests**: if code logic changes, tests should be added or updated. Check for proper Jest mock setup, assertions, and coverage of edge cases.
 
 3. Report findings grouped by severity: **Must fix** / **Consider** / **Nitpick**. Reference `file:line`. If the diff is clean, say so plainly. Be direct and critical — no rubber-stamping.
+   - Number every finding sequentially across all groups (do not restart at 1 per group), so each can be referenced by number:
+     ```
+     Must fix
+
+     1. path/to/file.js:26 — one-line claim. Then the explanation.
+     2. path/to/other.js:227-289 — one-line claim. Then the explanation.
+
+     Consider
+
+     3. ...
+     ```
+   - Within a finding, don't use " - " (spaced dash) as a bullet or clause separator; write full sentences or use a colon. It reads ambiguously in chat.
 
 4. If there are fixable issues, ask the user: "Apply these fixes?" If yes, apply the code changes using the Edit tool (do NOT stage them). Report what was changed. The changes will remain **unstaged** so the user can review the diffs before deciding to stage them.
 

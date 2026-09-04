@@ -33,11 +33,14 @@ async function seedRecipes() {
     // Create recipes through service
     for (const recipe of recipes) {
       try {
-        // Map ingredient names to their IDs
+        // Seed rows are written by name; the id is resolved here. Every seeded
+        // component is an ingredient — seed a product component by hand if one
+        // is ever needed, since it also needs a combinationId.
         const recipeIngredients = recipe.ingredients.map(ingredient => ({
           ...ingredient,
-          ingredientId: ingredientMap[ingredient.name],
-        })).filter(ingredient => ingredient.ingredientId);
+          type: 'ingredient',
+          id: ingredientMap[ingredient.name],
+        })).filter(ingredient => ingredient.id);
         delete recipe.id; // Remove ID from seed data
 
         const newRecipe = new Recipe({

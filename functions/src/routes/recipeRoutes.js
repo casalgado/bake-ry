@@ -3,6 +3,7 @@ const recipeController = require('../controllers/recipeController');
 const {
   authenticateUser,
   requireBakeryAssistant,
+  requireBakeryAdmin,
 } = require('../middleware/userAccess');
 const hasBakeryAccess = require('../middleware/bakeryAccess');
 
@@ -18,11 +19,20 @@ const bakeryRouter = express.Router({ mergeParams: true });
 bakeryRouter.use(hasBakeryAccess);
 bakeryRouter.use(requireBakeryAssistant);
 
+// On-demand cost reconciliation (admin only).
+bakeryRouter.post(
+  '/recipes/reconcile-costs',
+  requireBakeryAdmin,
+  recipeController.reconcileCosts,
+);
+
 // CRUD routes
 bakeryRouter.post('/recipes', recipeController.create);
 bakeryRouter.get('/recipes', recipeController.getAll);
 bakeryRouter.get('/recipes/:id', recipeController.getById);
-bakeryRouter.patch('/recipes/:id', recipeController.patch);
+// PATCH intentionally not routed: it would hit the generic factory patch,
+// which skips recipeService's guardrails and cost-propagation transaction.
+// Use PUT.
 bakeryRouter.put('/recipes/:id', recipeController.update);
 bakeryRouter.delete('/recipes/:id', recipeController.remove);
 

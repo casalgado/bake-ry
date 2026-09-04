@@ -321,7 +321,7 @@ describe('Bakery User Service Tests', () => {
       admin.auth().deleteUser = jest.fn().mockResolvedValue(undefined);
 
       try {
-        await bakeryUserService.delete(testUser.id, testStoreId);
+        await bakeryUserService.remove(testUser.id, testStoreId);
 
         // Verify deleteUser was called
         expect(admin.auth().deleteUser).toHaveBeenCalledWith(testUser.id);
@@ -444,7 +444,7 @@ describe('Bakery User Service Tests', () => {
       admin.auth().deleteUser = jest.fn().mockResolvedValue(undefined);
 
       try {
-        await bakeryUserService.delete(user1.id, testStoreId);
+        await bakeryUserService.remove(user1.id, testStoreId);
 
         // Now create a new user with the same phone
         const userData2 = createTestUserData({

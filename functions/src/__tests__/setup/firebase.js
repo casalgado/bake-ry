@@ -26,56 +26,14 @@ function initializeFirebase() {
   return { admin, db };
 }
 
-async function deleteCollection(db, collectionRef) {
-  const batchSize = 500;
-  const query = collectionRef.limit(batchSize);
-
-  return new Promise((resolve, reject) => {
-    deleteQueryBatch(db, query, resolve).catch(reject);
-  });
-}
-
-async function deleteQueryBatch(db, query, resolve) {
-  const snapshot = await query.get();
-
-  if (snapshot.size === 0) {
-    resolve();
-    return;
-  }
-
-  // Create a new batch
-  const batch = db.batch();
-
-  // Delete documents in a batch
-  snapshot.docs.forEach((doc) => {
-    batch.delete(doc.ref);
-  });
-
-  await batch.commit();
-
-  // Recurse on the next process tick
-  process.nextTick(() => {
-    deleteQueryBatch(db, query, resolve);
-  });
-}
-
 async function clearFirestoreData(db) {
   try {
+    // recursiveDelete walks the whole tree under each root collection —
+    // arbitrarily deep subcollections included (e.g. products/{id}/updateHistory).
+    // The old hand-rolled version only reached two levels, so deep subcollections
+    // on fixed-id docs leaked across tests.
     const collections = await db.listCollections();
-    const promises = collections.map(async (collection) => {
-      // First, recursively delete all subcollections
-      const docs = await collection.listDocuments();
-      const subCollectionPromises = docs.map(async (doc) => {
-        const subCollections = await doc.listCollections();
-        return Promise.all(subCollections.map(sub => deleteCollection(db, sub)));
-      });
-      await Promise.all(subCollectionPromises);
-
-      // Then delete the main collection
-      return deleteCollection(db, collection);
-    });
-
-    await Promise.all(promises);
+    await Promise.all(collections.map((collection) => db.recursiveDelete(collection)));
   } catch (error) {
     console.error('Error clearing Firestore data:', error);
     throw error;

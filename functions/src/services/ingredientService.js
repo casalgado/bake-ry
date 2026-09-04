@@ -5,7 +5,8 @@ const createBaseService = require('./base/serviceFactory');
 const { NotFoundError, BadRequestError } = require('../utils/errors');
 const {
   planIngredientCostPropagation,
-  applyWrites,
+  createPlan,
+  applyPlan,
 } = require('./recipeGraph');
 const { syncIngredientStockDoc } = require('./stockService');
 
@@ -27,7 +28,7 @@ const createIngredientService = () => {
     return created;
   };
 
-  const update = async (ingredientId, updateData, bakeryId) => {
+  const update = async (ingredientId, updateData, bakeryId, editor = null) => {
     try {
       const ingredientRef = baseService.getCollectionRef(bakeryId).doc(ingredientId);
 
@@ -41,16 +42,18 @@ const createIngredientService = () => {
         const currentIngredient = Ingredient.fromFirestore(doc);
 
         // A cost change fans out to every consuming recipe and onward to those
-        // recipes' owners (§7). Planned first, applied below, so the
-        // transaction never reads after it writes.
-        const costWrites = hasCostChanged(currentIngredient, updateData)
-          ? await planIngredientCostPropagation(
+        // recipes' owners. Planned first, applied below, so the transaction
+        // never reads after it writes.
+        const plan = createPlan();
+        if (hasCostChanged(currentIngredient, updateData)) {
+          await planIngredientCostPropagation(
             transaction,
             bakeryId,
             ingredientId,
             updateData.costPerUnit,
-          )
-          : [];
+            { plan },
+          );
+        }
 
         const updatedIngredient = new Ingredient({
           ...currentIngredient,
@@ -59,14 +62,28 @@ const createIngredientService = () => {
         });
 
         // ---- writes ----
+        // This runs its own transaction (for the propagation reads), so the
+        // updateHistory entry that baseService.update writes is written here
+        // directly — same shape, via the shared recordHistory.
+        const changes = baseService.diffObjects(currentIngredient, updatedIngredient);
+        if (Object.keys(changes).length > 0) {
+          baseService.recordHistory(
+            transaction,
+            ingredientRef,
+            changes,
+            currentIngredient,
+            editor,
+          );
+        }
+
         transaction.update(ingredientRef, updatedIngredient.toFirestore());
-        applyWrites(transaction, costWrites);
+        applyPlan(transaction, plan, { editor });
         return updatedIngredient;
       });
 
-      // A stocked ingredient needs a stocks doc (§8.1). Post-commit and
-      // non-fatal: the cache is rebuildable, writeMovements creates what it
-      // finds missing, and syncIngredientStockDoc swallows its own failures.
+      // A stocked ingredient needs a stocks doc. Post-commit and non-fatal: the
+      // cache is rebuildable, writeMovements creates what it finds missing, and
+      // syncIngredientStockDoc swallows its own failures.
       await syncIngredientStockDoc(bakeryId, { ...updated, id: ingredientId });
 
       return updated;
@@ -79,9 +96,8 @@ const createIngredientService = () => {
   const remove = async (ingredientId, bakeryId, editor = null) => {
     try {
       // The ingredient's own usedInRecipes array is the source of truth here —
-      // recipeService maintains it transactionally. (A previous
-      // where('ingredients', 'array-contains', ingredientId) query never matched,
-      // because recipe.ingredients holds objects, not ids.)
+      // recipeService maintains it transactionally. recipe.ingredients holds
+      // component objects, not ids, so it can't be queried with array-contains.
       const doc = await baseService.getCollectionRef(bakeryId).doc(ingredientId).get();
       if (!doc.exists) {
         throw new NotFoundError('Ingredient not found');
@@ -89,7 +105,7 @@ const createIngredientService = () => {
 
       const ingredient = Ingredient.fromFirestore(doc);
 
-      // A manufactured ingredient owns its production recipe. Deleting it would
+      // A production ingredient owns its recipe. Deleting it would
       // orphan that recipe — recipeService guards the same edge from the other
       // side (findRecipeOwners queries ingredients by recipeId).
       if (ingredient.recipeId) {

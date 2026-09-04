@@ -21,8 +21,10 @@ bakeryRouter.use(requireBakeryAssistant);
 // CRUD routes
 bakeryRouter.post('/ingredients', ingredientController.create);
 bakeryRouter.get('/ingredients', ingredientController.getAll);
+bakeryRouter.get('/ingredients/:id/cost-impact', ingredientController.costImpact);
 bakeryRouter.get('/ingredients/:id', ingredientController.getById);
-bakeryRouter.patch('/ingredients/:id', ingredientController.patch);
+// PATCH intentionally not routed: it would hit the generic factory patch,
+// which skips ingredientService's cost-propagation transaction. Use PUT.
 bakeryRouter.put('/ingredients/:id', ingredientController.update);
 bakeryRouter.delete('/ingredients/:id', ingredientController.remove);
 

@@ -524,7 +524,7 @@ describe('Stock ledger', () => {
     it('creates a stocks doc when an ingredient becomes stocked', async () => {
       await col('ingredients').doc('crema').set({
         name: 'crema',
-        type: 'manufactured',
+        isResale: false,
         unit: 'g',
         costPerUnit: 5,
         stockBehavior: 'passThrough',
