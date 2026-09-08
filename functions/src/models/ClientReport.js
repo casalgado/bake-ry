@@ -140,6 +140,19 @@ class ClientReport {
       const firstOrderDate = firstOrder[this.options.dateField];
       const veteran = firstOrderDate < rangeStart;
 
+      // Contact/billing fields for the client-list exports. All denormalised on
+      // the order; address only rides delivery orders, so take the newest one
+      // that carries it rather than blindly using lastOrder.
+      const addressOrder = clientOrders.findLast(o => o.deliveryAddress);
+      const contact = {
+        name: lastOrder.userName,
+        email: lastOrder.userEmail,
+        phone: lastOrder.userPhone,
+        legalName: lastOrder.userLegalName,
+        nationalId: lastOrder.userNationalId,
+        address: addressOrder ? addressOrder.deliveryAddress : '',
+      };
+
       const keyOf = order => periodKeyForDate(order[this.options.dateField], this.options.period);
       const clientPeriodKeys = new Set(clientOrders.map(keyOf));
       const ordersInRange = clientOrders.filter(o => periodIndexByKey.has(keyOf(o)));
@@ -155,7 +168,7 @@ class ClientReport {
           const ordersInPeriod = clientOrders.filter(o => keyOf(o) === periodObj.key);
           nuevosPorPeriodo[firstOrderPeriodIndex].clients.push({
             userId,
-            name: lastOrder.userName,
+            ...contact,
             total: ordersInPeriod.reduce((sum, o) => sum + o.total, 0),
             orderCount: ordersInPeriod.length,
             lastOrderDate: lastOrder[this.options.dateField],
@@ -185,9 +198,7 @@ class ClientReport {
       const bucket = classifyVector(vector, orderedInPartial);
       buckets[bucket].push({
         userId,
-        name: lastOrder.userName,
-        email: lastOrder.userEmail,
-        phone: lastOrder.userPhone,
+        ...contact,
         rangeTotal: ordersInRange.reduce((sum, o) => sum + o.total, 0),
         orderCount: ordersInRange.length,
         lastOrderDate: lastOrder[this.options.dateField],

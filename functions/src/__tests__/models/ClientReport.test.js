@@ -19,13 +19,16 @@ function addDays(date, n) {
   return d;
 }
 
-function makeOrder(id, userId, userName, dueDate, { subtotal = 10000, paymentDate = null, userEmail = '', userPhone = '' } = {}) {
+function makeOrder(id, userId, userName, dueDate, { subtotal = 10000, paymentDate = null, userEmail = '', userPhone = '', userLegalName = '', userNationalId = '', deliveryAddress = '' } = {}) {
   return new Order({
     id,
     userId,
     userName,
     userEmail,
     userPhone,
+    userLegalName,
+    userNationalId,
+    deliveryAddress,
     dueDate,
     paymentDate,
     orderItems: [{
@@ -225,13 +228,26 @@ describe('ClientReport.generateReport', () => {
   it('takes email/phone/name from the client\'s latest order', () => {
     const orders = [
       makeOrder('l1', 'estrella', 'Old Name', addDays(THIS_MONDAY, -35), { userEmail: 'old@x.com', userPhone: '111' }),
-      makeOrder('l2', 'estrella', 'New Name', addDays(THIS_MONDAY, -7), { userEmail: 'new@x.com', userPhone: '222' }),
+      makeOrder('l2', 'estrella', 'New Name', addDays(THIS_MONDAY, -7), { userEmail: 'new@x.com', userPhone: '222', userLegalName: 'ACME SAS', userNationalId: '900123' }),
     ];
     const report = new ClientReport(orders, b2bClients, options).generateReport();
     const row = Object.values(report.buckets).flat().find(c => c.userId === 'estrella');
     expect(row.name).toBe('New Name');
     expect(row.email).toBe('new@x.com');
     expect(row.phone).toBe('222');
+    expect(row.legalName).toBe('ACME SAS');
+    expect(row.nationalId).toBe('900123');
+  });
+
+  it('takes address from the most recent order that has one', () => {
+    const orders = [
+      makeOrder('a1', 'estrella', 'Client', addDays(THIS_MONDAY, -35), { deliveryAddress: 'Calle 1' }),
+      makeOrder('a2', 'estrella', 'Client', addDays(THIS_MONDAY, -14), { deliveryAddress: 'Calle 2' }),
+      makeOrder('a3', 'estrella', 'Client', addDays(THIS_MONDAY, -7)), // pickup, no address
+    ];
+    const report = new ClientReport(orders, b2bClients, options).generateReport();
+    const row = Object.values(report.buckets).flat().find(c => c.userId === 'estrella');
+    expect(row.address).toBe('Calle 2');
   });
 
   it('satisfies bucket-sum and single-bucket-membership invariants across a mixed population', () => {
