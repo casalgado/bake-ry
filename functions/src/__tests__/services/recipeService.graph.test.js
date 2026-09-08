@@ -15,7 +15,6 @@ describe('Recipe graph — owners, guardrails, costing', () => {
   const seedIngredient = (id, data = {}) =>
     col('ingredients').doc(id).set({
       name: id,
-      isResale: false,
       unit: 'g',
       costPerUnit: 10,
       usedInRecipes: [],
@@ -571,23 +570,6 @@ describe('Recipe graph — owners, guardrails, costing', () => {
           bakeryId,
         ),
       ).rejects.toThrow(/ya tiene una receta/);
-    });
-
-    it('refuses a production recipe for a resale ingredient', async () => {
-      await seedIngredient('harina', { costPerUnit: 10 });
-      await seedIngredient('gaseosa', { isResale: true });
-
-      await expect(
-        recipeService.create(
-          {
-            name: 'gaseosa',
-            ingredientId: 'gaseosa',
-            yield: 100,
-            ingredients: [component('harina', 50)],
-          },
-          bakeryId,
-        ),
-      ).rejects.toThrow(/reventa/);
     });
   });
 });

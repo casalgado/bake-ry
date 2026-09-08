@@ -236,14 +236,6 @@ const createRecipeService = () => {
 
       const ingredient = doc.data();
 
-      // The Ingredient model refuses to construct a resale ingredient that has a
-      // recipe, so writing this link would make the document unreadable.
-      if (ingredient.isResale) {
-        throw new BadRequestError(
-          'Un ingrediente de reventa no puede tener receta propia',
-        );
-      }
-
       if (ingredient.recipeId && ingredient.recipeId !== recipeId) {
         throw new BadRequestError(
           'Este ingrediente ya tiene una receta de producción',

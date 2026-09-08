@@ -19,9 +19,8 @@ class RecipeComponent {
     notes = '',
   }) {
     // Only an explicit 'product' is a product; anything else is an ingredient.
-    // A component's `type` says what KIND OF ROW this is — never confuse it with
-    // an ingredient's own `isResale` flag, which is a different question about
-    // a different document.
+    // A component's `type` says which collection to resolve `id` against — it
+    // is about this row, never about what the target document is or does.
     this.type =
       type === RecipeComponent.TYPES.PRODUCT
         ? RecipeComponent.TYPES.PRODUCT

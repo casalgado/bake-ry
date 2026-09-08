@@ -17,7 +17,6 @@ describe('Ingredient Service — deletion guard', () => {
   const seedIngredient = (id, usedInRecipes = []) =>
     ingredientRef(id).set({
       name: 'harina',
-      isResale: false,
       unit: 'g',
       costPerUnit: 5,
       usedInRecipes,

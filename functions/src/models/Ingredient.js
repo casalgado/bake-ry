@@ -17,8 +17,6 @@ class Ingredient extends BaseModel {
     id,
     bakeryId,
     name,
-    // false: consumed to make your products. true: bought and sold as-is.
-    isResale = false,
     categoryId,
     categoryName,
     createdAt,
@@ -26,7 +24,7 @@ class Ingredient extends BaseModel {
 
     // Usage and Recipes
     usedInRecipes = [],
-    // Ingredients you make (not resale) may be produced from their own recipe (§4).
+    // An ingredient may be produced from its own recipe — a preparación (§4).
     recipeId = null,
     stockBehavior = Ingredient.STOCK_BEHAVIORS.PASS_THROUGH,
     notes,
@@ -60,18 +58,11 @@ class Ingredient extends BaseModel {
       throw new BadRequestError('Invalid ingredient stock behavior');
     }
 
-    // Only something you make can have a recipe (§4).
-    if (recipeId && isResale) {
-      throw new BadRequestError('Resale ingredients cannot have a recipe');
-    }
-
     // Basic Information
     this.bakeryId = bakeryId;
     this.name = name;
     this.categoryId = categoryId;
     this.categoryName = categoryName;
-
-    this.isResale = Boolean(isResale);
 
     // Usage and Recipes
     this.usedInRecipes = usedInRecipes;

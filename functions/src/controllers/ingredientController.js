@@ -23,11 +23,6 @@ const validateIngredientData = (data) => {
     errors.push('Cost per unit cannot be negative');
   }
 
-  // Validate isResale if provided
-  if (data.isResale !== undefined && typeof data.isResale !== 'boolean') {
-    errors.push('isResale must be a boolean');
-  }
-
   return errors;
 };
 

@@ -5,13 +5,10 @@ const { BadRequestError } = require('../utils/errors');
 
 const validateRecipeData = (recipeData) => {
   const errors = [];
-  const ingredients = recipeData.ingredients;
+  const ingredients = recipeData.ingredients ?? [];
 
-  // A recipe needs at least one component, each with an id and a quantity.
-  if (!ingredients || ingredients.length === 0) {
-    errors.push('Recipe must have at least one ingredient');
-    return errors;
-  }
+  // Empty ingredients is legal: a preparación is created before its first line,
+  // and the recetario's canSave already blocks emptying an existing recipe.
 
   // Components are ingredients or products, both keyed by `id`.
   ingredients.forEach((ingredient, index) => {
