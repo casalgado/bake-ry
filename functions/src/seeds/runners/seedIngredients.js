@@ -6,55 +6,40 @@ const fs = require('fs');
 const path = require('path');
 
 async function seedIngredients() {
-  try {
-    console.log('Creating ingredients...');
+  console.log('Creating ingredients...');
 
-    // Store created ingredients with their IDs for reference
-    const createdIngredients = [];
+  const createdIngredients = [];
 
-    // Create ingredients through service
-    for (const ingredient of ingredients) {
-      delete ingredient.id; // Remove ID from seed data
-      const createdIngredient = await ingredientService.create(new Ingredient({
+  for (const ingredient of ingredients) {
+    const created = await ingredientService.create(
+      {
         ...ingredient,
         bakeryId: BAKERY_ID,
-        categoryId: ingredient.categoryId || 'category-id',
-        categoryName: ingredient.categoryName || 'category-name',
-        notes: ingredient.notes || 'notes',
-        preferredSupplierId: ingredient.preferredSupplierId || 'preferred-supplier-id',
-        isResaleProduct: ingredient.isResaleProduct || false,
-        isActive: ingredient.isActive || true,
-        isDiscontinued: ingredient.isDiscontinued || false,
-        customAttributes: ingredient.customAttributes || {},
-      }).toFirestore(), BAKERY_ID);
-
-      createdIngredients.push({
-        id: createdIngredient.id,
-        ...createdIngredient,
-      });
-      console.log(`Created ingredient: ${createdIngredient.name}, ${createdIngredient.id}`);
-    }
-
-    // Write created ingredients to a file for recipes to use
-
-    const seedDataDir = path.join(__dirname, '../data');
-    fs.writeFileSync(
-      path.join(seedDataDir, 'seededIngredients.json'),
-      JSON.stringify(createdIngredients, null, 2),
+        // Raw materials are bought and held, so deduction stops at them.
+        stockBehavior: Ingredient.STOCK_BEHAVIORS.STOCKED,
+      },
+      BAKERY_ID,
     );
 
-    console.log('Ingredients seeded successfully');
-    return createdIngredients;
-  } catch (error) {
-    console.error('Error seeding ingredients:', error);
-    throw error;
+    createdIngredients.push(created);
+    console.log(`Created ingredient: ${created.name}, ${created.id}`);
   }
+
+  // Recipe seeder reads this to map ingredient names to ids.
+  fs.writeFileSync(
+    path.join(__dirname, '../data/seededIngredients.json'),
+    JSON.stringify(createdIngredients, null, 2),
+  );
+
+  console.log('Ingredients seeded successfully');
+  return createdIngredients;
 }
 
-// Export the function so it can be used by recipe seeder
 module.exports = seedIngredients;
 
-// Only run if this is the main file being executed
 if (require.main === module) {
-  seedIngredients();
+  seedIngredients().catch((error) => {
+    console.error('Error seeding ingredients:', error);
+    process.exit(1);
+  });
 }

@@ -1334,6 +1334,7 @@
             "name": "focaccia",
             "collectionId": "y4koQ0pzabULphKDyb7E",
             "collectionName": "panaderia tradicional",
+            "inventoryMode": "recipe",
             "variations": [],
             "basePrice": 18000,
             "currentPrice": 18000,
@@ -1430,6 +1431,7 @@
             "name": "beatriz",
             "collectionId": "6XyBqTCgL8U7uavYACuq",
             "collectionName": "cafe el diario",
+            "inventoryMode": "unit",
             "variations": [
                 {
                     "id": "t3XDtkA74yoUGQZz",
@@ -1514,6 +1516,7 @@
             "name": "margarita",
             "collectionId": "6XyBqTCgL8U7uavYACuq",
             "collectionName": "cafe el diario",
+            "inventoryMode": "unit",
             "variations": [
                 {
                     "id": "p73jxaf3zoGo3zDc",
@@ -1598,6 +1601,7 @@
             "name": "cold brew",
             "collectionId": "6XyBqTCgL8U7uavYACuq",
             "collectionName": "cafe el diario",
+            "inventoryMode": "unit",
             "variations": [
                 {
                     "id": "8HhfhbdDaH25Qkge",
