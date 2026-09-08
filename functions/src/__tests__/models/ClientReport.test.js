@@ -239,6 +239,19 @@ describe('ClientReport.generateReport', () => {
     expect(row.nationalId).toBe('900123');
   });
 
+  it('bucket rows carry per-period spend aligned to report.periods', () => {
+    const orders = [
+      makeOrder('t1', 'estrella', 'Client', addDays(THIS_MONDAY, -35), { subtotal: 100 }),
+      makeOrder('t2', 'estrella', 'Client', addDays(THIS_MONDAY, -14), { subtotal: 200 }),
+      makeOrder('t3', 'estrella', 'Client', addDays(THIS_MONDAY, -14), { subtotal: 50 }),
+    ];
+    const report = new ClientReport(orders, b2bClients, options).generateReport();
+    const row = Object.values(report.buckets).flat().find(c => c.userId === 'estrella');
+    expect(row.periodTotals).toHaveLength(report.periods.length);
+    expect(row.periodTotals.reduce((a, b) => a + b, 0)).toBe(row.rangeTotal);
+    expect(row.periodTotals.filter(t => t > 0).sort((a, b) => a - b)).toEqual([100, 250]);
+  });
+
   it('takes address from the most recent order that has one', () => {
     const orders = [
       makeOrder('a1', 'estrella', 'Client', addDays(THIS_MONDAY, -35), { deliveryAddress: 'Calle 1' }),

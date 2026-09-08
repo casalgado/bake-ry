@@ -195,11 +195,20 @@ class ClientReport {
       // Only counted here for veterans; "new" clients already counted above.
       if (veteran) activeClients += 1;
 
+      // Per-period spend, aligned to `this.periods` (partial period included),
+      // for the "one column per period" bucket export.
+      const totalByPeriodKey = {};
+      ordersInRange.forEach(o => {
+        const k = keyOf(o);
+        totalByPeriodKey[k] = (totalByPeriodKey[k] || 0) + o.total;
+      });
+
       const bucket = classifyVector(vector, orderedInPartial);
       buckets[bucket].push({
         userId,
         ...contact,
         rangeTotal: ordersInRange.reduce((sum, o) => sum + o.total, 0),
+        periodTotals: this.periods.map(p => totalByPeriodKey[p.key] || 0),
         orderCount: ordersInRange.length,
         lastOrderDate: lastOrder[this.options.dateField],
         vector,
