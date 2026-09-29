@@ -246,6 +246,7 @@ class Order extends BaseModel {
     deliveryFee = 0,
     deliveryCost = 0,
     numberOfBags = 1,
+    deliveryRound = 0,
 
     // Notes
     customerNotes = '',
@@ -333,6 +334,7 @@ class Order extends BaseModel {
     this.deliveryFee = deliveryFee == '' ? 0 : deliveryFee;
     this.deliveryCost = deliveryCost == '' ? 0 : deliveryCost;
     this.numberOfBags = numberOfBags == '' ? 0 : numberOfBags;
+    this.deliveryRound = deliveryRound;
 
     // Set isComplimentary based on paymentMethod
     this.isComplimentary = paymentMethod === 'complimentary' || paymentMethod === 'quote';
