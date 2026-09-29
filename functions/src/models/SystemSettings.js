@@ -18,14 +18,24 @@ class SystemSettings extends BaseModel {
     { key: "refrigerated", value: "Refrigerated" }, // or 'chilled'
     { key: "frozen", value: "Frozen" },
   ];
+  /* El vocabulario de unidades, y el único. Se sirve a los clientes como
+   * settings.unitOptions, y ahí lo leen VariationsManager (filtra por `type`) y
+   * ProductCollectionForm (filtra por `template`). Los símbolos son en español
+   * porque son lo que se guarda y lo que se muestra: `paq`, no `pkt`.
+   *
+   * `ml` y `L` son de volumen pero caen en la plantilla WEIGHT: la dimensión
+   * agrupa "lo que se mide" frente a "lo que se cuenta", no la magnitud física. */
   static UNIT_OPTIONS = [
     { symbol: "g", name: "Gramo", type: "weight", template: "WEIGHT" },
+    { symbol: "kg", name: "Kilogramo", type: "weight", template: "WEIGHT" },
     { symbol: "lb", name: "Libra", type: "weight", template: "WEIGHT" },
 
     { symbol: "ml", name: "Mililitro", type: "volume", template: "WEIGHT" },
+    { symbol: "L", name: "Litro", type: "volume", template: "WEIGHT" },
+
     { symbol: "uds", name: "Unidades", type: "count", template: "QUANTITY" },
     { symbol: "dz", name: "Docena", type: "count", template: "QUANTITY" },
-    { symbol: "pkt", name: "Paquete", type: "count", template: "QUANTITY" },
+    { symbol: "paq", name: "Paquete", type: "count", template: "QUANTITY" },
   ];
 
   static AVAILABLE_PAYMENT_METHODS = [

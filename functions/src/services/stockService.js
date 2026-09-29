@@ -385,7 +385,7 @@ const syncProductStockDocs = async (bakeryId, product) => {
 
     return await Promise.all(
       items.map(({ item, name }) =>
-        syncStockDoc(bakeryId, item, { name, unit: 'unidad', warehouseId }),
+        syncStockDoc(bakeryId, item, { name, unit: 'uds', warehouseId }),
       ),
     );
   } catch (error) {

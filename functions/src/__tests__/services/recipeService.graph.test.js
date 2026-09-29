@@ -330,7 +330,7 @@ describe('Recipe graph — owners, guardrails, costing', () => {
         productId: 'combo',
         ingredients: [
           component('harina', 10),
-          { type: 'product', id: 'torta', quantity: 1, unit: 'unidad' },
+          { type: 'product', id: 'torta', quantity: 1, unit: 'uds' },
         ],
       });
 

@@ -160,7 +160,7 @@ const createRecipeService = () => {
           }
         }
 
-        assertUnit('unidad', data.name);
+        assertUnit('uds', data.name);
 
         return {
           component: new RecipeComponent({
@@ -168,7 +168,7 @@ const createRecipeService = () => {
             id,
             combinationId,
             quantity,
-            unit: 'unidad',
+            unit: 'uds',
             notes: raw.notes || '',
           }),
           ref,

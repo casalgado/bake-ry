@@ -93,7 +93,7 @@ const ingredients = [
     name: 'Huevo',
     categoryId: 'lacteos-y-proteinas',
     categoryName: 'Lácteos y Proteínas',
-    unit: 'unidades',
+    unit: 'uds',
     costPerUnit: 700,
     storageTemp: 'Refrigeracion',
     preferredSupplier: 'Granja El Roble',
