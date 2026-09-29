@@ -16,5 +16,7 @@ src/seeds/backup/
 src/seeds/firestore/
 src/middleware/request_logs/
 *.csv
+src/seeds/runners/auth-prune-*.json
+src/seeds/runners/auth-audit-report.json
 zsandbox/
 zdocs/
