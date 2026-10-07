@@ -68,7 +68,7 @@ class BakerySettings extends BaseModel {
       defaultClientId: null, // Will store auto-created "Punto de Venta" client ID
     },
     // Opt-in module. Gates frontend visibility only — never backend logic.
-    // See zplanning/strategy/INVENTORY-IMPLEMENTATION.md §14 (front repo).
+    // See zplanning/inventory/INVENTORY-IMPLEMENTATION.md §14 (front repo).
     inventory: {
       enabled: false,
       // Stock is held per (item, warehouse) — "bodega" in the UI. Living in

@@ -8,7 +8,7 @@
 // Each client gets a `.`/`0`/`1` vector over the report's complete periods
 // (the current, still-open period is excluded from the vector — ordering in
 // it can only promote a client, never demote one) and is sorted into one of
-// six buckets from that vector. See zplanning/CLIENT_PERSISTENCY_REDESIGN.md
+// six buckets from that vector. See zplanning/implemented/CLIENT_PERSISTENCY_REDESIGN.md
 // (bake-ry-front) for the full decision tree and worked examples.
 
 const { Order } = require('./Order');

@@ -39,6 +39,6 @@ Nothing in B is blocked.
 
 ## Kickoff prompt (Phase B)
 
-> Phase B of `zplanning/inventory-next-steps.md`, frontend only, backend already exists. Don't touch backend — flag missing endpoints instead of improvising.
+> Phase B of `zplanning/inventory/inventory-next-steps.md`, frontend only, backend already exists. Don't touch backend — flag missing endpoints instead of improvising.
 > Read first: `inventory-next-steps.md` (Phase B), `inventory-ux-plan.md`, `strategy/INVENTORY-IMPLEMENTATION.md` §2–§5, §11.
 > Before B3: discuss recipe-per-combination vs the documented copy-and-scale decision (§2, §11.3 — rejected base-recipe-with-multiplier because icing doesn't scale with sponge). Be critical of the existing decision. B1/B2 can start first.
