@@ -8,7 +8,6 @@ const ingredients = [
     unit: 'g',
     costPerUnit: 5,
     storageTemp: 'Ambiente',
-    preferredSupplier: 'Molinos del Norte',
   },
   {
     name: 'Harina Integral',
@@ -17,7 +16,6 @@ const ingredients = [
     unit: 'g',
     costPerUnit: 8,
     storageTemp: 'Ambiente',
-    preferredSupplier: 'Molinos del Norte',
   },
   {
     name: 'Harina de Almendra',
@@ -26,7 +24,6 @@ const ingredients = [
     unit: 'g',
     costPerUnit: 45,
     storageTemp: 'Ambiente',
-    preferredSupplier: 'Frutos Secos Premium',
   },
   {
     name: 'Agua',
@@ -43,7 +40,6 @@ const ingredients = [
     unit: 'ml',
     costPerUnit: 30,
     storageTemp: 'Ambiente',
-    preferredSupplier: 'Distribuidora La Espiga',
   },
   {
     name: 'Sal',
@@ -60,7 +56,6 @@ const ingredients = [
     unit: 'g',
     costPerUnit: 4,
     storageTemp: 'Ambiente',
-    preferredSupplier: 'Distribuidora La Espiga',
   },
   {
     name: 'Levadura Fresca',
@@ -69,7 +64,6 @@ const ingredients = [
     unit: 'g',
     costPerUnit: 22,
     storageTemp: 'Refrigeracion',
-    preferredSupplier: 'Distribuidora La Espiga',
   },
   {
     name: 'Leche Entera',
@@ -78,7 +72,6 @@ const ingredients = [
     unit: 'ml',
     costPerUnit: 3,
     storageTemp: 'Refrigeracion',
-    preferredSupplier: 'Lácteos del Valle',
   },
   {
     name: 'Mantequilla Sin Sal',
@@ -87,7 +80,6 @@ const ingredients = [
     unit: 'g',
     costPerUnit: 18,
     storageTemp: 'Refrigeracion',
-    preferredSupplier: 'Lácteos del Valle',
   },
   {
     name: 'Huevo',
@@ -96,7 +88,6 @@ const ingredients = [
     unit: 'uds',
     costPerUnit: 700,
     storageTemp: 'Refrigeracion',
-    preferredSupplier: 'Granja El Roble',
   },
   {
     name: 'Semillas de Girasol',
@@ -121,7 +112,6 @@ const ingredients = [
     unit: 'ml',
     costPerUnit: 45,
     storageTemp: 'Ambiente',
-    preferredSupplier: 'Esencias del Mundo',
   },
   {
     name: 'Canela Molida',
@@ -130,7 +120,6 @@ const ingredients = [
     unit: 'g',
     costPerUnit: 60,
     storageTemp: 'Ambiente',
-    preferredSupplier: 'Especias Orientales',
   },
   {
     name: 'Chocolate Semiamargo',
@@ -139,7 +128,6 @@ const ingredients = [
     unit: 'g',
     costPerUnit: 40,
     storageTemp: 'Ambiente',
-    preferredSupplier: 'Cacao Andino',
   },
   {
     name: 'Cocoa en Polvo',
@@ -148,7 +136,6 @@ const ingredients = [
     unit: 'g',
     costPerUnit: 55,
     storageTemp: 'Ambiente',
-    preferredSupplier: 'Cacao Andino',
   },
   // Resale items (e.g. `Café Beatriz 500g`) are products with
   // inventoryMode: 'unit', seeded in data/products.json — not ingredients.

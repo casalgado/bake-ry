@@ -92,6 +92,15 @@ const buildStockDocId = (itemKey, warehouseId) => {
   return `${itemKey}__${warehouseId}`;
 };
 
+/** API item identity `{ type, id, combinationId }` → the ledger descriptor buildItemKey reads. */
+const toStockItem = ({ type, id, combinationId = null } = {}) => {
+  if (type === ITEM_TYPES.INGREDIENT) return { itemType: type, ingredientId: id };
+  if (type === ITEM_TYPES.PRODUCT) {
+    return { itemType: type, productId: id, combinationId: combinationId || null };
+  }
+  throw new BadRequestError(`Unknown stock item type: ${type}`);
+};
+
 /**
  * The bakery's warehouse list. Never swallows a read failure: guessing the
  * default would silently write a movement to the wrong warehouse, and the
@@ -658,6 +667,8 @@ module.exports = {
   DEFAULT_WAREHOUSE_ID,
   buildItemKey,
   buildStockDocId,
+  toStockItem,
+  retryId,
   getWarehouses,
   resolveWarehouseId,
   getDefaultWarehouseId,
