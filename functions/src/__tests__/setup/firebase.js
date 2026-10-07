@@ -17,6 +17,7 @@ function initializeFirebase() {
   if (!admin.apps.length) {
     admin.initializeApp({
       projectId: 'bake-ry',
+      storageBucket: 'bake-ry.appspot.com',
     });
   }
 

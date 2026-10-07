@@ -3,10 +3,9 @@ const BaseModel = require('./base/BaseModel');
 class SystemSettings extends BaseModel {
   static ORDER_STATUSES = [
     "Recibida",
-    "En Produccion",
-    "Preparada",
-    "En Camino",
-    "Completada",
+    "Producida",
+    "Enviada",
+    "Entregada",
   ];
 
   static FULFILLMENT_TYPES = [

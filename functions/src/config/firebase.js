@@ -8,6 +8,7 @@ if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: 'https://bake-ry.firebaseio.com',
+    storageBucket: 'bake-ry.appspot.com',
   // If you're using other Firebase services, include their configs here
   // For example: databaseURL: "https://your-database-name.firebaseio.com"
   });

@@ -5,6 +5,7 @@ const cors = require("cors");
 
 const authRoutes = require("./routes/authRoutes");
 const whatsappRoutes = require("./routes/whatsappRoutes");
+const inboundEmailRoutes = require("./routes/inboundEmailRoutes");
 const bakeryRoutes = require("./routes/bakeryRoutes");
 const productRoutes = require("./routes/productRoutes");
 const ingredientRoutes = require("./routes/ingredientRoutes");
@@ -36,6 +37,10 @@ app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Before requestLogger: the body is a raw email of up to 25 MB.
+app.use("/inbound-email", inboundEmailRoutes);
+
 app.use(requestLogger);
 
 // Public routes
