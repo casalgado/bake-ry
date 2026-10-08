@@ -585,4 +585,21 @@ describe('Stock ledger', () => {
       expect(movements.map((m) => m.warehouseId).sort()).toEqual([MAIN, BRANCH].sort());
     });
   });
+
+  describe('verify', () => {
+    it('reports nothing while the cache matches the ledger, and the row that drifts', async () => {
+      await seedStock(flourItem, 1000);
+      await stockService.writeMovements(bakeryId, [
+        { item: flourItem, warehouseId: MAIN, qty: -10, type: 'sale', refs: { orderId: 'o1' } },
+      ]);
+
+      expect(await stockService.verify(bakeryId)).toEqual([]);
+
+      await col('stocks').doc(docIdOf(flourItem)).update({ currentStock: 500 });
+
+      const drift = await stockService.verify(bakeryId);
+      expect(drift).toHaveLength(1);
+      expect(drift[0]).toMatchObject({ id: docIdOf(flourItem), expected: 990, actual: 500, diff: -490 });
+    });
+  });
 });

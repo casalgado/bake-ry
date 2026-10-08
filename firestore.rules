@@ -70,6 +70,13 @@ service cloud.firestore {
         allow read: if isAuthenticated() && isBakeryStaff(bakeryId);
         allow write: if false;
       }
+
+      // Read for Existencias' realtime listener. A stocks doc is derived from
+      // stockMovements and written only by the API.
+      match /stocks/{stockId} {
+        allow read: if isAuthenticated() && isBakeryStaff(bakeryId);
+        allow write: if false;
+      }
     }
   }
 }

@@ -7,6 +7,18 @@ const OrderHistory = require('../models/OrderHistory');
 const createBaseService = require('./base/serviceFactory');
 const { db } = require('../config/firebase');
 const { NotFoundError, BadRequestError } = require('../utils/errors');
+const stockService = require('./stockService');
+
+// Runs after the order commits. Never fails the order (invariant 8). A failure is
+// only logged: nothing retries it, and verify compares each stock's cache with the
+// ledger, not orders with the ledger, so it will not show it. The order's stock is
+// corrected the next time a stock-relevant field of that order changes.
+const reconcileIfNeeded = (bakeryId, before, after, editor) => (stockService.needsReconcile(before, after)
+  ? stockService.reconcileOrderStock(bakeryId, after.id, {
+    // Firestore refuses undefined: one missing field would silently skip the deduction.
+    editor: editor ? { userId: editor.uid ?? null, email: editor.email ?? null, role: editor.role ?? null } : null,
+  }).catch((error) => console.error('Stock reconcile failed for order', after.id, error))
+  : null);
 
 const createOrderService = () => {
   const baseService = createBaseService('orders', Order, 'bakeries/{bakeryId}');
@@ -25,7 +37,7 @@ const createOrderService = () => {
 
   const create = async (orderData, bakeryId) => {
     try {
-      return await db.runTransaction(async (transaction) => {
+      const created = await db.runTransaction(async (transaction) => {
         // 1. Create main order
         const orderRef = baseService.getCollectionRef(bakeryId).doc();
         const order = new Order({
@@ -68,6 +80,9 @@ const createOrderService = () => {
 
         return order;
       });
+
+      await reconcileIfNeeded(bakeryId, null, created, null);
+      return created;
     } catch (error) {
       console.error('Error in order create:', error);
       throw error;
@@ -78,7 +93,8 @@ const createOrderService = () => {
     try {
       const orderRef = baseService.getCollectionRef(bakeryId).doc(id);
 
-      return await db.runTransaction(async (transaction) => {
+      let before;
+      const result = await db.runTransaction(async (transaction) => {
         const doc = await transaction.get(orderRef);
 
         if (!doc.exists) {
@@ -86,6 +102,7 @@ const createOrderService = () => {
         }
 
         const currentOrder = Order.fromFirestore(doc);
+        before = currentOrder;
         const updatedOrder = new Order({
           ...currentOrder,
           ...data,
@@ -121,6 +138,9 @@ const createOrderService = () => {
 
         return updatedOrder;
       });
+
+      await reconcileIfNeeded(bakeryId, before, result, editor);
+      return result;
     } catch (error) {
       console.error('Error updating order:', error);
       throw error;
@@ -131,7 +151,8 @@ const createOrderService = () => {
     try {
       const orderRef = baseService.getCollectionRef(bakeryId).doc(id);
 
-      return await db.runTransaction(async (transaction) => {
+      let before;
+      const result = await db.runTransaction(async (transaction) => {
         const doc = await transaction.get(orderRef);
 
         if (!doc.exists) {
@@ -139,6 +160,7 @@ const createOrderService = () => {
         }
 
         const currentOrder = Order.fromFirestore(doc);
+        before = currentOrder;
         const updatedOrder = new Order({
           ...currentOrder,
           ...data,
@@ -181,6 +203,9 @@ const createOrderService = () => {
 
         return updatedOrder;
       });
+
+      await reconcileIfNeeded(bakeryId, before, result, editor);
+      return result;
     } catch (error) {
       console.error('Error patching order:', error);
       throw error;
@@ -209,7 +234,9 @@ const createOrderService = () => {
 
       // Process each batch
       for (const batchUpdates of batches) {
+        let toReconcile = [];
         await db.runTransaction(async (transaction) => {
+          toReconcile = [];
           // Process reads sequentially instead of Promise.all
           const updateOperations = [];
           for (const update of batchUpdates) {
@@ -266,6 +293,7 @@ const createOrderService = () => {
               updateOperations.push({
                 success: true,
                 orderRef,
+                currentOrder,
                 updatedOrder,
                 changes,
                 data,
@@ -290,10 +318,11 @@ const createOrderService = () => {
               continue;
             }
 
-            const { orderRef, updatedOrder, changes, id } = operation;
+            const { orderRef, currentOrder, updatedOrder, changes, id } = operation;
 
             // update order and history only if changes are present
             if (Object.keys(changes).length > 0) {
+              toReconcile.push({ before: currentOrder, after: updatedOrder });
               const historyRef = orderRef.collection('updateHistory').doc();
               transaction.set(historyRef, {
                 timestamp: new Date(),
@@ -313,6 +342,11 @@ const createOrderService = () => {
             });
           }
         });
+
+        // One by one, after the batch commits: never inside the 500-op batch.
+        for (const { before, after } of toReconcile) {
+          await reconcileIfNeeded(bakeryId, before, after, editor);
+        }
       }
 
       return results;
@@ -326,7 +360,8 @@ const createOrderService = () => {
     try {
       const orderRef = baseService.getCollectionRef(bakeryId).doc(id);
 
-      return await db.runTransaction(async (transaction) => {
+      let before;
+      const result = await db.runTransaction(async (transaction) => {
         const doc = await transaction.get(orderRef);
 
         if (!doc.exists) {
@@ -334,6 +369,7 @@ const createOrderService = () => {
         }
 
         const currentOrder = Order.fromFirestore(doc);
+        before = currentOrder;
         const updatedOrder = new Order({
           ...currentOrder,
           isDeleted: true,
@@ -355,6 +391,9 @@ const createOrderService = () => {
 
         return null;
       });
+
+      await reconcileIfNeeded(bakeryId, before, { ...before, isDeleted: true }, editor);
+      return result;
     } catch (error) {
       console.error('Error removing order:', error);
       throw error;

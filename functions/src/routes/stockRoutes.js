@@ -2,6 +2,7 @@ const express = require('express');
 const stockController = require('../controllers/stockController');
 const {
   authenticateUser,
+  requireBakeryAdmin,
   requireBakeryAssistant,
   requireBakeryStaffOrAdmin,
 } = require('../middleware/userAccess');
@@ -19,6 +20,7 @@ bakeryRouter.use(hasBakeryAccess);
 // (§12.2 role access stays open for counts and purchases — this is the
 // conservative starting point for adjustments, easy to widen later.)
 bakeryRouter.get('/stocks', requireBakeryAssistant, stockController.getAll);
+bakeryRouter.get('/stocks/verify', requireBakeryAdmin, stockController.verify);
 bakeryRouter.get(
   '/stocks/:itemKey/movements',
   requireBakeryAssistant,

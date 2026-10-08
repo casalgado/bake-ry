@@ -13,8 +13,9 @@
 //      movement doc or touch a stocks doc's currentStock anywhere else.
 //   3. The movement doc and the cache increment land in the same transaction.
 //   4. Reads happen before writes, always (a Firestore transaction requirement).
-//   5. Deterministic ids are the idempotency mechanism — never an "already
-//      deducted" flag on the order.
+//   5. Idempotency comes from deterministic ids (hand-entered movements, run
+//      receipts) or, for orders, from the diff against the order's own
+//      movements (reconcileOrderStock) — never an "already deducted" flag.
 //   6. Stock is held per (item, warehouse). The stocks doc id is built by
 //      buildStockDocId — never hand-concatenated, same rule as itemKey.
 //
@@ -206,11 +207,9 @@ const validateMovement = (movement) => {
  *                           unitCost?, name?, unit? }]
  *                           `id` present ⇒ deterministic ⇒ idempotent: writing
  *                           it twice produces one movement and one increment.
- *                           Sale ids stay `{orderId}_{orderItemId}_{itemKey}`:
- *                           one order line deducts from exactly one warehouse,
- *                           so the id is still unique.
- * @param {Object} options   { transaction } to enlist in an outer transaction —
- *                           phase 2 runs this inside the order transaction.
+ *                           Order movements have no id: reconcileOrderStock's
+ *                           diff is their idempotency.
+ * @param {Object} options   { transaction } to enlist in an outer transaction.
  * @returns {Array} the movements actually written (skipped duplicates excluded)
  */
 const writeMovements = async (bakeryId, movements = [], { transaction = null } = {}) => {
@@ -424,22 +423,84 @@ const syncIngredientStockDoc = async (bakeryId, ingredient) => {
   }
 };
 
-/** One row per (item, warehouse). A single-warehouse bakery cannot tell. */
+// ponytail: an open order whose dueDate is more than this many days past counts
+// as forgotten and stops holding stock. Future orders always count.
+const COMMITTED_WINDOW_DAYS = 10;
+
+/**
+ * Stock doc id → quantity, for open order lines that will take from stock and
+ * pending run lines. A resale (`unit`) product always takes from stock when it
+ * ships, whatever the line's fulfillmentSource says, so its lines count too.
+ */
+const getCommittedAndIncoming = async (bakeryId) => {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - COMMITTED_WINDOW_DAYS);
+
+  const [warehouseId, orders, runs, unitProducts] = await Promise.all([
+    getDefaultWarehouseId(bakeryId),
+    db.collection(`bakeries/${bakeryId}/orders`)
+      .where('isDeleted', '==', false)
+      .where('status', 'in', [0, 1])
+      .where('dueDate', '>=', cutoff)
+      .get(),
+    db.collection(`bakeries/${bakeryId}/productionRuns`).where('status', '==', 'open').get(),
+    db.collection(`bakeries/${bakeryId}/products`).where('inventoryMode', '==', 'unit').select().get(),
+  ]);
+  const unitIds = new Set(unitProducts.docs.map((doc) => doc.id));
+
+  const committed = new Map();
+  const incoming = new Map();
+  const add = (map, item, atWarehouse, qty) => {
+    const id = buildStockDocId(buildItemKey(toStockItem(item)), atWarehouse);
+    map.set(id, (map.get(id) || 0) + (Number(qty) || 0));
+  };
+
+  orders.docs.forEach((doc) => (doc.data().orderItems || []).forEach((line) => {
+    if (line.fulfillmentSource !== 'stock' && !unitIds.has(line.productId)) return;
+    const item = { type: ITEM_TYPES.PRODUCT, id: line.productId, combinationId: line.combination?.id };
+    add(committed, item, line.sourceWarehouseId || warehouseId, line.quantity);
+  }));
+
+  runs.docs.forEach((doc) => {
+    const run = doc.data();
+    if (run.isDeleted) return;
+    (run.lines || []).forEach((line) => {
+      if (line.status === 'pending') add(incoming, line.item, run.warehouseId, line.plannedQty);
+    });
+  });
+
+  return { committed, incoming };
+};
+
+/**
+ * One row per (item, warehouse). A single-warehouse bakery cannot tell.
+ * Each row carries committed / incoming / available, computed here and never
+ * stored: the orders and runs are the commitment, so the next read reflects them.
+ */
 const getStocks = async (
   bakeryId,
-  { itemType = null, search = null, warehouseId = null } = {},
+  { itemType = null, search = null, warehouseId = null, itemKeys = null } = {},
 ) => {
   let query = stocksRef(bakeryId);
   if (itemType) query = query.where('itemType', '==', itemType);
   if (warehouseId) query = query.where('warehouseId', '==', warehouseId);
 
   const snapshot = await query.get();
-  const stocks = snapshot.docs.map(toPlain);
+  let stocks = snapshot.docs.map(toPlain);
 
-  if (!search) return stocks;
+  if (itemKeys?.length) stocks = stocks.filter((stock) => itemKeys.includes(stock.itemKey));
 
-  const needle = search.toLowerCase();
-  return stocks.filter((stock) => (stock.name || '').toLowerCase().includes(needle));
+  if (search) {
+    const needle = search.toLowerCase();
+    stocks = stocks.filter((stock) => (stock.name || '').toLowerCase().includes(needle));
+  }
+
+  const { committed, incoming } = await getCommittedAndIncoming(bakeryId);
+  return stocks.map((stock) => {
+    const c = committed.get(stock.id) || 0;
+    const i = incoming.get(stock.id) || 0;
+    return { ...stock, committed: c, incoming: i, available: (stock.currentStock || 0) + i - c };
+  });
 };
 
 const getStock = async (bakeryId, itemKey, warehouseId) => {
@@ -497,9 +558,8 @@ const itemOf = (stock) => ({
 });
 
 /**
- * Turns a client's retry key into a movement doc id — the same mechanism sales
- * get from `{orderId}_{orderItemId}_{itemKey}`, exposed to hand-entered
- * movements that have no natural id of their own (invariant 5).
+ * Turns a client's retry key into a doc id, for hand-entered documents that
+ * have no natural id of their own (invariant 5).
  *
  * The key is generated when the form opens, not when it submits, so a resend
  * after a lost response carries the key the first attempt used and lands on the
@@ -812,6 +872,197 @@ const expandRecipe = async (bakeryId, item, qty) => {
   return { name, unit, components: [...components.values()], gaps };
 };
 
+// Recipe scaling leaves float dust; a difference under this is no difference.
+const roundQty = (n) => Math.round(n * 1e6) / 1e6;
+
+/**
+ * Drift check: per stocks doc, baselineQty + Σ movements since baselineAt
+ * against currentStock. Report only — a repair is an adjustment, never a
+ * silent overwrite. Returns only the rows that disagree.
+ */
+// ponytail: reads every movement of the bakery; narrow by baselineAt per item if it gets slow.
+const verify = async (bakeryId) => {
+  const [stocksSnap, movementsSnap] = await Promise.all([
+    stocksRef(bakeryId).get(),
+    movementsRef(bakeryId).get(),
+  ]);
+
+  const byStockDoc = new Map();
+  movementsSnap.docs.map(toPlain).forEach((m) => {
+    const id = buildStockDocId(m.itemKey, m.warehouseId);
+    if (!byStockDoc.has(id)) byStockDoc.set(id, []);
+    byStockDoc.get(id).push(m);
+  });
+
+  return stocksSnap.docs.map(toPlain).flatMap((stock) => {
+    const since = stock.baselineAt ? new Date(stock.baselineAt) : new Date(0);
+    const expected = roundQty((byStockDoc.get(stock.id) || [])
+      .filter((m) => new Date(m.timestamp) >= since)
+      .reduce((sum, m) => sum + m.qty, Number(stock.baselineQty) || 0));
+    const actual = roundQty(Number(stock.currentStock) || 0);
+    return expected === actual
+      ? []
+      : [{ id: stock.id, name: stock.name, expected, actual, diff: roundQty(actual - expected) }];
+  });
+};
+
+const stockGapsRef = (bakeryId) => db.collection(`bakeries/${bakeryId}/stockGaps`);
+
+/** next-steps §3: the order decides when. */
+const affectsStock = (order) => Boolean(order) && !order.isDeleted && order.status >= 2;
+
+// What of a line can move stock. A price or note edit leaves this unchanged.
+const stockSignature = (order) => JSON.stringify((order?.orderItems || []).map((l) => [
+  l.id, l.productId, l.combination?.id || null, Number(l.quantity),
+  l.fulfillmentSource, l.sourceWarehouseId || null,
+]));
+
+const needsReconcile = (before, after) =>
+  affectsStock(before) !== affectsStock(after) ||
+  (affectsStock(after) && stockSignature(before) !== stockSignature(after));
+
+/**
+ * What a shipped order should have taken from the bodega; each line decides:
+ *   product 'none'                  → nothing
+ *   product 'unit', or a stock line → −quantity of the product itself
+ *   product 'recipe', produce line  → its recipe, through expandRecipe
+ * Plain reads, before any transaction. Nothing when affectsStock is false.
+ * Returns { movements: [{ item, warehouseId, qty, name, unit }] merged by stock
+ * doc, gaps: [{ orderItemId, productId, productName, gaps }] }.
+ */
+const expandOrder = async (bakeryId, order) => {
+  if (!affectsStock(order)) return { movements: [], gaps: [] };
+
+  const warehouseId = await getDefaultWarehouseId(bakeryId);
+  const products = new Map();
+  const readProduct = async (id) => {
+    if (!products.has(id)) {
+      const snap = await db.doc(`bakeries/${bakeryId}/products/${id}`).get();
+      products.set(id, snap.exists && !snap.data().isDeleted ? snap.data() : null);
+    }
+    return products.get(id);
+  };
+
+  const desired = new Map();
+  const take = (item, atWarehouse, qty, name, unit) => {
+    const ledgerItem = toStockItem(item);
+    const id = buildStockDocId(buildItemKey(ledgerItem), atWarehouse);
+    const current = desired.get(id);
+    if (current) current.qty -= qty;
+    else desired.set(id, { item: ledgerItem, warehouseId: atWarehouse, qty: -qty, name, unit });
+  };
+
+  const gaps = [];
+  for (const line of order.orderItems || []) {
+    const quantity = Number(line.quantity) || 0;
+    if (!line.productId || quantity <= 0) continue;
+
+    const item = { type: ITEM_TYPES.PRODUCT, id: line.productId, combinationId: line.combination?.id || null };
+    const lineGap = (list) => gaps.push({
+      orderItemId: line.id,
+      productId: line.productId,
+      productName: line.productName || '',
+      gaps: list,
+    });
+
+    const product = await readProduct(line.productId);
+    if (!product) {
+      lineGap([{ item, name: line.productName || '', reason: 'missingItem' }]);
+      continue;
+    }
+    if (!product.inventoryMode || product.inventoryMode === 'none') continue;
+
+    if (product.inventoryMode === 'unit' || line.fulfillmentSource === 'stock') {
+      take(item, line.sourceWarehouseId || warehouseId, quantity, productName(product, item.combinationId), 'uds');
+      continue;
+    }
+
+    const walk = await expandRecipe(bakeryId, item, quantity);
+    walk.components.forEach((c) => take(c.item, warehouseId, c.qty, c.name, c.unit));
+    if (walk.gaps.length) lineGap(walk.gaps);
+  }
+
+  return { movements: [...desired.values()], gaps };
+};
+
+/**
+ * Brings an order's movements in line with what it should have deducted: the
+ * desired movements minus the net of the ones it already has (refs.orderId),
+ * written as the delta. An unchanged order is an empty diff — that is the
+ * idempotency, not fixed ids. Ship → back → ship ends at one net deduction.
+ *
+ * The order is expanded outside the transaction (invariant 4); if it changed
+ * before the transaction read it again, it is expanded again.
+ */
+const reconcileOrderStock = async (bakeryId, orderId, { editor = null } = {}) => {
+  const orderRef = db.doc(`bakeries/${bakeryId}/orders/${orderId}`);
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const snap = await orderRef.get();
+    if (!snap.exists) throw new NotFoundError('Order not found');
+    const plan = await expandOrder(bakeryId, { id: orderId, ...snap.data() });
+
+    const result = await db.runTransaction(async (t) => {
+      const fresh = await t.get(orderRef);
+      if (!fresh.exists || !fresh.updateTime.isEqual(snap.updateTime)) return null;
+
+      const [existing, gapDocs] = await Promise.all([
+        getMovementsByRefs(bakeryId, { orderId }, { transaction: t }),
+        t.get(stockGapsRef(bakeryId).where('orderId', '==', orderId)),
+      ]);
+
+      const net = new Map();
+      existing.forEach((m) => {
+        const id = buildStockDocId(m.itemKey, m.warehouseId);
+        net.set(id, (net.get(id) || 0) + m.qty);
+      });
+
+      const desired = new Map(plan.movements.map((m) => [
+        buildStockDocId(buildItemKey(m.item), m.warehouseId), m,
+      ]));
+
+      // A line removed since the last reconcile: its descriptor comes off its
+      // stocks doc, which the earlier movement created.
+      const orphanIds = [...net.keys()].filter((id) => !desired.has(id));
+      const orphanDocs = await Promise.all(orphanIds.map((id) => t.get(stocksRef(bakeryId).doc(id))));
+      orphanDocs.forEach((doc) => {
+        const stock = doc.data();
+        desired.set(doc.id, {
+          item: itemOf(stock), warehouseId: stock.warehouseId, qty: 0, name: stock.name, unit: stock.unit,
+        });
+      });
+
+      // Undoing or changing what is already taken is a compensation; taking it
+      // again once it was all given back (net 0) is a sale.
+      const type = [...net.values()].every((qty) => roundQty(qty) === 0)
+        ? MOVEMENT_TYPES.SALE
+        : MOVEMENT_TYPES.COMPENSATION;
+      const deltas = [...desired.entries()]
+        .map(([id, m]) => ({ ...m, qty: roundQty(m.qty - (net.get(id) || 0)) }))
+        .filter((m) => m.qty !== 0)
+        .map((m) => ({ ...m, type, refs: { orderId }, editor }));
+
+      const written = await writeMovements(bakeryId, deltas, { transaction: t });
+
+      const gapIds = new Set();
+      plan.gaps.forEach((gap) => {
+        const id = `${orderId}_${gap.orderItemId}`;
+        gapIds.add(id);
+        t.set(stockGapsRef(bakeryId).doc(id), { orderId, ...gap, updatedAt: new Date() });
+      });
+      gapDocs.docs.forEach((doc) => {
+        if (!gapIds.has(doc.id)) t.delete(doc.ref);
+      });
+
+      return { written, gaps: plan.gaps };
+    });
+
+    if (result) return result;
+  }
+
+  throw new Error(`Order ${orderId} kept changing; stock not reconciled`);
+};
+
 module.exports = {
   MOVEMENT_TYPES,
   WASTE_REASONS,
@@ -839,4 +1090,9 @@ module.exports = {
   getMovementsByRefs,
   reverseMovements,
   expandRecipe,
+  affectsStock,
+  needsReconcile,
+  expandOrder,
+  reconcileOrderStock,
+  verify,
 };

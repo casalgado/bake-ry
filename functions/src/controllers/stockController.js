@@ -21,14 +21,24 @@ const stockController = {
   async getAll(req, res) {
     try {
       const { bakeryId } = req.params;
-      const { itemType, search, warehouseId } = req.query;
+      const { itemType, search, warehouseId, itemKeys } = req.query;
 
       const stocks = await stockService.getStocks(bakeryId, {
         itemType,
         search,
         warehouseId,
+        // ?itemKeys=a&itemKeys=b arrives as an array; String() joins it with commas.
+        itemKeys: itemKeys && String(itemKeys).split(','),
       });
       res.status(200).json(stocks);
+    } catch (error) {
+      handleError(res, error);
+    }
+  },
+
+  async verify(req, res) {
+    try {
+      res.status(200).json(await stockService.verify(req.params.bakeryId));
     } catch (error) {
       handleError(res, error);
     }
