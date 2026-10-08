@@ -1,156 +1,100 @@
+// Written by name: seedRecipes resolves every name against what the earlier
+// seeders created and fails if one is missing. Quantities are in the
+// component's own unit (ingredients.js; products count in uds).
+//
+// Owner, exactly one shape:
+//   { ingredient }                 a preparación (also needs `yield`, in its unit)
+//   { product: [collection, name] }                  a product without variations
+//   { product: [collection, name], combination }     one of its combinations
+//
+// Order matters: preparaciones first, so the products that use them are costed
+// with their real cost, and the caja last, since it is made of other products.
+const ing = (name, quantity) => ({ ingredient: name, quantity });
+const prod = (collection, name, quantity, combination = null) => ({
+  product: [collection, name],
+  combination,
+  quantity,
+});
+
 const recipes = [
   {
-    id: 'pan-integral-especial-001',
-    createdAt: new Date('2024-11-04T01:51:12.733Z'),
-    updatedAt: new Date('2024-11-04T01:51:45.922Z'),
-    name: 'Pan Integral Especial',
-    description: 'Pan integral con semillas y especias',
-    version: 1,
-    ingredients: [
-      {
-        name: 'Harina Integral',
-        quantity: 500,
-        unit: 'g',
-        notes: 'Tamizada',
-      },
-      {
-        name: 'Cardamomo Molido',
-        quantity: 5,
-        unit: 'g',
-        notes: 'Al gusto',
-      },
-    ],
-    steps: [
-      'Mezclar harina integral con cardamomo',
-      'Agregar agua gradualmente mientras se amasa',
-      'Dejar reposar por 1 hora',
-      'Formar el pan y hornear a 180°C por 35 minutos',
-    ],
-    preparationTime: 75,
-    bakingTime: 35,
-    isActive: true,
-    notes: 'Mantener la masa con 70% de hidratación',
+    owner: { ingredient: 'Masa Madre' },
+    yield: 1000,
+    name: 'Masa Madre',
+    description: 'Fermento de harina y agua, sin stock propio',
+    ingredients: [ing('Harina de Trigo', 500), ing('Agua', 500)],
   },
   {
-    id: 'galletas-arandanos-001',
-    createdAt: new Date('2024-11-04T01:51:12.733Z'),
-    updatedAt: new Date('2024-11-04T01:51:45.922Z'),
-    name: 'Galletas de Arándanos',
-    description: 'Galletas suaves con arándanos deshidratados',
-    version: 1,
-    ingredients: [
-      {
-        name: 'Harina de Trigo',
-        quantity: 250,
-        unit: 'g',
-        notes: 'Tamizada',
-      },
-      {
-        name: 'Mantequilla Sin Sal',
-        quantity: 150,
-        unit: 'g',
-        notes: 'Temperatura ambiente',
-      },
-      {
-        name: 'Arándanos Deshidratados',
-        quantity: 100,
-        unit: 'g',
-        notes: 'Picados gruesamente',
-      },
-      {
-        name: 'Extracto de Vainilla',
-        quantity: 5,
-        unit: 'ml',
-        notes: 'Al gusto',
-      },
-    ],
-    steps: [
-      'Cremar mantequilla',
-      'Agregar extracto de vainilla',
-      'Incorporar harina gradualmente',
-      'Agregar arándanos',
-      'Formar galletas y hornear a 170°C por 15 minutos',
-    ],
+    owner: { ingredient: 'Masa Base' },
+    yield: 5000,
+    name: 'Masa Base',
+    description: 'Masa blanca de la que salen las baguettes y la focaccia',
     preparationTime: 30,
-    bakingTime: 15,
-    isActive: true,
-    notes: 'Las galletas deben quedar doradas en los bordes',
+    ingredients: [
+      ing('Harina de Trigo', 3000),
+      ing('Agua', 1900),
+      ing('Sal', 60),
+      ing('Levadura Fresca', 40),
+    ],
   },
   {
-    id: 'pan-avena-jengibre-001',
-    createdAt: new Date('2024-11-04T01:51:12.733Z'),
-    updatedAt: new Date('2024-11-04T01:51:45.922Z'),
-    name: 'Pan de Avena y Jengibre',
-    description: 'Pan especiado con avena y jengibre',
-    version: 1,
-    ingredients: [
-      {
-        name: 'Harina de Avena',
-        quantity: 300,
-        unit: 'g',
-        notes: 'Tamizada',
-      },
-      {
-        name: 'Jengibre Molido',
-        quantity: 10,
-        unit: 'g',
-        notes: 'Al gusto',
-      },
-      {
-        name: 'Leche Entera',
-        quantity: 200,
-        unit: 'ml',
-        notes: 'Temperatura ambiente',
-      },
-    ],
-    steps: [
-      'Mezclar harina de avena con jengibre',
-      'Agregar leche tibia gradualmente',
-      'Amasar hasta obtener consistencia suave',
-      'Dejar leudar por 45 minutos',
-      'Hornear a 180°C por 30 minutos',
-    ],
-    preparationTime: 60,
-    bakingTime: 30,
-    isActive: true,
-    notes: 'Pan especiado perfecto para el desayuno',
-  },
-  {
-    id: 'pastel-almendra-001',
-    createdAt: new Date('2024-11-04T01:51:12.733Z'),
-    updatedAt: new Date('2024-11-04T01:51:45.922Z'),
-    name: 'Pastel de Almendra',
-    description: 'Pastel húmedo de almendra',
-    version: 1,
-    ingredients: [
-      {
-        name: 'Harina de Almendra',
-        quantity: 250,
-        unit: 'g',
-        notes: 'Tamizada',
-      },
-      {
-        name: 'Mantequilla Sin Sal',
-        quantity: 200,
-        unit: 'g',
-        notes: 'Derretida',
-      },
-      {
-        name: 'Extracto de Vainilla',
-        quantity: 10,
-        unit: 'ml',
-        notes: 'Al gusto',
-      },
-    ],
-    steps: [
-      'Mezclar harina de almendra con mantequilla derretida',
-      'Agregar extracto de vainilla',
-      'Hornear a 160°C por 45 minutos',
-    ],
+    owner: { product: ['panaderia tradicional', 'focaccia'] },
+    name: 'Focaccia',
     preparationTime: 20,
+    bakingTime: 25,
+    ingredients: [ing('Masa Base', 800), ing('Aceite de Oliva', 60), ing('Sal', 10)],
+  },
+  {
+    owner: { product: ['baguette', 'original'], combination: 'x5' },
+    name: 'Baguette original x5',
+    preparationTime: 20,
+    bakingTime: 20,
+    ingredients: [ing('Masa Base', 600)],
+  },
+  {
+    owner: { product: ['baguette', 'original'], combination: 'x5 integral' },
+    name: 'Baguette original x5 integral',
+    preparationTime: 25,
+    bakingTime: 20,
+    ingredients: [
+      ing('Harina Integral', 360),
+      ing('Masa Madre', 120),
+      ing('Agua', 220),
+      ing('Sal', 7),
+    ],
+  },
+  {
+    owner: { product: ['sourdough', 'original'], combination: 'pequeño' },
+    name: 'Sourdough original pequeño',
+    preparationTime: 40,
+    bakingTime: 35,
+    ingredients: [
+      ing('Masa Madre', 250),
+      ing('Harina de Trigo', 300),
+      ing('Agua', 190),
+      ing('Sal', 8),
+    ],
+  },
+  {
+    owner: { product: ['sourdough', 'original'], combination: 'mediano' },
+    name: 'Sourdough original mediano',
+    preparationTime: 40,
     bakingTime: 45,
-    isActive: true,
-    notes: 'Mantener en refrigeración',
+    ingredients: [
+      ing('Masa Madre', 475),
+      ing('Harina de Trigo', 570),
+      ing('Agua', 360),
+      ing('Sal', 15),
+    ],
+  },
+  {
+    owner: { product: ['panaderia tradicional', 'caja degustación'] },
+    name: 'Caja degustación',
+    description: 'Se arma con producto ya hecho: descuenta baguettes y focaccia, no sus insumos',
+    ingredients: [
+      prod('baguette', 'original', 2, 'x5'),
+      prod('panaderia tradicional', 'focaccia', 1),
+    ],
   },
 ];
 

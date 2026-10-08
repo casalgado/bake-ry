@@ -67,6 +67,10 @@ const settings = {
     'Completada',
   ],
   'theme': {},
+  // Merged over the defaults one level deep: the default `main` bodega stays.
+  'features': {
+    inventory: { enabled: true },
+  },
   'suggestedProductVariations': {
     WEIGHT: {
       label: 'Weight',

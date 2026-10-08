@@ -1,5 +1,5 @@
 const { BAKERY_ID } = require('../seedConfig');
-const productsData = require('../data/products.json');
+const products = require('../data/products');
 const productService = require('../../services/productService');
 const Product = require('../../models/Product');
 const fs = require('fs');
@@ -9,10 +9,7 @@ async function seedProducts() {
   try {
     console.log('Creating products...');
 
-    // First, ensure product collections exist by reading from file
-
-    // Get products from JSON file
-    const products = productsData.items;
+    // Product collections already exist: seedBakery creates them.
 
     // Store created products with their IDs for reference
     const createdProducts = [];
@@ -20,7 +17,6 @@ async function seedProducts() {
     // Create products through service
     for (const product of products) {
       try {
-        // Create new product with exact data from JSON
         const newProduct = new Product({
           ...product,
           bakeryId: BAKERY_ID,

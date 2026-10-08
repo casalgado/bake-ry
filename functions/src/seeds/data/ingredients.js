@@ -1,5 +1,12 @@
-// Basic raw materials for a bakery. All `stocked` — these are bought and held,
-// not produced from their own recipe. Category ids match seeds/data/settings.js.
+// Only what data/recipes.js uses. Category ids match seeds/data/settings.js.
+//
+// `stockBehavior` defaults to `stocked` (bought and held, deduction stops
+// there). `passThrough` holds no stock: deduction goes through to the
+// ingredient's own recipe, or deducts nothing when it has none (Agua).
+//
+// Masa Madre and Masa Base are preparaciones: they are created here without a
+// recipe, and seedRecipes attaches theirs. Resale items (cold brew) are
+// products with inventoryMode 'unit', in data/products.js — not ingredients.
 const ingredients = [
   {
     name: 'Harina de Trigo',
@@ -18,20 +25,13 @@ const ingredients = [
     storageTemp: 'Ambiente',
   },
   {
-    name: 'Harina de Almendra',
-    categoryId: 'harinas-y-almidones',
-    categoryName: 'Harinas y Almidones',
-    unit: 'g',
-    costPerUnit: 45,
-    storageTemp: 'Ambiente',
-  },
-  {
     name: 'Agua',
     categoryId: 'liquidos-base',
     categoryName: 'Líquidos Base',
     unit: 'ml',
     costPerUnit: 0.01,
     storageTemp: 'Ambiente',
+    stockBehavior: 'passThrough',
   },
   {
     name: 'Aceite de Oliva',
@@ -50,14 +50,6 @@ const ingredients = [
     storageTemp: 'Ambiente',
   },
   {
-    name: 'Azúcar',
-    categoryId: 'sazonadores-basicos',
-    categoryName: 'Sazonadores Básicos',
-    unit: 'g',
-    costPerUnit: 4,
-    storageTemp: 'Ambiente',
-  },
-  {
     name: 'Levadura Fresca',
     categoryId: 'fermentos',
     categoryName: 'Fermentos',
@@ -66,79 +58,22 @@ const ingredients = [
     storageTemp: 'Refrigeracion',
   },
   {
-    name: 'Leche Entera',
-    categoryId: 'lacteos-y-proteinas',
-    categoryName: 'Lácteos y Proteínas',
-    unit: 'ml',
-    costPerUnit: 3,
+    name: 'Masa Madre',
+    categoryId: 'fermentos',
+    categoryName: 'Fermentos',
+    unit: 'g',
+    costPerUnit: 0,
+    storageTemp: 'Refrigeracion',
+    stockBehavior: 'passThrough',
+  },
+  {
+    name: 'Masa Base',
+    categoryId: 'fermentos',
+    categoryName: 'Fermentos',
+    unit: 'g',
+    costPerUnit: 0,
     storageTemp: 'Refrigeracion',
   },
-  {
-    name: 'Mantequilla Sin Sal',
-    categoryId: 'lacteos-y-proteinas',
-    categoryName: 'Lácteos y Proteínas',
-    unit: 'g',
-    costPerUnit: 18,
-    storageTemp: 'Refrigeracion',
-  },
-  {
-    name: 'Huevo',
-    categoryId: 'lacteos-y-proteinas',
-    categoryName: 'Lácteos y Proteínas',
-    unit: 'uds',
-    costPerUnit: 700,
-    storageTemp: 'Refrigeracion',
-  },
-  {
-    name: 'Semillas de Girasol',
-    categoryId: 'semillas-y-granos',
-    categoryName: 'Semillas y Granos',
-    unit: 'g',
-    costPerUnit: 25,
-    storageTemp: 'Ambiente',
-  },
-  {
-    name: 'Arándanos Deshidratados',
-    categoryId: 'frutas-y-vegetales',
-    categoryName: 'Frutas y Vegetales',
-    unit: 'g',
-    costPerUnit: 45,
-    storageTemp: 'Ambiente',
-  },
-  {
-    name: 'Extracto de Vainilla',
-    categoryId: 'especias-y-aromaticos',
-    categoryName: 'Especias y Aromáticos',
-    unit: 'ml',
-    costPerUnit: 45,
-    storageTemp: 'Ambiente',
-  },
-  {
-    name: 'Canela Molida',
-    categoryId: 'especias-y-aromaticos',
-    categoryName: 'Especias y Aromáticos',
-    unit: 'g',
-    costPerUnit: 60,
-    storageTemp: 'Ambiente',
-  },
-  {
-    name: 'Chocolate Semiamargo',
-    categoryId: 'chocolates-y-cocoa',
-    categoryName: 'Chocolates y Cocoa',
-    unit: 'g',
-    costPerUnit: 40,
-    storageTemp: 'Ambiente',
-  },
-  {
-    name: 'Cocoa en Polvo',
-    categoryId: 'chocolates-y-cocoa',
-    categoryName: 'Chocolates y Cocoa',
-    unit: 'g',
-    costPerUnit: 55,
-    storageTemp: 'Ambiente',
-  },
-  // Resale items (e.g. `Café Beatriz 500g`) are products with
-  // inventoryMode: 'unit', seeded in data/products.json — not ingredients.
 ];
 
 module.exports = ingredients;

@@ -15,8 +15,8 @@ async function seedIngredients() {
       {
         ...ingredient,
         bakeryId: BAKERY_ID,
-        // Raw materials are bought and held, so deduction stops at them.
-        stockBehavior: Ingredient.STOCK_BEHAVIORS.STOCKED,
+        // Bought and held unless the seed row says otherwise.
+        stockBehavior: ingredient.stockBehavior ?? Ingredient.STOCK_BEHAVIORS.STOCKED,
       },
       BAKERY_ID,
     );
@@ -25,7 +25,7 @@ async function seedIngredients() {
     console.log(`Created ingredient: ${created.name}, ${created.id}`);
   }
 
-  // Recipe seeder reads this to map ingredient names to ids.
+  // Reference copy of what was created (gitignored).
   fs.writeFileSync(
     path.join(__dirname, '../data/seededIngredients.json'),
     JSON.stringify(createdIngredients, null, 2),
