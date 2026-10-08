@@ -60,8 +60,15 @@ service cloud.firestore {
       
       match /recipes/{recipeId} {
         allow read: if isAuthenticated() && isBakeryStaff(bakeryId);
-        allow write: if isAuthenticated() && 
+        allow write: if isAuthenticated() &&
           (isSystemAdmin() || isBakeryAdmin(bakeryId));
+      }
+
+      // Read for the kitchen list's realtime listener. Written only by the API:
+      // receiving a line moves stock, which a client write would skip.
+      match /productionRuns/{runId} {
+        allow read: if isAuthenticated() && isBakeryStaff(bakeryId);
+        allow write: if false;
       }
     }
   }

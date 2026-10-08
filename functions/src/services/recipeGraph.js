@@ -5,8 +5,8 @@
 //   - cost propagation: recipe cost -> owner cache -> consumers, and back again
 //
 // Both live here because they traverse the same edges. Stock deduction is a
-// third walk of this graph, but it belongs to stockService — it runs inside the
-// order transaction and yields movements, not validations.
+// third walk of this graph, in stockService (expandRecipe): plain reads that
+// run BEFORE any transaction and yield components, never inside one.
 //
 // See docs/recipe-costing.md for how the pieces fit together.
 const { db } = require('../config/firebase');
@@ -504,6 +504,9 @@ const reconcileOwnerCost = (bakeryId, owner = {}, editor = null) =>
   });
 
 module.exports = {
+  MAX_DEPTH,
+  resolveRecipeId,
+  normalizeComponent,
   assertGraphIsSane,
   sameCost,
   computeRecipeCost,

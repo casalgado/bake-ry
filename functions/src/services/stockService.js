@@ -24,6 +24,7 @@ const { db } = require('../config/firebase');
 const { FieldValue } = require('firebase-admin/firestore');
 const { BadRequestError, NotFoundError } = require('../utils/errors');
 const { generateId } = require('../utils/helpers');
+const { MAX_DEPTH, resolveRecipeId, normalizeComponent } = require('./recipeGraph');
 
 const MOVEMENT_TYPES = {
   SALE: 'sale',
@@ -660,6 +661,157 @@ const transfer = async (
   return getTransferMovements(bakeryId, shared.refs.transferId);
 };
 
+/**
+ * Movements carrying all of these refs (and this type): e.g. everything one
+ * production receipt wrote. Equality filters only, so no composite index.
+ */
+const getMovementsByRefs = async (bakeryId, refs = {}, { type = null, transaction = null } = {}) => {
+  let query = movementsRef(bakeryId);
+  Object.entries(refs).forEach(([key, value]) => {
+    query = query.where(`refs.${key}`, '==', value);
+  });
+  if (type) query = query.where('type', '==', type);
+
+  const snapshot = await (transaction ? transaction.get(query) : query.get());
+  return snapshot.docs.map(toPlain);
+};
+
+/**
+ * The opposite of movements already written: same item, warehouse and size,
+ * opposite sign, type `compensation`. The ledger is append-only, so a mistake is
+ * undone by new movements, never by deleting. `idFor(movement)` makes each one
+ * deterministic, so reversing twice writes once. Stock may end negative: the
+ * ledger never blocks (invariant 8).
+ */
+const reverseMovements = async (
+  bakeryId,
+  movements = [],
+  { idFor = null, refs = {}, editor = null, transaction = null } = {},
+) => {
+  // The descriptor a movement needs is read back off its stocks doc: a movement
+  // stores only the itemKey.
+  const stocks = await Promise.all(
+    movements.map((m) => getStock(bakeryId, m.itemKey, m.warehouseId)),
+  );
+
+  return writeMovements(
+    bakeryId,
+    movements.map((m, i) => ({
+      id: idFor ? idFor(m) : undefined,
+      item: itemOf(stocks[i]),
+      warehouseId: m.warehouseId,
+      qty: -m.qty,
+      type: MOVEMENT_TYPES.COMPENSATION,
+      refs,
+      editor,
+      name: stocks[i].name,
+      unit: stocks[i].unit,
+    })),
+    { transaction },
+  );
+};
+
+const productName = (product, combinationId) => {
+  const combination = (product.variations?.combinations || [])
+    .find((c) => c.id === combinationId);
+  return combination ? `${product.name} ${combination.name}`.trim() : product.name;
+};
+
+/**
+ * The deduction walk: what making `qty` of `item` consumes from the bodega,
+ * through the item's OWN recipe. Plain reads, never inside a transaction
+ * (invariant 4): callers expand first, then write inside theirs.
+ *
+ * Each component of that recipe resolves as:
+ *   product 'unit' or 'recipe'          → its own stock. Stop.
+ *   product 'none'                      → nothing
+ *   ingredient 'stocked'                → its own stock. Stop.
+ *   ingredient 'passThrough' + recipe   → its recipe, scaled by qty / yield
+ *   ingredient 'passThrough', no recipe → nothing, and not a gap
+ *
+ * A tracked product used as a component is taken from the vitrina, not
+ * re-made: a caja de 6 consumes six croissants, not their flour.
+ *
+ * Gaps say where the walk couldn't follow; they never block.
+ * Returns { name, unit, components: [{ item, qty, name, unit }], gaps: [{ item, name, reason }] }:
+ * the top item's own name/unit, and its components merged by item.
+ */
+const expandRecipe = async (bakeryId, item, qty) => {
+  const cache = new Map();
+  const read = async (path) => {
+    if (!cache.has(path)) {
+      const snap = await db.doc(`bakeries/${bakeryId}/${path}`).get();
+      cache.set(path, snap.exists && !snap.data().isDeleted ? snap.data() : null);
+    }
+    return cache.get(path);
+  };
+
+  const components = new Map();
+  const gaps = [];
+
+  const take = (component, amount, name, unit) => {
+    const key = buildItemKey(toStockItem(component));
+    const current = components.get(key);
+    if (current) current.qty += amount;
+    else components.set(key, { item: component, qty: amount, name, unit });
+  };
+
+  // One recipe level: a product's recipe makes one unit, a preparación's makes `yield`.
+  const walkRecipe = async (owner, amount, depth, recipeId, name) => {
+    if (depth > MAX_DEPTH) return gaps.push({ item: owner, name, reason: 'depthExceeded' });
+    const recipe = recipeId ? await read(`recipes/${recipeId}`) : null;
+    if (!recipe) return gaps.push({ item: owner, name, reason: 'missingRecipe' });
+
+    const factor = owner.type === ITEM_TYPES.INGREDIENT
+      ? amount / (Number(recipe.yield) || 1)
+      : amount;
+    for (const raw of recipe.ingredients || []) {
+      const quantity = Number(raw.quantity) || 0;
+      const component = normalizeComponent(raw);
+      if (quantity > 0 && component.id) await expand(component, quantity * factor, depth + 1);
+    }
+  };
+
+  const expand = async (component, amount, depth) => {
+    if (component.type === ITEM_TYPES.PRODUCT) {
+      const product = await read(`products/${component.id}`);
+      if (!product) return gaps.push({ item: component, name: component.id, reason: 'missingItem' });
+      if (product.inventoryMode === 'unit' || product.inventoryMode === 'recipe') {
+        take(component, amount, productName(product, component.combinationId), 'uds');
+      }
+      return;
+    }
+
+    const ingredient = await read(`ingredients/${component.id}`);
+    if (!ingredient) return gaps.push({ item: component, name: component.id, reason: 'missingItem' });
+    if (ingredient.stockBehavior === 'stocked') {
+      return take(component, amount, ingredient.name, ingredient.unit || '');
+    }
+    if (!ingredient.recipeId) return;
+    return walkRecipe(component, amount, depth, ingredient.recipeId, ingredient.name);
+  };
+
+  // The top item is never taken: what is asked for is its recipe's components.
+  const top = { type: item.type, id: item.id, combinationId: item.combinationId || null };
+  let name;
+  let unit;
+  if (top.type === ITEM_TYPES.PRODUCT) {
+    const product = await read(`products/${top.id}`);
+    if (!product) throw new NotFoundError('Producto no encontrado');
+    name = productName(product, top.combinationId);
+    unit = 'uds';
+    await walkRecipe(top, qty, 0, resolveRecipeId(product, top.combinationId), name);
+  } else {
+    const ingredient = await read(`ingredients/${top.id}`);
+    if (!ingredient) throw new NotFoundError('Ingrediente no encontrado');
+    name = ingredient.name;
+    unit = ingredient.unit || '';
+    await walkRecipe(top, qty, 0, ingredient.recipeId, name);
+  }
+
+  return { name, unit, components: [...components.values()], gaps };
+};
+
 module.exports = {
   MOVEMENT_TYPES,
   WASTE_REASONS,
@@ -684,4 +836,7 @@ module.exports = {
   adjust,
   waste,
   transfer,
+  getMovementsByRefs,
+  reverseMovements,
+  expandRecipe,
 };
