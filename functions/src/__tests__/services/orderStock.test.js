@@ -206,6 +206,18 @@ describe('Order stock', () => {
       expect(spy).not.toHaveBeenCalled();
     });
 
+    it('with inventory off, nothing ships and past movements stay', async () => {
+      const shipped = await createOrder([line('l1', 'pan', 4, 'stock')], 2);
+      await col('settings').doc('default').set({ features: { inventory: { enabled: false } } }, { merge: true });
+
+      const order = await createOrder([line('l1', 'coke', 3)], 2);
+      await orderService.patch(shipped.id, { orderItems: [line('l1', 'pan', 6, 'stock')] }, bakeryId, editor);
+
+      expect(await movementsOf(order.id)).toHaveLength(0);
+      expect(await movementsOf(shipped.id)).toHaveLength(1);
+      expect(await stockOf('product_pan')).toBe(-4);
+    });
+
     it('patchAll shipping three orders reconciles each', async () => {
       const a = await createOrder([line('l1', 'pan', 1, 'stock')], 1);
       const b = await createOrder([line('l1', 'pan', 2, 'stock')], 1);

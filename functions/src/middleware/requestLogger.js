@@ -12,6 +12,9 @@ const isDevelopment = () => {
 };
 
 const requestLogger = (req, res, next) => {
+  // Dev only: prod bodies carry card data (PayU), and Cloud Run already logs requests
+  if (!isDevelopment()) return next();
+
   const startTime = Date.now();
 
   // Log request details
@@ -19,7 +22,6 @@ const requestLogger = (req, res, next) => {
   console.log(`Time: ${new Date().toISOString()}`);
   console.log(`Method: ${req.method}`);
   console.log(`URL: ${req.originalUrl}`);
-  console.log(`Token: ${req.headers.authorization}`);
 
   // Log request body if present
   if (Object.keys(req.body || {}).length) {
@@ -103,7 +105,10 @@ const requestLogger = (req, res, next) => {
           };
           let url = req.originalUrl.split('/');
           let last_part = url[url.length - 1].split('?')[0];
-          const filename = `${req.method}_${last_part}_${Date.now()}.json`;
+          const d = new Date();
+          const p = (n, len = 2) => String(n).padStart(len, '0');
+          const ts = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}h${p(d.getMinutes())}m${p(d.getSeconds())}s${p(d.getMilliseconds(), 3)}`;
+          const filename = `${ts}_${req.method}_${last_part}.json`;
           fs.writeFileSync(
             path.join(logsDir, filename),
             JSON.stringify(logEntry, null, 2),

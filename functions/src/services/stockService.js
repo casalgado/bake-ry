@@ -118,6 +118,12 @@ const getWarehouses = async (bakeryId) => {
     : [{ id: DEFAULT_WAREHOUSE_ID, isDefault: true }];
 };
 
+/** The bakery's inventory switch. Off, orders never touch the ledger. */
+const isInventoryEnabled = async (bakeryId) => {
+  const doc = await db.doc(`bakeries/${bakeryId}/settings/default`).get();
+  return doc.data()?.features?.inventory?.enabled === true;
+};
+
 /**
  * The warehouse a caller means, and proof that it exists. Movements themselves
  * are never implicit — validateMovement rejects a movement without a
@@ -210,9 +216,15 @@ const validateMovement = (movement) => {
  *                           Order movements have no id: reconcileOrderStock's
  *                           diff is their idempotency.
  * @param {Object} options   { transaction } to enlist in an outer transaction.
+ *                           { stockFields } stocks doc id → extra fields merged
+ *                           into that doc's one cache write (a count's baseline).
  * @returns {Array} the movements actually written (skipped duplicates excluded)
  */
-const writeMovements = async (bakeryId, movements = [], { transaction = null } = {}) => {
+const writeMovements = async (
+  bakeryId,
+  movements = [],
+  { transaction = null, stockFields = {} } = {},
+) => {
   if (!movements.length) return [];
 
   const prepared = movements.map((movement) => {
@@ -301,6 +313,7 @@ const writeMovements = async (bakeryId, movements = [], { transaction = null } =
         t.update(ref, {
           currentStock: FieldValue.increment(delta.qty),
           updatedAt: new Date(),
+          ...stockFields[docId],
         });
         return;
       }
@@ -316,6 +329,7 @@ const writeMovements = async (bakeryId, movements = [], { transaction = null } =
           warehouseId: delta.warehouseId,
         }),
         currentStock: delta.qty,
+        ...stockFields[docId],
       });
     });
 
@@ -895,6 +909,8 @@ const verify = async (bakeryId) => {
   });
 
   return stocksSnap.docs.map(toPlain).flatMap((stock) => {
+    // `>=` on purpose: a count stamps its movement 1 ms before the baselineAt it
+    // sets (stockCountService.close), so the baseline already holds it.
     const since = stock.baselineAt ? new Date(stock.baselineAt) : new Date(0);
     const expected = roundQty((byStockDoc.get(stock.id) || [])
       .filter((m) => new Date(m.timestamp) >= since)
@@ -1073,6 +1089,7 @@ module.exports = {
   toStockItem,
   retryId,
   getWarehouses,
+  isInventoryEnabled,
   resolveWarehouseId,
   getDefaultWarehouseId,
   writeMovements,
@@ -1089,6 +1106,8 @@ module.exports = {
   transfer,
   getMovementsByRefs,
   reverseMovements,
+  itemOf,
+  roundQty,
   expandRecipe,
   affectsStock,
   needsReconcile,

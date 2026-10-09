@@ -9,16 +9,26 @@ const { db } = require('../config/firebase');
 const { NotFoundError, BadRequestError } = require('../utils/errors');
 const stockService = require('./stockService');
 
-// Runs after the order commits. Never fails the order (invariant 8). A failure is
-// only logged: nothing retries it, and verify compares each stock's cache with the
-// ledger, not orders with the ledger, so it will not show it. The order's stock is
-// corrected the next time a stock-relevant field of that order changes.
-const reconcileIfNeeded = (bakeryId, before, after, editor) => (stockService.needsReconcile(before, after)
-  ? stockService.reconcileOrderStock(bakeryId, after.id, {
-    // Firestore refuses undefined: one missing field would silently skip the deduction.
-    editor: editor ? { userId: editor.uid ?? null, email: editor.email ?? null, role: editor.role ?? null } : null,
-  }).catch((error) => console.error('Stock reconcile failed for order', after.id, error))
-  : null);
+// Runs after the order commits, only when a stock-relevant field changed and the
+// bakery has inventory on. The switch is checked here and not in expandOrder: there
+// an empty plan would be diffed against the order's past movements and undo them.
+// Never fails the order (invariant 8). A failure is only logged: nothing retries
+// it, and verify compares each stock's cache with the ledger, not orders with the
+// ledger, so it will not show it. The order's stock is corrected the next time a
+// stock-relevant field of that order changes.
+const reconcileIfNeeded = async (bakeryId, before, after, editor) => {
+  if (!stockService.needsReconcile(before, after)) return null;
+  try {
+    if (!(await stockService.isInventoryEnabled(bakeryId))) return null;
+    return await stockService.reconcileOrderStock(bakeryId, after.id, {
+      // Firestore refuses undefined: one missing field would silently skip the deduction.
+      editor: editor ? { userId: editor.uid ?? null, email: editor.email ?? null, role: editor.role ?? null } : null,
+    });
+  } catch (error) {
+    console.error('Stock reconcile failed for order', after.id, error);
+    return null;
+  }
+};
 
 const createOrderService = () => {
   const baseService = createBaseService('orders', Order, 'bakeries/{bakeryId}');

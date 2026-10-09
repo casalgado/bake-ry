@@ -77,6 +77,12 @@ service cloud.firestore {
         allow read: if isAuthenticated() && isBakeryStaff(bakeryId);
         allow write: if false;
       }
+
+      // Read for the live count. Written only by the API: closing moves stock.
+      match /stockCounts/{countId} {
+        allow read: if isAuthenticated() && isBakeryStaff(bakeryId);
+        allow write: if false;
+      }
     }
   }
 }
