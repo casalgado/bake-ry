@@ -25,6 +25,16 @@ function getDateInColombia(zuluDateString) {
   return colombiaDateParts;
 }
 
+/**
+ * Colombia local time (HH:mm:ss, 24h) for a Date. Colombia has no DST.
+ * @param {Date} date
+ * @returns {string}
+ */
+function getTimeInColombia(date) {
+  return date.toLocaleTimeString("en-GB", { timeZone: "America/Bogota", hourCycle: "h23" });
+}
+
 module.exports = {
-  getDateInColombia
+  getDateInColombia,
+  getTimeInColombia,
 };

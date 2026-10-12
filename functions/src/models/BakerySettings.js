@@ -59,6 +59,33 @@ class BakerySettings extends BaseModel {
       showTermsAndConditions: true,
       taxMode: "inclusive",
     },
+    // DIAN electronic invoicing. Nothing secret lives here: the certificate and
+    // the software PIN stay out of Firestore. Off until a bakery is habilitada.
+    einvoicing: {
+      enabled: false,
+      environment: "2", // "2" habilitación (test), "1" production
+      softwareId: "",
+      issuer: {
+        nit: "", // no check digit
+        checkDigit: "",
+        legalName: "",
+        personType: "1", // 1 jurídica, 2 natural
+        taxLevelCode: "", // e.g. "O-13"
+        phone: "",
+        email: "",
+        address: { line: "", cityCode: "", cityName: "", deptCode: "", deptName: "" },
+      },
+      // The numbering resolution of the environment above.
+      resolution: {
+        number: "",
+        prefix: "",
+        from: 0,
+        to: 0,
+        startDate: "",
+        endDate: "",
+        technicalKey: "",
+      },
+    },
     pos: {
       enabled: false,
       autoMarkPaid: false,
