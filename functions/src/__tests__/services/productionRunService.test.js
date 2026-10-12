@@ -1,7 +1,7 @@
 const { initializeFirebase, clearFirestoreData } = require('../setup/firebase');
 
 // Production runs and the deduction walk they receive through.
-// See INVENTORY-BUILD-PLAN.md M2.2–M2.4.
+// See bake-ry-front zplanning/inventory/INVENTORY.md §3 and §4.2.
 describe('Production runs', () => {
   let db;
   let stockService;
@@ -182,6 +182,19 @@ describe('Production runs', () => {
       expect((await col('stockMovements').get()).size).toBe(0);
     });
 
+    it('refuses a retry that reuses the key with different content, and an infinite quantity', async () => {
+      await seedTorta();
+      await runService.create({ lines: [tortaLine(3)], idempotencyKey: 'k2' }, bakeryId, user);
+
+      await expect(
+        runService.create({ lines: [tortaLine(5)], idempotencyKey: 'k2' }, bakeryId, user),
+      ).rejects.toThrow(/otros datos/);
+      await expect(
+        runService.create({ lines: [tortaLine(Infinity)] }, bakeryId, user),
+      ).rejects.toThrow(/cantidad/);
+      expect((await col('productionRuns').get()).size).toBe(1);
+    });
+
     it('previews without writing anything', async () => {
       await seedTorta();
 
@@ -213,6 +226,48 @@ describe('Production runs', () => {
       expect(movements).toHaveLength(1 + preview.components.length);
       expect(movements.every((m) => m.type === 'production'
         && m.refs.productionRunId === run.id && m.refs.lineId === lineId)).toBe(true);
+    });
+
+    it('refuses a bodega the bakery never declared', async () => {
+      await seedTorta();
+
+      await expect(runService.create(
+        { warehouseId: 'bodega-fantasma', lines: [tortaLine()] }, bakeryId, user,
+      )).rejects.toThrow(/Bodega desconocida/);
+      expect((await col('productionRuns').get()).size).toBe(0);
+    });
+
+    it('receives a stocked preparación: + its output, − its recipe scaled by the yield', async () => {
+      await seedIngredient('harina');
+      await seedIngredient('masa', { stockBehavior: 'stocked', recipeId: 'r-masa' });
+      await seedRecipe('r-masa', [ing('harina', 500)], { ingredientId: 'masa', yield: 1000 });
+
+      const run = await runService.create(
+        { lines: [{ item: { type: 'ingredient', id: 'masa' }, plannedQty: 2000 }] }, bakeryId, user,
+      );
+      await runService.receiveLine(bakeryId, run.id, run.lines[0].id, user);
+
+      expect(await stockOf('ingredient_masa')).toBe(2000);
+      expect(await stockOf('ingredient_harina')).toBe(-1000);
+    });
+
+    it('receives a combination output into that combination, from its own recipe', async () => {
+      await seedIngredient('harina');
+      await seedProduct('pan', {
+        hasVariations: true,
+        variations: { combinations: [{ id: 'grande', name: 'Grande', recipeId: 'r-pan-grande' }] },
+      });
+      await seedRecipe('r-pan-grande', [ing('harina', 100)], { productId: 'pan', combinationId: 'grande' });
+
+      const run = await runService.create(
+        { lines: [{ item: { type: 'product', id: 'pan', combinationId: 'grande' }, plannedQty: 3 }] },
+        bakeryId, user,
+      );
+      await runService.receiveLine(bakeryId, run.id, run.lines[0].id, user);
+
+      expect(await stockOf('product_pan_grande')).toBe(3);
+      expect(await stockOf('product_pan')).toBeNull();
+      expect(await stockOf('ingredient_harina')).toBe(-300);
     });
 
     it('cancels a pending line without moving stock, and closes the run when none is pending', async () => {

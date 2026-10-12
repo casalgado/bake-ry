@@ -128,6 +128,10 @@ const createPurchaseService = () => {
       createdBy: editor,
     });
     draft.validate();
+    draft.requestFingerprint = JSON.stringify([
+      draft.providerId,
+      draft.lines.map((l) => [l.item.type, l.item.id, l.item.combinationId, l.qty, l.total, l.updateCost]),
+    ]);
 
     const purchasesRef = baseService.getCollectionRef(bakeryId);
     const id = retryId(data.idempotencyKey, 'purchase');
@@ -136,7 +140,13 @@ const createPurchaseService = () => {
     return db.runTransaction(async (t) => {
       // ---- reads ----
       const existing = await t.get(purchaseRef);
-      if (existing.exists) return Purchase.fromFirestore(existing);
+      if (existing.exists) {
+        const stored = existing.data().requestFingerprint;
+        if (stored && stored !== draft.requestFingerprint) {
+          throw new BadRequestError('Esta compra ya se envió con otros datos. Recarga e inténtalo de nuevo.');
+        }
+        return Purchase.fromFirestore(existing);
+      }
 
       const provider = await t.get(providersRef(bakeryId).doc(draft.providerId));
       if (!provider.exists || provider.data().isDeleted) {
@@ -168,7 +178,10 @@ const createPurchaseService = () => {
       // ingredients is costed once, with both.
       const plan = createPlan();
       newCosts.forEach(({ to }, ingredientId) =>
-        plan.costOverrides.set(`ingredient_${ingredientId}`, to));
+        plan.costOverrides.set(
+          buildItemKey({ itemType: ITEM_TYPES.INGREDIENT, ingredientId }),
+          to,
+        ));
       for (const [ingredientId, { from, to }] of newCosts) {
         const ref = ingredientsRef(bakeryId).doc(ingredientId);
         stage(plan, ref, { costPerUnit: to, updatedAt: new Date() });

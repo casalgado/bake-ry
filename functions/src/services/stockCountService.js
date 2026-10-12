@@ -13,10 +13,15 @@ const {
   roundQty,
 } = require('./stockService');
 
+// Counted items closed per transaction. A differing item costs two writes (its
+// movement and its stocks doc) and the count doc one more: 401 writes, inside
+// the 500 a transaction has been allowed to hold.
+const CLOSE_CHUNK = 200;
+
 /**
  * Conteo: people type what is on the shelf, live and together, and closing sets
  * each counted item's baseline to that number. See the frontend repo's
- * zplanning/inventory/INVENTORY-IMPLEMENTATION.md §15.
+ * zplanning/inventory/INVENTORY.md §4.5.
  * Rows change one at a time (setItem); there is no whole-count update.
  */
 const createStockCountService = () => {
@@ -142,7 +147,7 @@ const createStockCountService = () => {
       .reduce((sum, m) => sum + m.qty, 0));
   };
 
-  // Unbounded reads, so outside the close transaction (invariant 4).
+  // Unbounded reads, so outside the close transactions (invariant 4).
   const describeItems = async (bakeryId, warehouseId, keys) => Object.fromEntries(
     await Promise.all(keys.map(async (key) => {
       const doc = await stocksRef(bakeryId).doc(buildStockDocId(key, warehouseId)).get();
@@ -156,86 +161,115 @@ const createStockCountService = () => {
     })),
   );
 
+  // A row is frozen once close has measured it; open rows have no diffQty.
+  const isFrozen = (row) => row.diffQty !== undefined;
+
   /**
-   * One transaction: per counted item, a `count` movement for the difference
-   * against currentStock (none when it matches) and baselineQty = counted,
-   * baselineAt = close time. Uncounted items keep their baseline. The rows are
-   * frozen onto the count, which becomes `closed`.
+   * One chunk of counted items, one transaction: per item a `count` movement
+   * for the difference against currentStock (none when it matches) and
+   * baselineQty = counted, baselineAt = the count's close time. The rows are
+   * frozen onto the count. Items are independent (baselines are per item) and
+   * their movement ids are deterministic, so a chunk that already ran is skipped.
+   */
+  const closeChunk = async (bakeryId, ref, keys, known, closing, editor) => {
+    await db.runTransaction(async (t) => {
+      const count = await readCount(t.get(ref));
+      if (count.status !== 'closing') throw new BadRequestError('El conteo ya no se está cerrando');
+
+      const todo = keys.filter((key) => count.items[key] && !isFrozen(count.items[key]));
+      if (!todo.length) return;
+
+      const stockRefs = todo.map((key) => stocksRef(bakeryId).doc(buildStockDocId(key, count.warehouseId)));
+      const stockDocs = await Promise.all(stockRefs.map((stockRef) => t.get(stockRef)));
+
+      // verify() sums movements at or after baselineAt; the baseline already
+      // holds this one, so it lands 1 ms before.
+      const movedAt = new Date(closing.closedAt.getTime() - 1);
+      const frozen = {};
+      const movements = [];
+      const stockFields = {};
+      const unmoved = [];
+
+      todo.forEach((key, i) => {
+        const stock = stockDocs[i].data();
+        const row = count.items[key];
+        const expectedQty = Number(stock.currentStock) || 0;
+        const diffQty = roundQty(row.qty - expectedQty);
+        const { unitCost, wasteSinceBaseline } = known[key];
+
+        frozen[`items.${key}`] = {
+          ...row, name: stock.name, unit: stock.unit, expectedQty, diffQty, unitCost, wasteSinceBaseline,
+        };
+        stockFields[stockRefs[i].id] = { baselineQty: row.qty, baselineAt: closing.closedAt };
+
+        if (diffQty === 0) {
+          unmoved.push(stockRefs[i]);
+          return;
+        }
+        movements.push({
+          id: `count_${count.id}_${key}`,
+          item: itemOf(stock),
+          warehouseId: count.warehouseId,
+          qty: diffQty,
+          type: MOVEMENT_TYPES.COUNT,
+          refs: { countId: count.id },
+          editor,
+          timestamp: movedAt,
+          unitCost,
+          name: stock.name,
+          unit: stock.unit,
+        });
+      });
+
+      // A movement's baseline rides on its one cache write; a matching count
+      // still verifies the item, with a plain update.
+      await writeMovements(bakeryId, movements, { transaction: t, stockFields });
+      unmoved.forEach((stockRef) => t.update(stockRef, {
+        ...stockFields[stockRef.id], updatedAt: closing.closedAt,
+      }));
+      t.update(ref, { ...frozen, updatedAt: closing.closedAt });
+    });
+  };
+
+  /**
+   * Closes a count: open → closing → closed. Closing stops further typing and
+   * stamps the close time; the counted items are then processed in chunks (see
+   * closeChunk), and the last step marks the count closed. A count left in
+   * `closing` by a crash is finished by calling close again.
    */
   const close = async (bakeryId, countId, user = null) => {
     const ref = countsRef(bakeryId).doc(countId);
     const editor = editorOf(user);
     const closedBy = await whoOf(bakeryId, user);
 
-    for (let attempt = 0; attempt < 3; attempt++) {
-      const before = requireOpen(await readCount(ref.get()));
-      const known = await describeItems(bakeryId, before.warehouseId, Object.keys(before.items));
-      const totalItems = (await stocksRef(bakeryId)
-        .where('warehouseId', '==', before.warehouseId).count().get()).data().count;
+    const closing = await db.runTransaction(async (t) => {
+      const count = await readCount(t.get(ref));
+      if (count.status === 'closing') return count;
 
-      const result = await db.runTransaction(async (t) => {
-        const count = requireOpen(await readCount(t.get(ref)));
-        const keys = Object.keys(count.items);
-        // A row typed after the reads above: measure again.
-        if (keys.some((key) => !known[key])) return null;
+      requireOpen(count);
+      const closedAt = new Date();
+      t.update(ref, { status: 'closing', closedBy, closedAt, updatedAt: closedAt });
+      return new StockCount({ ...count, status: 'closing', closedBy, closedAt, updatedAt: closedAt });
+    });
 
-        const stockRefs = keys.map((key) => stocksRef(bakeryId).doc(buildStockDocId(key, count.warehouseId)));
-        const stockDocs = await Promise.all(stockRefs.map((stockRef) => t.get(stockRef)));
+    const pending = Object.keys(closing.items).filter((key) => !isFrozen(closing.items[key]));
+    const known = await describeItems(bakeryId, closing.warehouseId, pending);
+    const totalItems = (await stocksRef(bakeryId)
+      .where('warehouseId', '==', closing.warehouseId).count().get()).data().count;
 
-        const closedAt = new Date();
-        // verify() sums movements at or after baselineAt; the baseline already
-        // holds this one, so it lands 1 ms before.
-        const movedAt = new Date(closedAt.getTime() - 1);
-        const items = {};
-        const movements = [];
-        const stockFields = {};
-        const unmoved = [];
-
-        keys.forEach((key, i) => {
-          const stock = stockDocs[i].data();
-          const row = count.items[key];
-          const expectedQty = Number(stock.currentStock) || 0;
-          const diffQty = roundQty(row.qty - expectedQty);
-          const { unitCost, wasteSinceBaseline } = known[key];
-
-          items[key] = { ...row, name: stock.name, unit: stock.unit, expectedQty, diffQty, unitCost, wasteSinceBaseline };
-          stockFields[stockRefs[i].id] = { baselineQty: row.qty, baselineAt: closedAt };
-
-          if (diffQty === 0) {
-            unmoved.push(stockRefs[i]);
-            return;
-          }
-          movements.push({
-            id: `count_${countId}_${key}`,
-            item: itemOf(stock),
-            warehouseId: count.warehouseId,
-            qty: diffQty,
-            type: MOVEMENT_TYPES.COUNT,
-            refs: { countId },
-            editor,
-            timestamp: movedAt,
-            unitCost,
-            name: stock.name,
-            unit: stock.unit,
-          });
-        });
-
-        // A movement's baseline rides on its one cache write; a matching count
-        // still verifies the item, with a plain update.
-        await writeMovements(bakeryId, movements, { transaction: t, stockFields });
-        unmoved.forEach((stockRef) => t.update(stockRef, { ...stockFields[stockRef.id], updatedAt: closedAt }));
-
-        const closed = new StockCount({
-          ...count, items, status: 'closed', closedBy, closedAt, totalItems, updatedAt: closedAt,
-        });
-        t.set(ref, closed.toFirestore());
-        return closed;
-      });
-
-      if (result) return result;
+    for (let i = 0; i < pending.length; i += CLOSE_CHUNK) {
+      await closeChunk(bakeryId, ref, pending.slice(i, i + CLOSE_CHUNK), known, closing, editor);
     }
 
-    throw new BadRequestError('Siguen llegando números, intenta de nuevo');
+    return db.runTransaction(async (t) => {
+      const count = await readCount(t.get(ref));
+      if (count.status === 'closed') return count;
+      if (count.status !== 'closing') throw new BadRequestError('El conteo ya no se está cerrando');
+
+      const updatedAt = new Date();
+      t.update(ref, { status: 'closed', totalItems, updatedAt });
+      return new StockCount({ ...count, status: 'closed', totalItems, updatedAt });
+    });
   };
 
   /** Ends an open count for everyone. Writes nothing to the ledger. */

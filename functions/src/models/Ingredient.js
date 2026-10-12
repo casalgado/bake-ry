@@ -71,7 +71,7 @@ class Ingredient extends BaseModel {
     this.currency = currency;
 
     // Current stock is NOT held here — it lives on the stocks docs
-    // (INVENTORY-IMPLEMENTATION.md §8.1). Legacy `currentStock` values remain in
+    // (bake-ry-front zplanning/inventory/INVENTORY.md §1). Legacy `currentStock` values remain in
     // stored docs and are simply ignored.
 
     // Units and Measurements

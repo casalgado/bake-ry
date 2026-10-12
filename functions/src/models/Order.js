@@ -5,9 +5,8 @@ const { BadRequestError } = require('../utils/errors');
 
 class OrderItem {
   // Where an order line's units come from (§2.1). Existing orders read as
-  // 'produce' — today's behavior — so there is no migration. Nothing consumes
-  // this yet: deduction is phase 2. Static on the class like
-  // Product.INVENTORY_MODES, so it travels with what owns it.
+  // 'produce' — today's behavior — so there is no migration. Static on the class
+  // like Product.INVENTORY_MODES, so it travels with what owns it.
   static FULFILLMENT_SOURCES = ['produce', 'stock'];
 
   constructor({
@@ -63,7 +62,7 @@ class OrderItem {
     this.taxMode = taxMode;
     this.displayOrder = displayOrder;
 
-    // Inventory: which branch of the phase-2 expansion this line will take.
+    // Inventory: what this line deducts when the order ships (stockService.expandOrder).
     this.fulfillmentSource = source;
     this.sourceWarehouseId = sourceWarehouseId;
 
@@ -226,6 +225,9 @@ class Order extends BaseModel {
     updatedAt,
     paymentDate = null,
     partialPaymentDate = null,
+    // When the order last became Enviada. Set by orderService from the status
+    // change, never by a client (stockService.stampShippedAt).
+    shippedAt = null,
 
     // Status and Payment
     status = 0,
@@ -265,7 +267,7 @@ class Order extends BaseModel {
     orderDiscountType = null,
     orderDiscountValue = 0,
   } = {}) {
-    super({ id, createdAt, updatedAt, preparationDate, dueDate, paymentDate, partialPaymentDate });
+    super({ id, createdAt, updatedAt, preparationDate, dueDate, paymentDate, partialPaymentDate, shippedAt });
 
     // Basic Information
     this.bakeryId = bakeryId;
@@ -541,6 +543,7 @@ class Order extends BaseModel {
       'partialPaymentDate',
       'earliestPartialPaymentDate',
       'dueDate',
+      'shippedAt',
     ];
   }
 

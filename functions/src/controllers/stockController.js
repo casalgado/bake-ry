@@ -17,6 +17,17 @@ const editorOf = (req) => ({
   role: req.user?.role,
 });
 
+// A window in days. Absent means the service's default; anything else must be a
+// positive number, or a negative one would quietly push the window into the future.
+const parseDays = (value) => {
+  if (value === undefined || value === null || value === '') return undefined;
+  const days = Number(value);
+  if (!Number.isFinite(days) || days <= 0) {
+    throw new BadRequestError('days debe ser un número mayor a 0');
+  }
+  return days;
+};
+
 const stockController = {
   async getAll(req, res) {
     try {
@@ -39,6 +50,33 @@ const stockController = {
   async verify(req, res) {
     try {
       res.status(200).json(await stockService.verify(req.params.bakeryId));
+    } catch (error) {
+      handleError(res, error);
+    }
+  },
+
+  // Shipped orders whose movements differ from what they should have deducted.
+  async verifyOrders(req, res) {
+    try {
+      const days = parseDays(req.query.days);
+      res.status(200).json(
+        await stockService.findUnreconciledOrders(req.params.bakeryId, { days }),
+      );
+    } catch (error) {
+      handleError(res, error);
+    }
+  },
+
+  // Brings those orders back in line, one at a time.
+  async reconcileOrders(req, res) {
+    try {
+      const days = parseDays(req.body?.days);
+      res.status(200).json(
+        await stockService.reconcileUnreconciledOrders(req.params.bakeryId, {
+          days,
+          editor: editorOf(req),
+        }),
+      );
     } catch (error) {
       handleError(res, error);
     }

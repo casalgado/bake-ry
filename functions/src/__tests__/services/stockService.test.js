@@ -1,6 +1,6 @@
 const { initializeFirebase, clearFirestoreData } = require('../setup/firebase');
 
-// Phase 1B: the ledger foundation. See INVENTORY-PLAN.md 1B.6.
+// The ledger foundation. See bake-ry-front zplanning/inventory/INVENTORY.md §2.
 // These cover the primitive every later phase trusts — get them right here and
 // deduction, counts and purchases inherit correctness.
 describe('Stock ledger', () => {
@@ -15,7 +15,7 @@ describe('Stock ledger', () => {
   const flourItem = { itemType: 'ingredient', ingredientId: 'harina' };
   const cokeItem = { itemType: 'product', productId: 'coke' };
 
-  // Every bakery has this one without a migration (CORRECTIONS §1.1).
+  // Every bakery has this one without a migration (INVENTORY.md §4.6).
   const MAIN = 'main';
   const BRANCH = 'sucursal';
 
@@ -490,7 +490,7 @@ describe('Stock ledger', () => {
         'product_coke_c350',
       ]);
       // Only the default warehouse: the others are born from their first
-      // movement (CORRECTIONS §1.2).
+      // movement (INVENTORY.md §4.6).
       expect(stocks.map((s) => s.id).sort()).toEqual([
         'product_coke_c1l__main',
         'product_coke_c350__main',
@@ -600,6 +600,87 @@ describe('Stock ledger', () => {
       const drift = await stockService.verify(bakeryId);
       expect(drift).toHaveLength(1);
       expect(drift[0]).toMatchObject({ id: docIdOf(flourItem), expected: 990, actual: 500, diff: -490 });
+    });
+
+    it('stays clean for a stocks doc born from a movement', async () => {
+      await stockService.writeMovements(bakeryId, [
+        { item: flourItem, warehouseId: MAIN, qty: 40, type: 'purchase', name: 'harina', unit: 'g' },
+      ]);
+
+      const stock = await readStock(flourItem);
+      const [movement] = (await col('stockMovements').get()).docs.map((d) => d.data());
+
+      expect(stock.baselineAt.toMillis()).toBeLessThanOrEqual(movement.timestamp.toMillis());
+      expect(await stockService.verify(bakeryId)).toEqual([]);
+    });
+  });
+
+  describe('stocks doc creation', () => {
+    it('syncing an existing doc refreshes its name and never resets its stock', async () => {
+      await seedStock(flourItem, 700);
+
+      await stockService.syncStockDoc(bakeryId, flourItem, { name: 'Harina', unit: 'g', warehouseId: MAIN });
+
+      expect(await readStock(flourItem)).toMatchObject({ name: 'Harina', currentStock: 700 });
+    });
+
+    it('syncing at the same time as a first movement keeps the movement', async () => {
+      await Promise.all([
+        stockService.syncStockDoc(bakeryId, flourItem, { name: 'Harina', unit: 'g', warehouseId: MAIN }),
+        stockService.writeMovements(bakeryId, [
+          { item: flourItem, warehouseId: MAIN, qty: 40, type: 'purchase', name: 'harina', unit: 'g' },
+        ]),
+      ]);
+
+      expect((await readStock(flourItem)).currentStock).toBe(40);
+      expect(await stockService.verify(bakeryId)).toEqual([]);
+    });
+  });
+
+  describe('quantities', () => {
+    it('rounds float dust before it reaches the ledger', async () => {
+      await seedStock(flourItem, 0);
+
+      await stockService.writeMovements(bakeryId, [
+        { item: flourItem, warehouseId: MAIN, qty: 0.1 + 0.2, type: 'adjustment', reason: 'carga' },
+      ]);
+
+      const [movement] = (await col('stockMovements').get()).docs.map((d) => d.data());
+      expect(movement.qty).toBe(0.3);
+      expect((await readStock(flourItem)).currentStock).toBe(0.3);
+    });
+
+    it('refuses an adjustment of nothing, of no quantity or of infinity', async () => {
+      await seedStock(flourItem, 100);
+      const key = stockService.buildItemKey(flourItem);
+
+      for (const qty of [0, '', null, undefined, Infinity, 'abc']) {
+        await expect(stockService.adjust(bakeryId, key, { qty, reason: 'carga' })).rejects.toThrow();
+      }
+      expect((await col('stockMovements').get()).size).toBe(0);
+    });
+  });
+
+  describe('hand-entered idempotency', () => {
+    it('one key reused for an adjustment and a baja writes both', async () => {
+      await seedStock(flourItem, 100);
+      const key = stockService.buildItemKey(flourItem);
+
+      const adjustment = await stockService.adjust(bakeryId, key, { qty: 5, reason: 'carga', idempotencyKey: 'k1' });
+      const baja = await stockService.waste(bakeryId, key, { qty: -2, reason: 'damaged', idempotencyKey: 'k1' });
+
+      expect(baja.id).not.toBe(adjustment.id);
+      expect((await readStock(flourItem)).currentStock).toBe(103);
+    });
+
+    it('the same key twice for the same kind still writes once', async () => {
+      await seedStock(flourItem, 100);
+      const key = stockService.buildItemKey(flourItem);
+
+      await stockService.adjust(bakeryId, key, { qty: 5, reason: 'carga', idempotencyKey: 'k1' });
+      await stockService.adjust(bakeryId, key, { qty: 5, reason: 'carga', idempotencyKey: 'k1' });
+
+      expect((await readStock(flourItem)).currentStock).toBe(105);
     });
   });
 });

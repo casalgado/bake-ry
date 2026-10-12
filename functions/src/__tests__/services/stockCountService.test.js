@@ -1,6 +1,6 @@
 const { initializeFirebase, clearFirestoreData } = require('../setup/firebase');
 
-// Conteo (M4). See zplanning/inventory/CONTEO-HANDOFF.md §4.
+// Conteo. See bake-ry-front zplanning/inventory/INVENTORY.md §4.5.
 describe('Stock counts', () => {
   let db;
   let stockService;
@@ -186,6 +186,114 @@ describe('Stock counts', () => {
 
       await expect(countService.discard(bakeryId, id, ana)).rejects.toThrow('no está abierto');
       await expect(countService.close(bakeryId, id, ana)).rejects.toThrow('no está abierto');
+    });
+  });
+
+  describe('closing in chunks', () => {
+    it('closes a count larger than one chunk and leaves verify clean', async () => {
+      const items = Array.from({ length: 450 }, (_, i) => ({ itemType: 'ingredient', ingredientId: `i${i}` }));
+      const batch = db.batch();
+      items.forEach((item) => batch.set(col('stocks').doc(docIdOf(item)), {
+        itemKey: keyOf(item),
+        warehouseId: MAIN,
+        itemType: 'ingredient',
+        ingredientId: item.ingredientId,
+        name: item.ingredientId,
+        unit: 'g',
+        currentStock: 10,
+        baselineQty: 10,
+        baselineAt: anHourAgo(),
+      }));
+      await batch.commit();
+
+      const { id } = await countService.open(bakeryId, {}, ana);
+      const rows = Object.fromEntries(items.map((item) => [
+        keyOf(item), { qty: 11, by: { userId: 'ana', name: 'Ana' }, at: new Date() },
+      ]));
+      await col('stockCounts').doc(id).update({ items: rows });
+
+      const closed = await countService.close(bakeryId, id, ana);
+
+      expect(closed.status).toBe('closed');
+      expect(Object.keys(closed.items)).toHaveLength(450);
+      expect(Object.values(closed.items).every((row) => row.diffQty === 1 && row.expectedQty === 10)).toBe(true);
+      expect(await countMovements(id)).toHaveLength(450);
+      expect((await readStock(items[0])).currentStock).toBe(11);
+      expect((await readStock(items[449])).currentStock).toBe(11);
+      expect(await stockService.verify(bakeryId)).toEqual([]);
+    }, 120000);
+
+    it('finishes a close that stopped half way without repeating what was done', async () => {
+      const { id } = await countService.open(bakeryId, {}, ana);
+      await countService.setItem(bakeryId, id, keyOf(flour), { qty: 950 }, ana);
+      await countService.setItem(bakeryId, id, keyOf(sugar), { qty: 400 }, ana);
+
+      // The first chunk ran: flour is baselined, its movement written, its row frozen.
+      const closedAt = new Date();
+      await stockService.writeMovements(bakeryId, [{
+        id: `count_${id}_${keyOf(flour)}`,
+        item: flour,
+        warehouseId: MAIN,
+        qty: -50,
+        type: 'count',
+        refs: { countId: id },
+        timestamp: new Date(closedAt.getTime() - 1),
+      }], { stockFields: { [docIdOf(flour)]: { baselineQty: 950, baselineAt: closedAt } } });
+      await col('stockCounts').doc(id).update({
+        status: 'closing',
+        closedAt,
+        closedBy: { userId: 'ana', name: 'Ana' },
+        [`items.${keyOf(flour)}.expectedQty`]: 1000,
+        [`items.${keyOf(flour)}.diffQty`]: -50,
+        [`items.${keyOf(flour)}.unitCost`]: 2,
+        [`items.${keyOf(flour)}.wasteSinceBaseline`]: 0,
+      });
+
+      const closed = await countService.close(bakeryId, id, ana);
+
+      expect(closed.status).toBe('closed');
+      expect(closed.items[keyOf(flour)]).toMatchObject({ expectedQty: 1000, diffQty: -50 });
+      expect(closed.items[keyOf(sugar)]).toMatchObject({ expectedQty: 500, diffQty: -100 });
+      expect(await countMovements(id)).toHaveLength(2);
+      expect((await readStock(flour)).currentStock).toBe(950);
+      expect((await readStock(sugar)).currentStock).toBe(400);
+      expect(await stockService.verify(bakeryId)).toEqual([]);
+    });
+
+    it('takes no more typing and no discard while closing', async () => {
+      const { id } = await countService.open(bakeryId, {}, ana);
+      await col('stockCounts').doc(id).update({ status: 'closing', closedAt: new Date() });
+
+      await expect(countService.setItem(bakeryId, id, keyOf(flour), { qty: 1 }, ana)).rejects.toThrow('no está abierto');
+      await expect(countService.discard(bakeryId, id, ana)).rejects.toThrow('no está abierto');
+    });
+  });
+
+  describe('opening and listing', () => {
+    it('two people pressing Empezar at once land on one count', async () => {
+      const [first, second] = await Promise.all([
+        countService.open(bakeryId, {}, ana),
+        countService.open(bakeryId, {}, ana),
+      ]);
+
+      expect(second.id).toBe(first.id);
+      expect((await col('stockCounts').get()).size).toBe(1);
+    });
+
+    it('lists summaries without rows: counted, who counted and, once closed, the money moved', async () => {
+      const { id } = await countService.open(bakeryId, {}, ana);
+      await countService.setItem(bakeryId, id, keyOf(flour), { qty: 950 }, ana);
+      await countService.setItem(bakeryId, id, keyOf(coke), { qty: 24 }, ana);
+
+      let [summary] = await countService.getAll(bakeryId);
+      expect(summary).toMatchObject({ id, status: 'open', counted: 2, counters: ['Ana'], netValue: null });
+      expect(summary.items).toBeUndefined();
+
+      await countService.close(bakeryId, id, ana);
+
+      [summary] = await countService.getAll(bakeryId);
+      // flour: 950 counted against 1000 at 2 each; coke matched.
+      expect(summary).toMatchObject({ status: 'closed', counted: 2, netValue: -100 });
     });
   });
 });

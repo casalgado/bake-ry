@@ -94,17 +94,16 @@ class BakerySettings extends BaseModel {
       autoSelectClient: false, // Toggle for auto-selecting POS client
       defaultClientId: null, // Will store auto-created "Punto de Venta" client ID
     },
-    // Opt-in module. Gates frontend visibility only — never backend logic.
-    // See zplanning/inventory/INVENTORY-IMPLEMENTATION.md §14 (front repo).
+    // Opt-in module. `enabled` shows or hides the screens. The ledger follows
+    // `enabledAt`: once set, orders keep moving stock whatever `enabled` says
+    // (stockService.getInventoryStart sets it the first time it finds the module on).
     inventory: {
       enabled: false,
+      enabledAt: null,
       // Stock is held per (item, warehouse) — "bodega" in the UI. Living in
       // the defaults means every bakery reads one without a migration, and a
       // bakery with exactly one sees no warehouse UI at all (§1.1).
       warehouses: [{ id: "main", name: "Principal", isDefault: true }],
-      // Which fulfillment source an order line preselects (§2.1).
-      // 'produce' behaves exactly like today — the safe default.
-      orderDefault: "produce", // 'smart' | 'produce' | 'stock'
     },
   };
 

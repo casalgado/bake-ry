@@ -47,6 +47,7 @@ class ProductionRun extends BaseModel {
     warehouseId,
     lines = [],
     createdBy = null,
+    requestFingerprint = null,
     isDeleted = false,
     createdAt,
     updatedAt,
@@ -54,6 +55,9 @@ class ProductionRun extends BaseModel {
     super({ id, createdAt, updatedAt, date });
     this.bakeryId = bakeryId;
     this.warehouseId = warehouseId;
+    // What the client asked for: a retry reusing the idempotencyKey with
+    // different content is refused instead of answered with the first run.
+    this.requestFingerprint = requestFingerprint;
     this.lines = Array.isArray(lines) ? lines.map(toLine) : [];
     this.createdBy = createdBy;
     // Stored so the base list query (`isDeleted != true`) doesn't skip the doc.
@@ -78,7 +82,7 @@ class ProductionRun extends BaseModel {
       if (!ITEM_TYPES.includes(l.item.type) || !l.item.id) {
         throw new BadRequestError(`Línea ${i + 1}: ítem inválido`);
       }
-      if (!(l.plannedQty > 0)) {
+      if (!Number.isFinite(l.plannedQty) || !(l.plannedQty > 0)) {
         throw new BadRequestError(`Línea ${i + 1}: la cantidad debe ser mayor a 0`);
       }
       if (!LINE_STATUSES.includes(l.status)) {

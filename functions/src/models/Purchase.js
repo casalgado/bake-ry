@@ -22,6 +22,7 @@ class Purchase extends BaseModel {
     warehouseId,
     lines = [],
     createdBy = null,
+    requestFingerprint = null,
     isDeleted = false,
     createdAt,
     updatedAt,
@@ -30,6 +31,9 @@ class Purchase extends BaseModel {
     this.bakeryId = bakeryId;
     this.providerId = providerId;
     this.warehouseId = warehouseId;
+    // What the client asked for, so a retry that reuses the idempotencyKey with
+    // different content is refused instead of answered with the first purchase.
+    this.requestFingerprint = requestFingerprint;
     this.lines = Array.isArray(lines) ? lines.map(toLine) : [];
     this.total = this.lines.reduce((sum, l) => sum + (l.total || 0), 0);
     this.createdBy = createdBy;
@@ -53,7 +57,7 @@ class Purchase extends BaseModel {
       if (!ITEM_TYPES.includes(l.item.type) || !l.item.id) {
         throw new BadRequestError(`Línea ${i + 1}: ítem inválido`);
       }
-      if (!(l.qty > 0)) {
+      if (!Number.isFinite(l.qty) || !(l.qty > 0)) {
         throw new BadRequestError(`Línea ${i + 1}: la cantidad debe ser mayor a 0`);
       }
       if (!Number.isFinite(l.total) || l.total < 0) {

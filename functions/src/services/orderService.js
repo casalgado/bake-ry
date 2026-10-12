@@ -10,19 +10,23 @@ const { NotFoundError, BadRequestError } = require('../utils/errors');
 const stockService = require('./stockService');
 
 // Runs after the order commits, only when a stock-relevant field changed and the
-// bakery has inventory on. The switch is checked here and not in expandOrder: there
-// an empty plan would be diffed against the order's past movements and undo them.
-// Never fails the order (invariant 8). A failure is only logged: nothing retries
-// it, and verify compares each stock's cache with the ledger, not orders with the
-// ledger, so it will not show it. The order's stock is corrected the next time a
-// stock-relevant field of that order changes.
+// bakery's inventory has ever been live (getInventoryStart). The gate is checked
+// here and not in expandOrder: there an empty plan would be diffed against the
+// order's past movements and undo them.
+// Never fails the order (invariant 8). A failure is only logged; the order's
+// stock is corrected the next time a stock-relevant field of that order changes,
+// or by stockService.reconcileUnreconciledOrders, which findUnreconciledOrders
+// feeds (GET /stocks/verify-orders).
 const reconcileIfNeeded = async (bakeryId, before, after, editor) => {
   if (!stockService.needsReconcile(before, after)) return null;
   try {
-    if (!(await stockService.isInventoryEnabled(bakeryId))) return null;
+    const inventoryStartedAt = await stockService.getInventoryStart(bakeryId);
+    if (!inventoryStartedAt) return null;
     return await stockService.reconcileOrderStock(bakeryId, after.id, {
       // Firestore refuses undefined: one missing field would silently skip the deduction.
       editor: editor ? { userId: editor.uid ?? null, email: editor.email ?? null, role: editor.role ?? null } : null,
+      editedWhileShipped: stockService.affectsStock(before) && stockService.affectsStock(after),
+      inventoryStartedAt,
     });
   } catch (error) {
     console.error('Stock reconcile failed for order', after.id, error);
@@ -85,6 +89,7 @@ const createOrderService = () => {
           .doc(order.id);
 
         // 4. Save order documents
+        stockService.stampShippedAt(null, order);
         transaction.set(orderRef, order.toFirestore());
         transaction.set(clientHistoryRef, order.toClientHistoryObject());
 
@@ -124,6 +129,8 @@ const createOrderService = () => {
             role: editor?.role,
           },
         });
+
+        stockService.stampShippedAt(currentOrder, updatedOrder);
 
         if (data.shouldUpdateClientAddress) {
           const clientRef = db
@@ -188,6 +195,8 @@ const createOrderService = () => {
         } else if (currentOrder.isPaid && !updatedOrder.isPaid) {
           updatedOrder.paymentDate = null;}
 
+        stockService.stampShippedAt(currentOrder, updatedOrder);
+
         console.log('Patching order:', updatedOrder);
 
         if (data.shouldUpdateClientAddress) {
@@ -233,8 +242,9 @@ const createOrderService = () => {
         failed: [],
       };
 
-      // Process in batches of 500 (Firestore limit)
-      const batchSize = 500;
+      // Each order writes two documents (the order and its history entry), so a
+      // batch of 100 stays far below the transaction's write limit.
+      const batchSize = 100;
       const batches = [];
 
       for (let i = 0; i < updates.length; i += batchSize) {
@@ -245,8 +255,12 @@ const createOrderService = () => {
       // Process each batch
       for (const batchUpdates of batches) {
         let toReconcile = [];
+        let outcome;
         await db.runTransaction(async (transaction) => {
+          // A retried transaction runs this callback again: the batch starts clean
+          // and only the attempt that commits reaches `results`.
           toReconcile = [];
+          outcome = { success: [], failed: [] };
           // Process reads sequentially instead of Promise.all
           const updateOperations = [];
           for (const update of batchUpdates) {
@@ -282,6 +296,8 @@ const createOrderService = () => {
                 updatedOrder.paymentDate = new Date();
               } else if (currentOrder.isPaid && !updatedOrder.isPaid) {
                 updatedOrder.paymentDate = null;}
+
+              stockService.stampShippedAt(currentOrder, updatedOrder);
 
               console.log('Patching order:', updatedOrder);
 
@@ -321,7 +337,7 @@ const createOrderService = () => {
           // Process writes
           for (const operation of updateOperations) {
             if (!operation.success) {
-              results.failed.push({
+              outcome.failed.push({
                 id: operation.id,
                 error: operation.error,
               });
@@ -346,14 +362,16 @@ const createOrderService = () => {
               transaction.update(orderRef, updatedOrder.toFirestore());
             }
 
-            results.success.push({
+            outcome.success.push({
               id,
               changes,
             });
           }
         });
+        results.success.push(...outcome.success);
+        results.failed.push(...outcome.failed);
 
-        // One by one, after the batch commits: never inside the 500-op batch.
+        // One by one, after the batch commits: never inside the batch.
         for (const { before, after } of toReconcile) {
           await reconcileIfNeeded(bakeryId, before, after, editor);
         }

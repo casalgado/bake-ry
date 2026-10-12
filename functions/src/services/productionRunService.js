@@ -20,7 +20,7 @@ const {
  * Production runs: what the counter sends to the kitchen to make for the
  * vitrina. Sending writes no movements; its pending lines are stock on its way.
  * Receiving one line adds the output and consumes its recipe, in one
- * transaction. See inventory-next-steps.md §4.
+ * transaction. See bake-ry-front zplanning/inventory/INVENTORY.md §4.2.
  */
 const createProductionRunService = () => {
   const baseService = createBaseService('productionRuns', ProductionRun, 'bakeries/{bakeryId}');
@@ -90,6 +90,9 @@ const createProductionRunService = () => {
       createdBy: editorOf(user),
     });
     draft.validate();
+    draft.requestFingerprint = JSON.stringify(
+      draft.lines.map((l) => [l.item.type, l.item.id, l.item.combinationId, l.plannedQty]),
+    );
 
     const outputDocs = await Promise.all(draft.lines.map((line) =>
       (line.item.type === ITEM_TYPES.INGREDIENT ? ingredientsRef : productsRef)(bakeryId)
@@ -105,7 +108,13 @@ const createProductionRunService = () => {
 
     return db.runTransaction(async (t) => {
       const existing = await t.get(runRef);
-      if (existing.exists) return ProductionRun.fromFirestore(existing);
+      if (existing.exists) {
+        const stored = existing.data().requestFingerprint;
+        if (stored && stored !== draft.requestFingerprint) {
+          throw new BadRequestError('Esta producción ya se envió con otros datos. Recarga e inténtalo de nuevo.');
+        }
+        return ProductionRun.fromFirestore(existing);
+      }
 
       const run = new ProductionRun({ ...draft, lines, id: runRef.id });
       t.set(runRef, run.toFirestore());

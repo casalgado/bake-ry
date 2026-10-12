@@ -1,7 +1,7 @@
 const { initializeFirebase, clearFirestoreData } = require('../setup/firebase');
 
 // Ingreso: a purchase, its `purchase` movements and the opt-in cost updates
-// commit in one transaction. See INVENTORY-BUILD-PLAN.md M1.4.
+// commit in one transaction. See bake-ry-front zplanning/inventory/INVENTORY.md §4.1.
 describe('Purchase service', () => {
   let db;
   let purchaseService;
@@ -256,5 +256,51 @@ describe('Purchase service', () => {
     expect(last.lines[0].unitCost).toBe(3);
 
     expect(await purchaseService.getLastPurchase(bakeryId, 'nobody')).toBeNull();
+  });
+
+  it('refuses a quantity that is infinite, zero, negative or not a number', async () => {
+    await seedIngredient('harina');
+
+    for (const qty of [Infinity, 'abc', 0, -1]) {
+      await expect(buy([ingredientLine('harina', qty, 100)])).rejects.toThrow(/cantidad/);
+    }
+
+    expect((await col('purchases').get()).size).toBe(0);
+    expect(await stockOf('ingredient_harina')).toBeNull();
+  });
+
+  it('takes the last line as the cost when an ingredient appears twice', async () => {
+    await seedIngredient('harina', { costPerUnit: 10 });
+
+    await buy([
+      ingredientLine('harina', 100, 1000, { updateCost: true }),
+      ingredientLine('harina', 100, 2000, { updateCost: true }),
+    ]);
+
+    expect((await col('ingredients').doc('harina').get()).data().costPerUnit).toBe(20);
+    expect(await stockOf('ingredient_harina')).toBe(200);
+  });
+
+  it('refuses a bodega the bakery never declared, and a negative total', async () => {
+    await seedIngredient('harina');
+
+    await expect(buy([ingredientLine('harina', 10, 100)], { warehouseId: 'bodega-fantasma' }))
+      .rejects.toThrow(/Bodega desconocida/);
+    await expect(buy([ingredientLine('harina', 10, -5)])).rejects.toThrow(/total/);
+
+    expect((await col('purchases').get()).size).toBe(0);
+    expect(await stockOf('ingredient_harina')).toBeNull();
+  });
+
+  it('refuses a retry that reuses the key with different content', async () => {
+    await seedIngredient('harina');
+    await buy([ingredientLine('harina', 1000, 5000)], { idempotencyKey: 'abc123' });
+
+    await expect(
+      buy([ingredientLine('harina', 2000, 5000)], { idempotencyKey: 'abc123' }),
+    ).rejects.toThrow(/otros datos/);
+
+    expect((await col('purchases').get()).size).toBe(1);
+    expect(await stockOf('ingredient_harina')).toBe(1000);
   });
 });

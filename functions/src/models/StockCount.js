@@ -1,6 +1,8 @@
 const BaseModel = require('./base/BaseModel');
 
-// One count of one bodega. status: 'open' | 'closed' | 'discarded'.
+// One count of one bodega. status: 'open' | 'closing' | 'closed' | 'discarded'.
+// `closing` is the short stretch while close processes the counted items in
+// chunks: no more typing, no discard, and close can be called again to resume.
 // `items` is a map keyed by itemKey, not an array: each typed number is a
 // single field write (`items.<itemKey>`), so two people on different rows
 // never overwrite each other.

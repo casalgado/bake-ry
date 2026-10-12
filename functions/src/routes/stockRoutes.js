@@ -21,6 +21,8 @@ bakeryRouter.use(hasBakeryAccess);
 // conservative starting point for adjustments, easy to widen later.)
 bakeryRouter.get('/stocks', requireBakeryAssistant, stockController.getAll);
 bakeryRouter.get('/stocks/verify', requireBakeryAdmin, stockController.verify);
+bakeryRouter.get('/stocks/verify-orders', requireBakeryAdmin, stockController.verifyOrders);
+bakeryRouter.post('/stocks/reconcile-orders', requireBakeryAdmin, stockController.reconcileOrders);
 bakeryRouter.get(
   '/stocks/:itemKey/movements',
   requireBakeryAssistant,

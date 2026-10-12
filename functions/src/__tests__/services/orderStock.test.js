@@ -1,8 +1,7 @@
 const { initializeFirebase, clearFirestoreData } = require('../setup/firebase');
 
 // Orders move stock through one diff-based reconcile, and disponible is
-// computed on read. See inventory-next-steps.md §3 / §6 and
-// INVENTORY-BUILD-PLAN.md M3.2–M3.4.
+// computed on read. See bake-ry-front zplanning/inventory/INVENTORY.md §4.3.
 describe('Order stock', () => {
   let db;
   let stockService;
@@ -206,18 +205,6 @@ describe('Order stock', () => {
       expect(spy).not.toHaveBeenCalled();
     });
 
-    it('with inventory off, nothing ships and past movements stay', async () => {
-      const shipped = await createOrder([line('l1', 'pan', 4, 'stock')], 2);
-      await col('settings').doc('default').set({ features: { inventory: { enabled: false } } }, { merge: true });
-
-      const order = await createOrder([line('l1', 'coke', 3)], 2);
-      await orderService.patch(shipped.id, { orderItems: [line('l1', 'pan', 6, 'stock')] }, bakeryId, editor);
-
-      expect(await movementsOf(order.id)).toHaveLength(0);
-      expect(await movementsOf(shipped.id)).toHaveLength(1);
-      expect(await stockOf('product_pan')).toBe(-4);
-    });
-
     it('patchAll shipping three orders reconciles each', async () => {
       const a = await createOrder([line('l1', 'pan', 1, 'stock')], 1);
       const b = await createOrder([line('l1', 'pan', 2, 'stock')], 1);
@@ -257,6 +244,242 @@ describe('Order stock', () => {
 
       expect((await col('stockGaps').doc(`${order.id}_l1`).get()).exists).toBe(false);
       expect(await stockOf('ingredient_harina')).toBe(-20);
+    });
+  });
+
+  describe('combinations, bodegas and what cannot be followed', () => {
+    const comboLine = (id, productId, combinationId, quantity) => ({
+      ...line(id, productId, quantity),
+      variation: null,
+      combination: { id: combinationId, name: combinationId, selection: [combinationId], basePrice: 1000 },
+    });
+
+    it("a combination takes its own recipe and never falls back to the product's", async () => {
+      // The product itself has a recipe (200 harina); only c1000 has its own.
+      await seedProduct('tortaV', {
+        hasVariations: true,
+        recipeId: 'r-torta',
+        variations: {
+          combinations: [
+            { id: 'c500', name: '500g', recipeId: null },
+            { id: 'c1000', name: '1kg', recipeId: 'r-c1000' },
+          ],
+        },
+      });
+      await seedRecipe(
+        'r-c1000',
+        [{ type: 'ingredient', id: 'harina', quantity: 400 }],
+        { productId: 'tortaV', combinationId: 'c1000' },
+      );
+
+      const order = await createOrder(
+        [comboLine('l1', 'tortaV', 'c500', 2), comboLine('l2', 'tortaV', 'c1000', 1)],
+        2,
+      );
+
+      expect(await stockOf('ingredient_harina')).toBe(-400);
+      const gap = await col('stockGaps').doc(`${order.id}_l1`).get();
+      expect(gap.data().gaps[0].reason).toBe('missingRecipe');
+      expect((await col('stockGaps').doc(`${order.id}_l2`).get()).exists).toBe(false);
+    });
+
+    it('a stock line leaves from the bodega it names', async () => {
+      await col('settings').doc('default').set({
+        features: {
+          inventory: {
+            enabled: true,
+            warehouses: [
+              { id: 'main', name: 'Principal', isDefault: true },
+              { id: 'branch', name: 'Sucursal' },
+            ],
+          },
+        },
+      });
+
+      await createOrder([{ ...line('l1', 'pan', 4, 'stock'), sourceWarehouseId: 'branch' }], 2);
+
+      const branch = await col('stocks').doc('product_pan__branch').get();
+      expect(branch.data().currentStock).toBe(-4);
+      expect((await col('stocks').doc('product_pan__main').get()).exists).toBe(false);
+    });
+
+    it('a product that no longer exists leaves a gap and the order still ships', async () => {
+      const order = await createOrder([line('l1', 'fantasma', 1, 'stock')], 2);
+
+      expect((await col('orders').doc(order.id).get()).data().status).toBe(2);
+      const gap = await col('stockGaps').doc(`${order.id}_l1`).get();
+      expect(gap.data().gaps[0].reason).toBe('missingItem');
+    });
+
+    it('a bulk ship with one order missing fails that one and ships the rest', async () => {
+      const real = await createOrder([line('l1', 'pan', 1, 'stock')], 1);
+
+      const results = await orderService.patchAll(bakeryId, [
+        { id: real.id, data: { status: 2 } },
+        { id: 'no-such-order', data: { status: 2 } },
+      ], editor);
+
+      expect(results.success.map((r) => r.id)).toEqual([real.id]);
+      expect(results.failed.map((r) => r.id)).toEqual(['no-such-order']);
+      expect(await stockOf('product_pan')).toBe(-1);
+    });
+  });
+
+  describe('the inventory switch', () => {
+    const settings = () => col('settings').doc('default');
+
+    it('a bakery that never turned inventory on keeps the ledger untouched', async () => {
+      await settings().set({ features: { inventory: { enabled: false } } });
+
+      const order = await createOrder([line('l1', 'coke', 3)], 2);
+
+      expect(await movementsOf(order.id)).toHaveLength(0);
+      expect(await stockOf('product_coke')).toBe(0);
+    });
+
+    it('turning it off after it was live does not pause the ledger', async () => {
+      await createOrder([line('l1', 'pan', 4, 'stock')], 2); // first sight of the switch on: goes live
+      await settings().set({ features: { inventory: { enabled: false } } }, { merge: true });
+
+      const order = await createOrder([line('l1', 'coke', 3)], 2);
+
+      expect(await movementsOf(order.id)).toHaveLength(1);
+      expect(await stockOf('product_coke')).toBe(-3);
+    });
+
+    it('records when it went live, once', async () => {
+      const first = await stockService.getInventoryStart(bakeryId);
+      const second = await stockService.getInventoryStart(bakeryId);
+
+      expect(first).toBeInstanceOf(Date);
+      expect(second.getTime()).toBe(first.getTime());
+    });
+  });
+
+  describe('shippedAt', () => {
+    const shippedAtOf = async (id) => (await col('orders').doc(id).get()).data().shippedAt;
+
+    it('is stamped on shipping, kept on going back, stamped anew on shipping again', async () => {
+      const order = await createOrder([line('l1', 'pan', 1, 'stock')], 0);
+      expect(await shippedAtOf(order.id)).toBeNull();
+
+      await setStatus(order.id, 2);
+      const first = (await shippedAtOf(order.id)).toDate().getTime();
+
+      await setStatus(order.id, 1);
+      expect((await shippedAtOf(order.id)).toDate().getTime()).toBe(first);
+
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      await setStatus(order.id, 3);
+      expect((await shippedAtOf(order.id)).toDate().getTime()).toBeGreaterThan(first);
+    });
+
+    it('keeps its first moment through 2 → 3 and ignores one sent by a client', async () => {
+      const order = await createOrder([line('l1', 'pan', 1, 'stock')], 2);
+      const first = (await shippedAtOf(order.id)).toDate().getTime();
+
+      await orderService.patch(order.id, { status: 3, shippedAt: new Date('2020-01-01') }, bakeryId, editor);
+
+      expect((await shippedAtOf(order.id)).toDate().getTime()).toBe(first);
+    });
+
+    it('is stamped on an order created already shipped', async () => {
+      const order = await createOrder([line('l1', 'pan', 1, 'stock')], 3);
+      expect(await shippedAtOf(order.id)).not.toBeNull();
+    });
+  });
+
+  describe('orders shipped before inventory went live', () => {
+    const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    it('editing one does not deduct what it ever held', async () => {
+      await col('settings').doc('default').set({ features: { inventory: { enabled: false } } });
+      const old = await createOrder([line('l1', 'pan', 4, 'stock')], 2);
+
+      await wait(5);
+      await col('settings').doc('default').set({ features: { inventory: { enabled: true } } });
+      await orderService.patch(old.id, { orderItems: [line('l1', 'pan', 5, 'stock')] }, bakeryId, editor);
+
+      expect(await movementsOf(old.id)).toHaveLength(0);
+      expect(await stockOf('product_pan')).toBe(0);
+    });
+
+    it('moving one back and shipping it again is a normal deduction', async () => {
+      await col('settings').doc('default').set({ features: { inventory: { enabled: false } } });
+      const old = await createOrder([line('l1', 'pan', 4, 'stock')], 2);
+
+      await wait(5);
+      await col('settings').doc('default').set({ features: { inventory: { enabled: true } } });
+      await setStatus(old.id, 1);
+      await setStatus(old.id, 2);
+
+      expect(await stockOf('product_pan')).toBe(-4);
+    });
+
+    it('an order shipped after it went live whose reconcile failed is still owed its deduction', async () => {
+      await stockService.getInventoryStart(bakeryId);
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      jest.spyOn(stockService, 'reconcileOrderStock').mockRejectedValueOnce(new Error('boom'));
+
+      const order = await createOrder([line('l1', 'pan', 4, 'stock')], 2);
+      expect(await movementsOf(order.id)).toHaveLength(0);
+
+      await orderService.patch(order.id, { orderItems: [line('l1', 'pan', 5, 'stock')] }, bakeryId, editor);
+
+      expect(await stockOf('product_pan')).toBe(-5);
+    });
+  });
+
+  describe('finding and repairing orders that never reconciled', () => {
+    it('lists a shipped order whose reconcile failed, then repairs it', async () => {
+      await stockService.getInventoryStart(bakeryId);
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      jest.spyOn(stockService, 'reconcileOrderStock').mockRejectedValueOnce(new Error('boom'));
+
+      const failed = await createOrder([line('l1', 'pan', 4, 'stock')], 2);
+      await createOrder([line('l1', 'coke', 1)], 2); // reconciles normally
+
+      const found = await stockService.findUnreconciledOrders(bakeryId);
+      expect(found).toEqual([{ orderId: failed.id, diffs: [{ id: 'product_pan__main', diff: -4 }] }]);
+
+      const result = await stockService.reconcileUnreconciledOrders(bakeryId);
+      expect(result).toEqual({ repaired: [failed.id], failed: [] });
+      expect(await stockOf('product_pan')).toBe(-4);
+      expect(await stockService.findUnreconciledOrders(bakeryId)).toEqual([]);
+    });
+
+    it('lists a deleted order whose reversal failed', async () => {
+      await stockService.getInventoryStart(bakeryId);
+      const order = await createOrder([line('l1', 'pan', 4, 'stock')], 2);
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      jest.spyOn(stockService, 'reconcileOrderStock').mockRejectedValueOnce(new Error('boom'));
+
+      await orderService.remove(order.id, bakeryId, editor);
+
+      const found = await stockService.findUnreconciledOrders(bakeryId);
+      expect(found).toEqual([{ orderId: order.id, diffs: [{ id: 'product_pan__main', diff: 4 }] }]);
+    });
+
+    it('lists an order moved back whose reversal failed', async () => {
+      await stockService.getInventoryStart(bakeryId);
+      const order = await createOrder([line('l1', 'pan', 4, 'stock')], 2);
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      jest.spyOn(stockService, 'reconcileOrderStock').mockRejectedValueOnce(new Error('boom'));
+
+      await setStatus(order.id, 1);
+
+      const found = await stockService.findUnreconciledOrders(bakeryId);
+      expect(found).toEqual([{ orderId: order.id, diffs: [{ id: 'product_pan__main', diff: 4 }] }]);
+    });
+
+    it('ignores orders shipped before inventory went live', async () => {
+      await col('settings').doc('default').set({ features: { inventory: { enabled: false } } });
+      await createOrder([line('l1', 'pan', 4, 'stock')], 2);
+
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      await col('settings').doc('default').set({ features: { inventory: { enabled: true } } });
+
+      expect(await stockService.findUnreconciledOrders(bakeryId)).toEqual([]);
     });
   });
 

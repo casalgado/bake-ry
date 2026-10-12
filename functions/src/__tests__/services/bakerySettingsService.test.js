@@ -117,6 +117,52 @@ describe('Bakery Settings Service Tests', () => {
       expect(doc.data().theme.primaryColor).toBe(patchData.theme.primaryColor);
     });
 
+    describe('when inventory went live', () => {
+      const wentLive = new Date('2026-09-01T12:00:00Z');
+
+      const settingsWithInventory = async () => {
+        const ref = await setupDefaultSettings();
+        await ref.update({ features: { inventory: { enabled: true, enabledAt: wentLive } } });
+        return ref;
+      };
+
+      it('survives a features patch that rebuilds inventory without it', async () => {
+        const ref = await settingsWithInventory();
+
+        await bakerySettingsService.patch(
+          'default', { features: { inventory: { enabled: false } } }, testStoreId,
+        );
+
+        const { inventory } = (await ref.get()).data().features;
+        expect(inventory.enabled).toBe(false);
+        expect(inventory.enabledAt.toDate().getTime()).toBe(wentLive.getTime());
+      });
+
+      it('survives a features patch that leaves inventory out, and inventory stays as it was', async () => {
+        const ref = await settingsWithInventory();
+
+        await bakerySettingsService.patch(
+          'default', { features: { reports: { showMultipleReports: true } } }, testStoreId,
+        );
+
+        const { inventory, reports } = (await ref.get()).data().features;
+        expect(reports.showMultipleReports).toBe(true);
+        expect(inventory.enabled).toBe(true);
+        expect(inventory.enabledAt.toDate().getTime()).toBe(wentLive.getTime());
+      });
+
+      it('cannot be set by a client', async () => {
+        const ref = await settingsWithInventory();
+
+        await bakerySettingsService.patch('default', {
+          features: { inventory: { enabled: true, enabledAt: new Date('2020-01-01') } },
+        }, testStoreId);
+
+        const { inventory } = (await ref.get()).data().features;
+        expect(inventory.enabledAt.toDate().getTime()).toBe(wentLive.getTime());
+      });
+    });
+
     it('should throw NotFoundError when patching non-existent settings', async () => {
       await expect(
         bakerySettingsService.patch('default', { theme: {} }, testStoreId),

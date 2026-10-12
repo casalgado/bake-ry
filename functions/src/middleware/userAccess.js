@@ -51,6 +51,16 @@ const requireBakeryStaffOrAdmin = (req, res, next) => {
   next();
 };
 
+// The kitchen: whoever may move production stock. Delivery and accounting
+// assistants have no part in it.
+const requireBakeryProduction = (req, res, next) => {
+  const allowedRoles = ['bakery_staff', 'bakery_admin', 'system_admin', 'production_assistant'];
+  if (!allowedRoles.includes(req.user.role)) {
+    throw new ForbiddenError('Requires production, staff or admin role');
+  }
+  next();
+};
+
 const requireBakeryAssistant = (req, res, next) => {
   const allowedRoles = ['bakery_staff', 'bakery_admin', 'system_admin', 'delivery_assistant', 'production_assistant', 'accounting_assistant'];
   if (!allowedRoles.includes(req.user.role)) {
@@ -64,5 +74,6 @@ module.exports = {
   requireSystemAdmin,
   requireBakeryAdmin,
   requireBakeryStaffOrAdmin,
+  requireBakeryProduction,
   requireBakeryAssistant,
 };

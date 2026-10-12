@@ -34,6 +34,18 @@ const createBakerySettingsService = () => {
 
       const currentSettings = BakerySettings.fromFirestore(doc);
 
+      // `features` is replaced whole and the model fills the gaps with defaults. When
+      // inventory went live (`enabledAt`, set by stockService.getInventoryStart) is
+      // the server's record, so a form that rebuilds `features` without it must not
+      // reset it, and one that leaves inventory out must not switch it off.
+      const storedInventory = currentSettings.features?.inventory;
+      if (data.features && storedInventory) {
+        data.features.inventory = {
+          ...(data.features.inventory ?? storedInventory),
+          enabledAt: storedInventory.enabledAt ?? null,
+        };
+      }
+
       // If we have product categories to update, process them
       if (data.productCategories) {
         data.productCategories = updateProductCategories(
