@@ -45,11 +45,11 @@ service cloud.firestore {
           (isSystemAdmin() || isBakeryAdmin(bakeryId));
       }
       
+      // Read for the realtime listeners. Written only by the API: a client write
+      // would skip the stock reconcile that shipping an order triggers.
       match /orders/{orderId} {
         allow read: if isAuthenticated() && isBakeryStaff(bakeryId);
-        allow create: if isAuthenticated();
-        allow update, delete: if isAuthenticated() && 
-          (isSystemAdmin() || isBakeryAdmin(bakeryId));
+        allow write: if false;
       }
       
       match /ingredients/{ingredientId} {
