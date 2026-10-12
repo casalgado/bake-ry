@@ -5,6 +5,46 @@ const createBaseService = require('./base/serviceFactory');
 const { NotFoundError, BadRequestError } = require('../utils/errors');
 const { syncProductStockDocs } = require('./stockService');
 
+/**
+ * What a form is not allowed to say about a product. recipeService owns the
+ * recipe pointers and the reverse index; a recipe-sourced cost is owned by the
+ * propagation walk. A form open since before a recipe changed would otherwise
+ * write the old values back. Silently ignored: a stale form is not an error.
+ * A cost the user switched to 'manual' is theirs and is taken as sent.
+ */
+const keepServerFields = (current, incoming) => {
+  const merged = { ...incoming };
+
+  if ('usedInRecipes' in merged) merged.usedInRecipes = current.usedInRecipes;
+  if ('recipeId' in merged) merged.recipeId = current.recipeId;
+
+  const followsRecipe = (stored, sent) =>
+    stored.costPriceSource === 'recipe' && (sent.costPriceSource ?? 'recipe') === 'recipe';
+
+  if ('costPrice' in merged && followsRecipe(current, merged)) {
+    merged.costPrice = current.costPrice;
+  }
+
+  if (merged.variations?.combinations) {
+    const stored = new Map((current.variations?.combinations || []).map((c) => [c.id, c]));
+    merged.variations = {
+      ...merged.variations,
+      combinations: merged.variations.combinations.map((combination) => {
+        const was = stored.get(combination.id);
+        if (!was) return combination;
+
+        const kept = { ...combination, recipeId: was.recipeId };
+        if ('costPrice' in combination && followsRecipe(was, combination)) {
+          kept.costPrice = was.costPrice;
+        }
+        return kept;
+      }),
+    };
+  }
+
+  return merged;
+};
+
 const createProductService = () => {
   const baseService = createBaseService('products', Product, 'bakeries/{bakeryId}');
 
@@ -77,42 +117,9 @@ const createProductService = () => {
 
         const currentProduct = Product.fromFirestore(productDoc);
 
-        // Handle recipe reassignment if recipe is being changed
-        if (updateData.recipeId && updateData.recipeId !== currentProduct.recipeId) {
-          // Check new recipe availability
-          const newRecipeRef = db
-            .collection(`bakeries/${bakeryId}/recipes`)
-            .doc(updateData.recipeId);
-          const newRecipeDoc = await transaction.get(newRecipeRef);
-
-          if (!newRecipeDoc.exists) {
-            throw new NotFoundError('New recipe not found');
-          }
-
-          if (newRecipeDoc.data().productId) {
-            throw new BadRequestError('New recipe is already assigned to another product');
-          }
-
-          // Release old recipe
-          const oldRecipeRef = db
-            .collection(`bakeries/${bakeryId}/recipes`)
-            .doc(currentProduct.recipeId);
-
-          transaction.update(oldRecipeRef, {
-            productId: null,
-            updatedAt: new Date(),
-          });
-
-          // Assign new recipe
-          transaction.update(newRecipeRef, {
-            productId: productId,
-            updatedAt: new Date(),
-          });
-        }
-
         const updatedProduct = new Product({
           ...currentProduct,
-          ...updateData,
+          ...keepServerFields(currentProduct, updateData),
           updatedAt: new Date(),
         });
 
@@ -205,7 +212,7 @@ const createProductService = () => {
               // Create updated instance
               const updatedProduct = new Product({
                 ...currentProduct,
-                ...data,
+                ...keepServerFields(currentProduct, data),
                 updatedAt: new Date(),
                 lastEditedBy: {
                   userId: editor?.uid,

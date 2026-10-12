@@ -9,6 +9,23 @@ const {
   applyPlan,
 } = require('./recipeGraph');
 const { syncIngredientStockDoc } = require('./stockService');
+const { ITEM_TYPES, buildItemKey } = require('../utils/itemKey');
+
+/**
+ * What a form is not allowed to say about an ingredient: recipeService owns the
+ * recipe pointer and the reverse index, and a preparación's cost is derived
+ * from its recipe. A form open since before they changed would write the old
+ * values back (and, for the cost, push them downstream). Silently ignored.
+ */
+const keepServerFields = (current, incoming) => {
+  const merged = { ...incoming };
+
+  if ('usedInRecipes' in merged) merged.usedInRecipes = current.usedInRecipes;
+  if ('recipeId' in merged) merged.recipeId = current.recipeId;
+  if ('costPerUnit' in merged && current.recipeId) merged.costPerUnit = current.costPerUnit;
+
+  return merged;
+};
 
 const createIngredientService = () => {
   const baseService = createBaseService('ingredients', Ingredient, 'bakeries/{bakeryId}');
@@ -28,7 +45,51 @@ const createIngredientService = () => {
     return created;
   };
 
-  const update = async (ingredientId, updateData, bakeryId, editor = null) => {
+  /**
+   * The unit is what recipe rows, the ingredient's own yield and its stock are
+   * all measured in, and nothing converts between units. Changing it under any
+   * of them would leave them disagreeing, so it is refused. An ingredient with
+   * none of them can change it; its stocks doc follows.
+   */
+  const assertUnitCanChange = async (transaction, bakeryId, ingredientId, current) => {
+    if (current.recipeId) {
+      throw new BadRequestError(
+        'No se puede cambiar la unidad de una preparación: su rendimiento está en esa unidad.',
+      );
+    }
+
+    const recipeIds = current.usedInRecipes || [];
+    // A stocks doc alone doesn't count: a stocked ingredient gets one when it is
+    // created, empty. What ties the unit down is a movement, written in it.
+    const [recipeDocs, movements] = await Promise.all([
+      recipeIds.length
+        ? transaction.getAll(...recipeIds.map((recipeId) =>
+          db.collection(`bakeries/${bakeryId}/recipes`).doc(recipeId)))
+        : [],
+      transaction.get(db.collection(`bakeries/${bakeryId}/stockMovements`)
+        .where('itemKey', '==', buildItemKey({ itemType: ITEM_TYPES.INGREDIENT, ingredientId }))
+        .limit(1)),
+    ]);
+
+    // Stale ids (a recipe deleted without cleaning the back-reference) don't count.
+    const recipeNames = recipeDocs
+      .filter((recipeDoc) => recipeDoc.exists)
+      .map((recipeDoc) => recipeDoc.data().name || recipeDoc.id);
+
+    if (recipeNames.length > 0) {
+      throw new BadRequestError(
+        `No se puede cambiar la unidad de un ingrediente usado en recetas. Usado en: ${recipeNames.join(', ')}`,
+      );
+    }
+
+    if (!movements.empty) {
+      throw new BadRequestError(
+        'No se puede cambiar la unidad de un ingrediente con movimientos de inventario.',
+      );
+    }
+  };
+
+  const update = async (ingredientId, formData, bakeryId, editor = null) => {
     try {
       const ingredientRef = baseService.getCollectionRef(bakeryId).doc(ingredientId);
 
@@ -40,6 +101,11 @@ const createIngredientService = () => {
         }
 
         const currentIngredient = Ingredient.fromFirestore(doc);
+        const updateData = keepServerFields(currentIngredient, formData);
+
+        if (updateData.unit !== undefined && updateData.unit !== currentIngredient.unit) {
+          await assertUnitCanChange(transaction, bakeryId, ingredientId, currentIngredient);
+        }
 
         // A cost change fans out to every consuming recipe and onward to those
         // recipes' owners. Planned first, applied below, so the transaction

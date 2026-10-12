@@ -571,5 +571,256 @@ describe('Recipe graph — owners, guardrails, costing', () => {
         ),
       ).rejects.toThrow(/ya tiene una receta/);
     });
+
+    it('refuses a second recipe for a product that already has a live one', async () => {
+      await seedIngredient('harina');
+      await seedProduct('torta', { recipeId: 'r1', costPrice: 0, costPriceSource: 'manual' });
+      await seedRecipe('r1', { productId: 'torta', ingredients: [component('harina', 10)] });
+
+      await expect(
+        recipeService.create(
+          { name: 'torta v2', productId: 'torta', ingredients: [component('harina', 20)] },
+          bakeryId,
+        ),
+      ).rejects.toThrow(/ya tiene una receta/);
+
+      expect((await col('products').doc('torta').get()).data().recipeId).toBe('r1');
+    });
+
+    it('takes a new recipe when the old pointer is stale', async () => {
+      await seedIngredient('harina');
+      await seedProduct('torta', { recipeId: 'ghost', costPrice: 0, costPriceSource: 'manual' });
+
+      const { id } = await recipeService.create(
+        { name: 'torta', productId: 'torta', ingredients: [component('harina', 20)] },
+        bakeryId,
+      );
+
+      expect((await col('products').doc('torta').get()).data().recipeId).toBe(id);
+    });
+
+    it('refuses a second recipe for a combination that already has one', async () => {
+      await seedIngredient('harina');
+      await seedProduct('torta', {
+        hasVariations: true,
+        variations: { combinations: [{ id: 'c500', name: '500g', costPrice: 0, recipeId: 'r1' }] },
+      });
+      await seedRecipe('r1', { productId: 'torta', combinationId: 'c500', ingredients: [component('harina', 10)] });
+
+      await expect(
+        recipeService.create(
+          { name: 'v2', productId: 'torta', combinationId: 'c500', ingredients: [component('harina', 20)] },
+          bakeryId,
+        ),
+      ).rejects.toThrow(/ya tiene una receta/);
+    });
+
+    it('keeps a hand-typed cost manual when the recipe is linked', async () => {
+      await seedIngredient('harina', { costPerUnit: 10 });
+      await seedProduct('torta', { costPrice: 3500, costPriceSource: 'manual' });
+
+      const { id } = await recipeService.create(
+        { name: 'torta', productId: 'torta', ingredients: [component('harina', 50)] },
+        bakeryId,
+      );
+
+      const torta = (await col('products').doc('torta').get()).data();
+      expect(torta).toMatchObject({ recipeId: id, costPriceSource: 'manual', costPrice: 3500 });
+    });
+
+    it('keeps a typed combination cost manual and takes the recipe for an unset one', async () => {
+      await seedIngredient('harina', { costPerUnit: 10 });
+      await seedProduct('torta', {
+        hasVariations: true,
+        variations: {
+          combinations: [
+            { id: 'c500', name: '500g', costPrice: 2000, costPriceSource: 'manual' },
+            { id: 'c1000', name: '1kg', costPrice: 0, costPriceSource: 'manual' },
+          ],
+        },
+      });
+
+      const typed = await recipeService.create(
+        { name: 'a', productId: 'torta', combinationId: 'c500', ingredients: [component('harina', 50)] },
+        bakeryId,
+      );
+      const unset = await recipeService.create(
+        { name: 'b', productId: 'torta', combinationId: 'c1000', ingredients: [component('harina', 50)] },
+        bakeryId,
+      );
+
+      const combos = (await col('products').doc('torta').get()).data().variations.combinations;
+      expect(combos.find((c) => c.id === 'c500'))
+        .toMatchObject({ recipeId: typed.id, costPriceSource: 'manual', costPrice: 2000 });
+      expect(combos.find((c) => c.id === 'c1000'))
+        .toMatchObject({ recipeId: unset.id, costPriceSource: 'recipe', costPrice: 500 });
+    });
+  });
+
+  describe('server-owned fields on update', () => {
+    it('a stale product form cannot write back the recipe pointers or a recipe-sourced cost', async () => {
+      await seedProduct('torta', {
+        recipeId: 'r1', usedInRecipes: ['rx'], costPrice: 500, costPriceSource: 'recipe',
+      });
+
+      await productService.update('torta', {
+        name: 'Torta',
+        recipeId: null,
+        usedInRecipes: [],
+        costPrice: 1,
+        costPriceSource: 'recipe',
+      }, bakeryId);
+
+      const torta = (await col('products').doc('torta').get()).data();
+      expect(torta).toMatchObject({ name: 'torta', recipeId: 'r1', usedInRecipes: ['rx'], costPrice: 500 });
+    });
+
+    it('a cost the user switched to manual is taken as sent', async () => {
+      await seedProduct('torta', { costPrice: 500, costPriceSource: 'recipe' });
+
+      await productService.update('torta', { costPriceSource: 'manual', costPrice: 700 }, bakeryId);
+
+      expect((await col('products').doc('torta').get()).data())
+        .toMatchObject({ costPriceSource: 'manual', costPrice: 700 });
+    });
+
+    it('a stale combination keeps its recipe and its recipe-sourced cost', async () => {
+      await seedProduct('torta', {
+        hasVariations: true,
+        variations: {
+          combinations: [
+            { id: 'c500', name: '500g', recipeId: 'r1', costPrice: 500, costPriceSource: 'recipe' },
+            { id: 'c1000', name: '1kg', recipeId: null, costPrice: 100, costPriceSource: 'manual' },
+          ],
+        },
+      });
+
+      await productService.update('torta', {
+        variations: {
+          combinations: [
+            { id: 'c500', name: '500g', recipeId: null, costPrice: 1, costPriceSource: 'recipe' },
+            { id: 'c1000', name: '1kg', recipeId: null, costPrice: 250, costPriceSource: 'manual' },
+          ],
+        },
+      }, bakeryId);
+
+      const combos = (await col('products').doc('torta').get()).data().variations.combinations;
+      expect(combos.find((c) => c.id === 'c500')).toMatchObject({ recipeId: 'r1', costPrice: 500 });
+      expect(combos.find((c) => c.id === 'c1000')).toMatchObject({ costPrice: 250 });
+    });
+
+    it('the bulk update guards the same fields', async () => {
+      await seedProduct('torta', {
+        recipeId: 'r1', usedInRecipes: ['rx'], costPrice: 500, costPriceSource: 'recipe',
+      });
+
+      await productService.patchAll(bakeryId, [
+        { id: 'torta', data: { usedInRecipes: [], recipeId: null, costPrice: 1, name: 'Torta' } },
+      ], { uid: 'u1' });
+
+      expect((await col('products').doc('torta').get()).data())
+        .toMatchObject({ name: 'torta', recipeId: 'r1', usedInRecipes: ['rx'], costPrice: 500 });
+    });
+
+    it('a stale ingredient form cannot write back the pointers, and a preparación keeps its derived cost', async () => {
+      await seedIngredient('crema', { recipeId: 'r1', usedInRecipes: ['rz'], costPerUnit: 5 });
+      await seedRecipe('rz', { productId: 'torta', ingredients: [component('crema', 10)] });
+
+      await ingredientService.update('crema', {
+        name: 'Crema',
+        recipeId: null,
+        usedInRecipes: [],
+        costPerUnit: 99,
+      }, bakeryId);
+
+      const crema = (await col('ingredients').doc('crema').get()).data();
+      expect(crema).toMatchObject({ name: 'Crema', recipeId: 'r1', usedInRecipes: ['rz'], costPerUnit: 5 });
+    });
+
+    it('a plain ingredient still takes a new cost', async () => {
+      await seedIngredient('harina', { costPerUnit: 10 });
+
+      await ingredientService.update('harina', { costPerUnit: 12 }, bakeryId);
+
+      expect((await col('ingredients').doc('harina').get()).data().costPerUnit).toBe(12);
+    });
+  });
+
+  describe('changing an ingredient unit', () => {
+    it('is refused while a live recipe uses it, and a stale back-reference does not count', async () => {
+      await seedIngredient('harina', { usedInRecipes: ['r1', 'gone'] });
+      await seedRecipe('r1', { name: 'Torta', productId: 'torta', ingredients: [component('harina', 10)] });
+
+      await expect(ingredientService.update('harina', { unit: 'kg' }, bakeryId))
+        .rejects.toThrow(/usado en recetas.*Torta/);
+
+      await col('recipes').doc('r1').delete();
+      await ingredientService.update('harina', { unit: 'kg' }, bakeryId);
+      expect((await col('ingredients').doc('harina').get()).data().unit).toBe('kg');
+    });
+
+    it('is refused for a preparación and for an ingredient with movements', async () => {
+      await seedIngredient('crema', { recipeId: 'r1' });
+      await seedIngredient('azucar', { stockBehavior: 'stocked' });
+      await col('stockMovements').doc('m1').set({
+        itemKey: 'ingredient_azucar', warehouseId: 'main', qty: 5, type: 'adjustment', timestamp: new Date(),
+      });
+
+      await expect(ingredientService.update('crema', { unit: 'kg' }, bakeryId))
+        .rejects.toThrow(/preparación/);
+      await expect(ingredientService.update('azucar', { unit: 'kg' }, bakeryId))
+        .rejects.toThrow(/movimientos/);
+    });
+
+    it('is allowed for a stocked ingredient that has a stocks doc but no movements, and the doc follows', async () => {
+      await seedIngredient('leche', { stockBehavior: 'stocked' });
+      await col('stocks').doc('ingredient_leche__main').set({
+        itemKey: 'ingredient_leche', warehouseId: 'main', itemType: 'ingredient', ingredientId: 'leche',
+        name: 'leche', unit: 'g', currentStock: 0, baselineQty: 0, baselineAt: new Date(),
+      });
+
+      await ingredientService.update('leche', { unit: 'ml' }, bakeryId);
+
+      expect((await col('ingredients').doc('leche').get()).data().unit).toBe('ml');
+      expect((await col('stocks').doc('ingredient_leche__main').get()).data().unit).toBe('ml');
+    });
+
+    it('is allowed for an ingredient nothing depends on', async () => {
+      await seedIngredient('sal');
+
+      await ingredientService.update('sal', { unit: 'kg' }, bakeryId);
+
+      expect((await col('ingredients').doc('sal').get()).data().unit).toBe('kg');
+    });
+  });
+
+  describe('a recipe whose component document is gone', () => {
+    it('can still be deleted', async () => {
+      await seedIngredient('harina');
+      const { id } = await recipeService.create(
+        { name: 'suelta', ingredients: [component('harina', 5)] },
+        bakeryId,
+      );
+      await col('ingredients').doc('harina').delete();
+
+      await recipeService.remove(id, bakeryId);
+
+      expect((await col('recipes').doc(id).get()).exists).toBe(false);
+    });
+
+    it('can still drop that component by editing', async () => {
+      await seedIngredient('harina');
+      await seedIngredient('azucar');
+      const { id } = await recipeService.create(
+        { name: 'suelta', ingredients: [component('harina', 5), component('azucar', 5)] },
+        bakeryId,
+      );
+      await col('ingredients').doc('harina').delete();
+
+      await recipeService.update(id, { ingredients: [component('azucar', 5)] }, bakeryId);
+
+      const recipe = (await col('recipes').doc(id).get()).data();
+      expect(recipe.ingredients.map((c) => c.id)).toEqual(['azucar']);
+    });
   });
 });

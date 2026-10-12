@@ -20,6 +20,7 @@ const {
   applyPlan,
 } = require('./recipeGraph');
 const { BadRequestError, NotFoundError } = require('../utils/errors');
+const { ITEM_TYPES, buildItemKey } = require('../utils/itemKey');
 
 const createRecipeService = () => {
   const baseService = createBaseService('recipes', Recipe, 'bakeries/{bakeryId}');
@@ -179,8 +180,22 @@ const createRecipeService = () => {
   };
 
   /**
+   * Which of these components still have a document. A hard-deleted one has no
+   * reverse index left to tidy, and updating it would fail the whole transaction.
+   * Read first: the caller writes afterwards.
+   */
+  const readLiveComponents = async (transaction, bakeryId, components) => {
+    const docs = await Promise.all(
+      components.map((c) => transaction.get(componentRef(bakeryId, c))),
+    );
+    return new Set(components.filter((_, i) => docs[i].exists).map(componentRefKey));
+  };
+
+  /**
    * Keeps the reverse index (usedInRecipes) honest on ingredients AND products.
    * The deletion guards and the cost-propagation walk are what read it.
+   * `liveOldKeys` (readLiveComponents) says which removed components can still
+   * be updated.
    */
   const updateComponentRelationships = (
     transaction,
@@ -188,6 +203,7 @@ const createRecipeService = () => {
     recipeId,
     oldComponents,
     newComponents,
+    liveOldKeys,
   ) => {
     const oldKeys = new Map(
       oldComponents.map((c) => [componentRefKey(c), c]),
@@ -197,7 +213,7 @@ const createRecipeService = () => {
     );
 
     oldKeys.forEach((component, key) => {
-      if (newKeys.has(key)) return;
+      if (newKeys.has(key) || !liveOldKeys.has(key)) return;
       transaction.update(componentRef(bakeryId, component), {
         usedInRecipes: FieldValue.arrayRemove(recipeId),
         updatedAt: new Date(),
@@ -224,9 +240,9 @@ const createRecipeService = () => {
    * caller has to compensate for after the fact.
    *
    * Both owner shapes are stamped: a product (or one of its combinations)
-   * through `recipeId` + `costPriceSource`, an ingredient through its own
-   * `recipeId`. findRecipeOwners and the ingredient deletion guard read those
-   * fields, so a missing one disarms both.
+   * through `recipeId` (and `costPriceSource` when it takes the recipe's cost),
+   * an ingredient through its own `recipeId`. findRecipeOwners and the
+   * ingredient deletion guard read `recipeId`, so a missing one disarms both.
    */
   const planOwnerLink = async (transaction, bakeryId, recipe, recipeId, plan) => {
     if (recipe.ingredientId) {
@@ -256,9 +272,11 @@ const createRecipeService = () => {
     if (!doc.exists) throw new NotFoundError('Product not found');
     const product = doc.data();
 
-    const ownerKey = recipe.combinationId
-      ? `product_${recipe.productId}_${recipe.combinationId}`
-      : `product_${recipe.productId}`;
+    const ownerKey = buildItemKey({
+      itemType: ITEM_TYPES.PRODUCT,
+      productId: recipe.productId,
+      combinationId: recipe.combinationId,
+    });
 
     // Propagation just ran and published this recipe's cost to the plan even
     // when it skipped the write (owner was still 'manual'). Fall back to a live
@@ -267,9 +285,24 @@ const createRecipeService = () => {
       ? plan.costOverrides.get(ownerKey)
       : await computeRecipeCost(transaction, bakeryId, recipe.ingredients, plan);
 
-    // costPriceSource follows the link. Propagation only fires on 'recipe', so a
-    // recipe left on 'manual' would never hand its cost to the thing it belongs
-    // to — stamping it here is what makes the link take effect.
+    // An owner has one recipe. Linking a second would orphan the first, which
+    // keeps pushing its cost; a pointer to a recipe that no longer exists is
+    // stale and does not count.
+    const assertNoOtherRecipe = async (currentRecipeId) => {
+      if (!currentRecipeId || currentRecipeId === recipeId) return;
+      const existing = await transaction.get(baseService.getCollectionRef(bakeryId).doc(currentRecipeId));
+      if (existing.exists) {
+        throw new BadRequestError('Este producto ya tiene una receta');
+      }
+    };
+
+    // The cost follows the link, so the recipe hands its cost to the thing it
+    // belongs to (propagation only fires on 'recipe'). A cost the user typed by
+    // hand is theirs: it stays 'manual' until they unlock it, and only an unset
+    // cost (0 or blank) is taken from the recipe.
+    const followsRecipe = (owner) =>
+      owner.costPriceSource === 'recipe' || !(Number(owner.costPrice) > 0);
+
     if (recipe.combinationId) {
       const variations =
         stagedData(plan, ref)?.variations || product.variations || {};
@@ -280,19 +313,23 @@ const createRecipeService = () => {
         throw new NotFoundError('Combination not found on product');
       }
 
+      await assertNoOtherRecipe(target.recipeId);
+
+      const takesCost = followsRecipe(target);
       stage(plan, ref, {
         variations: {
           ...variations,
-          combinations: combinations.map((c) =>
-            c.id === recipe.combinationId
+          combinations: combinations.map((c) => {
+            if (c.id !== recipe.combinationId) return c;
+            return takesCost
               ? { ...c, recipeId, costPriceSource: 'recipe', costPrice }
-              : c,
-          ),
+              : { ...c, recipeId };
+          }),
         },
         updatedAt: new Date(),
       });
 
-      if (!sameCost(target.costPrice, costPrice)) {
+      if (takesCost && !sameCost(target.costPrice, costPrice)) {
         recordCostChange(plan, ref, {
           costPrice: {
             from: Number(target.costPrice) || 0,
@@ -304,14 +341,16 @@ const createRecipeService = () => {
       return;
     }
 
+    await assertNoOtherRecipe(product.recipeId);
+
+    const takesCost = followsRecipe(product);
     stage(plan, ref, {
       recipeId,
-      costPriceSource: 'recipe',
-      costPrice,
+      ...(takesCost ? { costPriceSource: 'recipe', costPrice } : {}),
       updatedAt: new Date(),
     });
 
-    if (!sameCost(product.costPrice, costPrice)) {
+    if (takesCost && !sameCost(product.costPrice, costPrice)) {
       recordCostChange(plan, ref, {
         costPrice: { from: Number(product.costPrice) || 0, to: costPrice },
       });
@@ -417,6 +456,10 @@ const createRecipeService = () => {
           ? await resolveComponents(t, bakeryId, updateData.ingredients)
           : null;
 
+        const liveOldKeys = componentsChanged
+          ? await readLiveComponents(t, bakeryId, currentRecipe.ingredients)
+          : new Set();
+
         const updatedRecipe = new Recipe({
           ...currentRecipe,
           ...updateData,
@@ -439,6 +482,7 @@ const createRecipeService = () => {
               recipeId,
               currentRecipe.ingredients,
               updatedRecipe.ingredients,
+              liveOldKeys,
             );
           }
 
@@ -553,6 +597,7 @@ const createRecipeService = () => {
 
       return await db.runTransaction(async (transaction) => {
         const components = currentRecipe.ingredients;
+        const liveKeys = await readLiveComponents(transaction, bakeryId, components);
 
         // Release the reverse index so components don't keep a dangling id.
         updateComponentRelationships(
@@ -561,6 +606,7 @@ const createRecipeService = () => {
           recipeId,
           components,
           [],
+          liveKeys,
         );
 
         // A recipe is hard-deleted, so it cannot carry lastEditedBy the way a

@@ -12,6 +12,7 @@
 const { db } = require('../config/firebase');
 const { BadRequestError, NotFoundError } = require('../utils/errors');
 const recordHistory = require('./base/recordHistory');
+const { ITEM_TYPES, buildItemKey } = require('../utils/itemKey');
 
 // Bounds the propagation write fan-out: a valid recipe graph can nest at most
 // this deep (assertGraphIsSane refuses to save anything deeper).
@@ -51,21 +52,25 @@ const normalizeComponent = (raw = {}) => ({
   combinationId: raw.combinationId || null,
 });
 
-/** Stable identity of a stock-holding / recipe-owning node (matches stockService's itemKey). */
+/** Stable identity of a stock-holding / recipe-owning node: the stock itemKey. */
 const nodeKey = (component) => {
   const { type, id, combinationId } = normalizeComponent(component);
-  if (type === 'product') {
-    return combinationId ? `product_${id}_${combinationId}` : `product_${id}`;
-  }
-  return `ingredient_${id}`;
+  return type === 'product'
+    ? buildItemKey({ itemType: ITEM_TYPES.PRODUCT, productId: id, combinationId })
+    : buildItemKey({ itemType: ITEM_TYPES.INGREDIENT, ingredientId: id });
 };
 
 const ownerKeyOf = (recipe) => {
-  if (recipe.ingredientId) return `ingredient_${recipe.ingredientId}`;
-  if (recipe.combinationId) {
-    return `product_${recipe.productId}_${recipe.combinationId}`;
+  if (recipe.ingredientId) {
+    return buildItemKey({ itemType: ITEM_TYPES.INGREDIENT, ingredientId: recipe.ingredientId });
   }
-  return recipe.productId ? `product_${recipe.productId}` : null;
+  return recipe.productId
+    ? buildItemKey({
+      itemType: ITEM_TYPES.PRODUCT,
+      productId: recipe.productId,
+      combinationId: recipe.combinationId,
+    })
+    : null;
 };
 
 // Costs are money; compare with a cent-level epsilon so float noise never
@@ -388,8 +393,9 @@ const planIngredientCostPropagation = async (
 
   // Seed — never check — the entry node: a cycle coming back to a recipe owned
   // by this ingredient is then caught by the guard in planRecipeCostPropagation.
-  plan.visited.add(`ingredient_${ingredientId}`);
-  plan.costOverrides.set(`ingredient_${ingredientId}`, newCostPerUnit);
+  const entryKey = buildItemKey({ itemType: ITEM_TYPES.INGREDIENT, ingredientId });
+  plan.visited.add(entryKey);
+  plan.costOverrides.set(entryKey, newCostPerUnit);
 
   const ingredientDoc = await transaction.get(
     ingredientsRef(bakeryId).doc(ingredientId),
@@ -505,6 +511,7 @@ const reconcileOwnerCost = (bakeryId, owner = {}, editor = null) =>
 
 module.exports = {
   MAX_DEPTH,
+  ownerKeyOf,
   resolveRecipeId,
   normalizeComponent,
   assertGraphIsSane,
