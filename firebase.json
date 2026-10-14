@@ -6,7 +6,7 @@
   "functions": [
     {
       "source": "functions",
-      "runtime": "nodejs20",
+      "runtime": "nodejs22",
       "codebase": "default",
       "predeploy": [
         "npm --prefix functions run check:filenames"

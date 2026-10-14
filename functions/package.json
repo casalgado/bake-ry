@@ -25,7 +25,7 @@
     "schema:snapshot": "node scripts/schema-snapshot.js"
   },
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "main": "src/index.js",
   "dependencies": {
@@ -34,7 +34,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "firebase-admin": "^12.6.0",
-    "firebase-functions": "^6.2.0",
+    "firebase-functions": "^7.4.0",
     "mailauth": "^7.1.1",
     "node-forge": "^1.4.0",
     "postal-mime": "^4.0.4",
