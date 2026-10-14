@@ -53,6 +53,14 @@ class BakerySettings extends BaseModel {
       defaultReportFilter: "dueDate",
       showMultipleReports: false,
     },
+    products: {
+      useProductCost: false,
+      offersWholeGrain: false, // asks per variation whether an integral version exists
+    },
+    // Opt-in module, switched on by a system admin.
+    accounting: {
+      enabled: false,
+    },
     invoicing: {
       defaultTermsAndConditions: "",
       showProductDescriptions: true,

@@ -71,6 +71,7 @@ const createBakeryService = () => {
           id: uid,
           email: userData.email,
           name: userData.name,
+          phone: String(userData.phone || '').replace(/\D/g, ''), // same as User.formatPhone
           role: 'bakery_admin',
           bakeryId: bakeryId,
           createdAt: new Date(),
