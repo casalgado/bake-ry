@@ -22,11 +22,11 @@
 - `POST /recipes/reconcile-costs` (admin) — recompute-and-correct one owner, for `usedInRecipes` drift.
 - Full reference: `docs/recipe-costing.md`.
 
-Docs: `inventory-next-steps.md` A1–A8 checked (front repo).
+Docs: `zplanning/inventory/INVENTORY.md` (front repo).
 
 ## Next (Phase B — frontend only, backend exists)
 
-**Before any code:** settle recipe-per-combination vs copy-and-scale (my idea vs documented decision, IMPLEMENTATION §2/§11.3). Decides B3's shape.
+**Before any code:** settle recipe-per-combination vs copy-and-scale (my idea vs documented decision, INVENTORY.md §9). Decides B3's shape.
 
 - B1 — ProductForm mode selector (Sin control / Compro y vendo / Lo produzco). None-products never show inventory UI.
 - B2 — IngredientForm: optional recipe + mandatory yield for non-resale ingredients, pass-through/stocked toggle, preferredSupplier.
@@ -39,6 +39,6 @@ Nothing in B is blocked.
 
 ## Kickoff prompt (Phase B)
 
-> Phase B of `zplanning/inventory/inventory-next-steps.md`, frontend only, backend already exists. Don't touch backend — flag missing endpoints instead of improvising.
-> Read first: `inventory-next-steps.md` (Phase B), `inventory-ux-plan.md`, `strategy/INVENTORY-IMPLEMENTATION.md` §2–§5, §11.
-> Before B3: discuss recipe-per-combination vs the documented copy-and-scale decision (§2, §11.3 — rejected base-recipe-with-multiplier because icing doesn't scale with sponge). Be critical of the existing decision. B1/B2 can start first.
+> Phase B, frontend only, backend already exists. Don't touch backend — flag missing endpoints instead of improvising.
+> Read first: `zplanning/inventory/INVENTORY.md` (front repo), §1, §3 and §8 for what is still open.
+> Before B3: discuss recipe-per-combination vs the documented copy-and-scale decision (INVENTORY.md §9 — rejected base-recipe-with-multiplier because icing doesn't scale with sponge). Be critical of the existing decision. B1/B2 can start first.

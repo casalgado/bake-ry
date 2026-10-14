@@ -180,7 +180,7 @@ Storage: `gs://bake-ry.appspot.com/inbound_emails/{bakeryId}/{id}.eml` (content-
    - Expenses: `expenseController.js` / `expenseRoutes.js` are **empty files**, and there's no Expense model.
    - Inventory: the stock ledger (`bakeries/{id}/stocks`, `stockMovements`) already has a `purchase` movement type (`src/services/stockService.js`).
    - `Ingredient.preferredSupplier` is free text ("suppliers belong to the balance-sheet epic"), and there's no Supplier entity.
-   - The inventory spec is `zplanning/inventory/INVENTORY-IMPLEMENTATION.md` in the **bake-ry-front** repo; read it first.
+   - The inventory spec is `zplanning/inventory/INVENTORY.md` in the **bake-ry-front** repo; read it first.
    - The hard part is mapping supplier line items ("HARINA TRIGO BULTO X 50KG") to ingredients, with unit conversion.
 7. Minor / optional:
    - DMARC for `carsalhaz.com` (it has none; Google Workspace mail).
