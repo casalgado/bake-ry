@@ -273,7 +273,7 @@ const bakerySettingsController = {
         await handleSubscriptionUpdate(patchData.subscription, bakeryId, req.user);
       }
 
-      const result = await bakerySettingsService.patch(id, patchData, bakeryId);
+      const result = await bakerySettingsService.patch(id, patchData, bakeryId, req.user);
       baseController.handleResponse(res, result);
     } catch (error) {
       baseController.handleError(res, error);

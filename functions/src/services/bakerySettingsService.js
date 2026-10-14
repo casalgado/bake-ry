@@ -4,6 +4,21 @@ const { BakerySettings, ProductCategory } = require('../models/BakerySettings');
 const { NotFoundError } = require('../utils/errors');
 const User = require('../models/User');
 
+const isPlainObject = (value) =>
+  value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
+
+// Incoming keys win; a key that is an object on both sides is merged one level deep.
+// Arrays and dates are replaced whole.
+const mergeGroups = (current = {}, incoming) => {
+  const merged = { ...current, ...incoming };
+  for (const key of Object.keys(incoming)) {
+    if (isPlainObject(incoming[key]) && isPlainObject(current[key])) {
+      merged[key] = { ...current[key], ...incoming[key] };
+    }
+  }
+  return merged;
+};
+
 const createBakerySettingsService = () => {
   const baseService = createBaseService('settings', BakerySettings, 'bakeries/{bakeryId}');
   const usersService = createBaseService('users', User, 'bakeries/{bakeryId}');
@@ -23,7 +38,7 @@ const createBakerySettingsService = () => {
     }
   };
 
-  const patch = async (id, data, bakeryId) => {
+  const patch = async (id, data, bakeryId, editor = null) => {
     try {
       const docRef = baseService.getCollectionRef(bakeryId).doc('default');
       const doc = await docRef.get();
@@ -34,16 +49,20 @@ const createBakerySettingsService = () => {
 
       const currentSettings = BakerySettings.fromFirestore(doc);
 
-      // `features` is replaced whole and the model fills the gaps with defaults. When
-      // inventory went live (`enabledAt`, set by stockService.getInventoryStart) is
-      // the server's record, so a form that rebuilds `features` without it must not
-      // reset it, and one that leaves inventory out must not switch it off.
+      // base patch replaces top-level fields whole and the model refills what is
+      // missing from defaults, so merge here: a client sending one group must not
+      // reset the others.
+      for (const field of ['features', 'branding', 'subscription']) {
+        if (data[field]) {
+          data[field] = mergeGroups(currentSettings[field], data[field]);
+        }
+      }
+
+      // When inventory went live (`enabledAt`, set by stockService.getInventoryStart)
+      // is the server's record, so a client must not reset it.
       const storedInventory = currentSettings.features?.inventory;
-      if (data.features && storedInventory) {
-        data.features.inventory = {
-          ...(data.features.inventory ?? storedInventory),
-          enabledAt: storedInventory.enabledAt ?? null,
-        };
+      if (data.features?.inventory && storedInventory) {
+        data.features.inventory.enabledAt = storedInventory.enabledAt ?? null;
       }
 
       // If we have product categories to update, process them
@@ -54,7 +73,7 @@ const createBakerySettingsService = () => {
         );
       }
 
-      return baseService.patch('default', data, bakeryId);
+      return baseService.patch('default', data, bakeryId, editor);
     } catch (error) {
       console.error('Error patching settings:', error);
       throw error;

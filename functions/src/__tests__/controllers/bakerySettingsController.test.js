@@ -74,6 +74,7 @@ describe('Bakery Settings Controller', () => {
         body: {
           theme: { primaryColor: '#FF0000' },
         },
+        user: { uid: 'admin-1', email: 'admin@system.test', role: 'system_admin' },
       };
 
       const mockUpdated = {
@@ -91,6 +92,7 @@ describe('Bakery Settings Controller', () => {
         'default',
         req.body,
         'bakery123',
+        req.user,
       );
       expect(res.json).toHaveBeenCalledWith(mockUpdated);
     });

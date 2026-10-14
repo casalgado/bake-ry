@@ -163,6 +163,48 @@ describe('Bakery Settings Service Tests', () => {
       });
     });
 
+    it('keeps stored keys and groups the patch does not send', async () => {
+      const ref = await setupDefaultSettings();
+      await ref.update({
+        features: {
+          order: { defaultDate: 'delivery' },
+          einvoicing: { enabled: true, softwareId: 'abc' },
+        },
+        subscription: { status: 'ACTIVE', savedCardId: 'card-1' },
+      });
+
+      await bakerySettingsService.patch('default', {
+        features: { order: { timeOfDay: true } },
+        subscription: { status: 'PAYMENT_FAILED' },
+      }, testStoreId);
+
+      const { features, subscription } = (await ref.get()).data();
+      expect(features.order.timeOfDay).toBe(true);
+      expect(features.order.defaultDate).toBe('delivery');
+      expect(features.einvoicing.softwareId).toBe('abc');
+      expect(subscription.status).toBe('PAYMENT_FAILED');
+      expect(subscription.savedCardId).toBe('card-1');
+    });
+
+    it('records who made the change', async () => {
+      const ref = await setupDefaultSettings();
+
+      await bakerySettingsService.patch(
+        'default',
+        { features: { order: { timeOfDay: true } } },
+        testStoreId,
+        { uid: 'admin-1', email: 'admin@system.test', role: 'system_admin' },
+      );
+
+      const history = await ref.collection('updateHistory').get();
+      expect(history.size).toBe(1);
+      expect(history.docs[0].data().editor).toEqual({
+        userId: 'admin-1',
+        email: 'admin@system.test',
+        role: 'system_admin',
+      });
+    });
+
     it('should throw NotFoundError when patching non-existent settings', async () => {
       await expect(
         bakerySettingsService.patch('default', { theme: {} }, testStoreId),
