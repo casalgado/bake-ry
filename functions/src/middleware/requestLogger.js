@@ -77,46 +77,40 @@ const requestLogger = (req, res, next) => {
         console.log('Response Body:', logData);
       }
 
-      // Only save to file if in development
-      if (isDevelopment()) {
-        try {
-          console.log('Saving request log to file');
-          // Create logs directory if it doesn't exist
-          const logsDir = path.join(__dirname, 'request_logs');
-          if (!fs.existsSync(logsDir)) {
-            fs.mkdirSync(logsDir, { recursive: true });
-          }
+      // Save to file (dev only, guarded at the top)
+      try {
+        const logsDir = path.join(__dirname, 'request_logs');
+        fs.mkdirSync(logsDir, { recursive: true });
 
-          // Create log entry with request and response data
-          const logEntry = {
-            timestamp: new Date().toISOString(),
-            request: {
-              method: req.method,
-              url: req.originalUrl,
-              body: req.body,
-              query: req.query,
-              params: req.params,
-            },
-            response: {
-              statusCode: res.statusCode,
-              body: logData,
-              responseTime: Date.now() - startTime,
-            },
-          };
-          let url = req.originalUrl.split('/');
-          let last_part = url[url.length - 1].split('?')[0];
-          const d = new Date();
-          const p = (n, len = 2) => String(n).padStart(len, '0');
-          const ts = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}h${p(d.getMinutes())}m${p(d.getSeconds())}s${p(d.getMilliseconds(), 3)}`;
-          const filename = `${ts}_${req.method}_${last_part}.json`;
-          fs.writeFileSync(
-            path.join(logsDir, filename),
-            JSON.stringify(logEntry, null, 2),
-          );
-          console.log(`Request log saved to ${filename}`);
-        } catch (error) {
-          console.error('Error saving request log:', error);
-        }
+        // Create log entry with request and response data
+        const logEntry = {
+          timestamp: new Date().toISOString(),
+          request: {
+            method: req.method,
+            url: req.originalUrl,
+            body: req.body,
+            query: req.query,
+            params: req.params,
+          },
+          response: {
+            statusCode: res.statusCode,
+            body: logData,
+            responseTime: Date.now() - startTime,
+          },
+        };
+        // /bakeries/:bakeryId/settings/default -> settings_default
+        const segments = req.originalUrl.split('?')[0].split('/').filter(Boolean);
+        const slug = (segments[0] === 'bakeries' ? segments.slice(2) : segments).join('_') || 'root';
+        const d = new Date();
+        const p = (n, len = 2) => String(n).padStart(len, '0');
+        const ts = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}h${p(d.getMinutes())}m${p(d.getSeconds())}s${p(d.getMilliseconds(), 3)}`;
+        const filename = `${ts}_${req.method}_${slug}.json`;
+        fs.writeFileSync(
+          path.join(logsDir, filename),
+          JSON.stringify(logEntry, null, 2),
+        );
+      } catch (error) {
+        console.error('Error saving request log:', error);
       }
     } catch (e) {
       console.log('Error processing response body:', e.message);
