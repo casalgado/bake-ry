@@ -14,9 +14,9 @@ Lo marcado con **(verificar con el contador)** no lo pudimos confirmar en fuente
   - **Modalidad archivo `.p12`, no token USB.** El token no se puede exportar y el servidor tiene que firmar solo.
   - Precio con IVA, vigencia, tiempo de entrega y proceso de validación de identidad.
   - Referencia 2025: unos $150.000 a $300.000 COP al año.
-- [ ] **5. Comprar el certificado.** Entregarme el `.p12` y su clave por un canal seguro, nunca por correo ni chat. Yo lo cargo en Secret Manager y esto lo hacemos juntos.
-- [ ] **6. Registro en el portal de habilitación** (`catalogo-vpfe.dian.gov.co`): generar token y registrar el modo de operación "Software propio". Me entregas el ID del software, el PIN y el TestSetId.
-- [ ] **7. Correr el set de pruebas conmigo** (60 facturas, 20 notas crédito, 20 notas débito) cuando termine la fase B3 del código.
+- [x] **5. Comprar el certificado.** Hecho 2026-10-19: Camerfirma, vence 2027-10-19. En Secret Manager como `einvoice-cert-901417532` y `einvoice-cert-pass-901417532`.
+- [x] **6. Registro en el portal de habilitación** (`catalogo-vpfe.dian.gov.co`): generar token y registrar el modo de operación "Software propio". Me entregas el ID del software, el PIN y el TestSetId. Hecho 2026-10-19: software "MAD", ID `edda25e6-f922-475e-b4bf-aa0cbc6238e7`, TestSetId `d901e326-d7e4-4dde-bccb-ff086080cbee`.
+- [ ] **7. Correr el set de pruebas conmigo** (en esta cuenta basta 1 factura aceptada; se pueden enviar hasta 30 facturas, 10 notas crédito y 10 notas débito) cuando termine la fase B3 del código.
 - [ ] **8. Con el estado "Habilitado":** elegir la fecha de inicio de facturación electrónica y pedir la numeración en MUISCA (prefijo y rango). (verificar con el contador)
 - [ ] **9. Asociar la numeración en el portal de habilitación** y entregarme prefijo, rango y vigencia.
 - [ ] **10. Producción:** primera factura real, en conjunto.

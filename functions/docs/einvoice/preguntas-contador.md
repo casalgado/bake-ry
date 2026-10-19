@@ -10,7 +10,6 @@
 - Nuestro software genera el XML (UBL 2.1), lo firma con el certificado y lo envía a la DIAN. La DIAN responde si lo acepta o lo rechaza.
 - La DIAN actualiza el RUT en la fecha de inicio elegida y agrega la responsabilidad 37 (obligado a facturar electrónicamente).
 - El número de factura es prefijo más consecutivo, único por empresa. El CUFE (código único de la factura) es único a nivel nacional.
-- Verificamos el anexo técnico v1.9 (Resolución 165 de 2023), que sigue vigente. **No** verificamos en fuentes oficiales los pasos exactos en MUISCA ni los requisitos del RUT, por eso las preguntas 1 a 3.
 
 ## Preguntas
 
@@ -18,29 +17,18 @@
 
 **1. ¿El RUT de la panadería está vigente y actualizado? ¿Qué responsabilidades tiene (48 IVA, régimen ordinario o Simple)?**
 
-Respuesta:
+Respuesta: Régimen Simple (RST). Falta confirmar en el RUT si es responsable o no responsable de IVA.
 
-**2. Hoy facturan con Alegra. ¿Quién compró el certificado de firma digital: la panadería, o lo gestiona Alegra con el suyo? ¿La panadería tiene el archivo (`.p12`) y su contraseña? ¿Cuándo vence?**
-
-Respuesta:
 
 **2b. ¿Cuál es su resolución de numeración actual en Alegra: prefijo, rango, fecha de vigencia y consecutivo en el que van? ¿Hay una resolución aparte para POS?**
 
 Respuesta:
 
-**2c. ¿Hay contrato o plan con Alegra con fecha de vencimiento? ¿Alegra es también su software contable, o solo factura?**
-
-Respuesta:
-
-**3. ¿Quién es el representante legal que hará los trámites, y tiene su firma electrónica DIAN (IFE) activa?**
+**3. ¿El representante legal tiene su firma electrónica DIAN (IFE) activa?**
 
 Respuesta:
 
 ### Impuestos de los productos
-
-**4. ¿Qué impuesto lleva cada tipo de producto: IVA 19%, IVA 5%, impuesto al consumo, excluido o exento? ¿Algo cambia si se consume en el local o se lleva?**
-
-Respuesta:
 
 **5. ¿Les aplican retenciones (retefuente, reteIVA, reteICA), o se las practican sus clientes? ¿Deben aparecer en la factura?**
 
@@ -52,7 +40,7 @@ Respuesta:
 
 Respuesta:
 
-**7. ¿A quiénes facturan: empresas (NIT), personas naturales o consumidor final? ¿Qué datos del cliente deben pedirse (tipo y número de documento, correo, ciudad)?**
+**7. ¿Qué datos del cliente deben pedirse (tipo y número de documento, correo, ciudad) B2B y B2C?**
 
 Respuesta:
 
@@ -66,9 +54,9 @@ Respuesta:
 
 Respuesta:
 
-**10. Domicilios o envíos y propinas: ¿llevan IVA, o van aparte?**
+**10. Domicilios o envíos, van aparte? Como se facturan?**
 
-Respuesta:
+Respuesta: No se cobra IVA. Va como un ítem más de la factura.
 
 **11. Pagos parciales y ventas a crédito: ¿cómo se expresan en la factura?**
 
@@ -84,6 +72,8 @@ Respuesta:
 
 Respuesta:
 
+**16. Como se estan procesando actualmente las facturas de pagos de servicios y otros gastos, como se genera el PyG?**
+
 **13b. Para que el software nuevo y Alegra convivan sin chocar, proponemos pedir una resolución nueva con un prefijo distinto. ¿Están de acuerdo? ¿Hay algún inconveniente contable en tener dos prefijos activos durante la transición?**
 
 Respuesta:
@@ -96,6 +86,8 @@ Respuesta:
 
 Respuesta:
 
-**15. ¿Usan software contable (Siigo, World Office, etc.) que necesite recibir las facturas?**
+**15. ¿Como procesamos esas facturas una vez las hagamos?**
 
 Respuesta:
+
+
