@@ -12,6 +12,12 @@ const parseSpanishName = (fullName, category) => {
     return { firstName: '', lastName: '', type: 'unknown' };
   }
 
+  // Business names are kept as typed
+  if (category === 'B2B') {
+    const name = fullName.replace(/\s+/g, ' ').trim();
+    return { firstName: name, lastName: '', name };
+  }
+
   // Clean the input while preserving diacritics and ñ
   let cleanName = fullName
     .replace(/\.$/, '')      // Remove trailing period
@@ -19,20 +25,13 @@ const parseSpanishName = (fullName, category) => {
     .trim()
     .toLowerCase();
 
-  // Check for business names
-  if (category === 'B2B') {
-    return {
-      firstName: capitalize(cleanName),
-      name: capitalize(cleanName),
-      lastName: '',
-    };
-  }
-
   // Handle parenthetical information
   cleanName = cleanName.replace(/\s*\([^)]*\)/g, '');
 
   // Handle single word names
   const parts = cleanName.split(' ').filter(Boolean);
+  // Accent-free copy for matching only; output keeps the original spelling
+  const plain = parts.map(p => p.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
   if (parts.length === 1) {
     return {
       firstName: capitalize(parts[0]),
@@ -45,12 +44,12 @@ const parseSpanishName = (fullName, category) => {
   let lastName = '';
 
   // Handle special compound names with "del/de la"
-  if (parts[0] === 'maría' && parts[1] === 'del' && parts[2]) {
+  if (plain[0] === 'maria' && plain[1] === 'del' && parts[2]) {
     firstName = `${parts[0]} ${parts[1]} ${parts[2]}`;
     lastName = parts.slice(3).join(' ');
   }
   // Handle other compound first names
-  else if (['maría', 'josé', 'juan', 'ana', 'luís', 'carlos'].includes(parts[0]) && parts[1]) {
+  else if (['maria', 'jose', 'juan', 'ana', 'luis', 'carlos'].includes(plain[0]) && parts.length > 2) {
     firstName = `${parts[0]} ${parts[1]}`;
     lastName = parts.slice(2).join(' ');
   }

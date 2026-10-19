@@ -46,7 +46,7 @@ class SystemSettings extends BaseModel {
     { value: "bbva", label: "BBVA", displayText: "BB" },
     { value: "nequi", label: "Nequi", displayText: "NQ" },
     { value: "quote", label: "Cotización", displayText: "CO" },
-    { value: "complimentary", label: "Regalo", displayText: "RE" },
+    { value: "complimentary", label: "Cortesía", displayText: "CT" },
   ];
 
   static DEFAULT_VARIATION_TEMPLATES = {

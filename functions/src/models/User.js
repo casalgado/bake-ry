@@ -30,9 +30,10 @@ class User extends BaseModel {
     this.bakeryId = bakeryId;
 
     // Clean and set names
-    this.firstName = parseSpanishName(name).firstName;
-    this.lastName = parseSpanishName(name).lastName;
-    this.name = parseSpanishName(name).name;
+    const parsedName = parseSpanishName(name, category);
+    this.firstName = parsedName.firstName;
+    this.lastName = parsedName.lastName;
+    this.name = parsedName.name;
     this.legalName = legalName.toLowerCase().trim();
 
     this.address = address;
