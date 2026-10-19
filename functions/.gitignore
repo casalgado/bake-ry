@@ -20,3 +20,4 @@ src/seeds/runners/auth-prune-*.json
 src/seeds/runners/auth-audit-report.json
 zsandbox/
 zdocs/
+src/seeds/recipes/
