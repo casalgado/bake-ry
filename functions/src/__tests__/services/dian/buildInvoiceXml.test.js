@@ -60,6 +60,7 @@ describe('dian/buildInvoiceXml', () => {
       issueTime: '14:30:05-05:00',
       subtotal: 25000,
       iva: 3800,
+      inc: 0,
       total: 28800,
       sellerNit: '900123456',
       buyerId: '222222222222',
@@ -75,6 +76,69 @@ describe('dian/buildInvoiceXml', () => {
     expect(xml).toContain('<cbc:LineCountNumeric>2</cbc:LineCountNumeric>');
     expect(xml).toContain('<cbc:PayableAmount currencyID="COP">28800.00</cbc:PayableAmount>');
     expect(xml.match(/<cac:InvoiceLine>/g)).toHaveLength(2);
+  });
+
+  it('puts tax only on taxed lines, and only taxed bases in TaxExclusiveAmount', () => {
+    expect(xml.match(/<cac:TaxTotal>/g)).toHaveLength(2); // the 19% line + the invoice level
+    expect(xml).toContain('<cbc:TaxExclusiveAmount currencyID="COP">20000.00</cbc:TaxExclusiveAmount>');
+    expect(xml).not.toContain('<cbc:Percent>0.00</cbc:Percent>');
+  });
+
+  it('writes no TaxTotal at all when every line is excluded', () => {
+    const { xml: untaxed } = buildInvoiceXml({
+      invoice: buildInvoiceData(makeOrder({
+        orderItems: [{ productId: 'p2', productName: 'Pan', quantity: 2, basePrice: 5000, currentPrice: 5000, taxPercentage: 0 }],
+      })),
+      issuer,
+      number: 'SETP990000003',
+      issuedAt,
+    });
+    expect(untaxed).not.toContain('<cac:TaxTotal>');
+    expect(untaxed).toContain('<cbc:TaxExclusiveAmount currencyID="COP">0.00</cbc:TaxExclusiveAmount>');
+    expect(untaxed).toContain('<cbc:PayableAmount currencyID="COP">10000.00</cbc:PayableAmount>');
+  });
+
+  it('writes one invoice-level TaxTotal per tax type and feeds INC to the CUFE', () => {
+    const mixed = makeOrder({
+      orderItems: [
+        { productId: 'p1', productName: 'Torta', quantity: 1, basePrice: 11900, currentPrice: 11900, taxPercentage: 19 },
+        { productId: 'p4', productName: 'Café', quantity: 1, basePrice: 10800, currentPrice: 10800, taxPercentage: 8, taxType: 'INC' },
+      ],
+    });
+    const result = buildInvoiceXml({ invoice: buildInvoiceData(mixed), issuer, number: 'SETP990000004', issuedAt });
+
+    expect(result.xml.match(/<cac:TaxTotal>/g)).toHaveLength(4); // 2 lines + IVA + INC
+    expect(result.xml).toContain('<cbc:ID>04</cbc:ID><cbc:Name>INC</cbc:Name>');
+    expect(result.cufe).toBe(computeCufe({
+      number: 'SETP990000004',
+      issueDate: '2026-10-20',
+      issueTime: '14:30:05-05:00',
+      subtotal: 20000,
+      iva: 1900,
+      inc: 800,
+      total: 22700,
+      sellerNit: '900123456',
+      buyerId: '222222222222',
+      technicalKey: issuer.resolution.technicalKey,
+      environment: '2',
+    }));
+  });
+
+  it('uses the trade name as party name and writes notes', () => {
+    const { xml: named } = buildInvoiceXml({
+      invoice: buildInvoiceData(order),
+      issuer: { ...issuer, tradeName: 'ÑANDÚ' },
+      number: 'SETP990000005',
+      issuedAt,
+      notes: ['Régimen simple: abstenerse de practicar retención.'],
+    });
+    expect(named).toContain('<cac:PartyName><cbc:Name>ÑANDÚ</cbc:Name></cac:PartyName>');
+    expect(named).toContain('<cbc:Note>Régimen simple: abstenerse de practicar retención.</cbc:Note>');
+    expect(named).toContain('unitCode="94"');
+  });
+
+  it('identifies the buyer in PartyIdentification (FAK61)', () => {
+    expect(xml).toContain('<cac:PartyIdentification><cbc:ID schemeName="13">222222222222</cbc:ID></cac:PartyIdentification>');
   });
 
   it('escapes special characters', () => {

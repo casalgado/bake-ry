@@ -11,6 +11,14 @@ class Product extends BaseModel {
     RECIPE: 'recipe',
   };
 
+  // Which tax taxPercentage refers to. A 0% product is excluded (no tax on the
+  // DIAN invoice). Existing products read as IVA, so there is no migration.
+  // ponytail: no "exento" (taxed at 0%); add a third state if a client needs it.
+  static TAX_TYPES = {
+    IVA: 'IVA',
+    INC: 'INC',
+  };
+
   // Whether costPrice is typed by hand or computed from the recipe (§7).
   static COST_PRICE_SOURCES = {
     MANUAL: 'manual',
@@ -34,6 +42,7 @@ class Product extends BaseModel {
     costPriceSource = Product.COST_PRICE_SOURCES.MANUAL,
     currentPrice,
     taxPercentage = 0,
+    taxType = Product.TAX_TYPES.IVA,
 
     // Inventory
     inventoryMode = Product.INVENTORY_MODES.NONE,
@@ -78,6 +87,7 @@ class Product extends BaseModel {
     this.usedInRecipes = usedInRecipes;
     this.currentPrice = currentPrice || basePrice;
     this.taxPercentage = Number(Number(taxPercentage).toFixed(1));
+    this.taxType = taxType;
 
     // Display & Marketing
     this.displayOrder = displayOrder;

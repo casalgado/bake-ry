@@ -1,5 +1,6 @@
 const { BadRequestError } = require('../../utils/errors');
 const { getDateInColombia } = require('../../utils/dateUtils');
+const Product = require('../../models/Product');
 
 // Annex v1.9 §5.2.1.1: monetary values may be off by ±2.00 COP.
 const TOLERANCE = 2;
@@ -19,7 +20,8 @@ const CONSUMIDOR_FINAL = {
 
 // PaymentMeansCode, annex table 13.3.4.2. Anything unmapped is "no definido".
 // ponytail: verify codes against the DIAN test set; card methods not mapped yet.
-const PAYMENT_MEANS_CODES = { cash: '10', transfer: '47' };
+// transfer = 31 ("transferencia débito"), as in the bakery's invoices the DIAN already accepted.
+const PAYMENT_MEANS_CODES = { cash: '10', transfer: '31' };
 
 const round2 = (n) => Math.round(n * 100) / 100;
 
@@ -41,6 +43,7 @@ const toLine = (item, ratio) => {
     description: item.invoiceTitle,
     code: item.productId,
     quantity: item.quantity,
+    taxType: item.taxType,
     taxRate: item.taxPercentage,
   };
 
@@ -70,17 +73,34 @@ const deliveryLine = (fee) => ({
   free: false,
 });
 
-/** Tax subtotals grouped by rate. ponytail: IVA only; INC/ICA wait for accountant Q4. */
+/**
+ * Tax subtotals grouped by type and rate. 0% lines are excluded products: they
+ * carry no tax and stay out of the taxable base, as in the invoices the DIAN
+ * already accepted from this bakery.
+ */
 const groupTaxes = (lines) => {
-  const byRate = new Map();
-  lines.filter((l) => !l.free).forEach((l) => {
-    const group = byRate.get(l.taxRate) || { rate: l.taxRate, base: 0, amount: 0 };
+  // Checked here, before einvoiceService reserves a number: a bad type found
+  // later would leave that number stuck in a draft. Free lines count too, since
+  // the XML writes their tax block.
+  const badLine = lines.find((l) => l.taxRate > 0 && !Object.values(Product.TAX_TYPES).includes(l.taxType));
+  if (badLine) {
+    throw new BadRequestError(`Tipo de impuesto inválido en "${badLine.description}": ${badLine.taxType}`);
+  }
+
+  const byKey = new Map();
+  lines.filter((l) => !l.free && l.taxRate > 0).forEach((l) => {
+    const key = `${l.taxType}-${l.taxRate}`;
+    const group = byKey.get(key) || { type: l.taxType, rate: l.taxRate, base: 0, amount: 0 };
     group.base = round2(group.base + l.base);
     group.amount = round2(group.amount + l.taxAmount);
-    byRate.set(l.taxRate, group);
+    byKey.set(key, group);
   });
-  return [...byRate.values()];
+  return [...byKey.values()];
 };
+
+const sumBy = (groups, field, type) => round2(groups
+  .filter((g) => !type || g.type === type)
+  .reduce((sum, g) => sum + g[field], 0));
 
 /**
  * Normalizes an Order into what the invoice needs. No XML here: all the
@@ -104,7 +124,7 @@ const buildInvoiceData = (order, { buyer = CONSUMIDOR_FINAL } = {}) => {
 
   const taxes = groupTaxes(lines);
   const lineExtension = round2(lines.reduce((sum, l) => sum + l.base, 0));
-  const taxTotal = round2(taxes.reduce((sum, t) => sum + t.amount, 0));
+  const taxTotal = sumBy(taxes, 'amount');
   const payable = round2(lineExtension + taxTotal);
 
   if (Math.abs(payable - order.total) > TOLERANCE) {
@@ -122,7 +142,15 @@ const buildInvoiceData = (order, { buyer = CONSUMIDOR_FINAL } = {}) => {
     buyer,
     lines,
     taxes,
-    totals: { lineExtension, taxTotal, payable },
+    // taxExclusive: taxable base only. iva/inc: per-type tax, for the CUFE.
+    totals: {
+      lineExtension,
+      taxExclusive: sumBy(taxes, 'base'),
+      taxTotal,
+      iva: sumBy(taxes, 'amount', 'IVA'),
+      inc: sumBy(taxes, 'amount', 'INC'),
+      payable,
+    },
     // ponytail: partial payments are ignored; paid = cash sale, unpaid = credit (accountant Q11).
     payment: {
       form: order.isPaid ? '1' : '2', // 1 contado, 2 crédito

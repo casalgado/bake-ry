@@ -1025,6 +1025,7 @@ describe('SalesReport', () => {
 
       // All taxable items are 19%: order-1 prod-1 (3), order-2 prod-1 (2), order-3 prod-3 (1), order-4 prod-1 (1), order-4 prod-5 (2)
       expect(taxMetrics[0]).toEqual({
+        taxType: 'IVA',
         taxPercentage: 19,
         quantity: 9,
         baseAmount: 72267,

@@ -20,17 +20,34 @@ describe('dian/invoiceData', () => {
 
     expect(data.lines.map((l) => l.base)).toEqual([20000, 5000]);
     expect(data.lines.map((l) => l.taxAmount)).toEqual([3800, 0]);
-    expect(data.totals).toEqual({ lineExtension: 25000, taxTotal: 3800, payable: 28800 });
+    expect(data.totals).toEqual({
+      lineExtension: 25000, taxExclusive: 20000, taxTotal: 3800, iva: 3800, inc: 0, payable: 28800,
+    });
     expect(data.totals.payable).toBe(order.total);
     expect(data.buyer).toBe(CONSUMIDOR_FINAL);
   });
 
-  it('groups taxes by rate', () => {
+  it('groups taxes by type and rate, leaving 0% (excluded) lines out', () => {
     const { taxes } = buildInvoiceData(makeOrder());
-    expect(taxes).toEqual([
-      { rate: 19, base: 20000, amount: 3800 },
-      { rate: 0, base: 5000, amount: 0 },
+    expect(taxes).toEqual([{ type: 'IVA', rate: 19, base: 20000, amount: 3800 }]);
+  });
+
+  it('keeps IVA and INC apart and totals each one', () => {
+    const order = makeOrder({
+      orderItems: [
+        { productId: 'p1', productName: 'Torta', quantity: 1, basePrice: 11900, currentPrice: 11900, taxPercentage: 19 },
+        { productId: 'p4', productName: 'Café', quantity: 1, basePrice: 10800, currentPrice: 10800, taxPercentage: 8, taxType: 'INC' },
+        { productId: 'p2', productName: 'Pan', quantity: 1, basePrice: 5000, currentPrice: 5000, taxPercentage: 0 },
+      ],
+    });
+    const data = buildInvoiceData(order);
+
+    expect(data.taxes).toEqual([
+      { type: 'IVA', rate: 19, base: 10000, amount: 1900 },
+      { type: 'INC', rate: 8, base: 10000, amount: 800 },
     ]);
+    expect(data.totals).toMatchObject({ taxExclusive: 20000, iva: 1900, inc: 800, taxTotal: 2700, payable: 27700 });
+    expect(data.totals.payable).toBe(order.total);
   });
 
   it('adds delivery as an untaxed line', () => {
@@ -67,7 +84,7 @@ describe('dian/invoiceData', () => {
 
   it('marks unpaid orders as credit and paid ones as cash', () => {
     expect(buildInvoiceData(makeOrder({ isPaid: false })).payment)
-      .toMatchObject({ form: '2', meansCode: '47', dueDate: '2026-10-20' });
+      .toMatchObject({ form: '2', meansCode: '31', dueDate: '2026-10-20' });
     expect(buildInvoiceData(makeOrder({ isPaid: true, paymentMethod: 'cash' })).payment)
       .toMatchObject({ form: '1', meansCode: '10' });
   });

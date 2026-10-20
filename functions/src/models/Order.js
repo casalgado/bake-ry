@@ -24,6 +24,7 @@ class OrderItem {
     combination,
     recipeId,
     taxPercentage = 0,
+    taxType,
     isComplimentary = false,
     productionBatch = 1,
     status = 0,
@@ -56,6 +57,8 @@ class OrderItem {
     this.costPrice = costPrice;
     this.recipeId = recipeId;
     this.taxPercentage = Number(Number(taxPercentage).toFixed(1));
+    // Same values as Product.TAX_TYPES. `??` so lines stored without it read as IVA.
+    this.taxType = taxType ?? 'IVA';
     this.isComplimentary = isComplimentary;
     this.productionBatch = productionBatch;
     this.status = status;
@@ -185,6 +188,7 @@ class OrderItem {
       collectionName: this.collectionName,
       isComplimentary: this.isComplimentary,
       taxPercentage: this.taxPercentage,
+      taxType: this.taxType,
       taxMode: this.taxMode,
       quantity: this.quantity,
       currentPrice: this.currentPrice,
@@ -419,15 +423,16 @@ class Order extends BaseModel {
       this.preTaxTotal = this.preTaxSubtotal;
     }
 
-    // Tax breakdown grouped by tax rate (discount-adjusted)
+    // Tax breakdown grouped by tax type and rate (discount-adjusted)
     const taxGroups = {};
     this.orderItems.filter(item => !item.isComplimentary && item.taxPercentage > 0).forEach(item => {
-      if (!taxGroups[item.taxPercentage]) {
-        taxGroups[item.taxPercentage] = { taxPercentage: item.taxPercentage, quantity: 0, baseAmount: 0, taxAmount: 0 };
+      const key = `${item.taxType}-${item.taxPercentage}`;
+      if (!taxGroups[key]) {
+        taxGroups[key] = { taxType: item.taxType, taxPercentage: item.taxPercentage, quantity: 0, baseAmount: 0, taxAmount: 0 };
       }
-      taxGroups[item.taxPercentage].quantity += item.quantity;
-      taxGroups[item.taxPercentage].baseAmount += item.preTaxPrice * item.quantity;
-      taxGroups[item.taxPercentage].taxAmount += item.taxAmount * item.quantity;
+      taxGroups[key].quantity += item.quantity;
+      taxGroups[key].baseAmount += item.preTaxPrice * item.quantity;
+      taxGroups[key].taxAmount += item.taxAmount * item.quantity;
     });
 
     if (discountRatio > 0) {

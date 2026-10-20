@@ -30,6 +30,10 @@ Respuesta:
 
 ### Impuestos de los productos
 
+**4. El café en grano, ¿lleva IVA 5% o impuesto al consumo (INC)? (Hoy en el sistema está con IVA 5%; el pan y el domicilio van excluidos, como en Alegra.)**
+
+Respuesta:
+
 **5. ¿Les aplican retenciones (retefuente, reteIVA, reteICA), o se las practican sus clientes? ¿Deben aparecer en la factura?**
 
 Respuesta:

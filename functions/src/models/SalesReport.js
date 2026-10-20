@@ -229,16 +229,20 @@ class SalesReport {
 
     this.orders.forEach(order => {
       (order.taxBreakdown || []).forEach(group => {
-        if (!byRate[group.taxPercentage]) {
-          byRate[group.taxPercentage] = { taxPercentage: group.taxPercentage, quantity: 0, baseAmount: 0, taxAmount: 0 };
+        // Breakdowns stored before INC support carry no type: they were all IVA.
+        const taxType = group.taxType ?? 'IVA';
+        const key = `${taxType}-${group.taxPercentage}`;
+        if (!byRate[key]) {
+          byRate[key] = { taxType, taxPercentage: group.taxPercentage, quantity: 0, baseAmount: 0, taxAmount: 0 };
         }
-        byRate[group.taxPercentage].quantity += group.quantity;
-        byRate[group.taxPercentage].baseAmount += group.baseAmount;
-        byRate[group.taxPercentage].taxAmount += group.taxAmount;
+        byRate[key].quantity += group.quantity;
+        byRate[key].baseAmount += group.baseAmount;
+        byRate[key].taxAmount += group.taxAmount;
       });
     });
 
-    return Object.values(byRate).sort((a, b) => b.taxPercentage - a.taxPercentage);
+    return Object.values(byRate)
+      .sort((a, b) => a.taxType.localeCompare(b.taxType) || b.taxPercentage - a.taxPercentage);
   }
 
   calculateSalesByPaymentMethod() {

@@ -431,7 +431,20 @@ describe('Order', () => {
     it('should calculate taxBreakdown with only taxable items', () => {
       // Only Product 1 (19%) is taxable, Product 2 (0%) is excluded
       expect(order.taxBreakdown).toEqual([
-        { taxPercentage: 19, quantity: 2, baseAmount: 1680, taxAmount: 320 },
+        { taxType: 'IVA', taxPercentage: 19, quantity: 2, baseAmount: 1680, taxAmount: 320 },
+      ]);
+    });
+
+    it('should keep IVA and INC at the same rate in separate groups', () => {
+      const mixed = new Order({
+        orderItems: [
+          { productId: '1', productName: 'Café', quantity: 1, currentPrice: 1080, taxPercentage: 8, taxType: 'INC' },
+          { productId: '2', productName: 'Jugo', quantity: 1, currentPrice: 1080, taxPercentage: 8 },
+        ],
+      });
+      expect(mixed.taxBreakdown).toEqual([
+        { taxType: 'INC', taxPercentage: 8, quantity: 1, baseAmount: 1000, taxAmount: 80 },
+        { taxType: 'IVA', taxPercentage: 8, quantity: 1, baseAmount: 1000, taxAmount: 80 },
       ]);
     });
 
@@ -758,7 +771,7 @@ describe('Order', () => {
         // Adjusted tax: 160 * 0.9 = 144
         expect(order.totalTaxAmount).toBe(144);
         expect(order.taxBreakdown).toEqual([
-          { taxPercentage: 19, quantity: 1, baseAmount: 756, taxAmount: 144 },
+          { taxType: 'IVA', taxPercentage: 19, quantity: 1, baseAmount: 756, taxAmount: 144 },
         ]);
       });
 
@@ -780,7 +793,7 @@ describe('Order', () => {
         // Adjusted preTax: 840 * 0.9 = 756
         expect(order.preTaxTotal).toBe(756);
         expect(order.taxBreakdown).toEqual([
-          { taxPercentage: 19, quantity: 1, baseAmount: 756, taxAmount: 144 },
+          { taxType: 'IVA', taxPercentage: 19, quantity: 1, baseAmount: 756, taxAmount: 144 },
         ]);
       });
 
@@ -798,7 +811,7 @@ describe('Order', () => {
         expect(order.totalTaxAmount).toBe(160);
         expect(order.preTaxTotal).toBe(840);
         expect(order.taxBreakdown).toEqual([
-          { taxPercentage: 19, quantity: 1, baseAmount: 840, taxAmount: 160 },
+          { taxType: 'IVA', taxPercentage: 19, quantity: 1, baseAmount: 840, taxAmount: 160 },
         ]);
       });
     });
@@ -835,7 +848,7 @@ describe('Order', () => {
         // total = 800,000 + 152,000 = 952,000
         expect(order.total).toBe(952000);
         expect(order.taxBreakdown).toEqual([
-          { taxPercentage: 19, quantity: 1, baseAmount: 800000, taxAmount: 152000 },
+          { taxType: 'IVA', taxPercentage: 19, quantity: 1, baseAmount: 800000, taxAmount: 152000 },
         ]);
       });
     });
@@ -872,7 +885,7 @@ describe('Order', () => {
         // total = 1,000,000 - 200,000 = 800,000
         expect(order.total).toBe(800000);
         expect(order.taxBreakdown).toEqual([
-          { taxPercentage: 19, quantity: 1, baseAmount: 672269, taxAmount: 127731 },
+          { taxType: 'IVA', taxPercentage: 19, quantity: 1, baseAmount: 672269, taxAmount: 127731 },
         ]);
       });
     });
@@ -897,7 +910,7 @@ describe('Order', () => {
         expect(order.totalTaxAmount).toBe(71250);
         expect(order.total).toBe(671250);
         expect(order.taxBreakdown).toEqual([
-          { taxPercentage: 19, quantity: 1, baseAmount: 375000, taxAmount: 71250 },
+          { taxType: 'IVA', taxPercentage: 19, quantity: 1, baseAmount: 375000, taxAmount: 71250 },
         ]);
       });
 
@@ -920,7 +933,7 @@ describe('Order', () => {
         expect(order.totalTaxAmount).toBe(59874);
         expect(order.total).toBe(600000);
         expect(order.taxBreakdown).toEqual([
-          { taxPercentage: 19, quantity: 1, baseAmount: 315126, taxAmount: 59874 },
+          { taxType: 'IVA', taxPercentage: 19, quantity: 1, baseAmount: 315126, taxAmount: 59874 },
         ]);
       });
     });
@@ -944,11 +957,11 @@ describe('Order', () => {
         expect(order.preTaxTotal).toBe(510000);
         expect(order.totalTaxAmount).toBe(81600);
         expect(order.total).toBe(591600);
-        // Integer keys iterate in ascending numeric order
+        // Groups keep insertion order; arrayContaining ignores it
         expect(order.taxBreakdown).toHaveLength(2);
         expect(order.taxBreakdown).toEqual(expect.arrayContaining([
-          { taxPercentage: 19, quantity: 1, baseAmount: 340000, taxAmount: 64600 },
-          { taxPercentage: 10, quantity: 1, baseAmount: 170000, taxAmount: 17000 },
+          { taxType: 'IVA', taxPercentage: 19, quantity: 1, baseAmount: 340000, taxAmount: 64600 },
+          { taxType: 'IVA', taxPercentage: 10, quantity: 1, baseAmount: 170000, taxAmount: 17000 },
         ]));
       });
 
@@ -972,8 +985,8 @@ describe('Order', () => {
         expect(order.total).toBe(510000);
         expect(order.taxBreakdown).toHaveLength(2);
         expect(order.taxBreakdown).toEqual(expect.arrayContaining([
-          { taxPercentage: 19, quantity: 1, baseAmount: 285714, taxAmount: 54286 },
-          { taxPercentage: 10, quantity: 1, baseAmount: 154545, taxAmount: 15455 },
+          { taxType: 'IVA', taxPercentage: 19, quantity: 1, baseAmount: 285714, taxAmount: 54286 },
+          { taxType: 'IVA', taxPercentage: 10, quantity: 1, baseAmount: 154545, taxAmount: 15455 },
         ]));
       });
     });
@@ -996,7 +1009,7 @@ describe('Order', () => {
         expect(order.totalTaxAmount).toBe(209000);
         expect(order.total).toBe(1309000);
         expect(order.taxBreakdown).toEqual([
-          { taxPercentage: 19, quantity: 3, baseAmount: 1100000, taxAmount: 209000 },
+          { taxType: 'IVA', taxPercentage: 19, quantity: 3, baseAmount: 1100000, taxAmount: 209000 },
         ]);
       });
 
@@ -1017,7 +1030,7 @@ describe('Order', () => {
         expect(order.totalTaxAmount).toBe(175631);
         expect(order.total).toBe(1100000);
         expect(order.taxBreakdown).toEqual([
-          { taxPercentage: 19, quantity: 3, baseAmount: 924369, taxAmount: 175631 },
+          { taxType: 'IVA', taxPercentage: 19, quantity: 3, baseAmount: 924369, taxAmount: 175631 },
         ]);
       });
     });
@@ -1042,7 +1055,7 @@ describe('Order', () => {
         expect(order.totalTaxAmount).toBe(188100);
         expect(order.total).toBe(1178100);
         expect(order.taxBreakdown).toEqual([
-          { taxPercentage: 19, quantity: 3, baseAmount: 990000, taxAmount: 188100 },
+          { taxType: 'IVA', taxPercentage: 19, quantity: 3, baseAmount: 990000, taxAmount: 188100 },
         ]);
       });
 
@@ -1065,7 +1078,7 @@ describe('Order', () => {
         expect(order.totalTaxAmount).toBe(158068);
         expect(order.total).toBe(990000);
         expect(order.taxBreakdown).toEqual([
-          { taxPercentage: 19, quantity: 3, baseAmount: 831932, taxAmount: 158068 },
+          { taxType: 'IVA', taxPercentage: 19, quantity: 3, baseAmount: 831932, taxAmount: 158068 },
         ]);
       });
     });
