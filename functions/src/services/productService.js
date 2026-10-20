@@ -33,7 +33,8 @@ const keepServerFields = (current, incoming) => {
         const was = stored.get(combination.id);
         if (!was) return combination;
 
-        const kept = { ...combination, recipeId: was.recipeId };
+        // A combination stored before recipes has no recipeId; Firestore rejects undefined.
+        const kept = { ...combination, recipeId: was.recipeId ?? null };
         if ('costPrice' in combination && followsRecipe(was, combination)) {
           kept.costPrice = was.costPrice;
         }
