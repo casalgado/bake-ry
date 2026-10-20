@@ -439,8 +439,9 @@ const syncIngredientStockDoc = async (bakeryId, ingredient) => {
   }
 };
 
-// ponytail: an open order whose dueDate is more than this many days past counts
-// as forgotten and stops holding stock. Future orders always count.
+// ponytail: an open order whose dueDate, or an open run whose date, is more than
+// this many days past counts as forgotten and stops holding or adding stock.
+// Future ones always count.
 const COMMITTED_WINDOW_DAYS = 10;
 
 /**
@@ -469,6 +470,7 @@ const getCommittedAndIncoming = async (bakeryId) => {
   const add = (map, item, atWarehouse, qty) => {
     const id = buildStockDocId(buildItemKey(toStockItem(item)), atWarehouse);
     map.set(id, (map.get(id) || 0) + (Number(qty) || 0));
+    return id;
   };
 
   orders.docs.forEach((doc) => (doc.data().orderItems || []).forEach((line) => {
@@ -477,15 +479,20 @@ const getCommittedAndIncoming = async (bakeryId) => {
     add(committed, item, line.sourceWarehouseId || warehouseId, line.quantity);
   }));
 
+  // Stock id → the earliest run date adding to it, so a screen can point at it.
+  const incomingDate = new Map();
   runs.docs.forEach((doc) => {
     const run = doc.data();
-    if (run.isDeleted) return;
+    const date = run.date?.toDate ? run.date.toDate() : new Date(run.date);
+    if (run.isDeleted || date < cutoff) return;
     (run.lines || []).forEach((line) => {
-      if (line.status === 'pending') add(incoming, line.item, run.warehouseId, line.plannedQty);
+      if (line.status !== 'pending') return;
+      const id = add(incoming, line.item, run.warehouseId, line.plannedQty);
+      if (!incomingDate.has(id) || date < incomingDate.get(id)) incomingDate.set(id, date);
     });
   });
 
-  return { committed, incoming };
+  return { committed, incoming, incomingDate };
 };
 
 /**
@@ -511,11 +518,17 @@ const getStocks = async (
     stocks = stocks.filter((stock) => (stock.name || '').toLowerCase().includes(needle));
   }
 
-  const { committed, incoming } = await getCommittedAndIncoming(bakeryId);
+  const { committed, incoming, incomingDate } = await getCommittedAndIncoming(bakeryId);
   return stocks.map((stock) => {
     const c = committed.get(stock.id) || 0;
     const i = incoming.get(stock.id) || 0;
-    return { ...stock, committed: c, incoming: i, available: (stock.currentStock || 0) + i - c };
+    return {
+      ...stock,
+      committed: c,
+      incoming: i,
+      incomingDate: incomingDate.get(stock.id) || null,
+      available: (stock.currentStock || 0) + i - c,
+    };
   });
 };
 

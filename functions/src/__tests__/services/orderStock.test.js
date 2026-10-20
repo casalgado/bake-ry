@@ -486,7 +486,7 @@ describe('Order stock', () => {
   describe('availability on getStocks', () => {
     const daysAgo = (n) => new Date(Date.now() - n * 24 * 60 * 60 * 1000);
 
-    it('committed, incoming and available, and an order past the window is not committed', async () => {
+    it('counts committed, incoming and available, ignoring orders and runs past the window', async () => {
       await stockService.writeMovements(bakeryId, [{
         item: { itemType: 'product', productId: 'pan' },
         warehouseId: 'main', qty: 10, type: 'adjustment', name: 'pan', unit: 'uds',
@@ -494,17 +494,42 @@ describe('Order stock', () => {
       await createOrder([line('l1', 'pan', 4, 'stock')], 0);
       await createOrder([line('l1', 'pan', 2, 'produce')], 1); // produce never commits
       await createOrder([line('l1', 'pan', 5, 'stock')], 0, { dueDate: daysAgo(11) });
-      await col('productionRuns').doc('run-1').set({
+      const runDate = daysAgo(1);
+      const run = (date, plannedQty) => ({
         status: 'open',
+        date,
         warehouseId: 'main',
         isDeleted: false,
-        lines: [{ id: 'rl1', item: { type: 'product', id: 'pan', combinationId: null }, plannedQty: 3, status: 'pending' }],
+        lines: [{ id: 'rl1', item: { type: 'product', id: 'pan', combinationId: null }, plannedQty, status: 'pending' }],
       });
+      await col('productionRuns').doc('run-1').set(run(runDate, 3));
+      await col('productionRuns').doc('run-stale').set(run(daysAgo(11), 7));
 
       const rows = await stockService.getStocks(bakeryId, { itemKeys: ['product_pan'] });
 
       expect(rows).toHaveLength(1);
       expect(rows[0]).toMatchObject({ currentStock: 10, committed: 4, incoming: 3, available: 9 });
+      expect(rows[0].incomingDate.getTime()).toBe(runDate.getTime());
+    });
+
+    it('incomingDate is the earliest open run', async () => {
+      const run = (date) => ({
+        status: 'open', date, warehouseId: 'main', isDeleted: false,
+        lines: [{ id: 'rl1', item: { type: 'product', id: 'pan', combinationId: null }, plannedQty: 1, status: 'pending' }],
+      });
+      await stockService.writeMovements(bakeryId, [{
+        item: { itemType: 'product', productId: 'pan' },
+        warehouseId: 'main', qty: 1, type: 'adjustment', name: 'pan', unit: 'uds',
+      }]);
+      const earliest = daysAgo(2);
+      // Read in id order: the later run comes first, so the earlier one must replace it.
+      await col('productionRuns').doc('run-a').set(run(daysAgo(0)));
+      await col('productionRuns').doc('run-b').set(run(earliest));
+
+      const [row] = await stockService.getStocks(bakeryId, { itemKeys: ['product_pan'] });
+
+      expect(row.incoming).toBe(2);
+      expect(row.incomingDate.getTime()).toBe(earliest.getTime());
     });
 
     it('a resale line counts as committed even when saved as produce', async () => {
