@@ -30,6 +30,7 @@
   },
   "main": "src/index.js",
   "dependencies": {
+    "@google-cloud/secret-manager": "^7.2.0",
     "@xmldom/xmldom": "^0.8.15",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

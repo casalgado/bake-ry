@@ -3,8 +3,9 @@ const { BadRequestError } = require('../utils/errors');
 
 // draft: number reserved, nothing built yet (a crash here is safe to retry).
 // signed: XML built and signed, not yet sent to the DIAN.
-// sent / accepted / rejected: what the DIAN answered; a rejected invoice is
-// resent with the same number.
+// sent: the DIAN took the zip (zipKey) and is validating it.
+// accepted / rejected: what the DIAN answered (`dian`). A rejected invoice is
+// rebuilt and resent with the same number.
 const STATUSES = ['draft', 'signed', 'sent', 'accepted', 'rejected'];
 
 // One invoice per order: the document id is the order id, so issuing twice
@@ -26,11 +27,14 @@ class Einvoice extends BaseModel {
     issuedAt = null,
     buyer = null,
     totals = null,
+    zipKey = null,
+    sentAt = null,
+    dian = null,
     createdBy = null,
     createdAt,
     updatedAt,
   }) {
-    super({ id, createdAt, updatedAt, issuedAt });
+    super({ id, createdAt, updatedAt, issuedAt, sentAt });
 
     if (!STATUSES.includes(status)) {
       throw new BadRequestError(`Invalid einvoice status: ${status}`);
@@ -47,11 +51,14 @@ class Einvoice extends BaseModel {
     this.xml = xml;
     this.buyer = buyer;
     this.totals = totals;
+    this.zipKey = zipKey;
+    // Last DIAN answer: { statusCode, statusDescription, statusMessage, errors, applicationResponse }.
+    this.dian = dian;
     this.createdBy = createdBy;
   }
 
   static get dateFields() {
-    return [...super.dateFields, 'issuedAt'];
+    return [...super.dateFields, 'issuedAt', 'sentAt'];
   }
 }
 

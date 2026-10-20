@@ -22,6 +22,7 @@ const productCollectionRoutes = require("./routes/productCollectionRoutes");
 const payuRoutes = require("./routes/payuRoutes");
 const billingRoutes = require("./routes/billingRoutes");
 const systemSettingsRoutes = require("./routes/systemSettingsRoutes");
+const einvoiceRoutes = require("./routes/einvoiceRoutes");
 
 const requestLogger = require("./middleware/requestLogger");
 
@@ -64,6 +65,7 @@ app.use("/bakeries", stockCountRoutes);
 app.use("/bakeries", bakeryUserRoutes);
 app.use("/bakeries", bakerySettingsRoutes);
 app.use("/bakeries", orderRoutes);
+app.use("/bakeries", einvoiceRoutes);
 app.use("/bakeries", productCollectionRoutes);
 app.use("/bakeries", payuRoutes);
 

@@ -73,10 +73,12 @@ class BakerySettings extends BaseModel {
       enabled: false,
       environment: "2", // "2" habilitación (test), "1" production
       softwareId: "",
+      testSetId: "", // habilitación only: the set de pruebas id from the portal
       issuer: {
         nit: "", // no check digit
         checkDigit: "",
         legalName: "",
+        tradeName: "", // shown as the party name when set, e.g. "ES ALIMENTO"
         personType: "1", // 1 jurídica, 2 natural
         taxLevelCode: "", // e.g. "O-13"
         phone: "",
@@ -93,6 +95,8 @@ class BakerySettings extends BaseModel {
         endDate: "",
         technicalKey: "",
       },
+      // Printed on every invoice, e.g. "Pertenecemos al régimen simple... abstenerse de practicar retención."
+      notes: [],
     },
     pos: {
       enabled: false,
