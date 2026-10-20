@@ -25,9 +25,11 @@ const createBakeryService = () => {
     let userRecord = null;
 
     try {
+      const email = (userData.email || '').trim().toLowerCase();
+
       // 1. Check if user already exists
       const existingUserQuery = await db.collection('users')
-        .where('email', '==', userData.email)
+        .where('email', '==', email)
         .limit(1)
         .get();
 
@@ -37,7 +39,7 @@ const createBakeryService = () => {
 
       // 2. Create Firebase Auth user first (outside transaction)
       userRecord = await admin.auth().createUser({
-        email: userData.email,
+        email: email,
         password: userData.password,
       });
 
@@ -69,7 +71,7 @@ const createBakeryService = () => {
         const userRef = db.collection('users').doc(uid);
         const userDoc = {
           id: uid,
-          email: userData.email,
+          email: email,
           name: userData.name,
           phone: String(userData.phone || '').replace(/\D/g, ''), // same as User.formatPhone
           role: 'bakery_admin',

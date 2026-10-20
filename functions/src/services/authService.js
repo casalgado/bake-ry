@@ -37,34 +37,18 @@ const createAuthService = () => {
       // 1. Verify token
       const decodedToken = await admin.auth().verifyIdToken(idToken);
 
-      // 2. Get user document
-      let userSnapshot;
-      if (decodedToken.role === 'bakery_admin' || decodedToken.role === 'system_admin') {
-        console.log('decodedToken.role1', decodedToken.role);
-        console.log('decodedToken.email', decodedToken.email);
-        userSnapshot = await baseService.getRootRef()
-          .where('email', '==', decodedToken.email)
-          .limit(1)
-          .get();
-      } else {
-        console.log('decodedToken.role2', decodedToken.role);
-        userSnapshot = await baseService.getCollectionRef(decodedToken.bakeryId)
-          .where('email', '==', decodedToken.email)
-          .limit(1)
-          .get();
-      }
+      // 2. Get user document by uid (doc id === auth uid)
+      const isAdmin = decodedToken.role === 'bakery_admin' || decodedToken.role === 'system_admin';
+      const userRef = isAdmin
+        ? baseService.getRootRef().doc(decodedToken.uid)
+        : baseService.getCollectionRef(decodedToken.bakeryId).doc(decodedToken.uid);
+      const userDoc = await userRef.get();
 
-      if (userSnapshot.empty) {
+      if (!userDoc.exists) {
         throw new NotFoundError('User not found');
       }
 
-      const userDoc = userSnapshot.docs[0];
       const userData = userDoc.data();
-
-      // 3. Verify UID
-      if (decodedToken.uid !== userDoc.id) {
-        throw new AuthenticationError('User authentication failed');
-      }
 
       return {
         uid: userDoc.id,

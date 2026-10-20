@@ -24,7 +24,8 @@ class User extends BaseModel {
   }) {
     super({ id, createdAt, updatedAt });
 
-    this.email = email == '' || email == null || email == undefined ? `${Math.random().toString(36).substring(2, 6)}@pendiente.com` : email;
+    const normalizedEmail = (email || '').trim().toLowerCase();
+    this.email = normalizedEmail || `${crypto.randomUUID().slice(0, 8)}@pendiente.com`;
     this.password = password;
     this.role = role;
     this.bakeryId = bakeryId;
